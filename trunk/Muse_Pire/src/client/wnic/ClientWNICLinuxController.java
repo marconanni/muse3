@@ -9,9 +9,12 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.*;
 
+import parameters.Parameters;
+
 import client.wnic.exception.InvalidAccessPoint;
 import client.wnic.exception.InvalidParameter;
 import client.wnic.exception.WNICException;
+import debug.DebugConsole;
 
 
 public class ClientWNICLinuxController implements ClientWNICController{
@@ -24,14 +27,15 @@ public class ClientWNICLinuxController implements ClientWNICController{
 	private String essidName = null;
 	private boolean essidFound = false;
 	private boolean relayFirstDetection = true;
+	private DebugConsole console =null;
 
 
 	public ClientWNICLinuxController(String ethX, String netName) throws WNICException{
 
 		interf = ethX;
 		essidName = netName;
-
-		System.out.println("ClientWNICLinuxController: L'interfaccia di rete " +  ethX + " esiste, ora ne controllo lo stato");
+		
+		//console.debugMessage(Parameters.DEBUG_INFO, "ClientWNICLinuxController: L'interfaccia di rete " +  ethX + " esiste, ora ne controllo lo stato");
 
 		refreshStatus();
 
@@ -43,7 +47,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		//System.out.println("ClientWNICLinuxController: " + ((isAssociated && essidFound)?"L'interfaccia " +interf+ " è connessa ad una rete Ad-Hoc":"L'interfaccia " +interf+ " non è connessa a nessuna rete Ad-Hoc"));
 
 	}
-
+	
 
 	//METODI PRIVATI
 
@@ -62,7 +66,6 @@ public class ClientWNICLinuxController implements ClientWNICController{
 				if (res.contains("radio off")){
 					isAssociated = false;
 					isOn = false;
-					//System.out.println("ClientWNICLinuxController.refreshStatus(): radio off");
 				}
 
 				else if (res.contains("IEEE")){
@@ -71,7 +74,6 @@ public class ClientWNICLinuxController implements ClientWNICController{
 					if(res.contains("AdHoc"))
 						modeAdHoc = true;
 					if(res.contains(essidName))essidFound = true;	
-					//System.out.println("ClientWNICLinuxController.refreshStatus(): radio on associated");
 					else {
 						essidFound = false;
 						throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
@@ -82,7 +84,6 @@ public class ClientWNICLinuxController implements ClientWNICController{
 					isOn = true;
 					isAssociated = false;
 					essidFound = false;
-					//System.out.println("ClientWNICLinuxController.refreshStatus(): radio on unassociated");
 				}
 				else throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 			}
@@ -342,6 +343,10 @@ public class ClientWNICLinuxController implements ClientWNICController{
 	 */
 	public boolean isEssidFound() {
 		return essidFound;
+	}
+	
+	public void setDebugConsole(DebugConsole console ){
+		this.console=console;
 	}
 }
 
