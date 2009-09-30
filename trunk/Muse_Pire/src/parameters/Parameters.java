@@ -2,7 +2,116 @@ package parameters;
 public class Parameters {
 	
 	
-	//public static final boolean IMRELAY=false;
+	/*
+	 ************************* DEBUG MESSAGE *************************************
+	 * 
+	 * */	
+	public static final int DEBUG_INFO=0;
+	public static final int DEBUG_WARNING=2;
+	public static final int DEBUG_ERROR=3;
+	
+	/*
+	 ******************* PORTE PER IL SERVER e i suoi STREAMINGSERVER  **********
+	 * porte utilizzate per la gestione della sessione sul SERVER
+	 * */
+	public static final int SERVER_SESSION_PORT_IN = 2001;
+	
+	
+	
+	/**
+	 * valori iniziali dei range di porte di controllo ingresso-uscita 
+	 * assegnabili ad uno STREAMING SERVER creato per gestire una sessione RTP
+	 */
+	//public static final int STREAMINGSERVER_INITIAL_PORT_IN_OUT_CONTROL = 10000;
+	
+	
+	
+	/**
+	 * valori iniziali dei range di porte RTP in uscita
+	 * assegnabili ad uno STREAMINGSERVER creato per gestire una sessione RTP 
+	 */
+	//public static final int STREAMINGSERVER_INITIAL_PORT_OUT_RTP = 11000;
+	
+/*++++++++++++++++++++++++++++++++ INDIRIZZI IP E INTERFACCE +++++++++++++++++++++++++++++++++++++++++++++*/
+	
+	/**
+	 * indirizzo IP del SERVER
+	 */
+	public static final String SERVER_ADDRESS = "192.168.0.10";
+	//public static final String SERVER_ADDRESS = "192.255.0.1";
+
+	
+	/**
+	 * indirizzo IP del CLIENT	 
+	 */
+
+	//public static final String CLIENT_ADDRESS = "192.168.1.11";
+	public static final String CLIENT_ADDRESS = "192.168.0.5";
+	//public static final String CLIENT_ADDRESS = "localhost";
+
+
+	
+	/**
+	 * indirizzo IP del RELAY sulla rete Ad-Hoc
+	 */
+	//public static final String RELAY_AD_HOC_ADDRESS = "192.168.2.2";
+	public static final String RELAY_AD_HOC_ADDRESS = "192.168.0.1";
+	//public static final String RELAY_AD_HOC_ADDRESS = "localhost";
+	
+	
+	/**
+	 * indirizzo IP del RELAY sulla rete Managed
+	 */
+	//public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
+	public static final String RELAY_MANAGED_ADDRESS = "192.168.0.1";
+	
+	
+	/**
+	 * indirizzo IP di BROADCAST sulla rete Ad-Hoc
+	 */
+	//public static final String BROADCAST_ADDRESS = "192.168.1.255";
+	public static final String BROADCAST_ADDRESS = "192.168.0.255"; 
+	
+	
+	
+	
+	/**
+	 * Nome della rete Ad-Hoc
+	 */
+	public static final String NAME_OF_AD_HOC_NETWORK = "lord";
+	
+	/**
+	 * Nome della rete Managed
+	 */
+	public static final String NAME_OF_MANAGED_NETWORK = "NETGEAR";
+	
+	
+	
+	
+	
+	/**
+	 * Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc
+	 */
+	public static final String NAME_OF_AD_HOC_RELAY_INTERFACE = "wlan0";
+	
+	/**
+	 * Nome dell'interfaccia con cui il Relay si affaccia sulla rete Managed
+	 */
+	public static final String NAME_OF_MANAGED_RELAY_INTERFACE  = "wlan2";
+	
+	/**
+	 * Nome dell'interfaccia con cui il Client si affaccia sulla rete Ad-Hoc
+	 */
+	public static final String NAME_OF_CLIENT_INTERFACE = "wlan0";
+	
+	/**
+	 * Nome dell'interfaccia con cui il Server si affaccia sulla rete Managed (cablato all'AP)
+	 */
+	public static final String NAME_OF_SERVER_INTERFACE = "eth0";
+
+
+	
+	public static final boolean IMRELAY=false;
 	/**
 	 * Nome del file che si vuole riprodurre (il file deve trovarsi nella cartella mp3)
 	 */
@@ -21,7 +130,7 @@ public class Parameters {
 	/**
 	 * Specifica il numero di sessioni attive massime che si possono avere sul Relay 
 	 */
-	public static final int RANGE_ACTIVE_SESSIONS = 1000;
+	//public static final int RANGE_ACTIVE_SESSIONS = 1000;
 
 	
 	/**
@@ -168,114 +277,9 @@ public class Parameters {
 		
 	
 	
-	
 		
-/************************* PORTE PER IL SERVER e i suoi STREAMINGSERVER **************/		
-	/**
-	 * porte utilizzate per la gestione della sessione sul SERVER
-	 */
-	public static final int SERVER_SESSION_PORT_IN = 2001;
 	
 	
-	
-	/**
-	 * valori iniziali dei range di porte di controllo ingresso-uscita 
-	 * assegnabili ad uno STREAMING SERVER creato per gestire una sessione RTP
-	 */
-	//public static final int STREAMINGSERVER_INITIAL_PORT_IN_OUT_CONTROL = 10000;
-	
-	
-	
-	/**
-	 * valori iniziali dei range di porte RTP in uscita
-	 * assegnabili ad uno STREAMINGSERVER creato per gestire una sessione RTP 
-	 */
-	//public static final int STREAMINGSERVER_INITIAL_PORT_OUT_RTP = 11000;
-
-	
-/*++++++++++++++++++++++++++++++++ FINE PORTE (non definitivo) +++++++++++++++++++++++++++++++++++++++++++*/	
-
-	
-	
-	
-	
-	
-/*++++++++++++++++++++++++++++++++ INDIRIZZI IP E INTERFACCE +++++++++++++++++++++++++++++++++++++++++++++*/
-	
-	/**
-	 * indirizzo IP del SERVER
-	 */
-	//public static final String SERVER_ADDRESS = "192.168.2.2";
-	public static final String SERVER_ADDRESS = "192.255.0.1";
-
-	
-	/**
-	 * indirizzo IP del CLIENT	 
-	 */
-
-	//public static final String CLIENT_ADDRESS = "192.168.1.11";
-	public static final String CLIENT_ADDRESS = "192.255.0.2";
-	//public static final String CLIENT_ADDRESS = "localhost";
-
-
-	
-	/**
-	 * indirizzo IP del RELAY sulla rete Ad-Hoc
-	 */
-	//public static final String RELAY_AD_HOC_ADDRESS = "192.168.2.2";
-	public static final String RELAY_AD_HOC_ADDRESS = "192.255.0.1";
-	//public static final String RELAY_AD_HOC_ADDRESS = "localhost";
-	
-	
-	/**
-	 * indirizzo IP del RELAY sulla rete Managed
-	 */
-	//public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
-	public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
-	
-	
-	/**
-	 * indirizzo IP di BROADCAST sulla rete Ad-Hoc
-	 */
-	//public static final String BROADCAST_ADDRESS = "192.168.1.255";
-	public static final String BROADCAST_ADDRESS = "192.168.1.255"; 
-	
-	
-	
-	
-	/**
-	 * Nome della rete Ad-Hoc
-	 */
-	public static final String NAME_OF_AD_HOC_NETWORK = "PROVARETE";
-	
-	/**
-	 * Nome della rete Managed
-	 */
-	public static final String NAME_OF_MANAGED_NETWORK = "NETGEAR";
-	
-	
-	
-	
-	
-	/**
-	 * Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc
-	 */
-	public static final String NAME_OF_AD_HOC_RELAY_INTERFACE = "eth1";
-	
-	/**
-	 * Nome dell'interfaccia con cui il Relay si affaccia sulla rete Managed
-	 */
-	public static final String NAME_OF_MANAGED_RELAY_INTERFACE  = "wlan0";
-	
-	/**
-	 * Nome dell'interfaccia con cui il Client si affaccia sulla rete Ad-Hoc
-	 */
-	public static final String NAME_OF_CLIENT_INTERFACE = "eth1";
-	
-	/**
-	 * Nome dell'interfaccia con cui il Server si affaccia sulla rete Managed (cablato all'AP)
-	 */
-	public static final String NAME_OF_SERVER_INTERFACE = "eth0";
 
 
 	
@@ -307,9 +311,9 @@ public class Parameters {
 	public static final int REDIRECT = 12;
 	public static final int LEAVE = 13;
 	
-	
+
 	public static final int REQUEST_FILE = 14;
-	public static final int FORWARD_REQ_FILE = 15;
+	public static final int FORWARD_REQ_FILE = 15;		//Richiesta file al server
 	public static final int ACK_RELAY_FORW = 16;
 	public static final int ACK_CLIENT_REQ = 17;
 	
