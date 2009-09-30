@@ -138,7 +138,13 @@ public class ClientElectionManager extends Observable implements Observer{
 				e al codice del messaggio che è appena arrivato*/
 
 
-			/** INIZIO STATO IDLE**/			
+			/** INIZIO STATO IDLE**/	
+			
+			//Da vedere a quale relay il cliente si deve collegare
+			//SOLUZIONI:
+			//1) al primo che risponde (synchronize il cambio di actualstatus)
+			//2) memorizzare tutte le risposte e ricevute in coppia (ip,RSSI) del relay e poi prendere quello con il segnale + alto->+ vicino
+			//3) Non ci poniamo questo problema e ci colleghiamo al relay staticamente (richiede di conoscere l'ip del relay on startup)
 
 			if(clientMessageReader.getCode() == Parameters.IM_RELAY && actualStatus == ClientStatus.INSTABLE){
 
@@ -165,7 +171,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
 				setImServed(true);
 
-				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: IM_RELAY arrivato e actualRelayAddress: " + actualRelayAddress);	
+				
 			}
 
 
@@ -473,6 +479,8 @@ public class ClientElectionManager extends Observable implements Observer{
 	 */
 	public synchronized void setImServed(boolean imS) {
 
+		//entro solo se non sono in fase di rielezione
+		//uno dei due deve essere false
 		if(!electing || !imS ){
 
 			this.imServed = imS;
@@ -483,9 +491,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					
 					try {
 
-						clientPositionController = new ClientPositionController(
-								Parameters.NAME_OF_CLIENT_INTERFACE,
-								Parameters.NAME_OF_AD_HOC_NETWORK);
+						clientPositionController = new ClientPositionController(Parameters.NAME_OF_CLIENT_INTERFACE,Parameters.NAME_OF_AD_HOC_NETWORK);
 
 						preparePositionController();
 						clientPositionController.start();
