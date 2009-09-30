@@ -37,7 +37,7 @@ public class Parameters {
 	/**
 	 * indirizzo IP del SERVER
 	 */
-	public static final String SERVER_ADDRESS = "192.168.0.10";
+	public static final String SERVER_ADDRESS = "192.168.0.5";
 	//public static final String SERVER_ADDRESS = "192.255.0.1";
 
 	
@@ -46,7 +46,7 @@ public class Parameters {
 	 */
 
 	//public static final String CLIENT_ADDRESS = "192.168.1.11";
-	public static final String CLIENT_ADDRESS = "192.168.0.5";
+	public static final String CLIENT_ADDRESS = "192.168.0.4";
 	//public static final String CLIENT_ADDRESS = "localhost";
 
 
@@ -55,7 +55,7 @@ public class Parameters {
 	 * indirizzo IP del RELAY sulla rete Ad-Hoc
 	 */
 	//public static final String RELAY_AD_HOC_ADDRESS = "192.168.2.2";
-	public static final String RELAY_AD_HOC_ADDRESS = "192.168.0.1";
+	public static final String RELAY_AD_HOC_ADDRESS = "192.168.0.5";
 	//public static final String RELAY_AD_HOC_ADDRESS = "localhost";
 	
 	
@@ -63,7 +63,7 @@ public class Parameters {
 	 * indirizzo IP del RELAY sulla rete Managed
 	 */
 	//public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
-	public static final String RELAY_MANAGED_ADDRESS = "192.168.0.1";
+	public static final String RELAY_MANAGED_ADDRESS = "192.168.0.5";
 	
 	
 	/**
@@ -78,12 +78,12 @@ public class Parameters {
 	/**
 	 * Nome della rete Ad-Hoc
 	 */
-	public static final String NAME_OF_AD_HOC_NETWORK = "lord";
+	public static final String NAME_OF_AD_HOC_NETWORK = "marco";
 	
 	/**
 	 * Nome della rete Managed
 	 */
-	public static final String NAME_OF_MANAGED_NETWORK = "NETGEAR";
+	public static final String NAME_OF_MANAGED_NETWORK = "MUSE2_SSID";
 	
 	
 	
