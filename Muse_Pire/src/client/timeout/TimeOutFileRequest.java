@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package client.timeout;
 
 import java.util.Observable;

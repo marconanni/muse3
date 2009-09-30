@@ -19,7 +19,6 @@ public class ClientMessageFactory {
 	/**
 	 * Messaggio di who is relay
 	 * <br/>
-	 * @param sequenceNumber
 	 * @param InetAddress addr
 	 * @param int port
 	 * @return DatagramPacket 

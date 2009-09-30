@@ -16,13 +16,13 @@ import client.ClientMessageReader;
 import client.timeout.ClientTimeoutFactory;
 import client.connection.ClientConnectionFactory;
 import client.connection.ClientElectionCM;
-//import client.gui.ClientFrameController;
 import client.positioning.ClientPositionController;
 
 import client.timeout.TimeOutFailToElect;
 import client.timeout.TimeOutSearch;
 
 import client.wnic.exception.WNICException;
+import debug.DebugConsole;
 
 /**
  * @author Leo Di Carlo, Luca Campeti
@@ -33,9 +33,11 @@ public class ClientElectionManager extends Observable implements Observer{
 
 	//ClientFrameController assegnabile al ClientElectionManager
 	//private ClientFrameController frameController = null;
+	private DebugConsole console = null;
 
 	//stati in cui si può trovare il ClientElectionManager
-	public enum ClientStatus {  
+	public enum ClientStatus {
+		INSTABLE,
 		IDLE, 
 		WAITING_END_ELECTION,
 	}
@@ -45,6 +47,7 @@ public class ClientElectionManager extends Observable implements Observer{
 
 	//indirizzo broadcast in forma InetAddress
 	private static InetAddress BCAST = null;
+	
 	static { 
 		try {
 			BCAST  = InetAddress.getByName(Parameters.BROADCAST_ADDRESS);
@@ -69,7 +72,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	private boolean firstEM_ELsent = false ;
 
 	//boolean che indica se questo nodo Client è coinvolto in una sessione RTP
-	//private boolean imServed = false;
+	private boolean imServed = false;
 
 	//il ClientPositionController per rispondere ai messaggi REQUEST_RSSI con il valore di RSSI
 	//rilevato dal Client nei confronti del Relay attuale
@@ -94,22 +97,23 @@ public class ClientElectionManager extends Observable implements Observer{
 	 * Fa partire il Connection Manager ed in seguito si mette
 	 * alla ricerca del Relay attuale.
 	 */
-	private ClientElectionManager(){
+	private ClientElectionManager(DebugConsole console){
+		this.setDebugConsole(console);
 
 		comManager = ClientConnectionFactory.getElectionConnectionManager(this);
 		comManager.start();
 
 		searchingRelay();
 
-		debugPrint("ClientElectionManager: creato ed entrato in STATO IDLE: inviato WHO_IS_RELAY e start TIMEOUT_SEARCH");
+		console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" inviato WHO_IS_RELAY e start TIMEOUT_SEARCH");
 	}
 
 
 	/**Metodo per ottenere l'istanza della classe singleton ClientElectionManager
 	 * @return un riferimento al singleton ClientElectionManager
 	 */
-	public static ClientElectionManager getINSTANCE(){
-		if(INSTANCE == null) INSTANCE = new ClientElectionManager();
+	public static ClientElectionManager getINSTANCE(DebugConsole console){
+		if(INSTANCE == null) INSTANCE = new ClientElectionManager(console);
 		return INSTANCE;
 	}
 
@@ -128,9 +132,7 @@ public class ClientElectionManager extends Observable implements Observer{
 
 			try {
 				clientMessageReader.readContent(dpIn);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			} catch (IOException e) {e.printStackTrace();}
 
 			/*Cominciamo ad esaminare i vari casi che si possono presentare, in base allo stato in cui ci si trova 
 				e al codice del messaggio che è appena arrivato*/
@@ -138,14 +140,11 @@ public class ClientElectionManager extends Observable implements Observer{
 
 			/** INIZIO STATO IDLE**/			
 
-			/*[IM_RELAY arrivato] /
-			 * resetto TIMEOUT_SEARCH 
-			 * relayAddress = <IP del Relay>
-			 */
-			if(clientMessageReader.getCode() == Parameters.IM_RELAY && 
-					actualStatus == ClientStatus.IDLE){
+			if(clientMessageReader.getCode() == Parameters.IM_RELAY && actualStatus == ClientStatus.INSTABLE){
 
-				debugPrint("ClientElectionManager: STATO IDLE: IM_RELAY arrivato");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO INSTABLE: IM_RELAY arrivato: ->STATO IDLE");
+				
+				actualStatus = ClientStatus.IDLE;
 
 				if(timeoutSearch != null) {
 					timeoutSearch.cancelTimeOutSearch();
@@ -156,10 +155,12 @@ public class ClientElectionManager extends Observable implements Observer{
 				electing = false;
 				firstEM_ELsent = false;
 
+				
+				//Notifico ClientSessionManager
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+actualRelayAddress);
 
-				debugPrint("ClientElectionManager: STATO IDLE: IM_RELAY arrivato e actualRelayAddress: " + actualRelayAddress);	
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: IM_RELAY arrivato e actualRelayAddress: " + actualRelayAddress);	
 			}
 
 
@@ -167,10 +168,9 @@ public class ClientElectionManager extends Observable implements Observer{
 			 *relayAddress = <IP del NEW RELAY>
 			 *reset TIMEOUT_SEARCH
 			 */
-			else if(clientMessageReader.getCode() == Parameters.ELECTION_DONE && 
-					actualStatus == ClientStatus.IDLE){
+			else if(clientMessageReader.getCode() == Parameters.ELECTION_DONE && actualStatus == ClientStatus.IDLE){
 
-				debugPrint("ClientElectionManager: STATO IDLE: ELECTION_DONE arrivato");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_DONE arrivato");
 
 				if(timeoutSearch != null){
 					timeoutSearch.cancelTimeOutSearch();
@@ -180,28 +180,26 @@ public class ClientElectionManager extends Observable implements Observer{
 				electing = false;
 				firstEM_ELsent = false;
 
-				if(actualRelayAddress == null || 
-						!actualRelayAddress.equals(clientMessageReader.getNewRelayAddress())){
+				if(actualRelayAddress == null ||!actualRelayAddress.equals(clientMessageReader.getNewRelayAddress())){
 
 					actualRelayAddress = clientMessageReader.getNewRelayAddress();
 
 
-					//if (imServed) 
-					preparePositionController();
+					if (imServed) preparePositionController();
 
 
+					//Notifico ClientSessionManager
 					setChanged();
 					notifyObservers("NEW_RELAY:"+actualRelayAddress);
 
-					//memorizeRelayAddress();
 
 					//RIPROPAGAZIONE UNA TANTUM DELL'ELECTION_DONE
 					comManager.sendTo(prepareRepropagation(dpIn));
 
-					debugPrint("ClientElectionManager: STATO IDLE: ELECTION_DONE ripropagato ");
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_DONE ripropagato ");
 				}
 
-				debugPrint("ClientElectionManager: STATO IDLE: ELECTION_DONE arrivato e actualRelayAddress: " + actualRelayAddress);
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_DONE arrivato e actualRelayAddress: " + actualRelayAddress);
 			}
 
 
@@ -215,10 +213,9 @@ public class ClientElectionManager extends Observable implements Observer{
 			 *start TIMEOUT_FAIL_TO_ELECT
 			 *relayAddress = null;
 			 */
-			else if(clientMessageReader.getCode() == Parameters.ELECTION_REQUEST && 
-					actualStatus == ClientStatus.IDLE){
+			else if(clientMessageReader.getCode() == Parameters.ELECTION_REQUEST && actualStatus == ClientStatus.IDLE){
 
-				debugPrint("ClientElectionManager: STATO IDLE: ELECTION_REQUEST arrivato " + (imServed?"e sono servito":"ma non sono servito"));
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_REQUEST arrivato " + (imServed?"e sono servito":"ma non sono servito"));
 
 				if(timeoutSearch != null){
 					timeoutSearch.cancelTimeOutSearch();
@@ -233,22 +230,18 @@ public class ClientElectionManager extends Observable implements Observer{
 					DatagramPacket dpOut = null;
 
 					try {
-						dpOut = ClientMessageFactory.buildElectioBeacon(
-								indexELECTION_BEACON, BCAST,
-								Parameters.RELAY_ELECTION_PORT_IN);
+						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.RELAY_ELECTION_PORT_IN);
 						comManager.sendTo(dpOut);
 						indexELECTION_BEACON++;
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 
-					timeoutFailToElect = ClientTimeoutFactory
-					.getTimeOutFailToElect(this,
-							Parameters.TIMEOUT_FAIL_TO_ELECT);
+					timeoutFailToElect = ClientTimeoutFactory.getTimeOutFailToElect(this,Parameters.TIMEOUT_FAIL_TO_ELECT);
 
 					actualStatus = ClientStatus.WAITING_END_ELECTION;
 
-					debugPrint("ClientElectionManager: STATO IDLE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato && imServed==true e start TIMEOUT_FAIL_TO_ELECT");
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato && imServed==true e start TIMEOUT_FAIL_TO_ELECT");
 				}
 
 				setChanged();
@@ -263,13 +256,12 @@ public class ClientElectionManager extends Observable implements Observer{
 			 *firstEM_EL = false
 			 *}
 			 */
-			else if((clientMessageReader.getCode() == Parameters.EM_EL_DET_CLIENT || 
-					clientMessageReader.getCode() == Parameters.EM_EL_DET_RELAY) && 
+			else if((clientMessageReader.getCode() == Parameters.EM_EL_DET_CLIENT || clientMessageReader.getCode() == Parameters.EM_EL_DET_RELAY) && 
 					actualStatus == ClientStatus.IDLE){
 
 				actualRelayAddress = null;
 
-				debugPrint("ClientElectionManager: STATO IDLE: arrivato EM_EL_DET_X  "+(firstEM_ELsent?"ma ho già inviato EM_EL_DET_CLIENT":"è non ho ancora inviato EM_EL_DET_CLIENT"));
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: arrivato EM_EL_DET_X  "+(firstEM_ELsent?"ma ho già inviato EM_EL_DET_CLIENT":"è non ho ancora inviato EM_EL_DET_CLIENT"));
 
 				electing = true;
 
@@ -292,7 +284,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					setChanged();
 					notifyObservers("EMERGENCY_ELECTION");
 
-					debugPrint("ClientElectionManager: STATO IDLE: arrivato EM_EL_DET_X e EM_EL_DET_CLIENT inviato");
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: arrivato EM_EL_DET_X e EM_EL_DET_CLIENT inviato");
 				}
 			}
 			/**FINE STATO IDLE**/	
@@ -314,7 +306,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					timeoutFailToElect = null;
 				}
 
-				debugPrint("ClientElectionManager: STATO WAITING_END_ELECTION: ELECTION_DONE ricevuto");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION: ELECTION_DONE ricevuto");
 
 				actualRelayAddress = clientMessageReader.getNewRelayAddress();
 				
@@ -332,7 +324,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				setChanged();
 				notifyObservers("NEW_RELAY:"+ actualRelayAddress);
 
-				debugPrint("ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: ELECTION_DONE ricevuto: actualRelayAddress: " + actualRelayAddress);
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: ELECTION_DONE ricevuto: actualRelayAddress: " + actualRelayAddress);
 			}
 
 			/*[EM_EL_CLIENT_DET || EM_EL_RELAY_DET] / 
@@ -349,7 +341,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					timeoutFailToElect = null;
 				}
 
-				debugPrint("ClientElectionManager: STATO WAITING_END_ELECTION: EM_EL_RELAY_DET_X ricevuto");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION: EM_EL_RELAY_DET_X ricevuto");
 
 				imServed = false;
 				clientPositionController.close();
@@ -375,7 +367,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				setChanged();
 				notifyObservers("EMERGENCY_ELECTION");
 
-				debugPrint("ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: EM_EL_RELAY_DET_X ricevuto: inviato EM_EL_DET_CLIENT");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: EM_EL_RELAY_DET_X ricevuto: inviato EM_EL_DET_CLIENT");
 
 			}
 			/**FINE STATO WAITING_END_ELECTION**/
@@ -394,9 +386,9 @@ public class ClientElectionManager extends Observable implements Observer{
 			/*[TIMEOUT_SEARCH scattato] --> SearchingRelay
 			 */
 			if(event.equals("TIMEOUTSEARCH") &&
-					actualStatus == ClientStatus.IDLE){
+					actualStatus == ClientStatus.INSTABLE){
 
-				debugPrint("ClientElectionManager: STATO IDLE:  TIMEOUT_SEARCH scattato");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE:  TIMEOUT_SEARCH scattato");
 
 				//Stato instabile SearchingRelay
 				searchingRelay();
@@ -414,7 +406,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			else if(event.equals("TIMEOUTFAILTOELECT") &&
 					actualStatus == ClientStatus.WAITING_END_ELECTION){
 
-				debugPrint("ClientElectionManager: STATO WAITING_END_ELECTION: TIMEOUT_FAIL_TO_ELECT scattato");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION: TIMEOUT_FAIL_TO_ELECT scattato");
 
 				imServed = false;
 				clientPositionController.close();
@@ -440,7 +432,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				setChanged();
 				notifyObservers("EMERGENCY_ELECTION");
 
-				debugPrint("ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: TIMEOUT_FAIL_TO_ELECT scattato: inviato EM_EL_DET_CLIENT");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: TIMEOUT_FAIL_TO_ELECT scattato: inviato EM_EL_DET_CLIENT");
 
 			}
 			/**FINE STATO WAITING_END_ELECTION**/
@@ -451,10 +443,13 @@ public class ClientElectionManager extends Observable implements Observer{
 	/**Metodo per impostare un FrameController per il debug
 	 * @param frameController il ClientFrameController da impostare per il debug
 	 */
-	public void setFrameController(ClientFrameController frameController) {
-		this.frameController = frameController;
-	}
+	//public void setFrameController(ClientFrameController frameController) {
+		//this.frameController = frameController;
+	//}
 
+	public void setDebugConsole(DebugConsole console) {
+		this.console = console;
+	}
 
 	/**Metodo che impone al ClientElectionManager, in opportune condizioni, 
 	 * di mettersi alla ricerca del Relay attuale
@@ -512,36 +507,19 @@ public class ClientElectionManager extends Observable implements Observer{
 	 */
 	private void searchingRelay(){
 
-		/*[TIMEOUT_SEARCH scattato] /
-		 * relayAddress = null 
-		 */
-
 		//se non sono in elezione oppure so che è cominciata un elezione di emergenza
 		if (!electing || (electing && firstEM_ELsent && !imServed)) {
-
 			actualRelayAddress = null;
-
 			DatagramPacket dpOut = null;
-
 			try {
-				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,
-						Parameters.WHO_IS_RELAY_PORT);
+				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT);
 				comManager.sendTo(dpOut);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			/*[WHO_IS_RELAY inviato] /
-			 * start TIMEOUT_SEARCH
-			 * status = Idle 
-			 */
-
-			timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,
-					Parameters.TIMEOUT_SEARCH);
-
-			actualStatus = ClientStatus.IDLE;
-
-			debugPrint("ClientElectionManager: STATO INSTABILE SEARCHING_RELAY -> IDLE: WHO_IS_RELAY inviato e start del TIMEOUT_SEARCH");
+			} catch (IOException e) {e.printStackTrace();}
+			timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
+			
+			actualStatus = ClientStatus.INSTABLE;
+			System.out.println("ciao ciao");
+			this.console.debugMessage(Parameters.DEBUG_WARNING,"ClientElectionManager: STATO INSTABILE SEARCHING_RELAY -> INSTABLE: WHO_IS_RELAY inviato e start del TIMEOUT_SEARCH");
 
 		}
 	}
@@ -571,11 +549,11 @@ public class ClientElectionManager extends Observable implements Observer{
 	/**Metodo per avere stampate di debug
 	 * @param message una String che rappresenta il messaggio da presentare
 	 */
-	private void debugPrint(String message){
-		System.err.println(message);
-		if(this.frameController != null)this.frameController.debugMessage(message);	
+	//private void debugPrint(String message){
+		//System.err.println(message);
+		//if(this.frameController != null)this.frameController.debugMessage(message);	
 
-	}
+	//}
 
 	/*	private void memorizeRelayAddress(){
 
@@ -703,9 +681,9 @@ public class ClientElectionManager extends Observable implements Observer{
 	}
 
 
-	public ClientFrameController getFrameController() {
-		return frameController;
-	}
+	//public ClientFrameController getFrameController() {
+		//return frameController;
+	//}
 
 
 	public static InetAddress getBCAST() {
@@ -731,6 +709,8 @@ class TesterClientElectionManager{
 	public static void main(String args[]){
 
 		DatagramSocket dsNet = null;
+		DebugConsole console = new DebugConsole();
+		console.setTitle("TEST MAIN CLIENT ELECTIONMANAGER");
 
 		try {
 			dsNet = new DatagramSocket(9999);
@@ -738,7 +718,7 @@ class TesterClientElectionManager{
 			e.printStackTrace();
 		}
 
-		ClientElectionManager cem = ClientElectionManager.getINSTANCE();
+		ClientElectionManager cem = ClientElectionManager.getINSTANCE(console);
 
 		//STATO IDLE && IM_RELAY ARRIVATO																	OK
 		/* Status: IDLE
