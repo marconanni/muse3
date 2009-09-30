@@ -467,7 +467,7 @@ public class Parameters {
 	/**
 	 * timeout relativo al messaggio WHO_IS_RELAY
 	 */
-	public static final int TIMEOUT_SEARCH = 1000;
+	public static final int TIMEOUT_SEARCH = 10000;
 	
 	
 	/**
