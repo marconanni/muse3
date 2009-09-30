@@ -160,6 +160,11 @@ public class ClientElectionManager extends Observable implements Observer{
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+actualRelayAddress);
 
+
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: IM_RELAY arrivato e actualRelayAddress: " + actualRelayAddress);
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
+				setImServed(true);
+
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: IM_RELAY arrivato e actualRelayAddress: " + actualRelayAddress);	
 			}
 
@@ -514,13 +519,12 @@ public class ClientElectionManager extends Observable implements Observer{
 			try {
 				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT);
 				comManager.sendTo(dpOut);
+
 			} catch (IOException e) {e.printStackTrace();}
 			timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
 			
 			actualStatus = ClientStatus.INSTABLE;
-			System.out.println("ciao ciao");
 			this.console.debugMessage(Parameters.DEBUG_WARNING,"ClientElectionManager: STATO INSTABILE SEARCHING_RELAY -> INSTABLE: WHO_IS_RELAY inviato e start del TIMEOUT_SEARCH");
-
 		}
 	}
 
