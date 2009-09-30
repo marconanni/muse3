@@ -56,8 +56,8 @@ public class ClientPositionController implements Observer{
 		crcm = ClientConnectionFactory.getRSSIConnectionManager(this);
 		
 		/**DISABILITARE IL CLIENTWNICLINUXCONTROLLER E ABILITARE IL CLIENTDUMMYCONTROLLER SOLO PER I TEST**/
-		cwnic = new ClientDummyController();
-		//cwnic = new ClientWNICLinuxController(interfaceToManage, essidName);
+		//cwnic = new ClientDummyController();
+		cwnic = new ClientWNICLinuxController(interfaceToManage, essidName);
 		
 		enableToMonitor = false;
 		started = false;
@@ -146,7 +146,7 @@ class TestClientPositionController {
 		TestObserver to = new TestObserver();
 		ClientPositionController cpc = null;
 		try {
-			cpc = new ClientPositionController("wlan0","PROVARETE");
+			cpc = new ClientPositionController("wlan0","lord");
 			cpc.setRelayAddress("192.168.1.3");
 			cpc.start();
 		} catch (WNICException e1) {

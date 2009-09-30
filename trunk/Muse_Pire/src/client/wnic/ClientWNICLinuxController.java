@@ -18,6 +18,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 
 	private boolean isOn = false;
 	private boolean isAssociated =false;
+	private boolean modeAdHoc = false;
 	private String relayAddress = null;
 	private String interf = null;
 	private String essidName = null;
@@ -38,7 +39,8 @@ public class ClientWNICLinuxController implements ClientWNICController{
 			throw new WNICException("ClientWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");	
 
 		System.out.println("ClientWNICLinuxController: L'interfaccia "+interf+" è attiva");
-		System.out.println("ClientWNICLinuxController: " + ((isAssociated && essidFound)?"L'interfaccia " +interf+ " è connessa ad una rete Ad-Hoc":"L'interfaccia " +interf+ " non è connessa a nessuna rete Ad-Hoc"));
+		System.out.println("ClientWNICLinuxController"+((isAssociated)?"L'interfaccia " +interf+ " è connessa alla rete " +essidName+ " in maniera "+ ((modeAdHoc)?"AdHoc":"Managed"):"L'interfaccia " +interf+ " non è connessa a nessuna rete Ad-Hoc"));
+		//System.out.println("ClientWNICLinuxController: " + ((isAssociated && essidFound)?"L'interfaccia " +interf+ " è connessa ad una rete Ad-Hoc":"L'interfaccia " +interf+ " non è connessa a nessuna rete Ad-Hoc"));
 
 	}
 
@@ -66,6 +68,8 @@ public class ClientWNICLinuxController implements ClientWNICController{
 				else if (res.contains("IEEE")){
 					isOn = true;
 					isAssociated = true;
+					if(res.contains("AdHoc"))
+						modeAdHoc = true;
 					if(res.contains(essidName))essidFound = true;	
 					//System.out.println("ClientWNICLinuxController.refreshStatus(): radio on associated");
 					else {

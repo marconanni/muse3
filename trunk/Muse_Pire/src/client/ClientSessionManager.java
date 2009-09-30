@@ -5,53 +5,51 @@ package client;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-//import java.net.InetAddress;
-//import java.net.UnknownHostException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.StringTokenizer;
-import java.util.Timer;
+//import java.util.Timer;
 //import java.util.TimerTask;
+
+//import com.sun.media.protocol.BufferListener;
 
 import parameters.Parameters;
 
-//import unibo.core.BufferEmptyEvent;
-//import unibo.core.BufferEmptyListener;
-//import unibo.core.BufferFullEvent;
-//import unibo.core.BufferFullListener;
-//import util.Logger;
-
-//import client.gui.ClientFrameController;
-//import client.timeout.ClientTimeoutFactory;
-//import client.timeout.TimeOutFileRequest;
-//import client.timeout.TimeOutSearch;
+import client.timeout.ClientTimeoutFactory;
+import client.timeout.TimeOutFileRequest;
+import client.timeout.TimeOutSearch;
 import client.connection.ClientConnectionFactory;
 import client.connection.ClientSessionCM;
+import debug.DebugConsole;
 /**
  * @author Leo Di Carlo
  *
  */
-public class ClientSessionManager implements Observer{//, BufferFullListener , BufferEmptyListener{
+public class ClientSessionManager implements Observer {
 
 	//private ClientFrameController frameController;
-	//private String filename;
+	private DebugConsole console;
+	private String filename;
 	private ClientSessionCM sessionCM;
 	private DatagramPacket msg;
 	private String eventType;
-	//private TimeOutSearch timeoutSearch;
-	//private TimeOutFileRequest timeoutFileRequest;
+	private TimeOutFileRequest timeoutFileRequest;
 	private String relayAddress;
 	private String status;
-	//private ClientBufferDataPlaying clientPlaying;
-	//private ClientPortMapper portMapper;
-	//private int myStreamingPort;
-	//private int proxyStreamingPort = -1;
-	//private int proxyCtrlPort = -1;
 	private ClientMessageReader messageReader;
 	private ClientElectionManager electionManager;
-	//private boolean bfSent = true;
-	//private Timer runner;
+
+	/*private boolean bfSent = true;
+	private Timer runner;
 	private String newrelay;
+	private TimeOutSearch timeoutSearch;
+	private int myStreamingPort;
+	private int proxyStreamingPort = -1;
+	private int proxyCtrlPort = -1;
+	private ClientBufferDataPlaying clientPlaying;
+	private ClientPortMapper portMapper;*/
 	/**
 	 * @param electionManager the electionManager to set
 	 */
@@ -66,9 +64,13 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 	/**
 	 * @param frameController the frameController to set
 	 */
-	/*public void setFrameController(ClientFrameController frameController) {
-		this.frameController = frameController;
-	}*/
+	//public void setFrameController(ClientFrameController frameController) {
+		//this.frameController = frameController;
+	//}
+	
+	public void setDebugConsole(DebugConsole console) {
+		this.console = console;
+	}
 
 	public ClientSessionManager(){
 		this.sessionCM = ClientConnectionFactory.getSessionConnectionManager(this);
@@ -92,24 +94,26 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 	public synchronized void update(Observable arg, Object event) {
 		// TODO Auto-generated method stub
 		this.messageReader = new ClientMessageReader();
+		
 		if(event instanceof String)
 		{
 			this.eventType = (String)event;
 
 			if(eventType.equals("TIMEOUTSEARCH")){
-				System.err.println("SCATTATO TIMEOUTSEARCH...");
+				console.debugMessage(Parameters.DEBUG_ERROR,"SCATTATO TIMEOUTSEARCH...");
 				this.status = "Idle";
+				System.out.println("Time out, no relay found...");
 				//this.frameController.debugMessage("SCATTATO TIMEOUTSEARCH...");
 				//this.frameController.debugMessage("Relay irraggiungibile...RIPROVARE PIU' TARDI");
 			}
-			if(eventType.equals("TIMEOUTFILEREQUEST")){
+			/*if(eventType.equals("TIMEOUTFILEREQUEST")){
 				System.err.println("SCATTATO TIMEOUTFILEREQUEST...");
-				//this.frameController.debugMessage("SCATTATO TIMEOUT_FILE_REQUEST...");
+				this.frameController.debugMessage("SCATTATO TIMEOUT_FILE_REQUEST...");
 
-			}
+			}*/
 
-			//if(eventType.equals("BUFFER_FULL") && status.equals("WaitingForPlaying"))
-			//{
+			/*if(eventType.equals("BUFFER_FULL") && status.equals("WaitingForPlaying"))
+			{
 //				frameController.debugMessage("Buffer Full");
 //				try {
 //					Thread.sleep(2000);
@@ -118,7 +122,7 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 //					e1.printStackTrace();
 //				}
 //				if(this.clientPlaying != null)this.clientPlaying.startPlaying();
-			/*status = "Playing";
+				status = "Playing";
 				try {
 					if(this.relayAddress!= null || this.proxyCtrlPort != -1)
 						this.msg = ClientMessageFactory.buildStopTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
@@ -162,19 +166,17 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 					e.printStackTrace();
 				}
 			}
-			*/
+
 			if(eventType.equals("RECIEVED_ELECTION_REQUEST") && this.status.equals("Playing"))
 			{
-				System.out.println("Client: ricevuto richiesta di elezione mentre sto suonando");
-				//this.clientPlaying.setThdOnBuffer(Parameters.BUFFER_THS_START_TX + ((Parameters.CLIENT_BUFFER/2)%2 == 0 ? Parameters.CLIENT_BUFFER/2:Parameters.CLIENT_BUFFER/2+1), false);
+				this.clientPlaying.setThdOnBuffer(Parameters.BUFFER_THS_START_TX + ((Parameters.CLIENT_BUFFER/2)%2 == 0 ? Parameters.CLIENT_BUFFER/2:Parameters.CLIENT_BUFFER/2+1), false);
 			}
 			if(eventType.equals("EMERGENCY_ELECTION"))
 			{
-				//this.clientPlaying.close();
-				//this.clientPlaying = null;
+				this.clientPlaying.close();
+				this.clientPlaying = null;
 				this.relayAddress = null;
-				//this.frameController.debugMessage("CLIENT SESSION MANAGER: ELEZIONE D'EMERGENZA, SESSIONE INVALIDATA, RIPROVARE PIÙ TARDI CON UNA NUOVA RICHIESTA");
-				System.out.println("Client: rielezione di emergenza... riprovare più tardi");
+				this.frameController.debugMessage("CLIENT SESSION MANAGER: ELEZIONE D'EMERGENZA, SESSIONE INVALIDATA, RIPROVARE PIÙ TARDI CON UNA NUOVA RICHIESTA");
 			}
 			if(eventType.contains("NEW_RELAY"))
 			{
@@ -184,7 +186,7 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 				
 			}
 
-			/*if(eventType.equals("PLAYER_PAUSED"))
+			if(eventType.equals("PLAYER_PAUSED"))
 			{
 				this.status = "Paused";
 			}
@@ -219,7 +221,7 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 				StringTokenizer st = new StringTokenizer(eventType, ":");
 				st.nextToken();
 				this.relayAddress = st.nextToken();
-				System.out.println("CLIENT SESSION MANAGER: l'indirizzo del relay trovato da CLIENT ELECION MANAGER è "+this.relayAddress);
+				this.console.debugMessage(Parameters.DEBUG_INFO,"CLIENT SESSION MANAGER: l'indirizzo del relay trovato da CLIENT ELECION MANAGER è "+this.relayAddress);
 				//this.frameController.debugMessage("CLIENT SESSION MANAGER: l'indirizzo del relay trovato da CLIENT ELECION MANAGER è "+this.relayAddress);
 			}
 			/*if(eventType.equals("END_OF_MEDIA"))
@@ -236,15 +238,17 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 				messageReader.readContent(this.msg);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				System.err.println("CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
+				//System.err.println("CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
+				console.debugMessage(Parameters.DEBUG_ERROR, "CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				//Logger.write("CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				e.printStackTrace();
 			}
-			/*if(messageReader.getCode() == Parameters.SERVER_UNREACHEABLE && status.equals("WaitingForResponse"))
+			if(messageReader.getCode() == Parameters.SERVER_UNREACHEABLE && status.equals("WaitingForResponse"))
 			{
 				if(this.timeoutFileRequest != null)this.timeoutFileRequest.cancelTimeOutFileRequest();
-				this.frameController.debugMessage("CLIENT SESSION MESSAGE: SERVER IRRAGGIUNGIBILE");
-			}*/
+				console.debugMessage(Parameters.DEBUG_ERROR, "CLIENT SESSION MESSAGE: SERVER IRRAGGIUNGIBILE");
+				//this.frameController.debugMessage("CLIENT SESSION MESSAGE: SERVER IRRAGGIUNGIBILE");
+			}
 			/*if(messageReader.getCode() == Parameters.ACK_CLIENT_REQ && status.equals("WaitingForResponse"))
 			{
 				if(this.timeoutFileRequest != null)this.timeoutFileRequest.cancelTimeOutFileRequest();
@@ -284,14 +288,14 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}*/
+			}
 			if(messageReader.getCode() == Parameters.LEAVE)
 			{
 				this.relayAddress =this.newrelay;
-				//this.frameController.setNewRelayIP(this.relayAddress);
-				//this.clientPlaying.setThdOnBuffer(Parameters.BUFFER_THS_START_TX, true);
-				//this.clientPlaying.redirectSource(this.relayAddress);
-			}
+				this.frameController.setNewRelayIP(this.relayAddress);
+				this.clientPlaying.setThdOnBuffer(Parameters.BUFFER_THS_START_TX, true);
+				this.clientPlaying.redirectSource(this.relayAddress);
+			}*/
 
 		}
 	}
@@ -300,7 +304,7 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 	 * 
 	 * @param filename Nome del file da richiedere - esso è staticamente preso dalla classe PARAMETERS
 	 */
-	/*public void requestFile(String filename)
+	public void requestFile(String filename)
 	{
 		this.filename = filename;
 		//this.status = "SearchingRelay";
@@ -312,7 +316,7 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 			
 			System.out.println("relayAddress: " + this.relayAddress);
 			try {
-				this.msg = ClientMessageFactory.buildRequestFile(0, this.filename, this.myStreamingPort, InetAddress.getByName(this.relayAddress), Parameter.RELAY_SESSION_AD_HOC_PORT_IN);
+				this.msg = ClientMessageFactory.buildRequestFile(0, this.filename, Parameters.CLIENT_PORT_RTP_IN, InetAddress.getByName(this.relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
 				sessionCM.sendTo(msg);
 				this.status = "WaitingForResponse";
 				this.timeoutFileRequest = ClientTimeoutFactory.getTimeOutFileRequest(this, Parameters.TIMEOUT_FILE_REQUEST);
@@ -327,9 +331,10 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 		else
 		{
 			this.electionManager.tryToSearchTheRelay();
-			this.frameController.debugMessage("RELAY DISCOVERING...\nSE NON SI RICEVONO NOTIFICHE ENTRO BREVE SI CONSIGLIA DI CAMBIARE POSIZIONE E RIPROVARE.");
+			console.debugMessage(Parameters.DEBUG_WARNING, "RELAY DISCOVERING...\nSE NON SI RICEVONO NOTIFICHE ENTRO BREVE SI CONSIGLIA DI CAMBIARE POSIZIONE E RIPROVARE.");
+			//this.frameController.debugMessage("RELAY DISCOVERING...\nSE NON SI RICEVONO NOTIFICHE ENTRO BREVE SI CONSIGLIA DI CAMBIARE POSIZIONE E RIPROVARE.");
 		}
-	}*/
+	}
 
 	/*public void bufferFullEventOccurred(BufferFullEvent e) {
 
@@ -342,9 +347,9 @@ public class ClientSessionManager implements Observer{//, BufferFullListener , B
 			this.update(null, "BUFFER_FULL");
 			bfSent = false;
 		}		
-	}*/
+	}
 	
-	/*public void bufferEmptyEventOccurred(BufferEmptyEvent e) {
+	public void bufferEmptyEventOccurred(BufferEmptyEvent e) {
 		//LUCA: tolto il ! qui
 		if (!bfSent) {
 			//se non � stato gi� inviato, viene inviato al proxy un messaggio di buffer full

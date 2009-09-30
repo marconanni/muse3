@@ -1,7 +1,12 @@
 package client.connection;
 
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.util.Observer;
+import java.net.UnknownHostException;
+import java.util.Observable;
+
+import sun.misc.Cleaner;
 
 /**
  * @author Luca Campeti
