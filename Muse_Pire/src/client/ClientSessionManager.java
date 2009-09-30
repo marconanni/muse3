@@ -250,13 +250,16 @@ public class ClientSessionManager implements Observer {
 				//this.frameController.debugMessage("CLIENT SESSION MESSAGE: SERVER IRRAGGIUNGIBILE");
 			}
 			/*if(messageReader.getCode() == Parameters.ACK_CLIENT_REQ && status.equals("WaitingForResponse"))
+>>>>>>> .r15
 			{
 				if(this.timeoutFileRequest != null)this.timeoutFileRequest.cancelTimeOutFileRequest();
-				this.proxyStreamingPort = messageReader.getRelaySendingPort();
-				this.proxyCtrlPort = messageReader.getRelayControlPort();
-				try {
-					this.clientPlaying = new ClientBufferDataPlaying(this.proxyStreamingPort, this.myStreamingPort, InetAddress.getByName(relayAddress), Parameters.CLIENT_BUFFER, Parameters.TTW, this, this.frameController);
-					String[] data = new String[7];
+				
+				//QUI MI PREPARE A RICEVERE LO STREAMING DA PARTE DEL PROXY CHE é STATO CREATO SUL RELAY A CUI SONO CONNESSO
+				//this.proxyStreamingPort = messageReader.getRelaySendingPort();
+				//this.proxyCtrlPort = messageReader.getRelayControlPort();
+				//try {
+					//this.clientPlaying = new ClientBufferDataPlaying(this.proxyStreamingPort, this.myStreamingPort, InetAddress.getByName(relayAddress), Parameters.CLIENT_BUFFER, Parameters.TTW, this, this.frameController);
+					/*String[] data = new String[7];
 					data[0] = InetAddress.getByName(Parameters.CLIENT_ADDRESS).getHostAddress();
 					data[1] = String.valueOf(Parameters.CLIENT_PORT_SESSION_IN);
 					data[2] = String.valueOf(this.myStreamingPort);
@@ -267,13 +270,13 @@ public class ClientSessionManager implements Observer {
 					this.frameController.setDataText(data);
 			//		this.clientPlaying.preparingSession();
 					this.clientPlaying.start();
-					
+					*/
 					
 			//		runner=new Timer();
 			//		runner.schedule(new TimerTask(){public void run(){System.out.println("PARTITO IL PLAYER - MULTIPLEXER...PASSATI "+Parameters.PLAYBACK_DELAY_START);clientPlaying.startPlaying();}}, Parameters.PLAYBACK_DELAY_START);
 					
 					//this.clientPlaying.startPlaying();
-					this.status = "Playing";
+					/*this.status = "Playing";
 					try {
 						this.msg = ClientMessageFactory.buildStartTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
 						sessionCM.sendTo(msg);
