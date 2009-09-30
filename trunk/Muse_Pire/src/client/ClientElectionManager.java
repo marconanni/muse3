@@ -478,24 +478,30 @@ public class ClientElectionManager extends Observable implements Observer{
 	 * c'è (più) sessione RTP in corso
 	 */
 	public synchronized void setImServed(boolean imS) {
+		System.out.println("setImServed 1");
 
 		//entro solo se non sono in fase di rielezione
 		//uno dei due deve essere false
 		if(!electing || !imS ){
+			System.out.println("setImServed 2");
 
 			this.imServed = imS;
 
 			if (this.imServed) {
+				System.out.println("setImServed 3");
 
 				if (actualRelayAddress != null) {
+					System.out.println("setImServed 4");
 					
 					try {
 
 						clientPositionController = new ClientPositionController(Parameters.NAME_OF_CLIENT_INTERFACE,Parameters.NAME_OF_AD_HOC_NETWORK);
+						clientPositionController.getClientWNICController().setDebugConsole(this.console);
+						clientPositionController.setDebugConsole(this.console);
 
 						preparePositionController();
 						clientPositionController.start();
-						System.err.println("ClientPositionController AVVIATO");
+						console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController AVVIATO");
 
 					} catch (WNICException e) {
 						e.printStackTrace();
@@ -737,18 +743,20 @@ class TesterClientElectionManager{
 		 * imServed: false
 		 * first EM_EL sent: false
 		 */
+		
+		
 
 		try {
 
 			Thread.sleep(1000);
 
-			DatagramPacket dpOut = RelayMessageFactory.buildImRelay("192.168.0.4", cem.getBCAST(), Parameters.CLIENT_PORT_ELECTION_IN);
+			DatagramPacket dpOut = RelayMessageFactory.buildImRelay("192.168.0.1", cem.getBCAST(), Parameters.CLIENT_PORT_ELECTION_IN);
 
 			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
 
 			dsNet.send(dpOut);
 
-			Thread.sleep(500);
+			Thread.sleep(5000);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -758,7 +766,23 @@ class TesterClientElectionManager{
 
 		//STAMPA 1
 		stamp(cem,1);
+		try {
 
+			DatagramPacket dpOut = RelayMessageFactory.buildRequestRSSI(5, InetAddress.getByName(Parameters.BROADCAST_ADDRESS), Parameters.CLIENT_RSSI_PORT);
+
+			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
+
+			dsNet.send(dpOut);
+
+			Thread.sleep(5000);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			
+			
+		}
 
 
 
@@ -770,16 +794,16 @@ class TesterClientElectionManager{
 		 * imServed: false
 		 * first EM_EL sent: false
 		 */
-		/*
-		cem.getTimeoutSearch().cancelTimeOutSearch();
-		cem.update(null, "TIMEOUTSEARCH");
+		
+		//cem.getTimeoutSearch().cancelTimeOutSearch();
+		//cem.update(null, "TIMEOUTSEARCH");
 		System.out.println("TIMEOUTSEARCH FERMATO");
 
 
 		//STAMPA 2
 		stamp(cem,2);
 
-		 */
+		
 
 
 
@@ -790,7 +814,7 @@ class TesterClientElectionManager{
 		 * imServed: false
 		 * first EM_EL sent: false
 		 */
-		/*		
+			
 		try {
 
 			DatagramPacket dpOut = RelayMessageFactory.buildElectionRequest(cem.getBCAST(), Parameters.CLIENT_PORT_ELECTION_IN);
@@ -810,7 +834,7 @@ class TesterClientElectionManager{
 		//STAMPA 3
 		stamp(cem,3);
 
-		 */
+		 
 
 
 
@@ -822,7 +846,7 @@ class TesterClientElectionManager{
 		 * first EM_EL sent: true
 		 */
 
-		/*
+		
 		cem.setFirstEM_ELsent(false);
 
 		try {
@@ -843,8 +867,8 @@ class TesterClientElectionManager{
 
 		//STAMPA 4
 		stamp(cem,4);
-
-		 */
+		
+		 
 
 
 		//STATO IDLE && EM_EL_DET_X ARRIVATO && firstEM_ELsent = true										OK
@@ -854,7 +878,7 @@ class TesterClientElectionManager{
 		 * imServed: false
 		 * first EM_EL sent: true
 		 */
-		/*
+		
 		cem.setFirstEM_ELsent(true);
 
 		try {
@@ -876,7 +900,7 @@ class TesterClientElectionManager{
 		//STAMPA 5
 		stamp(cem,5);
 
-		 */
+		 
 
 
 		//STATO IDLE && imServed = true && ELECTION_REQUEST ARRIVATO										OK
@@ -906,7 +930,7 @@ class TesterClientElectionManager{
 		}
 
 		//fermo il TIMEOUT_FAIL_TO_ELECT
-		cem.getTimeoutFailToElect().cancelTimeOutFailToElect();
+		//cem.getTimeoutFailToElect().cancelTimeOutFailToElect();
 
 		//fermo il ClientPositionController
 		cem.getClientPositionController().close();
@@ -959,7 +983,7 @@ class TesterClientElectionManager{
 		 * imServed: false
 		 * first EM_EL sent: true
 		 */
-		/*
+		
 		try {
 
 			DatagramPacket dpOut = RelayMessageFactory.buildEmElDetRelay(5, cem.getBCAST(), Parameters.CLIENT_PORT_ELECTION_IN);
@@ -979,7 +1003,7 @@ class TesterClientElectionManager{
 		//STAMPA 9
 		stamp(cem,9);
 
-		 */
+		 
 
 
 		//STATO WAITING_END_NORMAL_ELECTION && RICEZIONE ELECTION_DONE										OK
@@ -989,7 +1013,7 @@ class TesterClientElectionManager{
 		 * imServed: false
 		 * first EM_EL sent: false
 		 */
-		/*
+		
 		try {
 
 			DatagramPacket dpOut = RelayMessageFactory.buildElectionDone(5, "192.168.0.123", cem.getBCAST(), Parameters.CLIENT_PORT_ELECTION_IN);
@@ -1009,7 +1033,7 @@ class TesterClientElectionManager{
 		//STAMPA 10
 		stamp(cem,10);
 
-		 */
+		 
 
 
 		//STATO WAITING_END_ELECTION && TIMEOUT_FAIL_TO_ELECT SCATTATO 								OK
@@ -1040,7 +1064,7 @@ class TesterClientElectionManager{
 		cem.tryToSearchTheRelay();
 
 		//fermo TIMEOUT_SEARCH
-		cem.getTimeoutSearch().cancelTimeOutSearch();
+		//cem.getTimeoutSearch().cancelTimeOutSearch();
 
 		//STAMPA 12
 		stamp(cem,12);
