@@ -139,7 +139,7 @@ class TestWhoIsRelayServer {
 		WhoIsRelayServer wirs = new WhoIsRelayServer(Parameters.RELAY_AD_HOC_ADDRESS, Parameters.WHO_IS_RELAY_PORT);
 		wirs.start();
 
-		try {
+		/*try {
 			BCAST = InetAddress.getByName(Parameters.BROADCAST_ADDRESS);
 
 			ds = new DatagramSocket(9999);
@@ -182,8 +182,8 @@ class TestWhoIsRelayServer {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}*/
 		
-		wirs.close();
+		//wirs.close();
 	}
 }

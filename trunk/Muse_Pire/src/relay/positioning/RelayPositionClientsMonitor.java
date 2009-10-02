@@ -23,7 +23,7 @@ import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutNotifyRSSI;
 import relay.timeout.TimeOutSearch;
 import relay.wnic.exception.InvalidParameter;
-import util.Logger;
+
 
 /**Classe che rappresenta un oggetto in grado di prevedere un possibile allontanamento del nodo Relay
  * nei confronti dei nodi Clients che sta servendo.
@@ -52,7 +52,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	private Vector<Double> averageValues = null;
 	private int maxNumberOfAverageValues;
 
-	private Logger logger = null;
+	//private Logger logger = null;
 	private DatagramPacket dp = null;
 	private RSSIFilter filter = null;
 	private long period ;
@@ -77,7 +77,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 		averageValues = new Vector<Double>();
 		addObserver(electionManager);
 		rrcm = RelayConnectionFactory.getRSSIConnectionManager(this);	
-		logger = new Logger();
+		//logger = new Logger();
 	}
 
 
@@ -247,14 +247,14 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 }
 
 
-/*
+
 class TestRelayPositionClientsMonitor{
 
 	public static void main(String args[]){
 		TestObserver to = new TestObserver();
 		RelayPositionClientsMonitor rpcm = new RelayPositionClientsMonitor(3,6000,to);
 		rpcm.start();
-		InetAddress localhost = null;
+		/*InetAddress localhost = null;
 		try {
 			localhost = InetAddress.getByName("localhost");
 		} catch (UnknownHostException e) {
@@ -279,10 +279,11 @@ class TestRelayPositionClientsMonitor{
 			e.printStackTrace();
 		}
 
+	}*/
 	}
-}
+	}
 
- class TestObserver implements Observer{
+ /*class TestObserver implements Observer{
 
 	public TestObserver(){
 		System.out.println("testObserver: creato");
