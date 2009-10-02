@@ -91,30 +91,65 @@ public class ClientElectionManager extends Observable implements Observer{
 
 	//istanza singleton del ClientElectionManager
 	private static ClientElectionManager INSTANCE = null;
+	
+	private boolean stop = false;
 
 
+	public ClientElectionManager() {}
+	
 	/**Costruttore per ottenere un nuovo ClientElectionManager.
 	 * Fa partire il Connection Manager ed in seguito si mette
 	 * alla ricerca del Relay attuale.
 	 */
-	private ClientElectionManager(DebugConsole console){
-		this.setDebugConsole(console);
+	public void init(){
 
 		comManager = ClientConnectionFactory.getElectionConnectionManager(this);
 		comManager.start();
-
-		searchingRelay();
-
-		console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" inviato WHO_IS_RELAY e start TIMEOUT_SEARCH");
+		try {
+			clientPositionController = new ClientPositionController(Parameters.NAME_OF_CLIENT_INTERFACE,Parameters.NAME_OF_AD_HOC_NETWORK);
+			//clientPositionController.setDebugConsole(console);
+		} catch (WNICException e) {console.debugMessage(Parameters.DEBUG_ERROR,e.getMessage());stop = true;}
+		
+		if(stop)
+			console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" e non può continuare in quanto la scheda di rete nn è configurata correttamente");
+		else{
+			console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: Scheda wireless configurata correttamente ora cerca il relay");
+			searchingRelay();
+		}
 	}
+
 
 
 	/**Metodo per ottenere l'istanza della classe singleton ClientElectionManager
 	 * @return un riferimento al singleton ClientElectionManager
 	 */
-	public static ClientElectionManager getINSTANCE(DebugConsole console){
-		if(INSTANCE == null) INSTANCE = new ClientElectionManager(console);
+	public static ClientElectionManager getINSTANCE(){
+		if(INSTANCE == null) INSTANCE = new ClientElectionManager();
 		return INSTANCE;
+	}
+	
+	/**Metodo che consente di mettersi alla ricerca di un Relay (se non si è in elezione,
+	 * o se si è in attesa della fine di un'elezione di emergenza)
+	 * inviando un WHO_IS_RELAY, facendo partire subito dopo 
+	 * il TIMEOUT_SEARCH  e impostando lo stato in IDLE
+	 */
+	private void searchingRelay(){
+
+		//se non sono in elezione oppure so che è cominciata un elezione di emergenza
+		if (!electing || (electing && firstEM_ELsent && !imServed)) {
+			actualRelayAddress = null;
+			DatagramPacket dpOut = null;
+			//timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
+			try {
+				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT);
+				comManager.sendTo(dpOut);
+
+			} catch (IOException e) {e.printStackTrace();}
+			
+			
+			actualStatus = ClientStatus.INSTABLE;
+			console.debugMessage(Parameters.DEBUG_WARNING,"ClientElectionManager: STATO INSTABILE SEARCHING_RELAY -> INSTABLE: WHO_IS_RELAY inviato e start del TIMEOUT_SEARCH");
+		}
 	}
 
 
@@ -123,16 +158,18 @@ public class ClientElectionManager extends Observable implements Observer{
 	 */
 
 	public synchronized void update(Observable arg0, Object arg1) {
+		System.out.println("UPPPDATE CLIENT ELECTION");
 
 		//PARTE PER LA GESTIONE DEI MESSAGGI PROVENIENTI DALLA RETE
 		if(arg1 instanceof DatagramPacket){
-
+			System.out.println("UPPPDATE CLIENT ELECTION1");
 			DatagramPacket dpIn = (DatagramPacket)arg1;
 			clientMessageReader = new ClientMessageReader();
+			System.out.println("UPPPDATE CLIENT ELECTION2");
 
 			try {
 				clientMessageReader.readContent(dpIn);
-			} catch (IOException e) {e.printStackTrace();}
+			} catch (IOException e) {e.printStackTrace();System.out.println("ERRRRRORRRREEEEE");}
 
 			/*Cominciamo ad esaminare i vari casi che si possono presentare, in base allo stato in cui ci si trova 
 				e al codice del messaggio che è appena arrivato*/
@@ -145,7 +182,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			//1) al primo che risponde (synchronize il cambio di actualstatus)
 			//2) memorizzare tutte le risposte e ricevute in coppia (ip,RSSI) del relay e poi prendere quello con il segnale + alto->+ vicino
 			//3) Non ci poniamo questo problema e ci colleghiamo al relay staticamente (richiede di conoscere l'ip del relay on startup)
-
+			System.out.println("Codice:"+clientMessageReader.getCode());
 			if(clientMessageReader.getCode() == Parameters.IM_RELAY && actualStatus == ClientStatus.INSTABLE){
 
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO INSTABLE: IM_RELAY arrivato: ->STATO IDLE");
@@ -153,6 +190,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				actualStatus = ClientStatus.IDLE;
 
 				if(timeoutSearch != null) {
+					System.out.println("CANCELLO TIMEOUT");
 					timeoutSearch.cancelTimeOutSearch();
 					timeoutSearch = null;
 				}
@@ -478,38 +516,17 @@ public class ClientElectionManager extends Observable implements Observer{
 	 * c'è (più) sessione RTP in corso
 	 */
 	public synchronized void setImServed(boolean imS) {
-		System.out.println("setImServed 1");
 
 		//entro solo se non sono in fase di rielezione
 		//uno dei due deve essere false
 		if(!electing || !imS ){
-			System.out.println("setImServed 2");
-
 			this.imServed = imS;
-
 			if (this.imServed) {
-				System.out.println("setImServed 3");
-
 				if (actualRelayAddress != null) {
-					System.out.println("setImServed 4");
-					
-					try {
-
-						clientPositionController = new ClientPositionController(Parameters.NAME_OF_CLIENT_INTERFACE,Parameters.NAME_OF_AD_HOC_NETWORK);
-						clientPositionController.getClientWNICController().setDebugConsole(this.console);
-						clientPositionController.setDebugConsole(this.console);
-
-						preparePositionController();
-						clientPositionController.start();
-						console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController AVVIATO");
-
-					} catch (WNICException e) {
-						e.printStackTrace();
-						System.exit(1);
-					}
+					preparePositionController();
+					clientPositionController.start();
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController AVVIATO monitorando il seguente indirizzo relay: "+actualRelayAddress);
 				}
-
-				System.err.println("ClientElectionManager.setImServed(): imServed settato a: " + imServed);
 			}
 			else if(clientPositionController != null) clientPositionController.close();
 		}
@@ -517,28 +534,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	}
 
 
-	/**Metodo che consente di mettersi alla ricerca di un Relay (se non si è in elezione,
-	 * o se si è in attesa della fine di un'elezione di emergenza)
-	 * inviando un WHO_IS_RELAY, facendo partire subito dopo 
-	 * il TIMEOUT_SEARCH  e impostando lo stato in IDLE
-	 */
-	private void searchingRelay(){
 
-		//se non sono in elezione oppure so che è cominciata un elezione di emergenza
-		if (!electing || (electing && firstEM_ELsent && !imServed)) {
-			actualRelayAddress = null;
-			DatagramPacket dpOut = null;
-			try {
-				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT);
-				comManager.sendTo(dpOut);
-
-			} catch (IOException e) {e.printStackTrace();}
-			timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
-			
-			actualStatus = ClientStatus.INSTABLE;
-			this.console.debugMessage(Parameters.DEBUG_WARNING,"ClientElectionManager: STATO INSTABILE SEARCHING_RELAY -> INSTABLE: WHO_IS_RELAY inviato e start del TIMEOUT_SEARCH");
-		}
-	}
 
 
 	/**Metodo per modificare l'indirizzo del destinatario del messaggio di ELECTION_DONE nell'indirizzo BROADCAST
@@ -557,7 +553,6 @@ public class ClientElectionManager extends Observable implements Observer{
 	/**Metodo per creare e avviare il ClientPositionController 
 	 */
 	private void preparePositionController(){
-
 		clientPositionController.setRelayAddress(actualRelayAddress);
 	}
 
@@ -579,6 +574,10 @@ public class ClientElectionManager extends Observable implements Observer{
 			e.printStackTrace();
 		}
 	}*/
+	
+	public DebugConsole getDebugCondole(){
+		return console;
+	}
 
 
 	public boolean isImServed() {
@@ -734,7 +733,7 @@ class TesterClientElectionManager{
 			e.printStackTrace();
 		}
 
-		ClientElectionManager cem = ClientElectionManager.getINSTANCE(console);
+		ClientElectionManager cem = ClientElectionManager.getINSTANCE();
 
 		//STATO IDLE && IM_RELAY ARRIVATO																	OK
 		/* Status: IDLE
