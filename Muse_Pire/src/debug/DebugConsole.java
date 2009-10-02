@@ -15,7 +15,7 @@ public class DebugConsole {
 	//componenti della consolle:
 	private JFrame frame;
 	//private JPanel panel;
-	private static Pane text;
+	private Pane text;
 	private String title;
 	/**
 	 * @param title the title to set
@@ -29,10 +29,10 @@ public class DebugConsole {
 	 * Costruttore
 	 * */
 	public DebugConsole(){
-		text = new Pane();
+		setText(new Pane());
 		frame= new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setContentPane(new JScrollPane(text));
+		frame.setContentPane(new JScrollPane(getText()));
 		frame.setSize(600, 400);
 		frame.setVisible(true);
 	}
@@ -42,14 +42,21 @@ public class DebugConsole {
 	 * */
 	public void debugMessage(int type, String message){
 		switch(type){
-		case Parameters.DEBUG_INFO: text.append(Color.black,message+"\n");
+		case Parameters.DEBUG_INFO: getText().append(Color.black,message+"\n");
 				break;
-		case Parameters.DEBUG_WARNING: text.append(Color.orange,message+"\n");
+		case Parameters.DEBUG_WARNING: getText().append(Color.orange,message+"\n");
 				break;
-		case Parameters.DEBUG_ERROR: text.append(Color.red,message+"\n");
+		case Parameters.DEBUG_ERROR: getText().append(Color.red,message+"\n");
 				break;
-		default :	text.append(Color.black,message+"\n");
+		default :	this.getText().append(Color.black,message+"\n");
 					break;
 		}
+	}
+	
+	public void setText(Pane text) {
+		this.text = text;
+	}
+	public Pane getText() {
+		return this.text;
 	}
 }
