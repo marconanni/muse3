@@ -64,39 +64,49 @@ public class ClientWNICLinuxController implements ClientWNICController{
 			if((res = interfaceInfo.readLine())!=null){
 				
 
-				if (res.contains("radio off")){
+				//scheda spenta
+				if (res.contains("off/any")){
 					isAssociated = false;
 					isOn = false;
+					console.debugMessage(Parameters.DEBUG_WARNING,"L'interfaccia "+ interf +" ESISTE però è SPENTA!");
 				}
 
+				//On ma non associata alla rete ad hoc
 				else if (res.contains("IEEE")){
 					isOn = true;
 					isAssociated = true;
-					if(res.contains("AdHoc"))
-						modeAdHoc = true;
-					if(res.contains(essidName))essidFound = true;	
-					else {
+					console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +"  ESISTE ed è ACCESA.");
+					if(res.contains(essidName)){
+						essidFound = true;
+						console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +" è CONNESSA alla rete " + essidName);
+					}else {
 						essidFound = false;
+						console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
 						throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
-					}
+					}	
+					
+					//controllo il mode della scheda (deve essere Ad-Hoc)
+					res = interfaceInfo.readLine();
+					if(res.contains("Ad-Hoc")){
+						modeAdHoc = true;
+						console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +" è settata a MODE Ad-Hoc");
+					}else {
+						modeAdHoc = false;
+						console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
+						throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
+					}	
+	
+				}else{
+					console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
+					throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 				}
-
-				else if (res.contains("unassociated")) {
-					isOn = true;
-					isAssociated = false;
-					essidFound = false;
-				}
-				else throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
+			}else{
+				console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
+				throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 			}
-			else throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 
 			interfaceInfo.close();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-
+		}catch (IOException e){e.printStackTrace();}
 	}
 
 
