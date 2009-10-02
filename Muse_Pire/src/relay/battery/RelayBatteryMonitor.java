@@ -21,7 +21,6 @@ import relay.wnic.AccessPointData;
 import relay.wnic.RelayWNICController;
 import relay.wnic.exception.InvalidParameter;
 import relay.wnic.exception.WNICException;
-import util.Logger;
 
 /**
  * @author Luca Campeti
@@ -35,7 +34,7 @@ public class RelayBatteryMonitor extends Observable {
 
 	private long period = -1;
 	private Timer timer = null;
-	private Logger logger = null;
+	//private Logger logger = null;
 	private boolean started;
 	private static double batteryLevel = -1;
 	private static StringTokenizer st = null;
@@ -53,7 +52,7 @@ public class RelayBatteryMonitor extends Observable {
 		period = p;
 		addObserver(electionManager);
 		started = false;
-		logger = new Logger();
+		//logger = new Logger();
 	}
 
 
