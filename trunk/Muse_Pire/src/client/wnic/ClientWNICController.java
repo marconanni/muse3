@@ -29,16 +29,18 @@ public interface ClientWNICController
 	/**Metodo per settare il monitoraggio del Relay attuale
 	 * @param rA l'indirizzo del Relay da monitorare
 	 */
-	public void setRelayAddress(String rA) throws WNICException;
+	//public void setRelayAddress(String rA) throws WNICException;
 
 	/**
 	 * Metodo per resettare il relay a cui è collegato
 	 * @param iN interfaccia della scheda wireless
 	 * @throws WNICException
 	 */
-	public void resetAddressToMonitor(String iN) throws WNICException;
+	//public void resetAddressToMonitor(String iN) throws WNICException;
 	
 
 	public void setDebugConsole(DebugConsole console);
+	
+	public DebugConsole getDebugConsole();
 
 }

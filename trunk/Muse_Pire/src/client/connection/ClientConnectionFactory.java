@@ -1,10 +1,6 @@
 package client.connection;
 
-import java.net.DatagramPacket;
-import java.util.Observable;
 import java.util.Observer;
-
-
 import client.ClientPortMapper;
 
 
