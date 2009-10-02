@@ -145,22 +145,6 @@ public class ClientWNICLinuxController implements ClientWNICController{
 	}
 
 	/**
-	 * Metodo per ottenere il risultato della chiamata al comando linux <code>iwspy interface<code>
-	 * @param iN il nome dell'interfaccia su cui si vuole chiamare il comando <code>iwspy<code>
-	 * @return un BufferedReader che rappresenta il risultato della chiamata al Sistema Operativo 
-	 * @throws WNICException
-	 */
-	private BufferedReader getRelayRSSIInfo(String iN) throws WNICException{
-		try{
-			Process	p= Runtime.getRuntime().exec("/sbin/iwspy " + iN);
-			p.waitFor();
-			return new BufferedReader(new InputStreamReader(p.getInputStream()));
-		}catch (Exception e){
-			throw new WNICException("ERRORE: impossibile ottenere informazioni dalla scheda wireless");
-		}	
-	}
-
-	/**
 	 * Metodo per riempire la cache locale dell'ARP con info sull'IP da osservare con il comando linux <code>iwspy interface<code>
 	 * @return un BufferedReader che rappresenta il risultato della chiamata al Sistema Operativo 
 	 * @throws WNICException
@@ -174,44 +158,53 @@ public class ClientWNICLinuxController implements ClientWNICController{
 			throw new WNICException("ERRORE: impossibile ottenere informazioni dalla scheda wireless");
 		}	
 	}
+	
+	private int convertRSSI(int dBm){
+		if(dBm<-100)
+			return 0;
+		if(dBm>20)
+			return 120;
+		return dBm+100;
+	}
 
-	/**Metodo per ottenere il valore di RSSI attuale avvertito nei confronti del Relay attuale tramite il comando <code>iwspy<code>
-	 * @param line la linea del risultato alla chiamata al comando linux <code>/sbin/iwspy interface<code>
-	 * @return un int che rappresenta il valore di RSSI attuale
+	/**Metodo per ottenere il valore di RSSI attuale avvertito nei confronti del Relay attuale tramite il comando <code>iwconfig<code>
+	 * @param line la linea del risultato alla chiamata al comando linux <code>/sbin/iwconfig interface<code>
+	 * @return un int che rappresenta il valore di RSSI attuale (dbm convertito tra 0 e 120)
 	 * @throws InvalidAccessPoint
 	 */
-	private int extracNewRSSIValue(String iN) throws InvalidParameter, WNICException{
+	private int getActualRSSIValue(String iN) throws InvalidParameter, WNICException{
 
-		BufferedReader br = getRelayRSSIInfo(iN); 
+		BufferedReader br = getInterfaceInfo(iN); 
+		System.out.println("Perfetto buffer");
 
-		if(br == null)
+		if(br == null){
+			System.out.println("Buffer null");
 			throw new InvalidParameter ("ERRORE: non esistono statistiche sull'interfaccia " + iN);
+		}
 
-		String line = null;
-		int res = -1;
-		try {
-			do {
-				line = br.readLine();
-				if(line.contains("No statistics to collect"))
-					throw new WNICException("ERRORE: non riesco a trovare statistiche sull'indirizzo " + relayAddress);
+		try{
+			String riga = br.readLine();
+			System.out.println("Letto riga1:"+riga);
+			while(riga!=null){
+				System.out.println("Entrato nel while");
+				StringTokenizer stringToken = new StringTokenizer(riga," \"\t\n\r\f");
+				while(stringToken.hasMoreElements()){
+					String token = stringToken.nextToken();
+					System.out.println("Token:"+token);
+					if(token.equals("Signal")){
+						return convertRSSI(Integer.parseInt(stringToken.nextToken().substring(6)));
+					}
+				}
+				riga=br.readLine();
+			
+			
 			}
-			while(line!=null && !line.contains("Signal"));
-			
-			br.close();
-			
-			//System.out.println(line);
-			
-			res = extractRSSIValue(line);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new WNICException("ERRORE: non riesco a trovare statistiche sull'indirizzo " +relayAddress);
-		} 
-		return res;
+		}catch (Exception e) {}
+		return -1;
 	}
 
 
-	private int extractRSSIValue(String line) throws WNICException{
+	/*private int extractRSSIValue(String line) throws WNICException{
 		StringTokenizer st = new StringTokenizer(line,"=");
 		int res = -1;
 		st.nextToken();
@@ -227,7 +220,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		}
 
 		return res;
-	}
+	}*/
 
 
 	//METODI PUBLICI
@@ -293,10 +286,12 @@ public class ClientWNICLinuxController implements ClientWNICController{
 	 * @throws WNICException
 	 */
 	public int getSignalStrenghtValue() throws WNICException{
-		refreshStatus();
+		//refreshStatus();
+		System.out.println("ECCOMI");
 		if(isAssociated){
+			System.out.println("OK associato");
 			try {
-				return extracNewRSSIValue(interf);
+				return getActualRSSIValue(interf);
 			} 
 			catch (Exception e) {
 				e.printStackTrace();
