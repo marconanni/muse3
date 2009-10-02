@@ -39,7 +39,7 @@ import relay.wnic.exception.WNICException;
 public class RelayElectionManager extends Observable implements Observer {
 	
 	//Debug consolle del RelayElectionManager
-	private DebugConsolle debugConsolle = null;
+	private DebugConsole debugConsolle = null;
 
 	//stati in cui si può trovare il RelayElectionManager
 	public enum RelayStatus {  
