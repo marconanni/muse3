@@ -27,7 +27,6 @@ public class WNICFinder
 		
 		ClientWNICController c=null;
 		
-		System.out.println(os);//DEBUG
 		if(os==null){throw new OSException("Nome del sistema operativo non valido");}
 		if(os.startsWith("Windows")){		
 			c = new ClientWNICWindowsController(interf,essidName);
