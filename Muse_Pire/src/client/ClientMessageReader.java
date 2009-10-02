@@ -43,7 +43,7 @@ public class ClientMessageReader {
 	 * @param dp
 	 * @throws IOException
 	 */
-	public void readContent(DatagramPacket dp) throws IOException {
+	public synchronized void readContent(DatagramPacket dp) throws IOException {
 		ByteArrayInputStream biStream = new ByteArrayInputStream(dp.getData(), 0, dp.getLength());
 		DataInputStream diStream = new DataInputStream(biStream);
 		message = diStream.readUTF();

@@ -30,7 +30,6 @@ import debug.DebugConsole;
 public class ClientPositionController implements Observer{
 
 	private DatagramPacket notifyRSSI = null;
-	private String interf=null;
 	private boolean enableToMonitor;
 	private boolean started;
 
@@ -49,14 +48,12 @@ public class ClientPositionController implements Observer{
 	 * @throws WNICException 
 	 */
 	public ClientPositionController(String interf, String essidName) throws WNICException{
-		this.interf = interf;
-
 		crcm = ClientConnectionFactory.getRSSIConnectionManager(this);
 		
 		try {
 			cwnic = WNICFinder.getCurrentWNIC(interf, essidName);
 		} catch (OSException e) {console.debugMessage(Parameters.DEBUG_ERROR,"ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
-		
+		console = cwnic.getDebugConsole();
 		enableToMonitor = false;
 		started = false;
 	}
@@ -78,9 +75,6 @@ public class ClientPositionController implements Observer{
 		if(started){
 			started = false;
 			crcm.close();
-			try {
-				cwnic.resetAddressToMonitor(interf);
-			} catch (WNICException e) {e.printStackTrace();}
 			cwnic = null;
 		}
 	}
@@ -93,25 +87,32 @@ public class ClientPositionController implements Observer{
 			cmr = new ClientMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);
-				console.debugMessage(Parameters.DEBUG_INFO, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
-				console.debugMessage(Parameters.DEBUG_ERROR,"CODICE ricevuto "+cmr.getCode()+" codice necessario "+Parameters.REQUEST_RSSI);
-				if(cmr.getCode() == Parameters.REQUEST_RSSI){
-					console.debugMessage(Parameters.DEBUG_ERROR,"Entrato nell'ifffff");
+				console.debugMessage(Parameters.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
+				if((cmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(relayAddress)){
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Devo inviare risp a: " + relayAddress);
 					RSSIvalue = cwnic.getSignalStrenghtValue();
-					console.debugMessage(Parameters.DEBUG_ERROR,"RSSI rilevato "+RSSIvalue);
 					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
-					console.debugMessage(Parameters.DEBUG_ERROR,"Creato messaggio da inviare "+notifyRSSI);
 					sequenceNumber++;
 					crcm.sendTo(notifyRSSI);
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RELAY_RSSI_RECEIVER_PORT);
-				}	
-			} catch (WNICException e) {e.printStackTrace();
-			} catch (IOException e) {e.printStackTrace();}
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RELAY_RSSI_RECEIVER_PORT);
+				}else{
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
+				
+				}
+			} catch (WNICException e) {
+					console.debugMessage(Parameters.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+					new WNICException("ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+				
+			} catch (IOException e) {e.printStackTrace();System.out.println("ERRORE");}
 			cmr = null;
 		}
+		console.debugMessage(Parameters.DEBUG_WARNING,"ESCO PRIMA CHE BLOCCHI QLC");
 	}
 
-
+	public ClientWNICController getClientWNICController(){
+		return this.cwnic;
+	}
+	
 	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
 	 * confronti dell'indirizzo del Relay
 	 * @param rA una String che rappresenta l'indirizzo del Relay
@@ -119,17 +120,14 @@ public class ClientPositionController implements Observer{
 	public void setRelayAddress(String rA) {
 		try {
 			relayAddress = InetAddress.getByName(rA);
-			cwnic.setRelayAddress(rA);
 			enableToMonitor = true;
-		} catch (UnknownHostException e) {e.printStackTrace();
-		} catch (WNICException e) {e.printStackTrace();}
-	}
-	
-	public ClientWNICController getClientWNICController(){
-		return this.cwnic;
+		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
 	/**Server per visualizzare i messagi di debug
 	 */
 	public void setDebugConsole(DebugConsole console) {this.console=console;}
 }
+
+
+

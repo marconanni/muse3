@@ -22,15 +22,17 @@ public class ClientController {
 		//frameController = frame.getController();
 		this.console = new DebugConsole();
 		this.console.setTitle("DEBUG CLIENT CONSOLE");
-		this.sessionManager = ClientSessionManager.getInstance();
-		this.sessionManager.setDebugConsole(this.console);
+		//this.sessionManager = ClientSessionManager.getInstance();
+		//this.sessionManager.setDebugConsole(this.console);
 		//this.sessionManager.setFrameController(frameController);
-		this.electionManager = ClientElectionManager.getINSTANCE(this.console);
+		this.electionManager = ClientElectionManager.getINSTANCE();
+		this.electionManager.setDebugConsole(console);
+		this.electionManager.init();
 		//this.electionManager.setDebugConsole(this.console);
 		
 		//this.electionManager.setFrameController(frameController);
-		this.electionManager.addObserver(this.sessionManager);
-		this.sessionManager.setElectionManager(electionManager);
+		//this.electionManager.addObserver(this.sessionManager);
+		//this.sessionManager.setElectionManager(electionManager);
 		//frameController.setSessionManager(this.sessionManager);
 	}
 	
