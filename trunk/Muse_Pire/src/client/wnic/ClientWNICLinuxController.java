@@ -34,18 +34,18 @@ public class ClientWNICLinuxController implements ClientWNICController{
 
 		interf = ethX;
 		essidName = netName;
+		console = new DebugConsole();
+		console.setTitle("CLIENT WNIC LINUX CONTROLLER - Debug conole");
 		
-		//console.debugMessage(Parameters.DEBUG_INFO, "ClientWNICLinuxController: L'interfaccia di rete " +  ethX + " esiste, ora ne controllo lo stato");
+		console.debugMessage(Parameters.DEBUG_INFO, "L'interfaccia di rete " +  ethX + " esiste, ora ne controllo lo stato");
 
 		refreshStatus();
 
 		if (!isOn)
 			throw new WNICException("ClientWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");	
 
-		System.out.println("ClientWNICLinuxController: L'interfaccia "+interf+" è attiva");
-		System.out.println("ClientWNICLinuxController"+((isAssociated)?"L'interfaccia " +interf+ " è connessa alla rete " +essidName+ " in maniera "+ ((modeAdHoc)?"AdHoc":"Managed"):"L'interfaccia " +interf+ " non è connessa a nessuna rete Ad-Hoc"));
-		//System.out.println("ClientWNICLinuxController: " + ((isAssociated && essidFound)?"L'interfaccia " +interf+ " è connessa ad una rete Ad-Hoc":"L'interfaccia " +interf+ " non è connessa a nessuna rete Ad-Hoc"));
-
+		console.debugMessage(Parameters.DEBUG_INFO, "L'interfaccia "+interf+" è attiva");
+		console.debugMessage(Parameters.DEBUG_INFO, ((isAssociated)?"L'interfaccia " +interf+ " è connessa alla rete " +essidName+ " in maniera "+ ((modeAdHoc)?"AdHoc":"Managed"):"L'interfaccia " +interf+ " non è connessa a nessuna rete Ad-Hoc"));
 	}
 	
 
@@ -62,6 +62,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		String res = null;
 		try{
 			if((res = interfaceInfo.readLine())!=null){
+				
 
 				if (res.contains("radio off")){
 					isAssociated = false;
