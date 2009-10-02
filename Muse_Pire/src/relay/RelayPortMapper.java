@@ -13,13 +13,13 @@ public class RelayPortMapper {
 
 	//PER I PROXY
 	/*range di porte assegnabili ad un PROXY per la ricezione del flusso RTP dal SERVER*/
-	private boolean[] rangePortInRTPProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
+	//private boolean[] rangePortInRTPProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
 
 	/*range di porte assegnabili ad un PROXY per l'invio del flusso RTP al CLIENT*/
-	private boolean[] rangePortOutRTPProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
+	//private boolean[] rangePortOutRTPProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
 
 	/*range di porte assegnabili ad un PROXY per ricevere messaggi START_TX e STOP_TX dal CLIENT*/
-	private boolean[] rangeAdHocPortInControlProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
+	//private boolean[] rangeAdHocPortInControlProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
 
 	/*range di porte assegnabili ad un PROXY per inviare il messaggio di LEAVE alCLIENT*/
 	private boolean[] rangeAdHocPortOutControlProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
@@ -27,41 +27,41 @@ public class RelayPortMapper {
 	/**
 	 * @param rangePortInRTPProxy the rangePortInRTPProxy to set
 	 */
-	public void setRangePortInRTPProxy(int rangePortInRTPProxy) {
+	//public void setRangePortInRTPProxy(int rangePortInRTPProxy) {
 		
-		this.rangePortInRTPProxy[rangePortInRTPProxy - Parameters.PROXY_INITIAL_PORT_IN_RTP] = false;
-	}
+		//this.rangePortInRTPProxy[rangePortInRTPProxy - Parameters.PROXY_INITIAL_PORT_IN_RTP] = false;
+	//}
 
 	/**
 	 * @param rangePortOutRTPProxy the rangePortOutRTPProxy to set
 	 */
-	public void setRangePortOutRTPProxy(int rangePortOutRTPProxy) {
-		this.rangePortOutRTPProxy[rangePortOutRTPProxy - Parameters.PROXY_INITIAL_PORT_OUT_RTP] = false;
-	}
+	//public void setRangePortOutRTPProxy(int rangePortOutRTPProxy) {
+		//this.rangePortOutRTPProxy[rangePortOutRTPProxy - Parameters.PROXY_INITIAL_PORT_OUT_RTP] = false;
+	//}
 
 	/**
 	 * @param rangeAdHocPortInControlProxy the rangeAdHocPortInControlProxy to set
 	 */
-	public void setRangeAdHocPortInControlProxy(
-			int rangeAdHocPortInControlProxy) {
-		this.rangeAdHocPortInControlProxy[rangeAdHocPortInControlProxy - Parameters.PROXY_INITIAL_AD_HOC_PORT_IN_CONTROL] = false;
-	}
+	//public void setRangeAdHocPortInControlProxy(
+			//int rangeAdHocPortInControlProxy) {
+		//this.rangeAdHocPortInControlProxy[rangeAdHocPortInControlProxy - Parameters.PROXY_INITIAL_AD_HOC_PORT_IN_CONTROL] = false;
+	//}
 
 	/**
 	 * @param rangeAdHocPortOutControlProxy the rangeAdHocPortOutControlProxy to set
 	 */
-	public void setRangeAdHocPortOutControlProxy(
-			int rangeAdHocPortOutControlProxy) {
-		this.rangeAdHocPortOutControlProxy[rangeAdHocPortOutControlProxy - Parameters.PROXY_INITIAL_AD_HOC_PORT_OUT_CONTROL] = false;
-	}
+	//public void setRangeAdHocPortOutControlProxy(
+		//	int rangeAdHocPortOutControlProxy) {
+		//this.rangeAdHocPortOutControlProxy[rangeAdHocPortOutControlProxy - Parameters.PROXY_INITIAL_AD_HOC_PORT_OUT_CONTROL] = false;
+	//}
 
 	/**
 	 * @param rangeManagedPortInOutControlProxy the rangeManagedPortInOutControlProxy to set
 	 */
-	public void setRangeManagedPortInOutControlProxy(
-			int rangeManagedPortInOutControlProxy) {
-		this.rangeManagedPortInOutControlProxy[rangeManagedPortInOutControlProxy - Parameters.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL] = false;
-	}
+	//public void setRangeManagedPortInOutControlProxy(
+		//	int rangeManagedPortInOutControlProxy) {
+		//this.rangeManagedPortInOutControlProxy[rangeManagedPortInOutControlProxy - Parameters.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL] = false;
+	//}
 
 	/*range di porte assegnabili ad un PROXY per inviare il messaggio di FORWARD_REQ_FILE al SERVER e  
 	 * i messaggi di START_TX e STOP_TX allo STREAMINGSERVER e per ricevere il messaggio ACK_RELAY_FORW*/
@@ -103,9 +103,9 @@ public class RelayPortMapper {
 	private RelayPortMapper()
 	{
 		for(int i = 0;i < Parameters.RANGE_ACTIVE_SESSIONS;i++){
-			rangePortInRTPProxy[i] = true;
-			rangePortOutRTPProxy[i] = true;
-			rangeAdHocPortInControlProxy[i] = true;
+			//rangePortInRTPProxy[i] = true;
+			//rangePortOutRTPProxy[i] = true;
+			//rangeAdHocPortInControlProxy[i] = true;
 			rangeAdHocPortOutControlProxy[i] = true;
 			rangeManagedPortInOutControlProxy[i] = true;
 		}
@@ -141,7 +141,7 @@ public class RelayPortMapper {
 	}
 
 
-	private int assignPort(String typePort)
+	/*private int assignPort(String typePort)
 	{
 		if(typePort.equals("ControlAdHocIn"))
 		{
@@ -196,73 +196,73 @@ public class RelayPortMapper {
 		}
 
 		return -1;
-	}
+	}*/
 
 	/**Metodo per ottenere una porta libera da assegnare al PROXY per 
 	 * ricevere i messaggi di START_TX e STOP_TX dal CLIENT
 	 * @return un intero rappresentante la porta appena occupata
 	 */
-	public int getFirstFreeControlAdHocInPort()
+	/*public int getFirstFreeControlAdHocInPort()
 	{
 		return this.assignPort("ControlAdHocIn");
-	}
+	}*/
 
 	/**Metodo per ottenere una porta libera da assegnare al PROXY per 
 	 * inviare il messaggio di ACK_CLIENT_REQ e di LEAVE al CLIENT
 	 * @return un intero rappresentante la porta appena occupata
 	 */
-	public int getFirstFreeControlAdHocOutPort()
+	/*public int getFirstFreeControlAdHocOutPort()
 	{
 		return this.assignPort("ControlAdHocOut");
-	}
+	}*/
 
 	/**Metodo per ottenere una porta libera da assegnare al PROXY per 
 	 * inviare i messaggi di FORWARD_REQ_FILE e, in seguito, quelli di START_TX e STOP_TX al SERVER
 	 * @return un intero rappresentante la porta appena occupata
 	 */
-	public int getFirstFreeControlManagedOutPort()
+	/*public int getFirstFreeControlManagedOutPort()
 	{
 		return this.assignPort("ControlManagedOut");
-	}
+	}*/
 
 	/**Metodo per ottenere una porta libera da assegnare al PROXY per 
 	 * ricevere lo stream RTP dal SERVER
 	 * @return un intero rappresentante la porta appena occupata
 	 */
-	public int getFirstFreeStreamInPort()
+	/*public int getFirstFreeStreamInPort()
 	{
 		return this.assignPort("StreamIn");
-	}
+	}*/
 
 	/**Metodo per ottenere una porta libera da assegnare al PROXY per 
 	 * inviare lo stream RTP al CLIENT
 	 * @return un intero rappresentante la porta appena occupata
 	 */
-	public int getFirstFreeStreamOutPort()
+	/*public int getFirstFreeStreamOutPort()
 	{
 		return this.assignPort("StreamOut");
-	}
+	}*/
 
 	/**Metodo per conoscere la situazione delle porte occupate attualmente 
 	 * @return un array di boolean -> true = porta libera, false = porta occupata
 	 */
-	public boolean[] getRangePortInRTPProxy() {
-		return rangePortInRTPProxy;
-	}
+//	public boolean[] getRangePortInRTPProxy() {
+//		return rangePortInRTPProxy;
+//	}
 
 	/**Metodo per conoscere la situazione delle porte occupate attualmente 
 	 * @return un array di boolean -> true = porta libera, false = porta occupata
 	 */
-	public boolean[] getRangePortOutRTPProxy() {
-		return rangePortOutRTPProxy;
-	}
+//	public boolean[] getRangePortOutRTPProxy() {
+//		return rangePortOutRTPProxy;
+//	}
 
 	/**Metodo per conoscere la situazione delle porte occupate attualmente 
 	 * @return un array di boolean -> true = porta libera, false = porta occupata
 	 */
-	public boolean[] getRangeAdHocPortInControlProxy() {
-		return rangeAdHocPortInControlProxy;
-	}
+//	public boolean[] getRangeAdHocPortInControlProxy() {
+//		return rangeAdHocPortInControlProxy;
+//	}
 
 	/**Metodo per conoscere la situazione delle porte occupate attualmente 
 	 * @return un array di boolean -> true = porta libera, false = porta occupata
