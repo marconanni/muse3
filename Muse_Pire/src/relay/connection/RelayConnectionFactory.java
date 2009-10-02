@@ -46,18 +46,18 @@ public class RelayConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ProxyCM
 	 * @return un istanza di ProxyCM
 	 */
-	public static ProxyCM getProxyConnectionManager(Observer obser){
-		return new ProxyCM(false, rpm.getLocalAdHocHostAddress().getHostAddress(), rpm.getFirstFreeControlAdHocInPort(),rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
-	}
+//	public static ProxyCM getProxyConnectionManager(Observer obser){
+//		return new ProxyCM(false, rpm.getLocalAdHocHostAddress().getHostAddress(), rpm.getFirstFreeControlAdHocInPort(),rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
+//	}
 	
 	/**Metoto statico per ottenere un'istanza di ProxyCM quando il Proxy viene creato per accogliere una sessione RTP esistente
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ProxyCM
 	 * @return un istanza di ProxyCM
 	 */
-	public static ProxyCM getProxyConnectionManager(Observer obser, int oldProxyCtrlPortIn){
-		rpm.setRangeAdHocPortInControlProxy(oldProxyCtrlPortIn);
-		return new ProxyCM(true, rpm.getLocalAdHocHostAddress().getHostAddress(), oldProxyCtrlPortIn ,rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
-	}
+//	public static ProxyCM getProxyConnectionManager(Observer obser, int oldProxyCtrlPortIn){
+//		rpm.setRangeAdHocPortInControlProxy(oldProxyCtrlPortIn);
+//		return new ProxyCM(true, rpm.getLocalAdHocHostAddress().getHostAddress(), oldProxyCtrlPortIn ,rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
+//	}
 
 }
 
