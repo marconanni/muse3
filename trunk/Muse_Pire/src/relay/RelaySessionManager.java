@@ -13,10 +13,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.StringTokenizer;
 
-import javax.media.NoDataSourceException;
+//import javax.media.NoDataSourceException;
 
 import debug.DebugConsole;
-import debug.DebugConsolle;
 
 import parameters.Parameters;
 import relay.connection.RelayConnectionFactory;
@@ -27,21 +26,22 @@ import relay.timeout.TimeOutSessionInfo;
 import relay.timeout.TimeOutSessionRequest;
 import server.ServerMessageReader;
 import server.ServerSessionManager;
-import server.StreamingServer;
-import util.Logger;
+//import server.StreamingServer;
+//import util.Logger;
 
 /**
  * @author Leo Di Carlo
  *
  */
 public class RelaySessionManager implements Observer{
-	private String status;
+	private RelaySessionStatus status;
 	private int numberOfSession;
 	private Hashtable<String, Proxy> pReferences;
 	private Hashtable<String, int[]> sessionInfo;
 	private DatagramPacket message;
 	public static final RelaySessionManager INSTANCE = new RelaySessionManager();
 	private boolean imRelay;
+	private boolean imBigBoss;
 	private String clientAddress;
 	//numero di ritrasmissioni del pacchetto REQUEST_SESSION prima di scatenare un elezione d'emergenza
 	private int numberOfRetrasmissions = 1;
@@ -55,6 +55,17 @@ public class RelaySessionManager implements Observer{
 	private DebugConsole consolle;
 	private String relayAddress;
 	private RelayElectionManager electionManager;
+	
+	//stati in cui si può trovare il RelayElectionManager
+	public enum RelaySessionStatus {  
+		IDLE_BIGBOSS,
+		ACTIVE_BIGBOSS,
+		ATTENDIGACKSESSION,
+		IDLE_NORMAL,
+		ACTIVE_NORMAL,
+		WAITING,
+		NOTHING
+		}
 	
 	/**
 	 * @param electionManager the electionManager to set
@@ -86,20 +97,28 @@ public class RelaySessionManager implements Observer{
 	public boolean isImRelay() {
 		return imRelay;
 	}
+	
+	/**
+	 * @return the imBigBoss
+	 */
+	public boolean isImBigBoss() {
+		return imBigBoss;
+	}
 
 	/**
-	 * @param imRelay the imRelay to set
+	 * @param imBigBoss imRelay the imBigBoss, imRelay to set
 	 */
-	public void setImRelay(boolean imRelay) {
+	public void setImRelay(boolean imBigBoss,boolean imRelay) {
 		this.imRelay = imRelay;
-		if(this.imRelay)
-		{
-			status = "Idle";
-		}
+		this.imBigBoss = imBigBoss;
+		if(this.imRelay && this.imBigBoss)
+			status = RelaySessionStatus.IDLE_BIGBOSS;
+		else if(this.imRelay && !this.imBigBoss)
+			status = RelaySessionStatus.IDLE_NORMAL;
+		else if(!this.imRelay && !this.imBigBoss)
+			status = RelaySessionStatus.WAITING;
 		else
-		{
-			status = "Waiting";
-		}
+			status = RelaySessionStatus.NOTHING;
 	}
 
 	/* (non-Javadoc)
@@ -136,7 +155,7 @@ public class RelaySessionManager implements Observer{
 			 */
 			if(this.messageReader.getCode() == Parameters.REQUEST_FILE && imRelay)
 			{
-				this.status = "Active";
+				this.status=(this.imBigBoss)? RelaySessionStatus.ACTIVE_BIGBOSS:RelaySessionStatus.ACTIVE_NORMAL;
 				this.clientAddress = message.getAddress().getHostAddress();
 				consolle.debugMessage(Parameters.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 				proxy = new Proxy(this, true, messageReader.getFilename(), this.clientAddress, messageReader.getPortStreamingClient());
@@ -175,14 +194,14 @@ public class RelaySessionManager implements Observer{
 			{
 				if(this.toAckSessionInfo!=null)
 					toAckSessionInfo.cancelTimeOutAckSessionInfo();
-				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto ACK_SESSION dal nuovo RELAY");
+				//consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto ACK_SESSION dal nuovo RELAY");
 				// TODO SETTAGGIO SU TUTTI I PROXY DI TUTTE LE PORTE SU CUI TRASMETTERE I FRAME NEI BUFFER LOCALI
 				this.changeProxySession(messageReader.getProxyInfo());
 			}
 			if(messageReader.getCode() == Parameters.SESSION_INFO && this.status.equals("RequestingSession"))
 			{
 				this.toSessionInfo.cancelTimeOutSessionInfo();
-				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
+				//consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
 				this.sessionInfo = messageReader.getSessionInfo();
 				String proxyInfo = this.createProxyFromSession(sessionInfo);
 				try {

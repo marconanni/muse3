@@ -12,7 +12,6 @@ import java.util.Observer;
 import java.util.Vector;
 
 import client.ClientMessageFactory;
-import debug.DebugConsolle;
 
 import parameters.Parameters;
 import relay.connection.RelayConnectionFactory;
@@ -60,9 +59,7 @@ public class RelayElectionManager extends Observable implements Observer {
 	static { 
 		try {
 			BCAST  = InetAddress.getByName(Parameters.BROADCAST_ADDRESS);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 
 	//stato attuale del RelayElectionManager
