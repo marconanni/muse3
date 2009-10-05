@@ -12,7 +12,7 @@ import java.util.Observer;
  * @author Luca Campeti
  *
  */
-public class AConnectionReceiver extends Observable implements Runnable{
+public class ConnectionReceiver extends Observable implements Runnable{
 
 	private DatagramSocket inSocket = null;
 	private DatagramPacket dataIn = null;
