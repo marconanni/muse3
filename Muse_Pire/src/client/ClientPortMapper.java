@@ -22,7 +22,8 @@ public class ClientPortMapper {
 	
 	/*porta della socket del client per la gestione dell'arrivo di REQUEST_RSSI
 	/* e per l'invio della NOTIFY_RSSI */
-	private int portRSSI;
+	private int portRSSIOut;
+	private int portRSSIIn;
 	
 	/*porta della socket del client per la ricezione dello stream RTP
 	/* e per l'invio della NOTIFY_RSSI */
@@ -36,7 +37,8 @@ public class ClientPortMapper {
 		portElectionOut = Parameters.CLIENT_PORT_ELECTION_OUT;
 		portSessionIn = Parameters.CLIENT_PORT_SESSION_IN;
 		portSessionOut = Parameters.CLIENT_PORT_SESSION_OUT;
-		portRSSI = Parameters.CLIENT_RSSI_PORT;
+		portRSSIOut = Parameters.CLIENT_RSSI_PORT_OUT;
+		portRSSIIn = Parameters.CLIENT_RSSI_PORT_IN;
 		portRTPIn = Parameters.CLIENT_PORT_RTP_IN;
 		
 		try {
@@ -66,8 +68,16 @@ public class ClientPortMapper {
 	 * invia le risposte NOTIFY_RSSI
 	 * @return un intero rappresentante la porta di cui sopra
 	 */
-	public int getPortRSSI() {
-		return portRSSI;
+	public int getPortRSSIIn() {
+		return portRSSIIn;
+	}
+	
+	/**Metodo per ottenere la porta su cui il CLIENT riceve i messaggi REQUEST_RSSI e 
+	 * invia le risposte NOTIFY_RSSI
+	 * @return un intero rappresentante la porta di cui sopra
+	 */
+	public int getPortRSSIOut() {
+		return portRSSIOut;
 	}
 
 	/**Metodo per ottenere la porta su l'ElectionManager del CLIENT riceve i messaggi di elezione 
