@@ -2,7 +2,6 @@ package client.wnic;
 
 import client.wnic.exception.OSException;
 import client.wnic.exception.WNICException;
-import parameters.Parameters;
 /**
  * WNICFinder.java
  * Questa classe consente di ottenere il controller della scheda wireless

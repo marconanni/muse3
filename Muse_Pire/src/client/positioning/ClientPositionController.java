@@ -52,7 +52,7 @@ public class ClientPositionController implements Observer{
 		
 		try {
 			cwnic = WNICFinder.getCurrentWNIC(interf, essidName);
-		} catch (OSException e) {console.debugMessage(Parameters.DEBUG_ERROR,"ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
+		} catch (OSException e) {new WNICException("ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
 		console = cwnic.getDebugConsole();
 		enableToMonitor = false;
 		started = false;
@@ -106,7 +106,6 @@ public class ClientPositionController implements Observer{
 			} catch (IOException e) {e.printStackTrace();System.out.println("ERRORE");}
 			cmr = null;
 		}
-		console.debugMessage(Parameters.DEBUG_WARNING,"ESCO PRIMA CHE BLOCCHI QLC");
 	}
 
 	public ClientWNICController getClientWNICController(){

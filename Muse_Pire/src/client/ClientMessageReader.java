@@ -16,6 +16,7 @@ import parameters.Parameters;
  *
  */
 public class ClientMessageReader {
+	private boolean debug = false;
 
 	//Stringa contenente il messaggio
 	private  String message = ""; 
@@ -47,7 +48,7 @@ public class ClientMessageReader {
 		ByteArrayInputStream biStream = new ByteArrayInputStream(dp.getData(), 0, dp.getLength());
 		DataInputStream diStream = new DataInputStream(biStream);
 		message = diStream.readUTF();
-		System.out.println("Messaggio ricevuto: "+message);
+		if(debug)System.out.println("Messaggio ricevuto: "+message);
 		readMessage();
 	}
 
@@ -78,10 +79,10 @@ public class ClientMessageReader {
 		StringTokenizer st = new StringTokenizer(message, "_");
 		String c = st.nextToken();
 		sequenceNumber = Integer.parseInt(c);
-		System.out.println("Sequence Number: " + sequenceNumber);
+		if(debug)System.out.println("Sequence Number: " + sequenceNumber);
 		c = st.nextToken();
 		code = Integer.parseInt(c);
-		System.out.println("Code " + code);
+		if(debug)System.out.println("Code " + code);
 		if (code == Parameters.ACK_CLIENT_REQ){
 			c = st.nextToken(); 
 			relaySendingPort = Integer.parseInt(c);

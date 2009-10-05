@@ -3,10 +3,7 @@ package client.connection;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Observable;
 import java.util.Observer;
 
 
@@ -26,8 +23,8 @@ public class AConnectionManager {
 	private boolean started = false;
 	protected String managerName = "AConnectionManager";
 	
-	private String localAdHocAddress = null;
-	private int localAdHocOutputPort = -1;
+	//private String localAdHocAddress = null;
+	//private int localAdHocOutputPort = -1;
 
 	/**Metodo per ottenere un AConnectionManager
 	 * @param localAdHocAddress una Stringa che rappresenta l'indirizzo locale sulla rete Ad-Hoc del nodo
@@ -35,11 +32,11 @@ public class AConnectionManager {
 	 * @param localAdHocOutputPort un int che rappresenta la porta di invio dei messaggi sulla rete Ad-Hoc
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
 	 */
-	public AConnectionManager(String localAdHocAddress, int localAdHocInputPort, int localAdHocOutputPort, Observer observer){
-		if(localAdHocAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
+	public AConnectionManager(int localAdHocInputPort, int localAdHocOutputPort, Observer observer){
+		//if(localAdHocAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 
-		this.localAdHocAddress = localAdHocAddress;
-		this.localAdHocOutputPort = localAdHocOutputPort;
+		//this.localAdHocAddress = localAdHocAddress;
+		//this.localAdHocOutputPort = localAdHocOutputPort;
 		
 		try {
 			adHocOutputSocket = new DatagramSocket(localAdHocOutputPort);
@@ -47,7 +44,7 @@ public class AConnectionManager {
 			e.printStackTrace();
 		}
 
-		receiverAdHoc = new AConnectionReceiver(observer,localAdHocAddress,localAdHocInputPort);
+		receiverAdHoc = new AConnectionReceiver(observer,localAdHocInputPort);
 		receiverAdHocThread = new Thread(receiverAdHoc);
 	}
 
