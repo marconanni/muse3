@@ -5,7 +5,6 @@ import java.util.Observer;
 
 import parameters.Parameters;
 
-import client.connection.ConnectionReceiverAndSender;
 import debug.DebugConsole;
 
 /**
