@@ -1,7 +1,5 @@
 package client;
 
-import javax.swing.SwingUtilities;
-
 
 
 public class ClientMain {
@@ -22,7 +20,7 @@ public class ClientMain {
 				//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				//frame.setVisible(true);
 				
-				ClientController clientCtrl = new ClientController();//frame);
+				new ClientController();//frame);
 								
 			//}
 		//});

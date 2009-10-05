@@ -1,12 +1,7 @@
 package client.connection;
 
 import java.net.DatagramPacket;
-import java.net.InetAddress;
 import java.util.Observer;
-import java.net.UnknownHostException;
-import java.util.Observable;
-
-import sun.misc.Cleaner;
 
 /**
  * @author Luca Campeti
@@ -17,8 +12,8 @@ public class ClientRSSICM {
 	ConnectionReceiverAndSender crs = null;
 	Thread clientRSSICMThread = null;
 
-	public ClientRSSICM(String localAddress, int localRSSIPort, Observer observer){
-		crs = new ConnectionReceiverAndSender(observer,localAddress,localRSSIPort);
+	public ClientRSSICM(int localRSSIPort, Observer observer){
+		crs = new ConnectionReceiverAndSender(observer,localRSSIPort);
 		crs.setManagerName("ClientRSSICM");
 		clientRSSICMThread = new Thread(crs);
 	}

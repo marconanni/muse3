@@ -19,7 +19,6 @@ import parameters.Parameters;
 
 import client.timeout.ClientTimeoutFactory;
 import client.timeout.TimeOutFileRequest;
-import client.timeout.TimeOutSearch;
 import client.connection.ClientConnectionFactory;
 import client.connection.ClientSessionCM;
 import debug.DebugConsole;

@@ -3,10 +3,7 @@ package client.connection;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -26,20 +23,20 @@ public class AConnectionReceiver extends Observable implements Runnable{
 	private boolean stopped = false;
 	protected String managerName = "AConnectionReceiver";
 	
-	private String localAddress = null;
-	private int localInputPort = -1;
+	//private String localAddress = null;
+	//private int localInputPort = -1;
 	
 	/**Metodo per ottenere un AConnectionReceiver
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
 	 * @param localAddress l'indirizzo locale del nodo
 	 * @param localInputPort la porta tramite cui ricevere i messaggi
 	 */
-	public AConnectionReceiver(Observer observer, String localAddress, int localInputPort){
+	public AConnectionReceiver(Observer observer, int localInputPort){
 		
-		if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
+		//if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 		
-		this.localAddress = localAddress;
-		this.localInputPort = localInputPort;
+		//this.localAddress = localAddress;
+		//this.localInputPort = localInputPort;
 		
 		try {
 			inSocket = new DatagramSocket(localInputPort);
@@ -57,10 +54,7 @@ public class AConnectionReceiver extends Observable implements Runnable{
 
 			if(stopped){
 				synchronized (sync) {
-					try {
-						//System.out.println(managerName+" : ricezione inibita");
-						sync.wait();
-						//System.out.println(managerName+" : ricezione riabilitata");
+					try {sync.wait();
 						if(dataIn != null) {
 							setChanged();
 							notifyObservers(dataIn);
@@ -114,9 +108,7 @@ public class AConnectionReceiver extends Observable implements Runnable{
 	 */
 	public void resumeReception(){
 		stopped = false;
-		synchronized (sync) {
-			sync.notifyAll();
-		}
+		synchronized (sync) {sync.notifyAll();}
 	}
 
 	/**Metodo per ottenere il nome del Manager che sta utilizzando l'AConnectionReceiver

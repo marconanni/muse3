@@ -3,9 +3,6 @@ package client.connection;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -26,21 +23,16 @@ public class ConnectionReceiverAndSender extends Observable implements Runnable{
 
 	private Object sync = new Object();
 
-	private String localAddress = null;
-	private int localInputPort = -1;
+	//private String localAddress = null;
+	//private int localInputPort = -1;
 
 	/**Metodo per ottenere un ConnectionReceiverAndSender 
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di ogni messaggio
 	 * @param localAddress una Stringa che rappresenta l'indirizzo locale del nodo
 	 * @param localInputPort un int che rappresenta la porta tramite cui ricevere i messaggi
 	 */
-	public ConnectionReceiverAndSender(Observer observer, String localAddress, int localInputPort){
+	public ConnectionReceiverAndSender(Observer observer,int localInputPort){
 		
-		if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
-		
-		this.localAddress = localAddress;
-		this.localInputPort = localInputPort;
-
 		try {
 			inOutSocket = new DatagramSocket(localInputPort);
 		} catch (Exception e) {
@@ -78,11 +70,7 @@ public class ConnectionReceiverAndSender extends Observable implements Runnable{
 
 			if(dataOut == null){
 				synchronized (sync) {
-					try {
-						sync.wait();
-					} catch (Exception e) {
-						// TODO: handle exception
-					}
+					try {sync.wait();} catch (Exception e) {}
 				}	
 			}
 
@@ -98,14 +86,12 @@ public class ConnectionReceiverAndSender extends Observable implements Runnable{
 			dataOut=null;
 		}
 	}
-
 	
 	/**Metodo per chiudere il ConnectionReceiverAndSender
 	 */
 	public void close(){
 		if(inOutSocket != null) inOutSocket.close();
 	}
-
 	
 	/**Metodo per inviare un Datagramma a un destinatario nella rete Ad-Hoc
 	 * @param notifyRSSI il DatagramPacket da inviare
@@ -116,7 +102,6 @@ public class ConnectionReceiverAndSender extends Observable implements Runnable{
 			sync.notifyAll();
 		}
 	}
-
 	
 	/**Metodo per ottenere il nome del Manager che sta utilizzando il ConnectionReceiverAndSender
 	 * @return una Stringa che rappresenta il nome del Manager che sta utilizzando il ConnectionReceiverAndSender

@@ -17,7 +17,7 @@ public class ClientConnectionFactory {
 	 * @return un istanza di ClientSessionCM
 	 */
 	public static ClientSessionCM getSessionConnectionManager(Observer obser){
-		return new ClientSessionCM(cpm.getLocalHostAddress().getHostAddress(),cpm.getPortSessionIn(),cpm.getPortSessionOut(),obser);
+		return new ClientSessionCM(cpm.getPortSessionIn(),cpm.getPortSessionOut(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di ClientElectionCM
@@ -25,7 +25,7 @@ public class ClientConnectionFactory {
 	 * @return un istanza di ClientElectionCM
 	 */
 	public static ClientElectionCM getElectionConnectionManager(Observer obser){
-		return new ClientElectionCM(cpm.getLocalHostAddress().getHostAddress(),cpm.getPortElectionIn(),cpm.getPortElectionOut(),obser);
+		return new ClientElectionCM(cpm.getPortElectionIn(),cpm.getPortElectionOut(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di ClientRSSICM
@@ -33,7 +33,7 @@ public class ClientConnectionFactory {
 	 * @return un istanza di ClientRSSICM
 	 */
 	public static ClientRSSICM getRSSIConnectionManager(Observer obser){
-		return new ClientRSSICM(cpm.getLocalHostAddress().getHostAddress(),cpm.getPortRSSI(),obser);
+		return new ClientRSSICM(cpm.getPortRSSI(),obser);
 	}
 
 }

@@ -1,6 +1,5 @@
 package client.connection;
 
-import java.net.InetAddress;
 import java.util.Observer;
 
 /**
@@ -9,8 +8,8 @@ import java.util.Observer;
  */
 public class ClientElectionCM extends AConnectionManager{
 	
-	public ClientElectionCM(String localAddress, int localElectionInputPort, int localElectionOutputPort, Observer observer){
-		super( localAddress, localElectionInputPort, localElectionOutputPort, observer);
+	public ClientElectionCM(int localElectionInputPort, int localElectionOutputPort, Observer observer){
+		super(localElectionInputPort, localElectionOutputPort, observer);
 		setNameManager("ClientElectionCM");
 	}
 }
