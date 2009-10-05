@@ -33,7 +33,7 @@ public class ClientPositionController implements Observer{
 	private boolean enableToMonitor;
 	private boolean started;
 
-	private ClientRSSICM  crcm = null ;
+	private ClientRSSICM  crscm = null ;
 	private ClientWNICController cwnic = null; 
 
 	private InetAddress relayAddress = null;
@@ -48,7 +48,7 @@ public class ClientPositionController implements Observer{
 	 * @throws WNICException 
 	 */
 	public ClientPositionController(String interf, String essidName) throws WNICException{
-		crcm = ClientConnectionFactory.getRSSIConnectionManager(this);
+		crscm = ClientConnectionFactory.getRSSIInOutConnectionManager(this);
 		
 		try {
 			cwnic = WNICFinder.getCurrentWNIC(interf, essidName);
@@ -64,7 +64,7 @@ public class ClientPositionController implements Observer{
 	 */
 	public void start(){
 		if(enableToMonitor){
-			crcm.start();
+			crscm.start();
 			started = true;
 		}
 	}
@@ -74,7 +74,7 @@ public class ClientPositionController implements Observer{
 	public void close(){
 		if(started){
 			started = false;
-			crcm.close();
+			crscm.close();
 			cwnic = null;
 		}
 	}
@@ -93,9 +93,10 @@ public class ClientPositionController implements Observer{
 					RSSIvalue = cwnic.getSignalStrenghtValue();
 					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
 					sequenceNumber++;
-					crcm.sendTo(notifyRSSI);
+					crscm.sendTo(notifyRSSI);
 					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RELAY_RSSI_RECEIVER_PORT);
 				}else{
+					//otifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
 					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
 				
 				}

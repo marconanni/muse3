@@ -32,10 +32,9 @@ public class ClientConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ClientRSSICM
 	 * @return un istanza di ClientRSSICM
 	 */
-	public static ClientRSSICM getRSSIConnectionManager(Observer obser){
-		return new ClientRSSICM(cpm.getPortRSSI(),obser);
+	public static ClientRSSICM getRSSIInOutConnectionManager(Observer obser){
+		return new ClientRSSICM(cpm.getPortRSSIIn(),cpm.getPortRSSIOut(),obser);
 	}
-
 }
 
 
