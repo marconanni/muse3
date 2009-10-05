@@ -1,7 +1,11 @@
 package client.connection;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.util.Observer;
+
+import parameters.Parameters;
 
 /**
  * @author Luca Campeti
@@ -9,27 +13,40 @@ import java.util.Observer;
  */
 public class ClientRSSICM {
 	
-	ConnectionReceiverAndSender crs = null;
-	Thread clientRSSICMThread = null;
+	AConnectionReceiver cr = null;
+	AConnectionSender cs = null;
+	Thread clientRSSICMThread_IN = null;
+	Thread clientRSSICMThread_OUT = null;
+	DatagramSocket outSocket = null;
 
-	public ClientRSSICM(int localRSSIPort, Observer observer){
-		crs = new ConnectionReceiverAndSender(observer,localRSSIPort);
-		crs.setManagerName("ClientRSSICM");
-		clientRSSICMThread = new Thread(crs);
+	public ClientRSSICM(int localRSSIPortIn,int localRSSIPortOut, Observer observer){
+		cr = new AConnectionReceiver(observer,localRSSIPortIn);
+		cr.setManagerName("ClientRSSICM_IN");
+		clientRSSICMThread_IN = new Thread(cr);
+		cs = new AConnectionSender(observer,localRSSIPortOut);
+		cs.setManagerName("ClientRSSICM_OUT");
+		clientRSSICMThread_OUT = new Thread(cs);
 	}
 	
 	public void start(){
-		if(clientRSSICMThread != null)clientRSSICMThread.start();
+		if(clientRSSICMThread_IN != null)clientRSSICMThread_IN.start();
+		if(clientRSSICMThread_OUT != null)clientRSSICMThread_OUT.start();
 	}
 
 	public void sendTo(DatagramPacket notifyRSSI){
-		crs.sendTo(notifyRSSI);
+		
+		cs.sendTo(notifyRSSI);
+		
 	}
 	
 	public void close(){
-		if(clientRSSICMThread != null){
-			crs.close();
-			clientRSSICMThread=null;
+		if(clientRSSICMThread_IN != null){
+			cr.close();
+			clientRSSICMThread_IN=null;
+		}
+		if(clientRSSICMThread_OUT != null){
+			cr.close();
+			clientRSSICMThread_OUT=null;
 		}
 	}
 
