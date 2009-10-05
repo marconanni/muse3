@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.StringTokenizer;
+
+import com.sun.media.rtsp.Timer;
 //import java.util.Timer;
 //import java.util.TimerTask;
 
@@ -19,6 +21,7 @@ import parameters.Parameters;
 
 import client.timeout.ClientTimeoutFactory;
 import client.timeout.TimeOutFileRequest;
+import client.timeout.TimeOutSearch;
 import client.connection.ClientConnectionFactory;
 import client.connection.ClientSessionCM;
 import debug.DebugConsole;
@@ -40,7 +43,7 @@ public class ClientSessionManager implements Observer {
 	private ClientMessageReader messageReader;
 	private ClientElectionManager electionManager;
 
-	/*private boolean bfSent = true;
+	private boolean bfSent = true;
 	private Timer runner;
 	private String newrelay;
 	private TimeOutSearch timeoutSearch;
@@ -48,7 +51,7 @@ public class ClientSessionManager implements Observer {
 	private int proxyStreamingPort = -1;
 	private int proxyCtrlPort = -1;
 	private ClientBufferDataPlaying clientPlaying;
-	private ClientPortMapper portMapper;*/
+	private ClientPortMapper portMapper;
 	/**
 	 * @param electionManager the electionManager to set
 	 */
