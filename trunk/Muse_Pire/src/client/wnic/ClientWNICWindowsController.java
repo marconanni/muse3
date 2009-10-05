@@ -72,4 +72,10 @@ public class ClientWNICWindowsController implements ClientWNICController{
 	/**Server per visualizzare i messagi di debug
 	 */
 	public void setDebugConsole(DebugConsole console) {this.console=console;}
+
+	@Override
+	public DebugConsole getDebugConsole() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
