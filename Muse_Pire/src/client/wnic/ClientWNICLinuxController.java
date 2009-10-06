@@ -34,7 +34,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		refreshStatus(true);
 
 		if (!isOn){
-			this.console.debugMessage(Parameters.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia "+Parameters.NAME_OF_CLIENT_INTERFACE+" deve essere configurata nel seguente modo:\nESSID:"+Parameters.NAME_OF_AD_HOC_NETWORK+"\nMODE:Ad-Hoc\nIP:"+Parameters.CLIENT_ADDRESS);
+			this.console.debugMessage(Parameters.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel seguente modo:\nESSID:"+Parameters.NAME_OF_AD_HOC_NETWORK+"\nMODE:Ad-Hoc\nIP:"+Parameters.CLIENT_ADDRESS);
 			throw new WNICException("ClientWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");	
 		}
 	}
