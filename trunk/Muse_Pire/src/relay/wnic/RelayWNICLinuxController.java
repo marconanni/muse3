@@ -59,6 +59,10 @@ public class RelayWNICLinuxController implements RelayWNICController{
 			this.console.debugMessage(Parameters.DEBUG_ERROR,"La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel modo seguente:\nESSID: "+Parameters.NAME_OF_MANAGED_NETWORK+"\nMODE: Managed\nIp:"+Parameters.RELAY_MANAGED_ADDRESS);
 			throw new WNICException("RelayWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");
 		}
+		if(!isEssidFound()){
+			this.console.debugMessage(Parameters.DEBUG_ERROR,"La scheda wireless non è associata al seguente ESSID "+essidName);
+			throw new WNICException("RelayWNICLinuxController:La scheda wireless non è associata al seguente ESSID "+essidName);
+		}
 	}
 
 
@@ -77,9 +81,9 @@ public class RelayWNICLinuxController implements RelayWNICController{
 			if((res = interfaceInfo.readLine())!=null){
 				res1 = interfaceInfo.readLine();
 				//scheda spenta
-				if (res.contains("off/any")){
+				if (res.contains("off/any")|| res.contains("IEEE")){
 					isAssociated = false;
-					isOn = false;
+					isOn = true;
 					currentAP = null;
 					essidFound = false;
 					if(debug)console.debugMessage(Parameters.DEBUG_WARNING,"L'interfaccia "+ interf +" ESISTE però è SPENTA!");
@@ -137,25 +141,24 @@ public class RelayWNICLinuxController implements RelayWNICController{
 			if((res = interfaceInfo.readLine())!=null){
 				res1 = interfaceInfo.readLine();
 				//scheda spenta
-				if (res.contains("off/any")){
-					isOn = false;
-					//On ma non associata alla rete managed
-				}else if (res.contains("IEEE")){
+				if (res.contains("off/any") || res.contains("IEEE")){
 					isOn = true;
-				}
+					//On ma non associata alla rete managed
+					String essid = extractEssidName(res);
+					System.out.print(essid.hashCode());
+					if((essid.hashCode()!=1024) && (essid.hashCode()!=383653452)){
+						essidFound = true;
+						essidName = essid;
+						isAssociated = true;
+						if(currentAP==null)currentAP = createCurrentAccessPointData(res,res1,interfaceInfo);
+						
+					}else if(res1.contains("Not-Associated")){
+						essidFound = false;
+						currentAP = null;
+						isAssociated = false;
+					}
+				}				
 				
-				String essid = extractEssidName(res);
-				if(essid.hashCode()!=1024){
-					essidFound = true;
-					essidName = essid;
-					isAssociated = true;
-					if(currentAP==null)currentAP = createCurrentAccessPointData(res,res1,interfaceInfo);
-					
-				}else if(res1.contains("Not-Associated")){
-					essidFound = false;
-					currentAP = null;
-					isAssociated = false;
-				}
 
 			}else{
 				console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
@@ -435,21 +438,23 @@ public class RelayWNICLinuxController implements RelayWNICController{
 			while((line = br.readLine())!=null){
 				if(line.contains("Cell")){
 					mac = extractMacAddress(line, 18);
-					do{
+					for(int i=0;i<3;i++){
+						do{
 						line = br.readLine();
-					}while(!line.contains("Signal")&&line != null);
-					firstRSSI = (double)extractRSSIValue(line);
-					do{line = br.readLine();}
-					while(line !=null && !line.contains("ESSID"));
-					st =new StringTokenizer(line,"\"");
-					st.nextToken();
-					essidName = st.nextToken();
-					do{line = br.readLine();}
-					while(line!=null && !line.contains("Mode"));
-					st =new StringTokenizer(line,":");
-					st.nextToken();
-					mode = st.nextToken();
-						vect.add(new AccessPointData(essidName,mac,mode,firstRSSI,numberOfPreviousRSSI));
+						}while((!line.contains("Signal"))&&(!line.contains("ESSID"))&&(!line.contains("Mode"))&&(line!=null));
+						if(line.contains("Signal"))
+							firstRSSI = (double)extractRSSIValue(line);
+						else if(line.contains("ESSID")){
+							st =new StringTokenizer(line,"\"");
+							st.nextToken();
+							essidName = st.nextToken();
+						}else if(line.contains("Mode")){
+							st =new StringTokenizer(line,":");
+							st.nextToken();
+							mode = st.nextToken();
+						}
+					}
+					vect.add(new AccessPointData(essidName,mac,mode,firstRSSI,numberOfPreviousRSSI));
 				}
 			}
 			br.close();
@@ -532,7 +537,7 @@ class TestRelayWNICLinuxController{
 
 		try {
 
-			rwlc = new RelayWNICLinuxController(6,"wlan0","ALMAWIFI");
+			rwlc = new RelayWNICLinuxController(6,"wlan0");
 
 			if(rwlc.isAssociated()&&rwlc.isEssidFound())	{
 
