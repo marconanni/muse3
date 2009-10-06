@@ -16,6 +16,7 @@ public class AccessPointData
 {
 	private String name;
 	private String mac;
+	private String mode;
 	private Vector<Double> signal;
 	private int maxSignalSize;
 	
@@ -28,7 +29,7 @@ public class AccessPointData
 	 * @throws InvalidAccessPoint se l'indirizzo mac o l'RSSI dell'access point non e' corretto
 	 * @throws InvalidParameter se il nome o il mac dell'access point sono null
 	 */
-	public AccessPointData(String name, String mac, double RSSI, int numberOfPreviousRSSI) throws InvalidAccessPoint, InvalidParameter
+	public AccessPointData(String name, String mac,String mode, double RSSI, int numberOfPreviousRSSI) throws InvalidAccessPoint, InvalidParameter
 	{
 		if (name==null)
 			throw new InvalidAccessPoint("ERRORE: nome dell'AP non valido");
@@ -62,6 +63,7 @@ public class AccessPointData
 		signal= new Vector<Double>();
 		this.name=name;
 		this.mac=mac;
+		this.mode=mode;
 		signal.add(Double.valueOf(RSSI));
 	}
 	
@@ -81,6 +83,11 @@ public class AccessPointData
 	public String getAccessPointMAC()
 	{
 		return mac;
+	}
+	
+	public String getAccessPointMode()
+	{
+		return mode;
 	}
 	
 	/**
