@@ -31,6 +31,15 @@ public class RelayWNICLinuxController implements RelayWNICController{
 	
 	private boolean debug = false;
 
+	public RelayWNICLinuxController(int previous, String ethX) throws WNICException{
+		interf = ethX;
+		numberOfPreviousRSSI=previous;
+		console = new DebugConsole();
+		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
+		isWIFIOn();
+		
+
+	}
 
 
 	public RelayWNICLinuxController(int previous, String ethX, String netName) throws WNICException{		
@@ -46,9 +55,10 @@ public class RelayWNICLinuxController implements RelayWNICController{
 		if(previous<=0)
 			throw new WNICException("RelayWNICLinuxController: ERRORE: numero di precedenti RSSI da memorizzare non positivo");		
 
-		if (!isOn)
+		if (!isOn){
 			this.console.debugMessage(Parameters.DEBUG_ERROR,"La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel modo seguente:\nESSID: "+Parameters.NAME_OF_MANAGED_NETWORK+"\nMODE: Managed\nIp:"+Parameters.RELAY_MANAGED_ADDRESS);
 			throw new WNICException("RelayWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");
+		}
 	}
 
 
@@ -62,10 +72,10 @@ public class RelayWNICLinuxController implements RelayWNICController{
 	private void refreshStatus() throws WNICException{
 
 		BufferedReader interfaceInfo = getInterfaceInfo(interf);
-		String res = null;
+		String res, res1 = null;
 		try{
 			if((res = interfaceInfo.readLine())!=null){
-
+				res1 = interfaceInfo.readLine();
 				//scheda spenta
 				if (res.contains("off/any")){
 					isAssociated = false;
@@ -82,7 +92,7 @@ public class RelayWNICLinuxController implements RelayWNICController{
 					if(debug)console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +"  ESISTE ed è ACCESA.");
 					if(res.contains(essidName)){
 						essidFound = true;
-						if(currentAP==null)currentAP = createCurrentAccessPointData(res,interfaceInfo);
+						if(currentAP==null)currentAP = createCurrentAccessPointData(res,res1,interfaceInfo);
 						if(debug)console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +" è CONNESSA alla rete " + essidName);
 					}
 					else {
@@ -93,22 +103,63 @@ public class RelayWNICLinuxController implements RelayWNICController{
 				
 				
 					//controllo il mode della scheda (deve essere Ad-Hoc)
-					res = interfaceInfo.readLine();
-					if(res.contains("Managed")){
+					//res = interfaceInfo.readLine();
+					if(res1.contains("Managed")){
 						modeManaged = true;
 						if(debug)console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +" è settata a MODE Managed");
 					}else {
 						modeManaged = false;
 						console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
-						throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
+						throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
 					}	
 				}else{
 					console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
-					throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
+					throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 				}
 			}else{
 				console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
-				throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
+				throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
+			}
+			interfaceInfo.close();
+		}catch (IOException e){e.printStackTrace();}
+	}
+	
+	/**
+	 * Metodo per rinfrescare lo stato del RelayWNICLinuxController grazie all'essecuzione del comando <code>iwconfig<code>.
+	 * @param interfaceInfo rappresenta in pratica il risultato di una chiamata al comando linux <code> /sbin/iwconfig interface<code>
+	 * @throws WNICException
+	 */
+	private void isWIFIOn() throws WNICException{
+
+		BufferedReader interfaceInfo = getInterfaceInfo(interf);
+		String res, res1 = null;
+		try{
+			if((res = interfaceInfo.readLine())!=null){
+				res1 = interfaceInfo.readLine();
+				//scheda spenta
+				if (res.contains("off/any")){
+					isOn = false;
+					//On ma non associata alla rete managed
+				}else if (res.contains("IEEE")){
+					isOn = true;
+				}
+				
+				String essid = extractEssidName(res);
+				if(essid.hashCode()!=1024){
+					essidFound = true;
+					essidName = essid;
+					isAssociated = true;
+					if(currentAP==null)currentAP = createCurrentAccessPointData(res,res1,interfaceInfo);
+					
+				}else if(res1.contains("Not-Associated")){
+					essidFound = false;
+					currentAP = null;
+					isAssociated = false;
+				}
+
+			}else{
+				console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
+				throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 			}
 			interfaceInfo.close();
 		}catch (IOException e){e.printStackTrace();}
@@ -121,39 +172,27 @@ public class RelayWNICLinuxController implements RelayWNICController{
 	 * @param rest
 	 * @return un AccessPointData da assegnare al riferimento locale
 	 */
-	private AccessPointData createCurrentAccessPointData(String firstLine, BufferedReader rest){
+	private AccessPointData createCurrentAccessPointData(String firstLine,String secondLine, BufferedReader rest){
 
 		String essidName = null;
 		String mac = null;
+		String mode = null;
 		double firstRSSI = -1;
 		String line = null;
 
 		try {
 			essidName = extractEssidName(firstLine);
-			mac = extractMacAddress(rest.readLine(),20);
+			mode = extractMode(secondLine);
+			mac = extractMacAddress(secondLine,20);
 			do line=rest.readLine();
 			while(line!=null && !line.contains("Signal"));
 			firstRSSI = (double)extractRSSIValue(line);
 			rest.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		/*DEBUG*/
-		/*	System.out.println("ESSID: " + ( essidName!=null?essidName:"null"));
-		System.out.println("MAC: " + ( mac!=null?mac:"null"));
-		System.out.println("RSSI: " + ( firstRSSI>0?firstRSSI:"null"));*/
-
+		} catch (Exception e) {e.printStackTrace();return null;}
 		try {
-			return new AccessPointData(essidName,mac,firstRSSI,numberOfPreviousRSSI);
-		} catch (InvalidAccessPoint e) {
-			e.printStackTrace();
-			return null;
-		} catch (InvalidParameter e) {
-			e.printStackTrace();
-			return null;
-		}
+			return new AccessPointData(essidName,mac,mode,firstRSSI,numberOfPreviousRSSI);
+		} catch (InvalidAccessPoint e) {e.printStackTrace();return null;} 
+		catch (InvalidParameter e) {e.printStackTrace();return null;}
 	}
 
 
@@ -169,7 +208,8 @@ public class RelayWNICLinuxController implements RelayWNICController{
 			p.waitFor();
 			return new BufferedReader(new InputStreamReader(p.getInputStream()));
 		}catch (Exception e){
-			throw new WNICException("ERRORE: impossibile ottenere informazioni dalla scheda wireless");
+			console.debugMessage(Parameters.DEBUG_ERROR,"Impossibile ottenere informazioni dalla scheda wireless");
+			throw new WNICException("RelayWNICLinuxController: Impossibile ottenere informazioni dalla scheda wireless");
 		}	
 	}
 
@@ -219,6 +259,14 @@ public class RelayWNICLinuxController implements RelayWNICController{
 	private String extractEssidName(String line){
 		String res = null;
 		StringTokenizer st = new StringTokenizer(line, ":\"");
+		st.nextToken();
+		res= st.nextToken();
+		return res;
+	}
+	
+	private String extractMode(String line){
+		String res = null;
+		StringTokenizer st = new StringTokenizer(line, ":");
 		st.nextToken();
 		res= st.nextToken();
 		return res;
@@ -346,7 +394,7 @@ public class RelayWNICLinuxController implements RelayWNICController{
 	 * @return true se l'interfaccia è associata ad un AP, false altrimenti
 	 */
 	public boolean isAssociated() throws WNICException {
-		refreshStatus();
+		isWIFIOn();
 		return isAssociated;
 	}
 
@@ -367,7 +415,7 @@ public class RelayWNICLinuxController implements RelayWNICController{
 	 */
 	public Vector<AccessPointData> getVisibleAccessPoints()	throws WNICException, InvalidAccessPoint {
 
-		refreshStatus();
+		isWIFIOn();
 
 		Vector<AccessPointData> vect = new Vector<AccessPointData>();
 		if(isAssociated && isOn && essidFound) {
@@ -378,33 +426,35 @@ public class RelayWNICLinuxController implements RelayWNICController{
 		String line = null;
 		String mac = null;
 		String essidName =null;
+		String mode = null;
 		double firstRSSI = -1;
 		StringTokenizer st = null;
+		System.out.println(interf);
 		BufferedReader br = getVisibleAccessPointInfo(interf);
 		try {
 			while((line = br.readLine())!=null){
-
 				if(line.contains("Cell")){
 					mac = extractMacAddress(line, 18);
-
-					st =new StringTokenizer(br.readLine(),"\"");
+					do{
+						line = br.readLine();
+					}while(!line.contains("Signal")&&line != null);
+					firstRSSI = (double)extractRSSIValue(line);
+					do{line = br.readLine();}
+					while(line !=null && !line.contains("ESSID"));
+					st =new StringTokenizer(line,"\"");
 					st.nextToken();
 					essidName = st.nextToken();
-
-					do {line = br.readLine();}
-					while(line !=null && !line.contains("Signal"));
-					firstRSSI = (double)extractRSSIValue(line);
-					vect.add(new AccessPointData(essidName,mac,firstRSSI,numberOfPreviousRSSI));
+					do{line = br.readLine();}
+					while(line!=null && !line.contains("Mode"));
+					st =new StringTokenizer(line,":");
+					st.nextToken();
+					mode = st.nextToken();
+						vect.add(new AccessPointData(essidName,mac,mode,firstRSSI,numberOfPreviousRSSI));
 				}
 			}
 			br.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidParameter e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (IOException e) {e.printStackTrace();} 
+		catch (InvalidParameter e) {e.printStackTrace();}
 
 		return (vect.size()==0)?null:vect;
 	}
@@ -482,12 +532,9 @@ class TestRelayWNICLinuxController{
 
 		try {
 
-			rwlc = new RelayWNICLinuxController(6, "eth1", "NETGEAR");
+			rwlc = new RelayWNICLinuxController(6,"wlan0","ALMAWIFI");
 
-			//if(rwlc.connectToAccessPoint("NETGEAR"))System.out.println("Connessione a " + rwlc.getAssociatedAccessPoint().getAccessPointName()+" riuscita");
-
-
-			if(rwlc.isAssociated())	{
+			if(rwlc.isAssociated()&&rwlc.isEssidFound())	{
 
 				ap = rwlc.getAssociatedAccessPoint();
 
@@ -502,13 +549,14 @@ class TestRelayWNICLinuxController{
 			}
 
 
-			if(rwlc.isAssociated())	{
+			if(!rwlc.isAssociated())	{
 				printVectorAP(rwlc.getVisibleAccessPoints());
+				System.out.println("Get visible access point");
 			}
 
 
 
-			for(int i=0;i<12;i++){
+			/*for(int i=0;i<1;i++){
 				try {
 					if(rwlc.isAssociated())	{
 						rwlc.updateSignalStrenghtValue();
@@ -523,11 +571,11 @@ class TestRelayWNICLinuxController{
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}
+			}*/
 		} catch (WNICException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.exit(1);
+			//System.exit(1);
 		}  catch (InvalidAccessPoint e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -545,11 +593,10 @@ class TestRelayWNICLinuxController{
 	}
 
 	private static void printVectorAP(Vector<AccessPointData> vect){
-		System.out.print("AP VISIBILI: [");
+		System.out.println("AP VISIBILI:");
 		for(int k = 0; k<vect.size(); k++)
 		{
-			System.out.print((vect.get(k)).getAccessPointName()+", ");
+			System.out.println("["+(vect.get(k)).getAccessPointName()+", "+(vect.get(k)).getAccessPointMAC()+", "+(vect.get(k)).getAccessPointMode()+", "+(vect.get(k)).getSignalStrenght()+" ]");
 		}
-		System.out.println("]\n");
 	}
 }
