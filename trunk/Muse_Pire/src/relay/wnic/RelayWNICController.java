@@ -1,5 +1,6 @@
 package relay.wnic;
 
+import debug.DebugConsole;
 import relay.wnic.exception.InvalidAccessPoint;
 import relay.wnic.exception.WNICException;
 
@@ -29,8 +30,9 @@ public interface RelayWNICController
 	 * Restituisce l'ultimo RSSI registrato per l'access point corrente <b>senza prima aggiornarlo</b>
 	 * @return l'ultimo RSSI registrato per l'access point corrente o 0 se non e' connessa
 	 * @throws WNICException se non si riesce a ottenere lo stato della scheda
+	 * @throws WNICException 
 	 */
-	public int getSignalLevel()throws WNICException;
+	public int getSignalStrenghtValue()throws WNICException, WNICException;
 	
 	/**
 	 * Restituisce l'access point a cui la scheda e' connessa
@@ -44,5 +46,9 @@ public interface RelayWNICController
 	 * @throws WNICException
 	 */
 	public int updateSignalStrenghtValue() throws WNICException;
+	
+	public void setDebugConsole(DebugConsole console);
+	
+	public DebugConsole getDebugConsole();
 	
 }

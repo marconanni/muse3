@@ -12,6 +12,7 @@ import java.util.Observer;
 import java.util.Vector;
 
 import client.ClientMessageFactory;
+import debug.DebugConsole;
 
 import parameters.Parameters;
 import relay.connection.RelayConnectionFactory;
@@ -29,7 +30,7 @@ import relay.timeout.TimeOutEmElection;
 import relay.timeout.TimeOutToElect;
 import relay.wnic.RelayDummyController;
 import relay.wnic.RelayWNICController;
-import relay.wnic.RelayWNICLinuxController;
+import relay.wnic.WNICFinder;
 import relay.wnic.exception.WNICException;
 
 /**Classe che gestisce la parte legata al protocollo di elezione del nuovo Relay
@@ -38,10 +39,11 @@ import relay.wnic.exception.WNICException;
 public class RelayElectionManager extends Observable implements Observer {
 	
 	//Debug consolle del RelayElectionManager
-	private DebugConsole debugConsolle = null;
+	private DebugConsole console = null;
 
 	//stati in cui si può trovare il RelayElectionManager
-	public enum RelayStatus {  
+	public enum RelayStatus {
+		OFF,
 		IDLE, 
 		ACTIVE_NORMAL_ELECTION,
 		WAITING_END_NORMAL_ELECTION,
@@ -89,7 +91,10 @@ public class RelayElectionManager extends Observable implements Observer {
 	//boolean che indica se è stato già inviato un ELECTION_DONE
 	private boolean firstELECTION_DONEsent = false;
 
-	//boolean che indica se si è il Relay attuale o meno
+	//boolean che indica se si è il Relay principale (BIG BOSS collegato al nodo server) o meno
+	private boolean imBigBoss = false;
+	
+	//boolean che indica se si è il Relay secondario o meno
 	private boolean imRelay = false;
 	
 	//numero di clients rilevati al momento a 1 hop da questo nodo
@@ -98,8 +103,11 @@ public class RelayElectionManager extends Observable implements Observer {
 	//il RelayMessageReader per leggere il contenuto dei messaggi ricevuti
 	private RelayMessageReader relayMessageReader = null;
 
-	//il RelayWNICController per ottenere informazioni dalla scheda di rete
-	private RelayWNICController relayWNICController = null;
+	//il RelayAPWNICController per ottenere informazioni dalla scheda di rete interfacciata alla rete MANAGED
+	private RelayWNICController relayAPWNICController = null;
+	
+	//il RelayWNICController per ottenere informazioni dalla scheda di rete interfacciata alla rete AdHoc
+	private RelayWNICController relayAHWNICController = null;
 	
 	//il RelayPositionAPMonitor per conoscere la propria situazione nei confronti dell'AP
 	private RelayPositionAPMonitor relayPositionAPMonitor = null;
@@ -122,11 +130,11 @@ public class RelayElectionManager extends Observable implements Observer {
 	private TimeOutToElect timeoutToElect = null;
 
 	//indici dei messaggi inviati 
-	private int indexELECTION_RESPONSE = 0;
+	/*private int indexELECTION_RESPONSE = 0;
 	private int indexREQUEST_SESSION = 0;
 	private int indexEM_EL_DET_RELAY = 0;
 	private int indexEM_ELECTION = 0;
-	private int indexELECTION_DONE = 0;
+	private int indexELECTION_DONE = 0;*/
 
 	//DA TOGLIERE DOPO I TEST
 	private boolean electionResponseAutoEnable = false;
@@ -147,32 +155,30 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * @param imRelay un boolean che a true indica che il nodo è stato creato per essere Relay
 	 * @throws Exception
 	 */
-	private RelayElectionManager(boolean imRelay, RelaySessionManager sessionManager) throws Exception{
+	private RelayElectionManager(boolean imBigBoss, boolean imRelay, RelaySessionManager sessionManager) throws Exception{
 
+		this.actualStatus = RelayStatus.OFF;
+		this.imBigBoss = imBigBoss;
 		this.imRelay = imRelay;
 		this.addObserver(sessionManager);
-		debugConsolle = new DebugConsolle();
-		debugConsolle.setTitle("RELAY ELECTION MANAGER DEBUG CONSOLLE");
+		this.console = new DebugConsole();
+		this.console.setTitle("RELAY ELECTION MANAGER DEBUG CONSOLE");
 
+		//Ogni relay deve avere due interfaccie WIFI, una per il nodo server e una per la rete ad hoc
 		try {
-			//ABILITARE IL DUMMY e DISABILITARE il WNICLINUXCONTROLLER solo in caso di test con una sola interfaccia
-			relayWNICController = new RelayDummyController(Parameters.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-			/*relayWNICController = new RelayWNICLinuxController(Parameters.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL,
+			relayAPWNICController = WNICFinder.getCurrentWNIC(
 					Parameters.NAME_OF_MANAGED_RELAY_INTERFACE,
-					Parameters.NAME_OF_MANAGED_NETWORK);*/
-		} catch (WNICException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+					Parameters.NAME_OF_MANAGED_NETWORK,
+					Parameters.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
+		} catch (WNICException e) {e.printStackTrace();System.exit(1);}
 	
 		comManager = RelayConnectionFactory.getElectionConnectionManager(this);
 		comManager.start();
 
-		//Se parto come Relay Attuale
-		if(imRelay){ 
-
+		//Se parto come Relay BIG BOSS
+		if(imBigBoss){ 
 			try {
-				if(relayWNICController.isConnected()) becomeRelay();
+				if(relayManagedWNICController.isConnected()) becomeBigBossRelay();
 				else throw new Exception("RelayElectionManager: ERRORE: questo nodo non può essere il Relay " +
 				"attuale dato che non vede l'AP");
 
@@ -194,10 +200,10 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * @param imRelay un boolean che indica se il nodo è il Relay attuale o meno.
 	 * @return un riferimento al singleton RelayElectionManager
 	 */
-	public static RelayElectionManager getInstance(boolean imRelay, RelaySessionManager sessionManager){
+	public static RelayElectionManager getInstance(boolean imBigBoss, boolean imRelay, RelaySessionManager sessionManager){
 		if(INSTANCE == null)
 			try {
-				INSTANCE = new RelayElectionManager(imRelay, sessionManager);
+				INSTANCE = new RelayElectionManager(imBigBoss, imRelay, sessionManager);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1090,19 +1096,21 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * partire il RelayPositionAPMonitor, il RelayPositionClientsMonitor,
 	 * il RelayBatteryMonitor e il WhoIsRelayServer. Poi passa allo stato di MONITORING.
 	 */
-	private void becomeRelay(){
+	private void becomeBigBossRelay(){
 
+		imBigBoss = true;
 		imRelay = true;
 
 		actualRelayAddress = Parameters.RELAY_AD_HOC_ADDRESS;
 		memorizeRelayAddress();
 
 		/*Vedere se sta parte serve*/
-		indexELECTION_RESPONSE = 0;
-		indexREQUEST_SESSION = 0;
-		indexEM_EL_DET_RELAY = 0;
-		indexEM_ELECTION = 0;
+//		indexELECTION_RESPONSE = 0;
+//		indexREQUEST_SESSION = 0;
+//		indexEM_EL_DET_RELAY = 0;
+//		indexEM_ELECTION = 0;
 
+		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
 		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
 		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
@@ -1111,16 +1119,21 @@ public class RelayElectionManager extends Observable implements Observer {
 		/*Fine Vedere se sta parte serve*/
 
 		try {
-			relayPositionAPMonitor = new RelayPositionAPMonitor(relayWNICController,
-					Parameters.POSITION_AP_MONITOR_PERIOD,this);
+			relayPositionAPMonitor = new RelayPositionAPMonitor(
+					relayManagedWNICController,	
+					Parameters.POSITION_AP_MONITOR_PERIOD,
+					this);
 
-			relayPositionClientsMonitor = new RelayPositionClientsMonitor(Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
+			//Compresi client e realy secondari
+			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
+					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
 					this);
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
-			whoIsRelayServer = new WhoIsRelayServer(Parameters.RELAY_AD_HOC_ADDRESS,
+			whoIsRelayServer = new WhoIsRelayServer(
+					Parameters.RELAY_AD_HOC_ADDRESS,
 					Parameters.WHO_IS_RELAY_PORT);
 
 			relayPositionAPMonitor.start();
@@ -1147,9 +1160,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 		try {
 			relayInetAddress = InetAddress.getByName(actualRelayAddress);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 
 

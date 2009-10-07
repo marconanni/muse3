@@ -19,7 +19,8 @@ public class TestObserver implements Observer{
 	public void update(Observable o, Object arg) {
 		String dp  = (String)arg;
 		System.out.println("\tObserver: ricevuta notifica: " + dp);
-		System.out.println("\tObserver: notifica ricevuta da: " + ((RelayPositionClientsMonitor)o).toString());
+		//System.out.println("\tObserver: notifica ricevuta da: " + ((RelayPositionClientsMonitor)o).toString());
+		System.out.println("\tObserver: notifica ricevuta da: " + ((RelayPositionAPMonitor)o).toString());
 	}
 
 }
