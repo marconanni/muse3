@@ -41,6 +41,7 @@ public class RelayConnectionFactory {
 	public static RelayRSSICM getRSSIConnectionManager(Observer obser){
 		return new RelayRSSICM(rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
 	}
+	
 
 	/**Metoto statico per ottenere un'istanza di ProxyCM quando il Proxy viene creato ex-novo
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ProxyCM

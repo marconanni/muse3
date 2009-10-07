@@ -69,7 +69,7 @@ public class RelayPositionRelaysMonitor extends Observable implements Observer {
 	 * il valore di RSSI che essi rilevano in riferimento al Relay
 	 * @param electionManager l'ElectionManager che deve essere avvertito allorchè si rilevi una possibile disconnessione
 	 */
-	public RelayPositionClientsMonitor(int maxNAV, long p, Observer electionManager){
+	public RelayPositionRelaysMonitor(int maxNAV, long p, Observer electionManager){
 		period = p;
 		seqNum = -1;
 		maxNumberOfAverageValues = maxNAV; 
@@ -248,12 +248,12 @@ public class RelayPositionRelaysMonitor extends Observable implements Observer {
 
 
 
-class TestRelayPositionClientsMonitor{
-
-	public static void main(String args[]){
-		TestObserver to = new TestObserver();
-		RelayPositionClientsMonitor rpcm = new RelayPositionClientsMonitor(3,6000,to);
-		rpcm.start();
+//class TestRelayPositionClientsMonitor{
+//
+//	public static void main(String args[]){
+//		TestObserver to = new TestObserver();
+//		RelayPositionClientsMonitor rpcm = new RelayPositionClientsMonitor(3,6000,to);
+//		rpcm.start();
 		/*InetAddress localhost = null;
 		try {
 			localhost = InetAddress.getByName("localhost");
@@ -280,25 +280,5 @@ class TestRelayPositionClientsMonitor{
 		}
 
 	}*/
-	}
-	}
-
- /*class TestObserver implements Observer{
-
-	public TestObserver(){
-		System.out.println("testObserver: creato");
-	}
-
-	public static String convertToString(byte[] content){
-		String res = "";
-		//for(int i = 0;i<1;i++)res = res + content[i] +", ";
-		res = res + content[0];
-		return res;
-	}
-
-	@Override
-	public void update(Observable o, Object arg) {
-		String dp  = (String)arg;
-		System.out.println("\tObserver: ricevuta notifica: " + dp);
-		System.out.println("\tObserver: notifica ricevuta da: " + ((RelayPositionClientsMonitor)o).toString());
-	}
+//	}
+//}

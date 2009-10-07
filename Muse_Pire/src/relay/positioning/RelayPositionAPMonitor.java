@@ -13,6 +13,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import parameters.Parameters;
 
@@ -31,6 +32,8 @@ public class RelayPositionAPMonitor extends Observable {
 	private AccessPointData currAP = null;
 	private Timer timer = null;
 	private boolean started;
+	private Vector<Double> predictionValues = null;
+	private int maxNumberOfPredictionValuesValues;
 
 
 	/**Metodo per ottenere un RelayPositionAPMonitor
@@ -91,10 +94,16 @@ public class RelayPositionAPMonitor extends Observable {
 
 				System.out.println("RelayPositionAPMonitor.mainTask(): (2). AP corrente a cui si è connessi "  +currAP.getAccessPointName() + " valore ultimo RSSI: " + actualRSSI);
 
-				filter =new GreyModel_v2(currAP.getLastSignalStrenghtValues());
+				double [] a = currAP.getLastSignalStrenghtValues();
+				System.out.print("[");
+				for(int i = 0; i<a.length;i++)
+					System.out.print(a[i]+",");
+				System.out.print("]\n");
+				filter =new GreyModel_v2(a);
 				prevision = filter.predictRSSI();
+				System.out.println("PREVISIONE:"+prevision);
 
-				if(prevision >= Parameters.AP_DISCONNECTION_THRS){
+				if(prevision >=83){// Parameters.AP_DISCONNECTION_THRS){
 
 					positiveDisconnectionPrediction++;
 					System.out.println("RelayPositionAPMonitor.mainTask(): (3). RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE. PREDIZIONE DI DISCONNESSIONE No"+positiveDisconnectionPrediction);
@@ -121,6 +130,37 @@ public class RelayPositionAPMonitor extends Observable {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Memorizza un nuovo valore di media di RSSI rilevati dai Clients nei confronti del Relay
+	 * @param val un nuovo valore di media di RSSI di cui sopra
+	 * @throws InvalidParameter se il valore dell'RSSI non e' valido
+	 */
+//	private void addNewAverageValue(double val) throws InvalidParameter {
+//
+//		if((val<0) || (val>120))
+//			throw new InvalidParameter("ERRORE: Potenza del segnale dell'AP non valida "+val);
+//		if(averageValues.size()<maxNumberOfAverageValues)
+//			averageValues.add(Double.valueOf(val));
+//		else {
+//			averageValues.removeElementAt(0);
+//			averageValues.add(Double.valueOf(val));
+//		}
+//	}
+
+
+	/**
+	 * Restituisce gli ultimi valori di media di RSSI memorizzati
+	 * @return gli ultimi valori di media di RSSI memorizzati
+	 */
+//	private double[] getLastAverageValues()	{
+//
+//		double res[]= new double[averageValues.size()];
+//		for(int i=0; i<res.length; i++)	{
+//			res[i]=averageValues.elementAt(i).doubleValue();
+//		}
+//		return res;
+//	}
 }
 
 
@@ -133,7 +173,7 @@ class TestRelayPositionAPMonitor{
 		RelayWNICLinuxController rwlc = null;
 		RelayPositionAPMonitor rpAPm = null;
 		try {
-			rwlc = new RelayWNICLinuxController(15,"eth1", "NETGEAR");
+			rwlc = new RelayWNICLinuxController(15,"wlan0", "ALMAWIFI");
 			rpAPm = new RelayPositionAPMonitor(rwlc,4000,to);
 			rpAPm.start();
 			

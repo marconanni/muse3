@@ -435,6 +435,27 @@ public class RelayMessageFactory {
 
 	}
 	
+	/**
+	 * Messaggio Notify RSSI
+	 * <br/>
+	 * @param int sequenceNumber
+	 * @param int RSSIvalue
+	 * @param InetAddress addr
+	 * @param int port
+	 * @return DatagramPacket 
+	 * @throws IOException
+	 */
+	public static DatagramPacket buildNotifyRSSI(int sequenceNumber , int RSSIvalue, InetAddress addr, int port) throws IOException{
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = sequenceNumber+"_"+Parameters.NOTIFY_RSSI+"_"+RSSIvalue;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+
+		return new DatagramPacket(data, data.length, addr, port);
+	}
+	
 	
 	/*
 	 * AGGIUNTO DA CARLO 4-12-2008 13.50
