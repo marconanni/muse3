@@ -90,7 +90,7 @@ public class RelayWNICLinuxController implements RelayWNICController{
 				}
 
 				//On ma non associata alla rete managed
-				else if (res.contains("IEEE")){
+				if (res.contains("IEEE")){
 					isOn = true;
 					isAssociated = true;
 					if(debug)console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +"  ESISTE ed è ACCESA.");
@@ -145,8 +145,7 @@ public class RelayWNICLinuxController implements RelayWNICController{
 					isOn = true;
 					//On ma non associata alla rete managed
 					String essid = extractEssidName(res);
-					System.out.print(essid.hashCode());
-					if((essid.hashCode()!=1024) && (essid.hashCode()!=383653452)){
+					if(essid.compareTo(Parameters.NAME_OF_MANAGED_NETWORK)==0){
 						essidFound = true;
 						essidName = essid;
 						isAssociated = true;
@@ -556,7 +555,6 @@ class TestRelayWNICLinuxController{
 
 			if(!rwlc.isAssociated())	{
 				printVectorAP(rwlc.getVisibleAccessPoints());
-				System.out.println("Get visible access point");
 			}
 
 
