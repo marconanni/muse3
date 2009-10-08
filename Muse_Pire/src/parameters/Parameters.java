@@ -14,7 +14,7 @@ public class Parameters {
 	 * 
 	 * */	
 	/** indirizzo IP del SERVER */
-	public static final String SERVER_ADDRESS = "192.168.0.1";
+	public static final String SERVER_ADDRESS = "192.168.0.4";
 	//public static final String SERVER_ADDRESS = "192.255.0.1";
 	
 	/** indirizzo IP del CLIENT */
@@ -24,12 +24,12 @@ public class Parameters {
 	
 	/** indirizzo IP del RELAY sulla rete Ad-Hoc */
 	//public static final String RELAY_AD_HOC_ADDRESS = "192.168.2.2";
-	public static final String RELAY_AD_HOC_ADDRESS = "192.168.0.1";
+	public static final String RELAY_AD_HOC_ADDRESS = "192.168.0.4";
 	//public static final String RELAY_AD_HOC_ADDRESS = "localhost";
 	
 	/** indirizzo IP del RELAY sulla rete Managed */
 	//public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
-	public static final String RELAY_MANAGED_ADDRESS = "192.168.0.1";
+	public static final String RELAY_MANAGED_ADDRESS = "192.168.0.4";
 	
 	/** indirizzo IP di BROADCAST sulla rete Ad-Hoc */
 	//public static final String BROADCAST_ADDRESS = "192.168.1.255";
@@ -66,7 +66,7 @@ public class Parameters {
 	
 	/** Specifica il numero di sessioni attive massime che si possono avere sul Relay */
 	public static final int RANGE_ACTIVE_SESSIONS = 1000;
-		
+	
 	/*
 	 ********************* PORTE DI COMUNICAZIONE *****************************
 	 * 
@@ -102,10 +102,8 @@ public class Parameters {
 	
 	/** porta su cui il CLIENT riceve i messaggi di REQUEST_RSSI
 	 *  e la porta da cui invia NOTIFY_RSSI al RELAY
-	 *  Servono due porte in quanto i messaggi possono arrivare da nodi diversi (più relay attivi)
-	 *  Client deve rispondere solo al nodo a cui è collegato */
-	public static final int CLIENT_RSSI_PORT_IN = 3004;
-	public static final int CLIENT_RSSI_PORT_OUT= 3010;
+	 */
+	public static final int CLIENT_RSSI_PORT = 3004;
 	
 	/** porta per la ricezione del flusso RTP sul CLIENT */
 	public static final int CLIENT_PORT_RTP_IN = 3005;
@@ -113,7 +111,8 @@ public class Parameters {
 	//RELAY E PROXY
 	/** porta su cui il Thread periodico del Relay Attuale ascolta i messaggi WHO_IS_RELAY
 	 *  e invia subito dopo la risposta IM_RELAY al mittente del WHO_IS_RELAY */
-	public static final int WHO_IS_RELAY_PORT = 4001;
+	public static final int WHO_IS_RELAY_PORT_IN= 4000;
+	public static final int WHO_IS_RELAY_PORT_OUT = 4001;
 	
 	/** porta per la gestione della sessione sul RELAY verso la rete ad-hoc in ingresso */
 	public static final int RELAY_SESSION_AD_HOC_PORT_IN = 4002;
@@ -175,8 +174,11 @@ public class Parameters {
 	 ***************** CODICI MESSAGGI DI COMUNICAZIONE **********************
 	 * 
 	 * */
-	public static final int WHO_IS_RELAY = 0;
-	public static final int IM_RELAY = 1;
+	public static final int WHO_IS_BIGBOSS = 0;
+	public static final int IM_BIGBOSS = 1;
+	public static final int WHO_IS_RELAY = 2;
+	public static final int IM_RELAY = 3;
+
 	public static final int ELECTION_REQUEST = 2;
 	public static final int ELECTION_BEACON = 3;
 	public static final int ELECTION_RESPONSE = 4;
@@ -191,6 +193,10 @@ public class Parameters {
 	public static final int ACK_SESSION = 11;
 	public static final int REDIRECT = 12;
 	public static final int LEAVE = 13;
+	
+	public static final int REQUEST_RSSI = 20;
+	public static final int NOTIFY_RSSI = 21;
+
 
 	public static final int REQUEST_FILE = 14;
 	public static final int FORWARD_REQ_FILE = 15;		//Richiesta file al server
@@ -200,8 +206,7 @@ public class Parameters {
 	public static final int START_TX = 18;
 	public static final int STOP_TX = 19;
 	
-	public static final int REQUEST_RSSI = 20;
-	public static final int NOTIFY_RSSI = 21;
+	
 	
 	public static final int ACK = 22;	
 	
