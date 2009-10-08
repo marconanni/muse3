@@ -24,6 +24,7 @@ import relay.RelayMessageReader;
  *
  */
 public class WhoIsRelayServer implements Observer {
+	private String ciao = null;
 
 	private RelayCM whoIsRealayManger = null;
 	private RelayMessageReader rmr = null;
