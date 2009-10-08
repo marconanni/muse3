@@ -190,6 +190,19 @@ public class RelayMessageFactory {
 		return new DatagramPacket(data, data.length, addr, port);
 
 	}
+	
+	static public DatagramPacket buildImBigBoss(String relayAddress, InetAddress addr, int port) throws IOException {
+
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = 0+"_"+Parameters.IM_BIGBOSS+"_"+relayAddress;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+
+		return new DatagramPacket(data, data.length, addr, port);
+
+	}
 
 
 	/**

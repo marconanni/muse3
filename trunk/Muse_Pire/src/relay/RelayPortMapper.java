@@ -1,10 +1,7 @@
 package relay;
 
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
 
 import parameters.Parameters;
 
@@ -70,7 +67,9 @@ public class RelayPortMapper {
 
 	//PER IL RELAY
 	/*porta su cui il relay attuale ascolta i messaggi di WHO_IS_RELAY e invia messaggi di IM_RELAY*/
-	private int portWhoIsRelay;
+	private int portInWhoIsRelay;
+	private int portOutWhoIsRelay;
+
 
 	/*porte delle socket per la gestione della sessione verso la rete Ad-Hoc, in ingresso e in uscita */
 	private int portInAdHocSession;
@@ -110,7 +109,8 @@ public class RelayPortMapper {
 			rangeManagedPortInOutControlProxy[i] = true;
 		}
 
-		portWhoIsRelay = Parameters.WHO_IS_RELAY_PORT;
+		portInWhoIsRelay = Parameters.WHO_IS_RELAY_PORT_IN;
+		portOutWhoIsRelay = Parameters.WHO_IS_RELAY_PORT_OUT;
 		portInAdHocElection = Parameters.RELAY_ELECTION_PORT_IN;
 		portOutAdHocElection = Parameters.RELAY_ELECTION_PORT_OUT;
 		portInAdHocSession = Parameters.RELAY_SESSION_AD_HOC_PORT_IN;
@@ -282,9 +282,14 @@ public class RelayPortMapper {
 	 * e tramite cui esso risponde inviando il messaggio IM_RELAY
 	 * @return un intero rappresentante la porta di cui sopra 
 	 */
-	public int getPortWhoIsRelay() {
-		return portWhoIsRelay;
+	public int getPortInWhoIsRelay() {
+		return portInWhoIsRelay;
 	}
+	
+	public int getPortOutWhoIsRelay() {
+		return portOutWhoIsRelay;
+	}
+	
 
 	/**Metodo per ottenere la porta su cui il SessionManager del RELAY riceve i messaggi di sessione dalla rete Ad-Hoc
 	 * @return un intero rappresentante la porta di cui sopra 

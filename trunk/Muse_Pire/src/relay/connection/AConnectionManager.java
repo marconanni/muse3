@@ -26,8 +26,8 @@ public class AConnectionManager {
 	private boolean started = false;
 	protected String managerName = "AConnectionManager";
 	
-	private String localAdHocAddress = null;
-	private int localAdHocOutputPort = -1;
+	private String localAdress;
+	
 
 	/**Metodo per ottenere un AConnectionManager
 	 * @param localAdHocAddress una Stringa che rappresenta l'indirizzo locale sulla rete Ad-Hoc del nodo
@@ -35,19 +35,18 @@ public class AConnectionManager {
 	 * @param localAdHocOutputPort un int che rappresenta la porta di invio dei messaggi sulla rete Ad-Hoc
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
 	 */
-	public AConnectionManager(String localAdHocAddress, int localAdHocInputPort, int localAdHocOutputPort, Observer observer){
-		if(localAdHocAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
+	public AConnectionManager(String localAddress, int localInputPort, int localOutputPort, Observer observer){
+		if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
+		this.localAdress = localAddress;
 
-		this.localAdHocAddress = localAdHocAddress;
-		this.localAdHocOutputPort = localAdHocOutputPort;
 		
 		try {
-			adHocOutputSocket = new DatagramSocket(localAdHocOutputPort);
+			adHocOutputSocket = new DatagramSocket(localOutputPort);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
 
-		receiverAdHoc = new AConnectionReceiver(observer,localAdHocAddress,localAdHocInputPort);
+		receiverAdHoc = new AConnectionReceiver(observer,this.localAdress,localInputPort);
 		receiverAdHocThread = new Thread(receiverAdHoc);
 	}
 
@@ -58,7 +57,6 @@ public class AConnectionManager {
 		if(receiverAdHoc!=null){
 			receiverAdHocThread.start();
 			started = true;
-			System.out.println(managerName+".start(): PARTITO");
 		}
 	}
 
@@ -70,12 +68,9 @@ public class AConnectionManager {
 		try {
 			adHocOutputSocket.send(dp);
 			System.out.println(managerName+".sendToAdHoc() : messaggio inviato a: " +dp.getAddress().getHostAddress() + " porta: " +dp.getPort() );
-			//System.out.println(managerName+".sendToAdHoc() : messaggio inviato da: " + localAdHocAddress + " porta: " + localAdHocOutputPort );
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) {e.printStackTrace();}
 	}
-
+	
 	/**Metodo per chiudere il AConnectionReceiver e la Socket d'invio locale
 	 */
 	public void close(){
@@ -121,6 +116,10 @@ public class AConnectionManager {
 	public void setNameManager(String managerName) {
 		this.managerName = managerName;
 		if(receiverAdHoc != null)receiverAdHoc.setManagerName(this.managerName);
+	}
+	
+	public String getLocalAddress(){
+		return localAdress;
 	}
 
 }
