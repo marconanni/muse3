@@ -9,8 +9,8 @@ import java.util.Observer;
  */
 public class RelaySessionCM extends MAConnectionManager {
 	
-	public RelaySessionCM(String localAdHocAddress, int localAdHocSessionInputPort, int localAdHocSessionOutputPort, String localManagedAddress, int localManagedSessionOutputPort, Observer observer){
+	public RelaySessionCM(String name, String localAdHocAddress, int localAdHocSessionInputPort, int localAdHocSessionOutputPort, String localManagedAddress, int localManagedSessionOutputPort, Observer observer){
 		super(localAdHocAddress, localAdHocSessionInputPort, localAdHocSessionOutputPort, localManagedAddress, localManagedSessionOutputPort, observer);
-		setNameManager("RelaySessionCM");
+		setNameManager(name);
 	}
 }

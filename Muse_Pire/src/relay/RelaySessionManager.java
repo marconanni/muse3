@@ -158,6 +158,9 @@ public class RelaySessionManager implements Observer{
 				this.status=(this.imBigBoss)? RelaySessionStatus.ACTIVE_BIGBOSS:RelaySessionStatus.ACTIVE_NORMAL;
 				this.clientAddress = message.getAddress().getHostAddress();
 				consolle.debugMessage(Parameters.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
+				//occhio qui a creare i  proxy ce ne sono di due tipi
+				//1 collegato col nodo server e quindi alla rete managed -> BIG BOSS
+				//2 collegato con un altro nodo relay e quindi alla rete ad hoc -> Relay secondario
 				proxy = new Proxy(this, true, messageReader.getFilename(), this.clientAddress, messageReader.getPortStreamingClient());
 
 				pReferences.put(this.clientAddress, proxy);

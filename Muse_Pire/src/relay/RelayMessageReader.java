@@ -81,14 +81,14 @@ public class RelayMessageReader {
 		c = st.nextToken();
 		code = Integer.parseInt(c);
 		System.out.println("Code "+code);
-		if(code == Parameters.ELECTION_RESPONSE)
-		{
-			W = Float.parseFloat(st.nextToken());
-		}
-		if(code == Parameters.ELECTION_DONE)
-		{
-			newRelayAddress = st.nextToken();
-		}
+//		if(code == Parameters.ELECTION_RESPONSE)
+//		{
+//			W = Float.parseFloat(st.nextToken());
+//		}
+//		if(code == Parameters.ELECTION_DONE)
+//		{
+//			newRelayAddress = st.nextToken();
+//		}
 		if(code == Parameters.EM_ELECTION)
 		{
 			W = Float.parseFloat(st.nextToken());
@@ -101,16 +101,16 @@ public class RelayMessageReader {
 		{
 			getHashTable(st);
 		}
-		if(code == Parameters.REQUEST_FILE)
-		{
-			filename = st.nextToken();
-			portStreamingClient = Integer.parseInt(st.nextToken());
-		}
-		if(code == Parameters.ACK_RELAY_FORW)
-		{
-			portStreamingServer = Integer.parseInt(st.nextToken());
-			portStreamingCtrlServer = Integer.parseInt(st.nextToken());
-		}
+//		if(code == Parameters.REQUEST_FILE)
+//		{
+//			filename = st.nextToken();
+//			portStreamingClient = Integer.parseInt(st.nextToken());
+//		}
+//		if(code == Parameters.ACK_RELAY_FORW)
+//		{
+//			portStreamingServer = Integer.parseInt(st.nextToken());
+//			portStreamingCtrlServer = Integer.parseInt(st.nextToken());
+//		}
 		if(code == Parameters.NOTIFY_RSSI)
 		{
 			RSSI = Double.parseDouble(st.nextToken());

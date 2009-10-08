@@ -1,12 +1,5 @@
 package relay.connection;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.util.Observable;
 import java.util.Observer;
 
 import relay.RelayPortMapper;
@@ -18,31 +11,39 @@ public class RelayConnectionFactory {
 
 	private static RelayPortMapper rpm = RelayPortMapper.getInstance();
 
-	/**Metoto statico per ottenere un'istanza di RelaySessionCM
+	/**Metoto statico per ottenere un'istanza di RelaySessionCM 
+	 * possibilità di ricevere e mandare messaggi sulla rete ad hoc e mandare messaggi sulla rete managed 
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelaySessionCM
 	 * @return un istanza di RelaySessionCM
 	 */
 	public static RelaySessionCM getSessionConnectionManager(Observer obser){
-		return new RelaySessionCM(rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInAdHocSession(),rpm.getPortOutAdHocSession(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getPortOutManagedSession(),obser);
+		return new RelaySessionCM("RelaySessionCM",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInAdHocSession(),rpm.getPortOutAdHocSession(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getPortOutManagedSession(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di RelayElectionCM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayElectionCM
 	 * @return un istanza di RelayElectionCM
 	 */
-	public static RelayElectionCM getElectionConnectionManager(Observer obser){
-		return new RelayElectionCM(rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInAdHocElection(),rpm.getPortOutAdHocElection(),obser);
+	public static RelayCM getElectionConnectionManager(Observer obser){
+		return new RelayCM("RelayElectionCM",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInAdHocElection(),rpm.getPortOutAdHocElection(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
 	 * @return un istanza di RelayRSSICM
 	 */
-	public static RelayRSSICM getRSSIConnectionManager(Observer obser){
-		return new RelayRSSICM(rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
+	public static RelayCM getRSSIConnectionManager(Observer obser){
+		return new RelayCM("RelayRSSICM",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
 	}
 	
-
+	/**Metoto statico per ottenere un'istanza di RelayRSSICM
+	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
+	 * @return un istanza di RelayRSSICM
+	 */
+	public static RelayCM getWhoIsRelayBigBossConnectionManager(Observer obser){
+		return new RelayCM("RelayWhoIsRelayBigBossManager",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInWhoIsRelay(),rpm.getPortOutWhoIsRelay(),obser);
+	}
+	
 	/**Metoto statico per ottenere un'istanza di ProxyCM quando il Proxy viene creato ex-novo
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ProxyCM
 	 * @return un istanza di ProxyCM

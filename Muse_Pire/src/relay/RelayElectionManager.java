@@ -15,8 +15,8 @@ import client.ClientMessageFactory;
 import debug.DebugConsole;
 
 import parameters.Parameters;
+import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
-import relay.connection.RelayElectionCM;
 import relay.connection.WhoIsRelayServer;
 import relay.positioning.RelayPositionAPMonitor;
 import relay.positioning.RelayPositionClientsMonitor;
@@ -54,7 +54,7 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 	//il manager per le comunicazioni
-	private RelayElectionCM comManager = null;
+	private RelayCM comManager = null;
 
 	//indirizzo broadcast in forma InetAddress
 	private static InetAddress BCAST = null;
@@ -170,7 +170,11 @@ public class RelayElectionManager extends Observable implements Observer {
 					Parameters.NAME_OF_MANAGED_RELAY_INTERFACE,
 					Parameters.NAME_OF_MANAGED_NETWORK,
 					Parameters.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-		} catch (WNICException e) {e.printStackTrace();System.exit(1);}
+			relayAHWNICController = WNICFinder.getCurrentWNIC(
+					Parameters.NAME_OF_AD_HOC_RELAY_INTERFACE,
+					Parameters.NAME_OF_AD_HOC_NETWORK,
+					Parameters.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
+		} catch (WNICException e) {System.err.println("ERRORE:"+e.getMessage());System.exit(1);}
 	
 		comManager = RelayConnectionFactory.getElectionConnectionManager(this);
 		comManager.start();
@@ -178,21 +182,27 @@ public class RelayElectionManager extends Observable implements Observer {
 		//Se parto come Relay BIG BOSS
 		if(imBigBoss){ 
 			try {
-				if(relayManagedWNICController.isConnected()) becomeBigBossRelay();
-				else throw new Exception("RelayElectionManager: ERRORE: questo nodo non può essere il Relay " +
-				"attuale dato che non vede l'AP");
-
+				if(relayAPWNICController.isConnected()&&relayAHWNICController.isConnected()) 
+					becomeBigBossRelay();
+				else{
+					console.debugMessage(Parameters.DEBUG_ERROR,"Questo nodo non può essere il BigBoss dato che non vede l'AP o non è collegato alla rete Ad Hoc");
+					throw new Exception("RelayElectionManager: ERRORE: questo nodo non può essere il BigBoss dato che non vede l'AP o non è collegato alla rete Ad Hoc");
+				}
 			} catch (WNICException e) {
-				throw new Exception("RelayElectionManager: ERRORE: Problemi con il RelayWNICController: " 
-						+ e.getStackTrace());
+				console.debugMessage(Parameters.DEBUG_ERROR, "Problemi con il RelayWNICController: " + e.getStackTrace());
+				throw new Exception("RelayElectionManager: ERRORE: Problemi con il RelayWNICController: "+ e.getStackTrace());
 			} 
 		}
 
-		/*[if imRelay == false] --> SearchingRelay
-		 */
-		else 
-			//Stato instabile SearchingRelay
+		//Parto da relay secondario
+		else if(imRelay){
+			serachingBigBoss();
+		}
+		
+		//parto come cliente normale
+		else{
 			searchingRelay();
+		}
 	}
 
 
@@ -204,10 +214,115 @@ public class RelayElectionManager extends Observable implements Observer {
 		if(INSTANCE == null)
 			try {
 				INSTANCE = new RelayElectionManager(imBigBoss, imRelay, sessionManager);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			} catch (Exception e) {e.printStackTrace();}
 			return INSTANCE;
+	}
+	
+	/**Metodo che consente di far si che questo nodo diventi il Relay attuale,
+	 * memorizzando l'indirizzo locale come indirizzo del Relay, creando e facendo
+	 * partire il RelayPositionAPMonitor, il RelayPositionClientsMonitor,
+	 * il RelayBatteryMonitor e il WhoIsRelayServer. Poi passa allo stato di MONITORING.
+	 */
+	private void becomeBigBossRelay(){
+
+		imBigBoss = true;
+		imRelay = true;
+
+		actualRelayAddress = Parameters.RELAY_AD_HOC_ADDRESS;
+		memorizeRelayAddress();
+
+		//Azzero tutti i timeout
+		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
+		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
+		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
+		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
+		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
+		/*Fine Vedere se sta parte serve*/
+
+		try {
+			relayPositionAPMonitor = new RelayPositionAPMonitor(
+					relayAPWNICController,	
+					Parameters.POSITION_AP_MONITOR_PERIOD,
+					this);
+
+			//Compresi client e realy secondari
+			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
+					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
+					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
+					this);
+
+			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
+
+			//MANCA IL WHO IS BIG BOS
+			whoIsRelayServer = new WhoIsRelayServer(imBigBoss);
+
+			relayPositionAPMonitor.start();
+			relayPositionClientsMonitor.start();
+			relayBatteryMonitor.start();
+			whoIsRelayServer.start();
+
+			actualStatus = RelayStatus.MONITORING;
+
+			System.out.println("RelayElectionManager.becomeRelay(): X -> STATO MONITORING: " +
+			"Monitors e whoIsRelayServer partiti");
+
+		} catch (WNICException e) {
+			e.printStackTrace();
+			System.exit(2);
+		}
+	}
+	
+	/**Metodo che consente di far si che questo nodo diventi il Relay attuale,
+	 * memorizzando l'indirizzo locale come indirizzo del Relay, creando e facendo
+	 * partire il RelayPositionAPMonitor, il RelayPositionClientsMonitor,
+	 * il RelayBatteryMonitor e il WhoIsRelayServer. Poi passa allo stato di MONITORING.
+	 */
+	private void serachingBigBoss(){
+
+		imBigBoss = true;
+		imRelay = true;
+
+		actualRelayAddress = Parameters.RELAY_AD_HOC_ADDRESS;
+		memorizeRelayAddress();
+
+		//Azzero tutti i timeout
+		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
+		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
+		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
+		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
+		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
+		/*Fine Vedere se sta parte serve*/
+
+		try {
+			relayPositionAPMonitor = new RelayPositionAPMonitor(
+					relayAPWNICController,	
+					Parameters.POSITION_AP_MONITOR_PERIOD,
+					this);
+
+			//Compresi client e realy secondari
+			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
+					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
+					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
+					this);
+
+			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
+
+			whoIsRelayServer = new WhoIsRelayServer();
+
+			relayPositionAPMonitor.start();
+			relayPositionClientsMonitor.start();
+			relayBatteryMonitor.start();
+			whoIsRelayServer.start();
+
+			actualStatus = RelayStatus.MONITORING;
+
+			System.out.println("RelayElectionManager.becomeRelay(): X -> STATO MONITORING: " +
+			"Monitors e whoIsRelayServer partiti");
+
+		} catch (WNICException e) {
+			e.printStackTrace();
+			System.exit(2);
+		}
 	}
 
 
@@ -1091,66 +1206,7 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 
-	/**Metodo che consente di far si che questo nodo diventi il Relay attuale,
-	 * memorizzando l'indirizzo locale come indirizzo del Relay, creando e facendo
-	 * partire il RelayPositionAPMonitor, il RelayPositionClientsMonitor,
-	 * il RelayBatteryMonitor e il WhoIsRelayServer. Poi passa allo stato di MONITORING.
-	 */
-	private void becomeBigBossRelay(){
-
-		imBigBoss = true;
-		imRelay = true;
-
-		actualRelayAddress = Parameters.RELAY_AD_HOC_ADDRESS;
-		memorizeRelayAddress();
-
-		/*Vedere se sta parte serve*/
-//		indexELECTION_RESPONSE = 0;
-//		indexREQUEST_SESSION = 0;
-//		indexEM_EL_DET_RELAY = 0;
-//		indexEM_ELECTION = 0;
-
-		//Azzero tutti i timeout
-		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
-		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
-		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
-		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
-		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
-		/*Fine Vedere se sta parte serve*/
-
-		try {
-			relayPositionAPMonitor = new RelayPositionAPMonitor(
-					relayManagedWNICController,	
-					Parameters.POSITION_AP_MONITOR_PERIOD,
-					this);
-
-			//Compresi client e realy secondari
-			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
-					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
-					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
-					this);
-
-			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
-
-			whoIsRelayServer = new WhoIsRelayServer(
-					Parameters.RELAY_AD_HOC_ADDRESS,
-					Parameters.WHO_IS_RELAY_PORT);
-
-			relayPositionAPMonitor.start();
-			relayPositionClientsMonitor.start();
-			relayBatteryMonitor.start();
-			whoIsRelayServer.start();
-
-			actualStatus = RelayStatus.MONITORING;
-
-			System.out.println("RelayElectionManager.becomeRelay(): X -> STATO MONITORING: " +
-			"Monitors e whoIsRelayServer partiti");
-
-		} catch (WNICException e) {
-			e.printStackTrace();
-			System.exit(2);
-		}
-	}
+	
 
 
 	/**Metodo per memorizzare l'InetAddress relativo all'actualRelayAddress
@@ -2588,7 +2644,7 @@ class TesterRelayElectionManager{
 		//non dovrebbe andare
 		rem.chooseAnotherRelay();*/
 
-		rem.getComManager().close();
+		//rem.getComManager().close();
 
 	}
 }

@@ -19,8 +19,7 @@ public class MAConnectionManager extends AConnectionManager {
 
 	private DatagramSocket managedOutputSocket = null;
 	
-	private String localManagedAddress = null;
-	private int localManagedOutputPort = -1;
+	private InetAddress localManagedAddress = null;
 
 	/**Metodo per ottenere un MAConnectionManager
 	 * @param localAdHocAddress una String che rappresenta l'indirizzo locale del nodo sulla rete Ad-Hoc
@@ -35,15 +34,16 @@ public class MAConnectionManager extends AConnectionManager {
 			
 		if(localManagedAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 		
-		this.localManagedAddress = localManagedAddress;
-		this.localManagedOutputPort = localManagedOutputPort;
+		
 		
 		try {
-			managedOutputSocket = new DatagramSocket(localManagedOutputPort);
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			this.localManagedAddress = InetAddress.getByName(localManagedAddress);
+		} catch (UnknownHostException e1) {e1.printStackTrace();}
+		
+		
+		try {
+			managedOutputSocket = new DatagramSocket(localManagedOutputPort,this.localManagedAddress);
+		} catch (SocketException e) {e.printStackTrace();}
 	}
 
 	/**Metodo per inviare un DatagramPacket alla rete Managed
@@ -53,12 +53,7 @@ public class MAConnectionManager extends AConnectionManager {
 		try {
 				managedOutputSocket.send(dp);
 				System.out.println(managerName+".sendToServer(): messaggio inviato al Server");
-				//System.out.println(managerName+".sendToServer(): messaggio inviato da: "+localManagedAddress+" porta: "+localManagedOutputPort);
-				//System.out.println(managerName+".sendToServer(): messaggio inviato a: "+dp.getAddress().getHostAddress()+" porta: "+ dp.getPort());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (IOException e) {e.printStackTrace();}
 	}
 
 	/**Metodo per chiudere le Socket del MAConnectionManager  
