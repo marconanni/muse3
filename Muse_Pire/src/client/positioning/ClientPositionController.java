@@ -15,8 +15,8 @@ import client.wnic.exception.WNICException;
 
 import client.ClientMessageFactory;
 import client.ClientMessageReader;
+import client.connection.ClientCM;
 import client.connection.ClientConnectionFactory;
-import client.connection.ClientRSSICM;
 import client.wnic.ClientWNICController;
 import client.wnic.WNICFinder;
 import debug.DebugConsole;
@@ -33,7 +33,7 @@ public class ClientPositionController implements Observer{
 	private boolean enableToMonitor;
 	private boolean started;
 
-	private ClientRSSICM  crscm = null ;
+	private ClientCM  crscm = null ;
 	private ClientWNICController cwnic = null; 
 
 	private InetAddress relayAddress = null;
@@ -48,7 +48,7 @@ public class ClientPositionController implements Observer{
 	 * @throws WNICException 
 	 */
 	public ClientPositionController(String interf, String essidName) throws WNICException{
-		crscm = ClientConnectionFactory.getRSSIInOutConnectionManager(this);
+		crscm = ClientConnectionFactory.getRSSIConnectionManager(this);
 		
 		try {
 			cwnic = WNICFinder.getCurrentWNIC(interf, essidName);
@@ -68,6 +68,19 @@ public class ClientPositionController implements Observer{
 			started = true;
 		}
 	}
+	
+	public void stopReceiving(){
+		crscm.stopReceiving();
+		enableToMonitor = false;
+		started = false;
+	}
+	
+	public void resumeReceiving(){
+		if(enableToMonitor){
+			crscm.resumeReceiving();
+			started = true;
+		}
+	}
 
 	/**Metodo per chiudere il ClientPositionController
 	 */
@@ -82,21 +95,18 @@ public class ClientPositionController implements Observer{
 	public synchronized void update(Observable arg0, Object arg1) {
 
 		if(arg1 instanceof DatagramPacket){
-
 			int RSSIvalue =-1;
 			cmr = new ClientMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);
 				console.debugMessage(Parameters.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
 				if((cmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(relayAddress)){
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Devo inviare risp a: " + relayAddress);
 					RSSIvalue = cwnic.getSignalStrenghtValue();
 					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
 					sequenceNumber++;
 					crscm.sendTo(notifyRSSI);
 					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RELAY_RSSI_RECEIVER_PORT);
 				}else{
-					//otifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
 					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
 				
 				}
@@ -104,7 +114,7 @@ public class ClientPositionController implements Observer{
 					console.debugMessage(Parameters.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
 					new WNICException("ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
 				
-			} catch (IOException e) {e.printStackTrace();System.out.println("ERRORE");}
+			} catch (IOException e) {e.printStackTrace();}
 			cmr = null;
 		}
 	}
