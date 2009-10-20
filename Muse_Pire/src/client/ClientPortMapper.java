@@ -1,6 +1,4 @@
-
 package client;
-
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -43,10 +41,7 @@ public class ClientPortMapper {
 		
 		try {
 			localhost = InetAddress.getByName(Parameters.CLIENT_ADDRESS);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 
 	/**Metodo per ottenere il riferimento all'unico ClientPortMapper attivo sul nodo CLIENT
@@ -114,48 +109,4 @@ public class ClientPortMapper {
 	public int getPortRTPIn() {
 		return portRTPIn;
 	}
-
-	/**
-	 * CODICE DI VERIFICA DEL PORTMAPPER DEL RELAY
-	 * @param args
-	 */
-	
-	/*public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		 ClientPortMapper portMapper = ClientPortMapper.getInstance();
-		 
-		 System.out.println("######### SESSIONE 1 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 System.out.println("######### SESSIONE 2 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 System.out.println("######### SESSIONE 3 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 System.out.println("######### SESSIONE 4 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 System.out.println("######### SESSIONE 5 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 System.out.println("######### SESSIONE 6 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 System.out.println("######### SESSIONE 7 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 System.out.println("######### SESSIONE 8 ########");
-		 System.out.println("PortaRTP: "+ portMapper.getFirstFreeRTPPort());
-		 System.out.println("PortaControllo: "+portMapper.getFirstFreeControlPort());
-		 
-		
-		 System.out.println("PortaElezioneIn: "+ portMapper.getPortElectionIn());
-		 System.out.println("PortaElezioneOut: "+ portMapper.getPortElectionOut());
-		 
-		 System.out.println("PortaStandardRequestRelay: "+ portMapper.getPortSessionIn());
-		 System.out.println("PortaStandardReceiveRelay: "+ portMapper.getPortSessionOut());
-	}*/
-
 }

@@ -22,8 +22,8 @@ import parameters.Parameters;
 import client.timeout.ClientTimeoutFactory;
 import client.timeout.TimeOutFileRequest;
 import client.timeout.TimeOutSearch;
+import client.connection.ClientCM;
 import client.connection.ClientConnectionFactory;
-import client.connection.ClientSessionCM;
 import debug.DebugConsole;
 /**
  * @author Leo Di Carlo
@@ -34,7 +34,7 @@ public class ClientSessionManager implements Observer {
 	//private ClientFrameController frameController;
 	private DebugConsole console;
 	private String filename;
-	private ClientSessionCM sessionCM;
+	private ClientCM sessionCM;
 	private DatagramPacket msg;
 	private String eventType;
 	private TimeOutFileRequest timeoutFileRequest;

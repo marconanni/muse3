@@ -16,24 +16,24 @@ public class ClientConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ClientSessionCM
 	 * @return un istanza di ClientSessionCM
 	 */
-	public static ClientSessionCM getSessionConnectionManager(Observer obser){
-		return new ClientSessionCM(cpm.getPortSessionIn(),cpm.getPortSessionOut(),obser);
+	public static ClientCM getSessionConnectionManager(Observer obser){
+		return new ClientCM("ClientSessionCM",cpm.getPortSessionIn(),cpm.getPortSessionOut(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di ClientElectionCM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ClientElectionCM
 	 * @return un istanza di ClientElectionCM
 	 */
-	public static ClientElectionCM getElectionConnectionManager(Observer obser){
-		return new ClientElectionCM(cpm.getPortElectionIn(),cpm.getPortElectionOut(),obser);
+	public static ClientCM getElectionConnectionManager(Observer obser){
+		return new ClientCM("ClientElectionCM", cpm.getPortElectionIn(),cpm.getPortElectionOut(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di ClientRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal ClientRSSICM
 	 * @return un istanza di ClientRSSICM
 	 */
-	public static ClientRSSICM getRSSIInOutConnectionManager(Observer obser){
-		return new ClientRSSICM(cpm.getPortRSSIIn(),cpm.getPortRSSIOut(),obser);
+	public static ClientCM getRSSIConnectionManager(Observer obser){
+		return new ClientCM("ClientRSSICM",cpm.getPortRSSIIn(),cpm.getPortRSSIOut(),obser);
 	}
 }
 

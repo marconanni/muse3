@@ -23,21 +23,12 @@ public class AConnectionReceiver extends Observable implements Runnable{
 	private boolean stopped = false;
 	protected String managerName = "AConnectionReceiver";
 	
-	//private String localAddress = null;
-	//private int localInputPort = -1;
-	
 	/**Metodo per ottenere un AConnectionReceiver
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
 	 * @param localAddress l'indirizzo locale del nodo
 	 * @param localInputPort la porta tramite cui ricevere i messaggi
 	 */
 	public AConnectionReceiver(Observer observer, int localInputPort){
-		
-		//if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
-		
-		//this.localAddress = localAddress;
-		//this.localInputPort = localInputPort;
-		
 		try {
 			inSocket = new DatagramSocket(localInputPort);
 		} catch (SocketException e) {
@@ -65,24 +56,13 @@ public class AConnectionReceiver extends Observable implements Runnable{
 					}
 				}
 			}
-
-			//System.out.println(managerName+": attesa messaggio da parte di: "+ localAddress + " porta: " + localInputPort);
 			dataIn = new DatagramPacket(buffer, buffer.length);
 
 			try {
 				inSocket.receive(dataIn);
 				System.out.println(managerName+": ricevuto messaggio da : " +dataIn.getAddress().getHostAddress() + " porta: " +dataIn.getPort());
-				/*
-				if(dataIn.getAddress().getHostAddress().equals(localAddress)){
-					System.out.println(managerName+" IGNORATO");
-					continue;
-				}
-				*/		
 			}
-			catch (IOException e) {
-				System.out.println(managerName+": " + e.getMessage());
-				break;
-			}
+			catch (IOException e) {System.out.println(managerName+": " + e.getMessage());break;}
 
 			if(stopped) continue;
 			
