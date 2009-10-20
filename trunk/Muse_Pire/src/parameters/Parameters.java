@@ -39,13 +39,13 @@ public class Parameters {
 	public static final String NAME_OF_AD_HOC_NETWORK = "marco";
 	
 	/** Nome della rete Managed */
-	public static final String NAME_OF_MANAGED_NETWORK = "MUSE2_SSID";
+	public static final String NAME_OF_MANAGED_NETWORK = "ALMAWIFI";
 	
 	/** Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc */
 	public static final String NAME_OF_AD_HOC_RELAY_INTERFACE = "wlan0";
 	
 	/**Nome dell'interfaccia con cui il Relay si affaccia sulla rete Managed*/
-	public static final String NAME_OF_MANAGED_RELAY_INTERFACE  = "wlan2";
+	public static final String NAME_OF_MANAGED_RELAY_INTERFACE  = "wlan1";
 	
 	/** Nome dell'interfaccia con cui il Client si affaccia sulla rete Ad-Hoc */
 	public static final String NAME_OF_CLIENT_INTERFACE = "wlan0";
