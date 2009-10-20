@@ -26,13 +26,13 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 		interf = ethX;
 		essidName = netName;
 		setDebugConsole(new DebugConsole());
-		console.setTitle("CLIENT WNIC LINUX CONTROLLER - Debug conole");
+		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
 		
 		refreshStatus(true);
 
 		if (!isOn){
-			this.console.debugMessage(Parameters.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel seguente modo:\nESSID:"+Parameters.NAME_OF_AD_HOC_NETWORK+"\nMODE:Ad-Hoc\nIP:"+Parameters.CLIENT_ADDRESS);
-			throw new WNICException("ClientWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");	
+			this.console.debugMessage(Parameters.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel seguente modo:\nESSID:"+Parameters.NAME_OF_AD_HOC_NETWORK+"\nMODE:Ad-Hoc\nIP:"+Parameters.RELAY_AD_HOC_ADDRESS);
+			//throw new WNICException("ClientWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");	
 		}
 	}
 	
@@ -47,18 +47,20 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 	private void refreshStatus(boolean debug) throws WNICException{
 
 		BufferedReader interfaceInfo = getInterfaceInfo(interf);
-		String res = null;
+		String res,res1 = null;
 		try{
 			if((res = interfaceInfo.readLine())!=null){
+				res1 = interfaceInfo.readLine();
 				//scheda spenta
-				if (res.contains("off/any")){
+				if (res.contains("off/any") || res1.contains("Not-Associated")){
 					isAssociated = false;
 					isOn = false;
+					essidFound = false;
 					if(debug)console.debugMessage(Parameters.DEBUG_WARNING,"L'interfaccia "+ interf +" ESISTE però è SPENTA!");
 				}
 
 				//On ma non associata alla rete ad hoc
-				else if (res.contains("IEEE")){
+				else if (res.contains("IEEE") && !res1.contains("Not-Associated")){
 					isOn = true;
 					isAssociated = true;
 					if(debug)console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +"  ESISTE ed è ACCESA.");
@@ -68,12 +70,12 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 					}else {
 						essidFound = false;
 						console.debugMessage(Parameters.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
-						throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
+						//throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
 					}	
 					
 					//controllo il mode della scheda (deve essere Ad-Hoc)
-					res = interfaceInfo.readLine();
-					if(res.contains("Ad-Hoc")){
+					//res = interfaceInfo.readLine();
+					if(res1.contains("Ad-Hoc")){
 						modeAdHoc = true;
 						if(debug)console.debugMessage(Parameters.DEBUG_INFO,"L'interfaccia "+ interf +" è settata a MODE Ad-Hoc");
 					}else {
