@@ -103,10 +103,11 @@ public class Parameters {
 	/** porta su cui il CLIENT riceve i messaggi di REQUEST_RSSI
 	 *  e la porta da cui invia NOTIFY_RSSI al RELAY
 	 */
-	public static final int CLIENT_RSSI_PORT = 3004;
+	public static final int CLIENT_RSSI_PORT_IN = 3004;
+	public static final int CLIENT_RSSI_PORT_OUT = 3005;
 	
 	/** porta per la ricezione del flusso RTP sul CLIENT */
-	public static final int CLIENT_PORT_RTP_IN = 3005;
+	public static final int CLIENT_PORT_RTP_IN = 3006;
 	
 	//RELAY E PROXY
 	/** porta su cui il Thread periodico del Relay Attuale ascolta i messaggi WHO_IS_RELAY
