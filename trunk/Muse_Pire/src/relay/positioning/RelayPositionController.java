@@ -5,24 +5,27 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Observable;
+import java.util.Observer;
+
+import client.wnic.ClientWNICController;
 
 import parameters.Parameters;
 import relay.RelayMessageFactory;
 import relay.RelayMessageReader;
+import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
-import relay.connection.RelayRSSICM;
 import relay.wnic.RelayWNICController;
 import relay.wnic.WNICFinder;
 import relay.wnic.exception.OSException;
 import relay.wnic.exception.WNICException;
 import debug.DebugConsole;
 
-public class RelayPositionController {
+public class RelayPositionController  implements Observer {
 	private DatagramPacket notifyRSSI = null;
 	private boolean enableToMonitor;
 	private boolean started;
 
-	private RelayRSSICM  crscm = null ;
+	private RelayCM  crscm = null ;
 	private RelayWNICController cwnic = null; 
 
 	private InetAddress relayAddress = null;
@@ -37,7 +40,7 @@ public class RelayPositionController {
 	 * @throws WNICException 
 	 */
 	public RelayPositionController(String interf, String essidName) throws WNICException{
-		crscm = RelayConnectionFactory.getRSSIInOutConnectionManager(this);
+		crscm = RelayConnectionFactory.getRSSIConnectionManager(this);
 		
 		try {
 			cwnic = WNICFinder.getCurrentWNIC(interf, essidName,0);
@@ -98,9 +101,6 @@ public class RelayPositionController {
 		}
 	}
 
-	public ClientWNICController getClientWNICController(){
-		return this.cwnic;
-	}
 	
 	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
 	 * confronti dell'indirizzo del Relay
@@ -118,4 +118,4 @@ public class RelayPositionController {
 	public void setDebugConsole(DebugConsole console) {this.console=console;}
 }
 
-}
+

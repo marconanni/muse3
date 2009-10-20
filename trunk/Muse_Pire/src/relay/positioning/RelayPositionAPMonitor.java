@@ -1,9 +1,8 @@
 package relay.positioning;
 
 import relay.wnic.AccessPointData;
+import relay.wnic.RelayAPWNICLinuxController;
 import relay.wnic.RelayWNICController;
-import relay.wnic.RelayWNICLinuxController;
-
 import relay.wnic.exception.InvalidParameter;
 import relay.wnic.exception.WNICException;
 
@@ -170,10 +169,10 @@ class TestRelayPositionAPMonitor{
 	public static void main(String args[]){
 		System.out.println("TestRelayPositionAPMonitor");
 		TestObserver to = new TestObserver();
-		RelayWNICLinuxController rwlc = null;
+		RelayAPWNICLinuxController rwlc = null;
 		RelayPositionAPMonitor rpAPm = null;
 		try {
-			rwlc = new RelayWNICLinuxController(15,"wlan0", "ALMAWIFI");
+			rwlc = new RelayAPWNICLinuxController(15,"wlan0", "ALMAWIFI");
 			rpAPm = new RelayPositionAPMonitor(rwlc,4000,to);
 			rpAPm.start();
 			
