@@ -28,7 +28,6 @@ import relay.timeout.TimeOutFailToElect;
 import relay.timeout.TimeOutSearch;
 import relay.timeout.TimeOutEmElection;
 import relay.timeout.TimeOutToElect;
-import relay.wnic.RelayDummyController;
 import relay.wnic.RelayWNICController;
 import relay.wnic.WNICFinder;
 import relay.wnic.exception.WNICException;
@@ -258,7 +257,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			relayPositionAPMonitor.start();
 			relayPositionClientsMonitor.start();
-			relayBatteryMonitor.start();
+			//relayBatteryMonitor.start();
 			whoIsRelayServer.start();
 
 			actualStatus = RelayStatus.MONITORING;
@@ -307,11 +306,11 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
-			whoIsRelayServer = new WhoIsRelayServer();
+			whoIsRelayServer = new WhoIsRelayServer(imBigBoss);
 
 			relayPositionAPMonitor.start();
 			relayPositionClientsMonitor.start();
-			relayBatteryMonitor.start();
+			//relayBatteryMonitor.start();
 			whoIsRelayServer.start();
 
 			actualStatus = RelayStatus.MONITORING;
@@ -330,8 +329,8 @@ public class RelayElectionManager extends Observable implements Observer {
 	/* (non-Javadoc)
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
-	public synchronized void update(Observable arg0, Object arg1) {
-
+	public synchronized void update(Observable arg0, Object arg1) {}
+/*
 		//PARTE PER LA GESTIONE DEI MESSAGGI PROVENIENTI DALLA RETE
 		if(arg1 instanceof DatagramPacket){
 
@@ -354,7 +353,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * relayAddress = <IP del Relay>
 			 * resetto TIMEOUT_SEARCH
 			 */
-			if(relayMessageReader.getCode() == Parameters.IM_RELAY && 
+			/*if(relayMessageReader.getCode() == Parameters.IM_RELAY && 
 					actualStatus == RelayStatus.IDLE){
 
 				if(timeoutSearch != null) {
@@ -379,7 +378,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 *relayAddress = <IP del NEW RELAY>
 			 *reset TIMEOUT_SEARCH
 			 */
-			else if(relayMessageReader.getCode() == Parameters.ELECTION_DONE && 
+			/*else if(relayMessageReader.getCode() == Parameters.ELECTION_DONE && 
 					actualStatus == RelayStatus.IDLE 
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
 					&& (!dpIn.getAddress().getHostAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS) || electionDoneAutoEnable)
@@ -429,7 +428,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 *status = ActiveNormalElection
 			 *start TIMEOUT_FAIL_TO_ELECT
 			 */
-			else if(relayMessageReader.getCode() == Parameters.ELECTION_REQUEST && 
+			/*else if(relayMessageReader.getCode() == Parameters.ELECTION_REQUEST && 
 					actualStatus == RelayStatus.IDLE 
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
 					&& (!dpIn.getAddress().getHostAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS) || electionRequestAutoEnable)
@@ -491,7 +490,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			PERCHE' POI, POTENDO RIENTRARE IN VISIBILITA' DELL'AP, QUANDO SCATTA UNA ULTERIORE ELEZIONE, PUO'
 			PARTECIVARVI (COME E' SUO DIRITTO)VISTO CHE CONOSCE L'INDIRIZZO DELL'ORMAI OLD
 			RELAY ELETTO TRAMITE ELEZIONE DI EMERGENZA (a chi manderebbe sennò la sua ELECTION_RESPONSE ? )*/
-			else if(relayMessageReader.getCode() == Parameters.EM_ELECTION && 
+			/*else if(relayMessageReader.getCode() == Parameters.EM_ELECTION && 
 					actualStatus == RelayStatus.IDLE 
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
 					&& (!dpIn.getAddress().getHostAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS) || emElectionAutoEnable)
@@ -529,7 +528,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			/*[ELECTION_BEACON arrivato] / 
 			 *counter_clients++ 
 			 */
-			else if(relayMessageReader.getCode() == Parameters.ELECTION_BEACON && 
+			/*else if(relayMessageReader.getCode() == Parameters.ELECTION_BEACON && 
 					actualStatus == RelayStatus.ACTIVE_NORMAL_ELECTION){
 
 				counter_clients++;
@@ -547,7 +546,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * relayAddress = <IP del NEW RELAY>
 			 * invio ELECTION_DONE
 			 */
-			else if(relayMessageReader.getCode() == Parameters.ELECTION_DONE && 
+			/*else if(relayMessageReader.getCode() == Parameters.ELECTION_DONE && 
 					actualStatus == RelayStatus.WAITING_END_NORMAL_ELECTION &&
 					!relayMessageReader.getNewRelayAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS) 
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
@@ -592,7 +591,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * imRelay = true 
 			 * invia REQUEST_SESSION 
 			 */
-			else if(relayMessageReader.getCode() == Parameters.ELECTION_DONE && 
+			/*else if(relayMessageReader.getCode() == Parameters.ELECTION_DONE && 
 					actualStatus == RelayStatus.WAITING_END_NORMAL_ELECTION &&
 					relayMessageReader.getNewRelayAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS)
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
@@ -635,13 +634,13 @@ public class RelayElectionManager extends Observable implements Observer {
 				}
 				*/
 
-				debugPrint("RelayElectionManager: STATO WAITING_END_NORMAL_ELECTION -> IDLE: " +
-				"ELECTION_DONE arrivato && <IP in ELECTION_DONE> == localhost");
+				//debugPrint("RelayElectionManager: STATO WAITING_END_NORMAL_ELECTION -> IDLE: " +
+				//"ELECTION_DONE arrivato && <IP in ELECTION_DONE> == localhost");
 				
 				//NON LO MANDO IO IL REQUEST_SESSION MA CI PENSA IL SESSION_MANAGER
 				/*debugPrint("RelayElectionManager: STATO WAITING_END_NORMAL_ELECTION -> IDLE: " +
 						"REQUEST_SESSION inviato al nuovo Relay: " + actualRelayAddress);*/
-			}
+			//}
 
 
 			/*[EM_EL_DET_RELAY arrivato || EM_EL_DET_CLIENT arrivato]
@@ -652,7 +651,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * start TIMEOUT_CLIENT_DETECTION
 			 * status = ActiveEmergencyElection
 			 */
-			else if((relayMessageReader.getCode() == Parameters.EM_EL_DET_RELAY ||
+			/*else if((relayMessageReader.getCode() == Parameters.EM_EL_DET_RELAY ||
 					relayMessageReader.getCode() == Parameters.EM_EL_DET_CLIENT) &&
 					actualStatus == RelayStatus.WAITING_END_NORMAL_ELECTION
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
@@ -690,7 +689,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			/*CASO IN CUI POTREBBE ARRIVARE UN EM_ELECTION DURANTE IL WAITING_END_NORMAL_ELECTION
 			 NELLA REALTA' NON DOVREBEB MAI CAPITARE */
-			else if(relayMessageReader.getCode() == Parameters.EM_ELECTION &&
+			/*else if(relayMessageReader.getCode() == Parameters.EM_ELECTION &&
 					actualStatus == RelayStatus.WAITING_END_NORMAL_ELECTION
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
 					&& (!dpIn.getAddress().getHostAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS) || emElectionAutoEnable)		
@@ -727,7 +726,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			/*[EM_EL_DET_CLIENT arrivato]
 			 * counter_clients++
 			 */
-			else if(relayMessageReader.getCode() == Parameters.EM_EL_DET_CLIENT &&
+			/*else if(relayMessageReader.getCode() == Parameters.EM_EL_DET_CLIENT &&
 					actualStatus == RelayStatus.ACTIVE_EMERGENCY_ELECTION){
 
 				counter_clients++;
@@ -746,7 +745,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 *if(<IP arrivato> < relayAddress) relayAddress = <IP arrivato>
 			 *}
 			 */
-			else if(relayMessageReader.getCode() == Parameters.EM_ELECTION &&
+			/*else if(relayMessageReader.getCode() == Parameters.EM_ELECTION &&
 					actualStatus == RelayStatus.ACTIVE_EMERGENCY_ELECTION
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
 					&& (!dpIn.getAddress().getHostAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS) || emElectionAutoEnable)	
@@ -773,7 +772,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 *if(<IP arrivato> < relayAddress) relayAddress = <IP arrivato>
 			 *}
 			 */
-			else if(relayMessageReader.getCode() == Parameters.EM_ELECTION &&
+			/*else if(relayMessageReader.getCode() == Parameters.EM_ELECTION &&
 					actualStatus == RelayStatus.WAITING_END_EMERGENCY_ELECTION
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
 					&& (!dpIn.getAddress().getHostAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS)	|| emElectionAutoEnable)	
@@ -794,7 +793,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			/*[ELECTION_RESPONSE arrivato]
 			 * if(!responses)responses = true
 			 */
-			else if(relayMessageReader.getCode() == Parameters.ELECTION_RESPONSE &&
+			/*else if(relayMessageReader.getCode() == Parameters.ELECTION_RESPONSE &&
 					actualStatus == RelayStatus.WAITING_RESPONSE
 					//Parte che evita la ricezione dei propri messaggi a livello alto 		
 					&& (!dpIn.getAddress().getHostAddress().equals(Parameters.RELAY_AD_HOC_ADDRESS) || electionResponseAutoEnable) 		
@@ -814,11 +813,11 @@ public class RelayElectionManager extends Observable implements Observer {
 			/**FINE STATO WAITING_RESPONSE **/
 
 
-		}
+		//}
 
 
 		//PARTE PER LA GESTIONE DELLE NOTIFICHE NON PROVENIENTI DALLA RETE
-		if(arg1 instanceof String){
+		/*if(arg1 instanceof String){
 
 			String event = (String) arg1;
 
@@ -827,7 +826,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			/*[TIMEOUT_SEARCH scattato] --> SearchingRelay
 			 */
-			if(event.equals("TIMEOUTSEARCH") &&
+			/*if(event.equals("TIMEOUTSEARCH") &&
 					actualStatus == RelayStatus.IDLE){
 
 				debugPrint("RelayElectionManager: STATO IDLE: TIMEOUT_SEARCH scattato");
@@ -843,7 +842,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			/*[TIMEOUT_ELECTION_BEACON scattato] --> WeightCalculation
 			 */
-			else if(event.equals("TIMEOUTELECTIONBEACON") &&
+			/*else if(event.equals("TIMEOUTELECTIONBEACON") &&
 					actualStatus == RelayStatus.ACTIVE_NORMAL_ELECTION){
 
 				debugPrint("RelayElectionManager: STATO ACTIVE_NORMAL_ELECTION: TIMEOUT_ELECTION_BEACON scattato" +
@@ -859,7 +858,7 @@ public class RelayElectionManager extends Observable implements Observer {
 				 * start TIMEOUT_FAIL_TO_ELECT  <-- (MA S'ERA FATTO PARTIRE PRIMAAAA !!!!)
 				 * status = WaitingEndNormalElection
 				 */
-				DatagramPacket dpOut = null;
+				/*DatagramPacket dpOut = null;
 
 				try {
 					dpOut = RelayMessageFactory.buildElectionResponse(indexELECTION_RESPONSE, W, relayInetAddress, Parameters.RELAY_ELECTION_PORT_IN);
@@ -888,7 +887,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * start TIMEOUT_CLIENT_DETECTION
 			 * status = ActiveEmergencyElection
 			 */
-			else if(event.equals("TIMEOUTFAILTOELECT") &&
+			/*else if(event.equals("TIMEOUTFAILTOELECT") &&
 					actualStatus == RelayStatus.WAITING_END_NORMAL_ELECTION){
 
 				debugPrint("RelayElectionManager: STATO WAITING_END_NORMAL_ELECTION: " +
@@ -930,7 +929,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			/*[TIMEOUT_CLIENT_DETECTION scattato] --> WeightCalculation
 			 */
-			else if(event.equals("TIMEOUTCLIENTDETECTION") &&
+			/*else if(event.equals("TIMEOUTCLIENTDETECTION") &&
 					actualStatus == RelayStatus.ACTIVE_EMERGENCY_ELECTION){
 
 				debugPrint("RelayElectionManager: STATO ACTIVE_EMERGENCY_ELECTION: TIMEOUT_CLIENT_DETECTION," +
@@ -954,7 +953,7 @@ public class RelayElectionManager extends Observable implements Observer {
 				 * }
 				 */
 
-				try {
+			/*	try {
 					if(relayWNICController.isConnected() && (!firstEM_ELECTIONarrived || compareAfterWeightCalculation())){
 
 						actualRelayAddress = Parameters.RELAY_AD_HOC_ADDRESS;
@@ -1012,7 +1011,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * imRelay = true
 			 * status = monitoring
 			 */
-			else if(event.equals("TIMEOUTEMELECTION") &&
+			/*else if(event.equals("TIMEOUTEMELECTION") &&
 					actualStatus == RelayStatus.WAITING_END_EMERGENCY_ELECTION){
 
 				electing = false;
@@ -1059,7 +1058,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * imRelay = true
 			 * status = monitoring
 			 */
-			else if(event.equals("DISCONNECTION_WARNING") &&
+			/*else if(event.equals("DISCONNECTION_WARNING") &&
 					actualStatus == RelayStatus.MONITORING){
 
 				debugPrint("RelayElectionManager: STATO MONITORING: DISCONNECTION_WARNING sollevato " +
@@ -1115,7 +1114,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * }
 			 * status = IDLE
 			 */
-			else if(event.equals("TIMEOUTTOELECT") &&
+			/*else if(event.equals("TIMEOUTTOELECT") &&
 					actualStatus == RelayStatus.WAITING_RESPONSE){
 
 				electing = false;
@@ -1160,8 +1159,8 @@ public class RelayElectionManager extends Observable implements Observer {
 				actualStatus = RelayStatus.IDLE;
 			}
 			/**FINE STATO WAITING_RESPONSE**/
-		}
-	}
+		//}
+	//}
 
 
 
@@ -1185,7 +1184,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			DatagramPacket dpOut = null;
 
 			try {
-				dpOut = RelayMessageFactory.buildWhoIsRelay(BCAST, Parameters.WHO_IS_RELAY_PORT);
+				dpOut = RelayMessageFactory.buildWhoIsRelay(BCAST, Parameters.WHO_IS_RELAY_PORT_IN);
 				comManager.sendTo(dpOut);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -1223,73 +1222,73 @@ public class RelayElectionManager extends Observable implements Observer {
 	/**Metodo per calcolare il W tramite il WeightCalculation a cui passo il RelayWNICController 
 	 * e il numero di clients rilevati 
 	 */
-	private void weightCalculation(){
-
-		W = WeightCalculator.calculateWeight(relayWNICController, counter_clients);
-		System.out.println("RelayElectionManager.weightCalculation(): STATO INSTABILE WEIGHT_CALCULATION: " +
-				"calcolato W = " + W);
-	}
+//	private void weightCalculation(){
+//
+//		W = WeightCalculator.calculateWeight(relayWNICController, counter_clients);
+//		System.out.println("RelayElectionManager.weightCalculation(): STATO INSTABILE WEIGHT_CALCULATION: " +
+//				"calcolato W = " + W);
+//	}
 
 
 	/**Metodo per confrontare il W proveniente dal messaggio 
 	 * @param externalW un double che rappresenta il W arrivato con il messaggio EM_ELECTION
 	 * @param externalAddress una String che rappresenta l'indirizzo del mittente del messaggio EM_ELECTION
 	 */
-	private void compareWithLocalData(double externalW, String externalAddress){
-
-		//DEBUG
-		//debugPrint("externalAddress: " + externalAddress);
-
-		if(externalW > maxW){
-
-			maxW = externalW;
-			System.out.println("RelayElectionManager.compareWithLocalData(): (externalW > maxW)");
-			System.out.println("RelayElectionManager.compareWithLocalData(): memorizzo "+externalAddress+
-			" perchè ha W più alto");
-			actualRelayAddress = externalAddress;
-			memorizeRelayAddress();
-		}
-		else if(externalW == maxW){
-
-			if((actualRelayAddress.compareTo(externalAddress))>0){
-
-				System.out.println("RelayElectionManager.compareWithLocalData(): (externalW == maxW)");
-				System.out.println("RelayElectionManager.compareWithLocalData(): memorizzo "+externalAddress+
-				" perchè ha IP più basso");
-				actualRelayAddress = externalAddress;
-				memorizeRelayAddress();				
-			}
-		}	
-	}
+//	private void compareWithLocalData(double externalW, String externalAddress){
+//
+//		//DEBUG
+//		//debugPrint("externalAddress: " + externalAddress);
+//
+//		if(externalW > maxW){
+//
+//			maxW = externalW;
+//			System.out.println("RelayElectionManager.compareWithLocalData(): (externalW > maxW)");
+//			System.out.println("RelayElectionManager.compareWithLocalData(): memorizzo "+externalAddress+
+//			" perchè ha W più alto");
+//			actualRelayAddress = externalAddress;
+//			memorizeRelayAddress();
+//		}
+//		else if(externalW == maxW){
+//
+//			if((actualRelayAddress.compareTo(externalAddress))>0){
+//
+//				System.out.println("RelayElectionManager.compareWithLocalData(): (externalW == maxW)");
+//				System.out.println("RelayElectionManager.compareWithLocalData(): memorizzo "+externalAddress+
+//				" perchè ha IP più basso");
+//				actualRelayAddress = externalAddress;
+//				memorizeRelayAddress();				
+//			}
+//		}	
+//	}
 
 
 	/**Metodo da lanciare appena finito di calcolare il proprio W
 	 * @return true se il W appena calcolato è maggiore del massimo W ottenuto dai messaggi 
 	 * EM_ELECTION, false altrimenti
 	 */
-	private boolean compareAfterWeightCalculation(){
-
-		debugPrint("compareAfterWeightCalculation");
-
-		if(W < 0)return false;
-
-		if(W > maxW){
-			System.out.println("RelayElectionManager.compareAfterWeightCalculation(): (W > maxW)");
-			System.out.println("RelayElectionManager.compareAfterWeightCalculation(): " +
-			"Memorizzo il mio indirizzo come quello del NEW RELAY perchè ha W più alto");
-			return true;
-		}
-		else if(W == maxW){
-
-			if((actualRelayAddress.compareTo(actualRelayAddress))<0){
-				System.out.println("RelayElectionManager.compareAfterWeightCalculation(): (W == maxW)");
-				System.out.println("RelayElectionManager.compareAfterWeightCalculation(): " +
-				"Memorizzo il mio indirizzo come quello del NEW RELAY perchè ha IP più basso");
-				return true;
-			}
-		}
-		return false;
-	}
+//	private boolean compareAfterWeightCalculation(){
+//
+//		debugPrint("compareAfterWeightCalculation");
+//
+//		if(W < 0)return false;
+//
+//		if(W > maxW){
+//			System.out.println("RelayElectionManager.compareAfterWeightCalculation(): (W > maxW)");
+//			System.out.println("RelayElectionManager.compareAfterWeightCalculation(): " +
+//			"Memorizzo il mio indirizzo come quello del NEW RELAY perchè ha W più alto");
+//			return true;
+//		}
+//		else if(W == maxW){
+//
+//			if((actualRelayAddress.compareTo(actualRelayAddress))<0){
+//				System.out.println("RelayElectionManager.compareAfterWeightCalculation(): (W == maxW)");
+//				System.out.println("RelayElectionManager.compareAfterWeightCalculation(): " +
+//				"Memorizzo il mio indirizzo come quello del NEW RELAY perchè ha IP più basso");
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 
 	/**Metodo per costruire il pacchetto di ELECTION_DONE da ripropagare
@@ -1308,65 +1307,65 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * affinchè il Relay uscente selezioni un altro tra i possibili Relay registrati tramite gli ELECTION_RESPONSE
 	 * come nuovo Relay
 	 */
-	public synchronized void chooseAnotherRelay(){
-
-		if (firstELECTION_DONEsent) {
-
-			if (possibleRelay.size() > 1) {
-
-				possibleRelay.remove(0);
-
-				DatagramPacket dpOut = null;
-				
-				try {
-					dpOut = RelayMessageFactory.buildElectionDone(
-							indexELECTION_DONE, possibleRelay.get(0)
-							.getAddress(), BCAST,
-							Parameters.RELAY_ELECTION_PORT_IN);
-
-					comManager.sendTo(dpOut);
-
-					dpOut = RelayMessageFactory.buildElectionDone(
-							indexELECTION_DONE, possibleRelay.get(0)
-							.getAddress(), BCAST,
-							Parameters.CLIENT_PORT_ELECTION_IN);
-
-					comManager.sendTo(dpOut);
-
-					indexELECTION_DONE++;
-
-					System.out.println("RelayElectionManager.chooseAnotherRelay(): NUOVO ELECTION_DONE SPEDITO");
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} else
-				System.out
-				.println("RelayElectionManager.chooseAnotherRelay(): Non ci sono altri possibili Relay rilevati");
-		} else
-			System.out
-			.println("RelayElectionManager.chooseAnotherRelay(): impossibile inviare un nuovo ELECTION_DONE " +
-			"perchè non ne è stato inviato uno in precendenza");
-	}
+//	public synchronized void chooseAnotherRelay(){
+//
+//		if (firstELECTION_DONEsent) {
+//
+//			if (possibleRelay.size() > 1) {
+//
+//				possibleRelay.remove(0);
+//
+//				DatagramPacket dpOut = null;
+//				
+//				try {
+//					dpOut = RelayMessageFactory.buildElectionDone(
+//							indexELECTION_DONE, possibleRelay.get(0)
+//							.getAddress(), BCAST,
+//							Parameters.RELAY_ELECTION_PORT_IN);
+//
+//					comManager.sendTo(dpOut);
+//
+//					dpOut = RelayMessageFactory.buildElectionDone(
+//							indexELECTION_DONE, possibleRelay.get(0)
+//							.getAddress(), BCAST,
+//							Parameters.CLIENT_PORT_ELECTION_IN);
+//
+//					comManager.sendTo(dpOut);
+//
+//					indexELECTION_DONE++;
+//
+//					System.out.println("RelayElectionManager.chooseAnotherRelay(): NUOVO ELECTION_DONE SPEDITO");
+//
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			} else
+//				System.out
+//				.println("RelayElectionManager.chooseAnotherRelay(): Non ci sono altri possibili Relay rilevati");
+//		} else
+//			System.out
+//			.println("RelayElectionManager.chooseAnotherRelay(): impossibile inviare un nuovo ELECTION_DONE " +
+//			"perchè non ne è stato inviato uno in precendenza");
+//	}
 	
 	
 	/**Metodo per avere stampate di debug
 	 * @param message una String che rappresenta il messaggio da presentare
 	 */
-	private void debugPrint(String message){
-		System.err.println(message);
-		if(debugConsolle != null)this.debugConsolle.debugMessage(message);	
+//	private void debugPrint(String message){
+//		System.err.println(message);
+//		if(debugConsolle != null)this.debugConsolle.debugMessage(message);	
+//
+//	}
 
-	}
 
 
-
-	public RelayElectionCM getComManager() {
+	public RelayCM getComManager() {
 		return comManager;
 	}
 
 
-	public void setComManager(RelayElectionCM comManager) {
+	public void setComManager(RelayCM comManager) {
 		this.comManager = comManager;
 	}
 
@@ -1481,13 +1480,17 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 
-	public RelayWNICController getRelayWNICController() {
-		return relayWNICController;
+	public RelayWNICController getRelayAHWNICController() {
+		return relayAHWNICController;
+	}
+	
+	public RelayWNICController getRelayAPWNICController() {
+		return relayAPWNICController;
 	}
 
 
 	public void setRelayWNICController(RelayWNICController relayWNICController) {
-		this.relayWNICController = relayWNICController;
+		this.relayAHWNICController = relayWNICController;
 	}
 
 
@@ -1574,54 +1577,54 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 
-	public int getIndexELECTION_RESPONSE() {
-		return indexELECTION_RESPONSE;
-	}
-
-
-	public void setIndexELECTION_RESPONSE(int indexELECTION_RESPONSE) {
-		this.indexELECTION_RESPONSE = indexELECTION_RESPONSE;
-	}
-
-
-	public int getIndexREQUEST_SESSION() {
-		return indexREQUEST_SESSION;
-	}
-
-
-	public void setIndexREQUEST_SESSION(int indexREQUEST_SESSION) {
-		this.indexREQUEST_SESSION = indexREQUEST_SESSION;
-	}
-
-
-	public int getIndexEM_EL_DET_RELAY() {
-		return indexEM_EL_DET_RELAY;
-	}
-
-
-	public void setIndexEM_EL_DET_RELAY(int indexEM_EL_DET_RELAY) {
-		this.indexEM_EL_DET_RELAY = indexEM_EL_DET_RELAY;
-	}
-
-
-	public int getIndexEM_ELECTION() {
-		return indexEM_ELECTION;
-	}
-
-
-	public void setIndexEM_ELECTION(int indexEM_ELECTION) {
-		this.indexEM_ELECTION = indexEM_ELECTION;
-	}
-
-
-	public int getIndexELECTION_DONE() {
-		return indexELECTION_DONE;
-	}
-
-
-	public void setIndexELECTION_DONE(int indexELECTION_DONE) {
-		this.indexELECTION_DONE = indexELECTION_DONE;
-	}
+//	public int getIndexELECTION_RESPONSE() {
+//		return indexELECTION_RESPONSE;
+//	}
+//
+//
+//	public void setIndexELECTION_RESPONSE(int indexELECTION_RESPONSE) {
+//		this.indexELECTION_RESPONSE = indexELECTION_RESPONSE;
+//	}
+//
+//
+//	public int getIndexREQUEST_SESSION() {
+//		return indexREQUEST_SESSION;
+//	}
+//
+//
+//	public void setIndexREQUEST_SESSION(int indexREQUEST_SESSION) {
+//		this.indexREQUEST_SESSION = indexREQUEST_SESSION;
+//	}
+//
+//
+//	public int getIndexEM_EL_DET_RELAY() {
+//		return indexEM_EL_DET_RELAY;
+//	}
+//
+//
+//	public void setIndexEM_EL_DET_RELAY(int indexEM_EL_DET_RELAY) {
+//		this.indexEM_EL_DET_RELAY = indexEM_EL_DET_RELAY;
+//	}
+//
+//
+//	public int getIndexEM_ELECTION() {
+//		return indexEM_ELECTION;
+//	}
+//
+//
+//	public void setIndexEM_ELECTION(int indexEM_ELECTION) {
+//		this.indexEM_ELECTION = indexEM_ELECTION;
+//	}
+//
+//
+//	public int getIndexELECTION_DONE() {
+//		return indexELECTION_DONE;
+//	}
+//
+//
+//	public void setIndexELECTION_DONE(int indexELECTION_DONE) {
+//		this.indexELECTION_DONE = indexELECTION_DONE;
+//	}
 
 
 	public static InetAddress getBCAST() {
@@ -1775,7 +1778,8 @@ class TesterRelayElectionManager{
 			System.out.println("electing: " + rem.isElecting());
 			System.out.println("first ELECTION_DONE sent: " + rem.isFirstELECTION_DONEsent());
 			System.out.println("first EM_ELECTION arrived: " + rem.isFirstEM_ELECTIONarrived());
-			System.out.println("apVisibility: " + rem.getRelayWNICController().isConnected());
+			System.out.println("apVisibility: " + rem.getRelayAPWNICController().isConnected());
+			System.out.println("aHVisibility: " + rem.getRelayAHWNICController().isConnected());
 			System.out.println("********************************************************************************");
 
 		} catch (WNICException e1) {
@@ -1793,11 +1797,11 @@ class TesterRelayElectionManager{
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
-
-		RelayElectionManager rem = RelayElectionManager.getInstance(false, null);
+		RelaySessionManager session = RelaySessionManager.getInstance();
+		RelayElectionManager rem = RelayElectionManager.getInstance(true,true, session);
 
 		//STAMPA VERIFICA 1
-		stamp(rem, 1);
+		//stamp(rem, 1);
 
 
 		//STATO IDLE && IM_RELAY ARRIVATO																	OK			
@@ -1848,125 +1852,125 @@ class TesterRelayElectionManager{
 		 */
 
 		//per abilitare la ricezione di ElectionRequest provenienti da localhost
-		rem.setElectionRequestAutoEnable(true); 
-
-		//per mettere apVisibility = false
-		((RelayDummyController)rem.getRelayWNICController()).setApVisibility(false); 
-
-		try {
-
-			DatagramPacket dpOut = RelayMessageFactory.buildElectionRequest(rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
-
-			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
-
-			dsNet.send(dpOut);
-
-			Thread.sleep(500);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		//STAMPA VERIFICA 3  
-		stamp(rem, 3);
-
-
-
-		//STATO IDLE && ELECTION_DONE ARRIVATO && apVisibility == false									OK
-		/* Status = IDLE
-		 * actualRelayAddress = 192.168.0.11
-		 * relayInetAddress = 192.168.0.11
-		 * imRelay = false
-		 * W = -1
-		 * maxW = -1
-		 * counter_clients = 0
-		 * electing = false
-		 * first ELECTION_DONE sent = false
-		 * first EM_ELECTION arrived = false
-		 * apVisibility = false
-		 */
-		/*
-		//per abilitare la ricezione di ElectionRequest provenienti da localhost
-		rem.setElectionDoneAutoEnable(true); 
-
-		//per mettere apVisibility = false
-		((RelayDummyController)rem.getRelayWNICController()).setApVisibility(false); 
-
-		try {
-
-			DatagramPacket dpOut = RelayMessageFactory.buildElectionDone(0,"192.168.0.11", rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
-
-			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
-
-			dsNet.send(dpOut);
-
-			Thread.sleep(500);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		//STAMPA VERIFICA 3bis  
-		stamp(rem, 3);
-		 */
-
-
-		//STATO IDLE && EM_ELECTION ARRIVATO && apVisibility == false										OK
-		/* Status = WAITING_END_EMERGENCY_ELECTION
-		 * actualRelayAddress = 192.168.0.7 (ci sta solo questo)
-		 * relayInetAddress = 192.168.0.7
-		 * imRelay = false
-		 * W = -1
-		 * maxW = 24
-		 * counter_clients = 0
-		 * electing = true
-		 * first ELECTION_DONE sent = false
-		 * first EM_ELECTION arrived = true
-		 * apVisibility = false
-		 */
-
-		//per abilitare la ricezione di ElectionRequest provenienti da localhost
-		rem.setEmElectionAutoEnable(true); 
-
-		//per mettere apVisibility = false
-		((RelayDummyController)rem.getRelayWNICController()).setApVisibility(false); 
-
-		try{
-			DatagramPacket dpOut = RelayMessageFactory.buildEmElection(3, 23, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
-
-			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
-
-			dsNet.send(dpOut);
-
-			dpOut = RelayMessageFactory.buildEmElection(4, 24, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
-
-			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
-
-			dsNet.send(dpOut);
-
-			dpOut = RelayMessageFactory.buildEmElection(5, 22, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
-
-			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
-
-			dsNet.send(dpOut);
-
-			Thread.sleep(500);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		//interrompo il TIMEOUT_EM_ELECTION
-		rem.getTimeoutEmElection().cancelTimeOutEmElection();
-
-		//STAMPA VERIFICA 3tris  
-		stamp(rem, 3);
+//		rem.setElectionRequestAutoEnable(true); 
+//
+//		//per mettere apVisibility = false
+//		((RelayDummyController)rem.getRelayWNICController()).setApVisibility(false); 
+//
+//		try {
+//
+//			DatagramPacket dpOut = RelayMessageFactory.buildElectionRequest(rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
+//
+//			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
+//
+//			dsNet.send(dpOut);
+//
+//			Thread.sleep(500);
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//
+//		//STAMPA VERIFICA 3  
+//		stamp(rem, 3);
+//
+//
+//
+//		//STATO IDLE && ELECTION_DONE ARRIVATO && apVisibility == false									OK
+//		/* Status = IDLE
+//		 * actualRelayAddress = 192.168.0.11
+//		 * relayInetAddress = 192.168.0.11
+//		 * imRelay = false
+//		 * W = -1
+//		 * maxW = -1
+//		 * counter_clients = 0
+//		 * electing = false
+//		 * first ELECTION_DONE sent = false
+//		 * first EM_ELECTION arrived = false
+//		 * apVisibility = false
+//		 */
+//		/*
+//		//per abilitare la ricezione di ElectionRequest provenienti da localhost
+//		rem.setElectionDoneAutoEnable(true); 
+//
+//		//per mettere apVisibility = false
+//		((RelayDummyController)rem.getRelayWNICController()).setApVisibility(false); 
+//
+//		try {
+//
+//			DatagramPacket dpOut = RelayMessageFactory.buildElectionDone(0,"192.168.0.11", rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
+//
+//			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
+//
+//			dsNet.send(dpOut);
+//
+//			Thread.sleep(500);
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//
+//		//STAMPA VERIFICA 3bis  
+//		stamp(rem, 3);
+//		 */
+//
+//
+//		//STATO IDLE && EM_ELECTION ARRIVATO && apVisibility == false										OK
+//		/* Status = WAITING_END_EMERGENCY_ELECTION
+//		 * actualRelayAddress = 192.168.0.7 (ci sta solo questo)
+//		 * relayInetAddress = 192.168.0.7
+//		 * imRelay = false
+//		 * W = -1
+//		 * maxW = 24
+//		 * counter_clients = 0
+//		 * electing = true
+//		 * first ELECTION_DONE sent = false
+//		 * first EM_ELECTION arrived = true
+//		 * apVisibility = false
+//		 */
+//
+//		//per abilitare la ricezione di ElectionRequest provenienti da localhost
+//		rem.setEmElectionAutoEnable(true); 
+//
+//		//per mettere apVisibility = false
+//		((RelayDummyController)rem.getRelayWNICController()).setApVisibility(false); 
+//
+//		try{
+//			DatagramPacket dpOut = RelayMessageFactory.buildEmElection(3, 23, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
+//
+//			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
+//
+//			dsNet.send(dpOut);
+//
+//			dpOut = RelayMessageFactory.buildEmElection(4, 24, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
+//
+//			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
+//
+//			dsNet.send(dpOut);
+//
+//			dpOut = RelayMessageFactory.buildEmElection(5, 22, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
+//
+//			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
+//
+//			dsNet.send(dpOut);
+//
+//			Thread.sleep(500);
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//
+//		//interrompo il TIMEOUT_EM_ELECTION
+//		rem.getTimeoutEmElection().cancelTimeOutEmElection();
+//
+//		//STAMPA VERIFICA 3tris  
+//		stamp(rem, 3);
 
 
 
@@ -2439,24 +2443,24 @@ class TesterRelayElectionManager{
 		 * first EM_ELECTION arrived = true
 		 * apVisibility = true (false nel caso di IDLE -> WAITING_END_EMERGENCY_ELECTION && apVisibility == false [STAMPA 3tris] )
 		 */
-
-		try{
-			DatagramPacket dpOut = RelayMessageFactory.buildEmElection(9, 33, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
-
-			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
-
-			dsNet.send(dpOut);
-
-			Thread.sleep(500);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		//STAMPA VERIFICA 15
-		stamp(rem, 15);
+//
+//		try{
+//			DatagramPacket dpOut = RelayMessageFactory.buildEmElection(9, 33, rem.getBCAST(), Parameters.RELAY_ELECTION_PORT_IN);
+//
+//			System.out.println("indirizzo: " + dpOut.getAddress().getHostAddress()+" porta: " +dpOut.getPort());
+//
+//			dsNet.send(dpOut);
+//
+//			Thread.sleep(500);
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//
+//		//STAMPA VERIFICA 15
+//		stamp(rem, 15);
 
 
 
@@ -2509,20 +2513,20 @@ class TesterRelayElectionManager{
 		 */
 
 		//mi tocca settare l'indirizzo del relay a mano 
-		rem.setActualRelayAddress("192.168.0.11");
-		try {
-			rem.setRelayInetAddress(InetAddress.getByName("192.168.0.11"));
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		//faccio scattare il TIMEOUT_EM_ELECTION 
-		rem.update(null,"TIMEOUTEMELECTION");
-
-
-		//STAMPA VERIFICA 17
-		stamp(rem, 17);
+//		rem.setActualRelayAddress("192.168.0.11");
+//		try {
+//			rem.setRelayInetAddress(InetAddress.getByName("192.168.0.11"));
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		//faccio scattare il TIMEOUT_EM_ELECTION 
+//		rem.update(null,"TIMEOUTEMELECTION");
+//
+//
+//		//STAMPA VERIFICA 17
+//		stamp(rem, 17);
 
 
 
