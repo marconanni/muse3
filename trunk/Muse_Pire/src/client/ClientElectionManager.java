@@ -11,8 +11,8 @@ import parameters.Parameters;
 
 import client.ClientMessageReader;
 import client.timeout.ClientTimeoutFactory;
+import client.connection.ClientCM;
 import client.connection.ClientConnectionFactory;
-import client.connection.ClientElectionCM;
 import client.positioning.ClientPositionController;
 import client.timeout.TimeOutFailToElect;
 import client.timeout.TimeOutSearch;
@@ -39,7 +39,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	private int indexELECTION_BEACON = 0;
 	private boolean stop = false;
 		
-	private ClientElectionCM comManager = null;							//il manaegr per le comunicazioni
+	private ClientCM comManager = null;							//il manaegr per le comunicazioni
 	private ClientPositionController clientPositionController = null;	//Ascolta i messaggi di RSSIREQUEST e risponde col proprio valore RSSI rilevato nel confronto del relay a cui è collegato
 	private ClientMessageReader clientMessageReader = null;				//il ClientMessageReader per leggere il contenuto dei messaggi ricevuti
 	private static ClientElectionManager INSTANCE = null;				//istanza singleton del ClientElectionManager
@@ -99,7 +99,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			DatagramPacket dpOut = null;
 		
 			try {
-				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT);
+				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT_IN);
 				comManager.sendTo(dpOut);
 
 			} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
@@ -475,8 +475,8 @@ public class ClientElectionManager extends Observable implements Observer{
 	 */
 	public DebugConsole getDebugCondole(){return console;}
 	public boolean isImServed() {return imServed;}
-	public ClientElectionCM getComManager() {return comManager;}
-	public void setComManager(ClientElectionCM comManager) {this.comManager = comManager;}
+	public ClientCM getComManager() {return comManager;}
+	public void setComManager(ClientCM comManager) {this.comManager = comManager;}
 	public ClientStatus getActualStatus() {return actualStatus;}
 	public void setActualStatus(ClientStatus actualStatus) {this.actualStatus = actualStatus;}
 	public String getActualRelayAddress() {return actualRelayAddress;}

@@ -23,9 +23,6 @@ public class AConnectionManager {
 	private boolean started = false;
 	protected String managerName = "AConnectionManager";
 	
-	//private String localAdHocAddress = null;
-	//private int localAdHocOutputPort = -1;
-
 	/**Metodo per ottenere un AConnectionManager
 	 * @param localAdHocAddress una Stringa che rappresenta l'indirizzo locale sulla rete Ad-Hoc del nodo
 	 * @param localAdHocInputPort un int che rappresenta la porta di ricezione dei messaggi sulla rete Ad-Hoc
@@ -33,10 +30,6 @@ public class AConnectionManager {
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
 	 */
 	public AConnectionManager(int localAdHocInputPort, int localAdHocOutputPort, Observer observer){
-		//if(localAdHocAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
-
-		//this.localAdHocAddress = localAdHocAddress;
-		//this.localAdHocOutputPort = localAdHocOutputPort;
 		
 		try {
 			adHocOutputSocket = new DatagramSocket(localAdHocOutputPort);
@@ -67,7 +60,6 @@ public class AConnectionManager {
 		try {
 			adHocOutputSocket.send(dp);
 			System.out.println(managerName+".sendToAdHoc() : messaggio inviato a: " +dp.getAddress().getHostAddress() + " porta: " +dp.getPort() );
-			//System.out.println(managerName+".sendToAdHoc() : messaggio inviato da: " + localAdHocAddress + " porta: " + localAdHocOutputPort );
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -115,7 +107,7 @@ public class AConnectionManager {
 	/**Metodo per impostare il nome del Manager che sta utilizzando l'AConnectionManager
 	 * @param managerName una String che rappresenta il nome del Manager che sta utilizzando l'AConnectionManager
 	 */
-	public void setNameManager(String managerName) {
+	public void setManagerName(String managerName) {
 		this.managerName = managerName;
 		if(receiverAdHoc != null)receiverAdHoc.setManagerName(this.managerName);
 	}
