@@ -32,9 +32,14 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 	public RelayAPWNICLinuxController(int previous, String ethX) throws WNICException{
 		interf = ethX;
 		numberOfPreviousRSSI=previous;
-		console = new DebugConsole();
+		setDebugConsole(new DebugConsole());
 		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
 		refreshStatus();
+		
+		if (!isOn){
+			this.console.debugMessage(Parameters.DEBUG_ERROR,"La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel modo seguente:\nESSID: "+Parameters.NAME_OF_MANAGED_NETWORK+"\nMODE: Managed\nIp:"+Parameters.RELAY_MANAGED_ADDRESS);
+			throw new WNICException("RelayWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");
+		}
 	}
 
 

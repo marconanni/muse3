@@ -33,6 +33,7 @@ public class RelayPositionAPMonitor extends Observable {
 	private boolean started;
 	private Vector<Double> predictionValues = null;
 	private int maxNumberOfPredictionValuesValues;
+	private String tmp;
 
 
 	/**Metodo per ottenere un RelayPositionAPMonitor
@@ -53,6 +54,7 @@ public class RelayPositionAPMonitor extends Observable {
 		addObserver(electionManager);
 		currAP=null;
 		started = false;
+		rwc.getDebugConsole().debugMessage(Parameters.DEBUG_INFO, "RelayPositionAPMonitor.mainTask(): (1). CICLO DI CONTROLLO CONNESSIONE AP ogni " + period + " ms");
 	}
 
 
@@ -79,29 +81,29 @@ public class RelayPositionAPMonitor extends Observable {
 	private void mainTask(){
 		try{
 
-			System.out.println("\n***********************INIZIO mainTask*************************");
-
-			System.out.println("RelayPositionAPMonitor.mainTask(): (1). CICLO DI CONTROLLO CONNESSIONE AP ogni " + period + " ms");
+			//System.out.println("\n***********************INIZIO mainTask*************************");
+			//System.out.println("RelayPositionAPMonitor.mainTask(): (1). CICLO DI CONTROLLO CONNESSIONE AP ogni " + period + " ms");
 
 			currAP = rwc.getAssociatedAccessPoint();
+			tmp = null;
 
 			double prevision = -1;
 
 			if(currAP!=null){
 
 				double actualRSSI = (double)rwc.updateSignalStrenghtValue();
-
-				System.out.println("RelayPositionAPMonitor.mainTask(): (2). AP corrente a cui si è connessi "  +currAP.getAccessPointName() + " valore ultimo RSSI: " + actualRSSI);
+				rwc.getDebugConsole().debugMessage(Parameters.DEBUG_INFO,"RelayPositionAPMonitor.mainTask: AP corrente a cui si è connessi "  +currAP.getAccessPointName() + " valore ultimo RSSI: " + actualRSSI);
 
 				double [] a = currAP.getLastSignalStrenghtValues();
-				System.out.print("[");
+				tmp="[";
 				for(int i = 0; i<a.length;i++)
-					System.out.print(a[i]+",");
-				System.out.print("]\n");
+					tmp+=a[i]+",";
+				tmp+="]";
 				filter =new GreyModel_v2(a);
 				prevision = filter.predictRSSI();
-				System.out.println("PREVISIONE:"+prevision);
-
+				tmp +=" PREVISIONE:"+prevision				;
+				rwc.getDebugConsole().debugMessage(Parameters.DEBUG_INFO,tmp);
+				
 				if(prevision >=83){// Parameters.AP_DISCONNECTION_THRS){
 
 					positiveDisconnectionPrediction++;
@@ -116,14 +118,14 @@ public class RelayPositionAPMonitor extends Observable {
 				}
 				else{
 					positiveDisconnectionPrediction=0;				
-					System.out.println("RelayPositionAPMonitor.mainTask(): (3). RSSI PREVISTO NON SUPERA SOGLIA DI DISCONNESSIONE.");
+					rwc.getDebugConsole().debugMessage(Parameters.DEBUG_INFO,"RelayPositionAPMonitor.mainTask(): RSSI PREVISTO NON SUPERA SOGLIA DI DISCONNESSIONE.");
 				}	
 			}
 			else{
 				System.err.println("RelayPositionAPMonitor.mainTask(): (2). Nessun AP rilevato all'istante : " + new Date(System.currentTimeMillis()).toString());
 			}
 
-			System.out.println("***********************FINE mainTask*************************\n");
+			//System.out.println("***********************FINE mainTask*************************\n");
 
 		}catch (Exception e) {
 			e.printStackTrace();
