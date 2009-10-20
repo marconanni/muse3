@@ -2,7 +2,6 @@ package relay.positioning;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Observable;
@@ -11,14 +10,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import client.ClientMessageFactory;
-
 import parameters.Parameters;
 
 import relay.RelayMessageFactory;
 import relay.RelayMessageReader;
+import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
-import relay.connection.RelayRSSICM;
+
 import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutNotifyRSSI;
 import relay.timeout.TimeOutSearch;
@@ -56,7 +54,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	private DatagramPacket dp = null;
 	private RSSIFilter filter = null;
 	private long period ;
-	private RelayRSSICM rrcm;
+	private RelayCM rrcm;
 	private int seqNum ;
 	private double sumOfRSSI;
 	private int numberOfValideRSSI;
