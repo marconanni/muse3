@@ -28,7 +28,7 @@ public class RelayPositionController  implements Observer {
 	private RelayCM  crscm = null ;
 	private RelayWNICController cwnic = null; 
 
-	private InetAddress relayAddress = null;
+	private InetAddress connectedRelayAddress = null;
 	private static int sequenceNumber = 0;
 
 	private RelayMessageReader cmr = null;
@@ -39,12 +39,12 @@ public class RelayPositionController  implements Observer {
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
 	 * @throws WNICException 
 	 */
-	public RelayPositionController(String interf, String essidName) throws WNICException{
+	public RelayPositionController(RelayWNICController cwnic) throws WNICException{
 		crscm = RelayConnectionFactory.getRSSIConnectionManager(this);
-		
-		try {
-			cwnic = WNICFinder.getCurrentWNIC(interf, essidName,0);
-		} catch (OSException e) {new WNICException("ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
+		this.cwnic=cwnic;
+//		try {
+//			cwnic = WNICFinder.getCurrentWNIC(interf, essidName,0);
+//		} catch (OSException e) {new WNICException("ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
 		console = cwnic.getDebugConsole();
 		enableToMonitor = false;
 		started = false;
@@ -79,18 +79,14 @@ public class RelayPositionController  implements Observer {
 			cmr = new RelayMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);
-				console.debugMessage(Parameters.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
-				if((cmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(relayAddress)){
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Devo inviare risp a: " + relayAddress);
-					RSSIvalue = cwnic.getSignalStrenghtValue();
-					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
-					sequenceNumber++;
-					crscm.sendTo(notifyRSSI);
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RELAY_RSSI_RECEIVER_PORT);
-				}else{
-					//otifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
-				
+				console.debugMessage(Parameters.DEBUG_WARNING, "RelayPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
+				if((cmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(connectedRelayAddress)){
+						console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Devo inviare risp a: " + connectedRelayAddress);
+						RSSIvalue = cwnic.getSignalStrenghtValue();
+						notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, connectedRelayAddress, Parameters.RSSI_PORT_IN);
+						sequenceNumber++;
+						crscm.sendTo(notifyRSSI);
+						console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + connectedRelayAddress+":"+Parameters.RSSI_PORT_IN);
 				}
 			} catch (WNICException e) {
 					console.debugMessage(Parameters.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
@@ -106,9 +102,9 @@ public class RelayPositionController  implements Observer {
 	 * confronti dell'indirizzo del Relay
 	 * @param rA una String che rappresenta l'indirizzo del Relay
 	 */
-	public void setRelayAddress(String rA) {
+	public void setConnectedRelayAddress(String rA) {
 		try {
-			relayAddress = InetAddress.getByName(rA);
+			connectedRelayAddress = InetAddress.getByName(rA);
 			enableToMonitor = true;
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}

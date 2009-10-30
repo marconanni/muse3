@@ -24,7 +24,7 @@ import relay.wnic.exception.InvalidParameter;
 
 
 /**Classe che rappresenta un oggetto in grado di prevedere un possibile allontanamento del nodo Relay
- * nei confronti dei nodi Clients che sta servendo.
+ * nei confronti dei nodi Clients che sta servendo e anche dal nodo relay big boss.
  * @author  Luca Campeti
  *
  */
@@ -36,6 +36,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	private RelayMessageReader rmr = null;
 	private TimeOutNotifyRSSI tnRSSI = null;
 	private Timer timer = null;
+	private InetAddress connectedRelayInetAddress = null;
 
 	private static InetAddress BCAST = null;
 
@@ -58,6 +59,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	private int seqNum ;
 	private double sumOfRSSI;
 	private int numberOfValideRSSI;
+	private String relayAddress;
 
 
 	/**Costruttore del RelayPositioniClientsMonitor che avverte il RelayElectionManager 
@@ -67,7 +69,8 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	 * il valore di RSSI che essi rilevano in riferimento al Relay
 	 * @param electionManager l'ElectionManager che deve essere avvertito allorchè si rilevi una possibile disconnessione
 	 */
-	public RelayPositionClientsMonitor(int maxNAV, long p, Observer electionManager){
+	public RelayPositionClientsMonitor(int maxNAV, long p, Observer electionManager, InetAddress connectedRelayInetAddress){
+		this.connectedRelayInetAddress=connectedRelayInetAddress;
 		period = p;
 		seqNum = -1;
 		maxNumberOfAverageValues = maxNAV; 
@@ -75,6 +78,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 		averageValues = new Vector<Double>();
 		addObserver(electionManager);
 		rrcm = RelayConnectionFactory.getRSSIConnectionManager(this);	
+		
 		//logger = new Logger();
 	}
 
@@ -109,14 +113,14 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 		DatagramPacket dp = null;
 
 		try {
-			System.out.println("\n*********************INIZIO mainTask*************************");
-			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.CLIENT_RSSI_PORT_IN);
+			//System.out.println("\n*********************INIZIO mainTask*************************");
+			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_IN, relayAddress);
 			numberOfValideRSSI = 0;
 			sumOfRSSI = 0;
 			rrcm.sendTo(dp);	
 			seqNum++;
 			tnRSSI = RelayTimeoutFactory.getTimeOutNotifyRSSI(this,Parameters.TIMEOUT_NOTIFY_RSSI);
-			System.out.println("***********************FINE mainTask*************************\n");
+			//System.out.println("***********************FINE mainTask*************************\n");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -138,6 +142,8 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 			}
 
 			if(rmr.getCode() == Parameters.NOTIFY_RSSI){
+				
+				//posso pesare il valore rssi del big boss a cui è collegato il relay tramite connectedRelayInetAddress
 
 				double RSSIValue = rmr.getRSSI();
 
@@ -242,15 +248,19 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 		}
 		return res;
 	}
+	
+	public void setRelayAddress(String rA) {
+		relayAddress = rA;
+	}
 }
 
 
 
 class TestRelayPositionClientsMonitor{
 
-	public static void main(String args[]){
+	public static void main(String args[]) throws UnknownHostException{
 		TestObserver to = new TestObserver();
-		RelayPositionClientsMonitor rpcm = new RelayPositionClientsMonitor(3,6000,to);
+		RelayPositionClientsMonitor rpcm = new RelayPositionClientsMonitor(3,6000,to,InetAddress.getLocalHost());
 		rpcm.start();
 		/*InetAddress localhost = null;
 		try {

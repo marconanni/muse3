@@ -21,6 +21,7 @@ import relay.connection.RelayConnectionFactory;
 import relay.connection.WhoIsRelayServer;
 import relay.positioning.RelayPositionAPMonitor;
 import relay.positioning.RelayPositionClientsMonitor;
+import relay.positioning.RelayPositionController;
 import relay.battery.RelayBatteryMonitor;
 import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutClientDetection;
@@ -70,8 +71,14 @@ public class RelayElectionManager extends Observable implements Observer {
 	//indirizzo del Relay attuale in forma String
 	private String actualRelayAddress = null;
 	
+	//indirizzo attuale del Relay (big boss) a cui è connesso -> solo relay normale
+	private String actualConnectedRelayAddress = null;
+	
 	//indirizzo del Relay in forma InetAddress
 	private InetAddress relayInetAddress = null;
+	
+	//indirizzo del Relay in forma InetAddress
+	private InetAddress connectedRelayInetAddress = null;
 
 	//Vector da riempire con le Couple relative agli ELECTION_RESPONSE ricevuti dal Relay uscente
 	private Vector<Couple> possibleRelay = null; 
@@ -83,13 +90,13 @@ public class RelayElectionManager extends Observable implements Observer {
 	private double maxW = -1;
 
 	//boolean che indica se si è in stato di elezione o meno
-	private boolean electing = false;
+	//private boolean electing = false;
 	
 	//boolean che indica se è stato già ricevuto un EM_ELECTION
-	private boolean firstEM_ELECTIONarrived = false;
+	//private boolean firstEM_ELECTIONarrived = false;
 	
 	//boolean che indica se è stato già inviato un ELECTION_DONE
-	private boolean firstELECTION_DONEsent = false;
+	//private boolean firstELECTION_DONEsent = false;
 
 	//boolean che indica se si è il Relay principale (BIG BOSS collegato al nodo server) o meno
 	private boolean imBigBoss = false;
@@ -112,22 +119,26 @@ public class RelayElectionManager extends Observable implements Observer {
 	//il RelayPositionAPMonitor per conoscere la propria situazione nei confronti dell'AP
 	private RelayPositionAPMonitor relayPositionAPMonitor = null;
 	
+	private RelayPositionController relayPositionController = null;
+	
 	//il RelayPositionClientsMonitor per conoscere la propria situazione nei confronti dei clients attualmente serviti
+	//compreso BIG BOSS in caso di relay secondario
 	private RelayPositionClientsMonitor relayPositionClientsMonitor = null;
 	
 	//il RelayBatteryMonitor per conoscere la situazione della propria batteria
 	private RelayBatteryMonitor relayBatteryMonitor = null;
 	
 	//il WhoIsRelayServer per rispondere ai WHO_IS_RELAY nel caso questo nodo sia il Relay attuale
+	//o per rispondere alle richieste WHO_IS_BIG_BOSS_RELAY
 	private WhoIsRelayServer whoIsRelayServer = null;
 
 	//vari Timeout necessari al RelayElectionManager
 	private TimeOutSearch timeoutSearch = null;
-	private TimeOutFailToElect timeoutFailToElect = null;
-	private TimeOutElectionBeacon timeoutElectionBeacon = null;
-	private TimeOutClientDetection timeoutClientDetection = null;
-	private TimeOutEmElection timeoutEmElection = null;
-	private TimeOutToElect timeoutToElect = null;
+	//private TimeOutFailToElect timeoutFailToElect = null;
+	//private TimeOutElectionBeacon timeoutElectionBeacon = null;
+	//private TimeOutClientDetection timeoutClientDetection = null;
+	//private TimeOutEmElection timeoutEmElection = null;
+	//private TimeOutToElect timeoutToElect = null;
 
 	//indici dei messaggi inviati 
 	/*private int indexELECTION_RESPONSE = 0;
@@ -137,11 +148,11 @@ public class RelayElectionManager extends Observable implements Observer {
 	private int indexELECTION_DONE = 0;*/
 
 	//DA TOGLIERE DOPO I TEST
-	private boolean electionResponseAutoEnable = false;
-	private boolean electionDoneAutoEnable = false;
-	private boolean emElectionAutoEnable = false;
-	private boolean emElDetRelayAutoEnable = false;
-	private boolean electionRequestAutoEnable = false;	
+//	private boolean electionResponseAutoEnable = false;
+//	private boolean electionDoneAutoEnable = false;
+//	private boolean emElectionAutoEnable = false;
+//	private boolean emElDetRelayAutoEnable = false;
+//	private boolean electionRequestAutoEnable = false;	
 	//FINE DA TOGLIERE DOPO I TEST
 
 
@@ -233,10 +244,10 @@ public class RelayElectionManager extends Observable implements Observer {
 
 		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
-		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
-		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
-		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
-		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
+//		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
+//		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
+//		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
+//		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
 		/*Fine Vedere se sta parte serve*/
 
 		try {
@@ -249,7 +260,8 @@ public class RelayElectionManager extends Observable implements Observer {
 			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
 					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
-					this);
+					this,
+					connectedRelayInetAddress);
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
@@ -257,18 +269,14 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			relayPositionAPMonitor.start();
 			relayPositionClientsMonitor.start();
-			//relayBatteryMonitor.start();
+			relayBatteryMonitor.start();
 			whoIsRelayServer.start();
 
 			actualStatus = RelayStatus.MONITORING;
+			
+			console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager.becomeRelay(): X -> STATO MONITORING: Monitors e whoIsRelayServer partiti");
 
-			System.out.println("RelayElectionManager.becomeRelay(): X -> STATO MONITORING: " +
-			"Monitors e whoIsRelayServer partiti");
-
-		} catch (WNICException e) {
-			e.printStackTrace();
-			System.exit(2);
-		}
+		} catch (WNICException e) {e.printStackTrace();System.exit(2);}
 	}
 	
 	/**Metodo che consente di far si che questo nodo diventi il Relay attuale,
@@ -278,25 +286,18 @@ public class RelayElectionManager extends Observable implements Observer {
 	 */
 	
 	private void searchingBigBossRelay(){
-
-		//se non sono in elezione oppure so che è cominciata un elezione di emergenza
-		//if (!electing || (electing && firstEM_ELsent && !imServed)) {
-			DatagramPacket dpOut = null;
-		
-			try {
-				dpOut = RelayMessageFactory.buildWhoIsBigBossRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT_IN);
-				comManager.sendTo(dpOut);
-
-			} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
-			
-			timeoutSearch = RelayTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
-			console.debugMessage(Parameters.DEBUG_WARNING,"RelayElectionManager: stato OFF, inviato WHO_IS_BIG_BOSS_RELAY e start del TIMEOUT_SEARCH");
-		//}
+		DatagramPacket dpOut = null;
+		try {
+			dpOut = RelayMessageFactory.buildWhoIsBigBossRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT_IN);
+			comManager.sendTo(dpOut);
+		} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
+		timeoutSearch = RelayTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
+		console.debugMessage(Parameters.DEBUG_WARNING,"RelayElectionManager: stato OFF, inviato WHO_IS_BIG_BOSS_RELAY e start del TIMEOUT_SEARCH");
 	}
 
 	private void becomRelay(){
 
-		imBigBoss = true;
+		imBigBoss = false;
 		imRelay = true;
 
 		actualRelayAddress = Parameters.RELAY_AD_HOC_ADDRESS;
@@ -304,30 +305,30 @@ public class RelayElectionManager extends Observable implements Observer {
 
 		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
-		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
-		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
-		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
-		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
+//		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
+//		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
+//		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
+//		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
 		/*Fine Vedere se sta parte serve*/
 
 		try {
-			relayPositionAPMonitor = new RelayPositionAPMonitor(
-					relayAPWNICController,	
-					Parameters.POSITION_AP_MONITOR_PERIOD,
-					this);
-
+			
+			relayPositionController = new RelayPositionController(relayAHWNICController);
+			relayPositionController.setConnectedRelayAddress(actualConnectedRelayAddress);
+			
 			//Compresi client e realy secondari
 			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
 					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
-					this);
+					this,
+					connectedRelayInetAddress);
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
-			whoIsRelayServer = new WhoIsRelayServer(imBigBoss);
+			whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
 
-			relayPositionAPMonitor.start();
 			relayPositionClientsMonitor.start();
+			relayPositionController.start();
 			//relayBatteryMonitor.start();
 			whoIsRelayServer.start();
 
@@ -348,6 +349,7 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public synchronized void update(Observable arg0, Object arg1) {
+		System.out.println("Arrivato un nuovo messaggio");
 
 		//PARTE PER LA GESTIONE DEI MESSAGGI PROVENIENTI DALLA RETE
 		if(arg1 instanceof DatagramPacket){
@@ -359,17 +361,7 @@ public class RelayElectionManager extends Observable implements Observer {
 				relayMessageReader.readContent(dpIn);
 			} catch (IOException e) {e.printStackTrace();}
 
-			/*Cominciamo ad esaminare i vari casi che si possono presentare, in base allo stato in cui ci si trova 
-			e al codice del messaggio che è appena arrivato*/
-
-
-			/** INIZIO STATO IDLE**/			
-
-			/*[IM_RELAY arrivato] / 
-			 * relayAddress = <IP del Relay>
-			 * resetto TIMEOUT_SEARCH
-			 */
-			if(relayMessageReader.getCode() == Parameters.IM_BIGBOSS && actualStatus == RelayStatus.IDLE){
+			if(relayMessageReader.getCode() == Parameters.IM_BIGBOSS && actualStatus == RelayStatus.OFF){
 
 				if(timeoutSearch != null) {
 					timeoutSearch.cancelTimeOutSearch();
@@ -378,16 +370,29 @@ public class RelayElectionManager extends Observable implements Observer {
 
 				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivato");
 
-				actualRelayAddress = relayMessageReader.getActualRelayAddress();
-				memorizeRelayAddress();
+				actualConnectedRelayAddress = relayMessageReader.getActualConnectedRelayAddress();
+				memorizeConnectedRelayAddress();
 
 				setChanged();
-				notifyObservers("RELAY_FOUND:"+relayMessageReader.getActualRelayAddress());
+				notifyObservers("RELAY_FOUND:"+relayMessageReader.getActualConnectedRelayAddress());
 								
-				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivatoa actualRelayAddress: "+actualRelayAddress);
+				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivatoa actualConnectRelayAddress: "+actualRelayAddress);
 				becomRelay();
 			}
 		}
+		if(arg1 instanceof String){
+
+			String event = (String) arg1;
+			/*[TIMEOUT_SEARCH scattato] --> SearchingRelay*/
+			if(event.equals("TIMEOUTSEARCH") &&	actualStatus == RelayStatus.OFF){
+				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO OFF: TIMEOUT_SEARCH scattato");
+				if(imRelay)
+					searchingBigBossRelay();
+				else
+					searchingRelay();
+			}
+		}
+		
 	}
 
 
@@ -834,24 +839,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 
 		//PARTE PER LA GESTIONE DELLE NOTIFICHE NON PROVENIENTI DALLA RETE
-		/*if(arg1 instanceof String){
-
-			String event = (String) arg1;
-
-
-			/**INIZIO STATO IDLE**/		
-
-			/*[TIMEOUT_SEARCH scattato] --> SearchingRelay
-			 */
-			/*if(event.equals("TIMEOUTSEARCH") &&
-					actualStatus == RelayStatus.IDLE){
-
-				debugPrint("RelayElectionManager: STATO IDLE: TIMEOUT_SEARCH scattato");
-
-				//Stato instabile SearchingRelay
-				searchingRelay();
-			}
-			/**FINE STATO IDLE**/	
+	
 
 
 
@@ -1196,7 +1184,6 @@ public class RelayElectionManager extends Observable implements Observer {
 		actualRelayAddress = null;
 
 		//se non sono in elezione 
-		if(!electing){
 
 			DatagramPacket dpOut = null;
 
@@ -1217,8 +1204,6 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			System.out.println("RelayElectionManager.searchingRelay(): STATO INSTABILE SEARCHING_RELAY -> IDLE: " +
 			"WHO_IS_RELAY inviato e TIMEOUT_SEARCH partito");
-
-		}
 	}
 
 
@@ -1232,6 +1217,16 @@ public class RelayElectionManager extends Observable implements Observer {
 
 		try {
 			relayInetAddress = InetAddress.getByName(actualRelayAddress);
+		} catch (UnknownHostException e) {e.printStackTrace();}
+	}
+	
+	/**Metodo per memorizzare l'InetAddress relativo all'actualRelayAddress
+	 * che è in forma di String 
+	 */
+	private void memorizeConnectedRelayAddress(){
+
+		try {
+			connectedRelayInetAddress = InetAddress.getByName(actualConnectedRelayAddress);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 
@@ -1377,46 +1372,46 @@ public class RelayElectionManager extends Observable implements Observer {
 
 
 
-	public RelayCM getComManager() {
-		return comManager;
-	}
+	public RelayCM getComManager() {return comManager;}
+	public void setComManager(RelayCM comManager) {this.comManager = comManager;}
 
+	public RelayStatus getActualStatus() {return actualStatus;}
+	public void setActualStatus(RelayStatus actualStatus) {this.actualStatus = actualStatus;}
+	public String getActualRelayAddress() {return actualRelayAddress;}
+	public String getActualConnectedRelayAddress() {return actualConnectedRelayAddress;}
+	public void setActualRelayAddress(String actualRelayAddress) {this.actualRelayAddress = actualRelayAddress;}
+	public void setActualConnectedRelayAddress(String actualConnectedRelayAddress) {this.actualConnectedRelayAddress = actualConnectedRelayAddress;}
+	public InetAddress getRelayInetAddress() {return relayInetAddress;}
+	public InetAddress getConnectedRelayInetAddress() {return connectedRelayInetAddress;}
+	public void setRelayInetAddress(InetAddress relayInetAddress) {this.relayInetAddress = relayInetAddress;}
+	public void setConnectedRelayInetAddress(InetAddress connectedRelayInetAddress) {this.connectedRelayInetAddress = connectedRelayInetAddress;}
 
-	public void setComManager(RelayCM comManager) {
-		this.comManager = comManager;
-	}
+	public boolean isImRelay() {return imRelay;}
+	public boolean isImBigBossRelay(){return imBigBoss;}
+	public void setImRelay(boolean imRelay) {this.imRelay = imRelay;}
+	public void setImBigBossRelay(boolean imBigBoss) {this.imBigBoss = imBigBoss;}
+	
+	public RelayMessageReader getRelayMessageReader() {return relayMessageReader;}
+	public void setRelayMessageReader(RelayMessageReader relayMessageReader) {this.relayMessageReader = relayMessageReader;}
 
+	public RelayWNICController getRelayAHWNICController() {return relayAHWNICController;}
+	public RelayWNICController getRelayAPWNICController() {return relayAPWNICController;}
+	public void setRelayAHWNICController(RelayWNICController relayAHWNICController) {this.relayAHWNICController = relayAHWNICController;}
+	public void setRelayAPWNICController(RelayWNICController relayAPWNICController) {this.relayAPWNICController = relayAPWNICController;}
 
-	public RelayStatus getActualStatus() {
-		return actualStatus;
-	}
+	public RelayPositionAPMonitor getRelayPositionAPMonitor() {return relayPositionAPMonitor;}
+	public void setRelayPositionAPMonitor(RelayPositionAPMonitor relayPositionAPMonitor) {this.relayPositionAPMonitor = relayPositionAPMonitor;}
 
+	public RelayPositionClientsMonitor getRelayPositionClientsMonitor() {return relayPositionClientsMonitor;}
+	public void setRelayPositionClientsMonitor(RelayPositionClientsMonitor relayPositionClientsMonitor) {this.relayPositionClientsMonitor = relayPositionClientsMonitor;}
 
-	public void setActualStatus(RelayStatus actualStatus) {
-		this.actualStatus = actualStatus;
-	}
+	public WhoIsRelayServer getWhoIsRelayServer() {return whoIsRelayServer;}
+	public void setWhoIsRelayServer(WhoIsRelayServer whoIsRelayServer) {this.whoIsRelayServer = whoIsRelayServer;}
 
-
-	public String getActualRelayAddress() {
-		return actualRelayAddress;
-	}
-
-
-	public void setActualRelayAddress(String actualRelayAddress) {
-		this.actualRelayAddress = actualRelayAddress;
-	}
-
-
-	public InetAddress getRelayInetAddress() {
-		return relayInetAddress;
-	}
-
-
-	public void setRelayInetAddress(InetAddress relayInetAddress) {
-		this.relayInetAddress = relayInetAddress;
-	}
-
-
+	public TimeOutSearch getTimeoutSearch() {return timeoutSearch;}
+	public void setTimeoutSearch(TimeOutSearch timeoutSearch) {this.timeoutSearch = timeoutSearch;}
+	
+	
 	public Vector<Couple> getPossibleRelay() {
 		return possibleRelay;
 	}
@@ -1447,34 +1442,27 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 
-	public boolean isElecting() {
-		return electing;
-	}
+//	public boolean isElecting() {
+//		return electing;
+//	}
+//
+//
+//	public void setElecting(boolean electing) {
+//		this.electing = electing;
+//	}
+//
+//
+//	public boolean isFirstEM_ELECTIONarrived() {
+//		return firstEM_ELECTIONarrived;
+//	}
+//
+//
+//	public void setFirstEM_ELECTIONarrived(boolean firstEM_ELECTIONarrived) {
+//		this.firstEM_ELECTIONarrived = firstEM_ELECTIONarrived;
+//	}
 
 
-	public void setElecting(boolean electing) {
-		this.electing = electing;
-	}
 
-
-	public boolean isFirstEM_ELECTIONarrived() {
-		return firstEM_ELECTIONarrived;
-	}
-
-
-	public void setFirstEM_ELECTIONarrived(boolean firstEM_ELECTIONarrived) {
-		this.firstEM_ELECTIONarrived = firstEM_ELECTIONarrived;
-	}
-
-
-	public boolean isImRelay() {
-		return imRelay;
-	}
-
-
-	public void setImRelay(boolean imRelay) {
-		this.imRelay = imRelay;
-	}
 
 
 	public int getCounter_clients() {
@@ -1487,111 +1475,48 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 
-	public RelayMessageReader getRelayMessageReader() {
-		return relayMessageReader;
-	}
 
 
-	public void setRelayMessageReader(RelayMessageReader relayMessageReader) {
-		this.relayMessageReader = relayMessageReader;
-	}
 
-
-	public RelayWNICController getRelayAHWNICController() {
-		return relayAHWNICController;
-	}
-	
-	public RelayWNICController getRelayAPWNICController() {
-		return relayAPWNICController;
-	}
-
-
-	public void setRelayWNICController(RelayWNICController relayWNICController) {
-		this.relayAHWNICController = relayWNICController;
-	}
-
-
-	public RelayPositionAPMonitor getRelayPositionAPMonitor() {
-		return relayPositionAPMonitor;
-	}
-
-
-	public void setRelayPositionAPMonitor(
-			RelayPositionAPMonitor relayPositionAPMonitor) {
-		this.relayPositionAPMonitor = relayPositionAPMonitor;
-	}
-
-
-	public RelayPositionClientsMonitor getRelayPositionClientsMonitor() {
-		return relayPositionClientsMonitor;
-	}
-
-
-	public void setRelayPositionClientsMonitor(
-			RelayPositionClientsMonitor relayPositionClientsMonitor) {
-		this.relayPositionClientsMonitor = relayPositionClientsMonitor;
-	}
-
-
-	public WhoIsRelayServer getWhoIsRelayServer() {
-		return whoIsRelayServer;
-	}
-
-
-	public void setWhoIsRelayServer(WhoIsRelayServer whoIsRelayServer) {
-		this.whoIsRelayServer = whoIsRelayServer;
-	}
-
-
-	public TimeOutSearch getTimeoutSearch() {
-		return timeoutSearch;
-	}
-
-
-	public void setTimeoutSearch(TimeOutSearch timeoutSearch) {
-		this.timeoutSearch = timeoutSearch;
-	}
-
-
-	public TimeOutFailToElect getTimeoutFailToElect() {
-		return timeoutFailToElect;
-	}
-
-
-	public void setTimeoutFailToElect(TimeOutFailToElect timeoutFailToElect) {
-		this.timeoutFailToElect = timeoutFailToElect;
-	}
-
-
-	public TimeOutElectionBeacon getTimeoutElectionBeacon() {
-		return timeoutElectionBeacon;
-	}
-
-
-	public void setTimeoutElectionBeacon(TimeOutElectionBeacon timeoutElectionBeacon) {
-		this.timeoutElectionBeacon = timeoutElectionBeacon;
-	}
-
-
-	public TimeOutClientDetection getTimeoutClientDetection() {
-		return timeoutClientDetection;
-	}
-
-
-	public void setTimeoutClientDetection(
-			TimeOutClientDetection timeoutClientDetection) {
-		this.timeoutClientDetection = timeoutClientDetection;
-	}
-
-
-	public TimeOutEmElection getTimeoutEmElection() {
-		return timeoutEmElection;
-	}
-
-
-	public void setTimeOutEmElection(TimeOutEmElection timeOutEmElection) {
-		this.timeoutEmElection = timeOutEmElection;
-	}
+//	public TimeOutFailToElect getTimeoutFailToElect() {
+//		return timeoutFailToElect;
+//	}
+//
+//
+//	public void setTimeoutFailToElect(TimeOutFailToElect timeoutFailToElect) {
+//		this.timeoutFailToElect = timeoutFailToElect;
+//	}
+//
+//
+//	public TimeOutElectionBeacon getTimeoutElectionBeacon() {
+//		return timeoutElectionBeacon;
+//	}
+//
+//
+//	public void setTimeoutElectionBeacon(TimeOutElectionBeacon timeoutElectionBeacon) {
+//		this.timeoutElectionBeacon = timeoutElectionBeacon;
+//	}
+//
+//
+//	public TimeOutClientDetection getTimeoutClientDetection() {
+//		return timeoutClientDetection;
+//	}
+//
+//
+//	public void setTimeoutClientDetection(
+//			TimeOutClientDetection timeoutClientDetection) {
+//		this.timeoutClientDetection = timeoutClientDetection;
+//	}
+//
+//
+//	public TimeOutEmElection getTimeoutEmElection() {
+//		return timeoutEmElection;
+//	}
+//
+//
+//	public void setTimeOutEmElection(TimeOutEmElection timeOutEmElection) {
+//		this.timeoutEmElection = timeOutEmElection;
+//	}
 
 
 //	public int getIndexELECTION_RESPONSE() {
@@ -1654,74 +1579,74 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 
-	public boolean isElectionResponseAutoEnable() {
-		return electionResponseAutoEnable;
-	}
+//	public boolean isElectionResponseAutoEnable() {
+//		return electionResponseAutoEnable;
+//	}
+//
+//
+//	public void setElectionResponseAutoEnable(boolean electionResponseAutoEnable) {
+//		this.electionResponseAutoEnable = electionResponseAutoEnable;
+//	}
+//
+//
+//	public boolean isElectionDoneAutoEnable() {
+//		return electionDoneAutoEnable;
+//	}
+//
+//
+//	public void setElectionDoneAutoEnable(boolean electionDoneAutoEnable) {
+//		this.electionDoneAutoEnable = electionDoneAutoEnable;
+//	}
+//
+//
+//	public boolean isEmElectionAutoEnable() {
+//		return emElectionAutoEnable;
+//	}
+//
+//
+//	public void setEmElectionAutoEnable(boolean emElectionAutoEnable) {
+//		this.emElectionAutoEnable = emElectionAutoEnable;
+//	}
+//
+//
+//	public boolean isEmElDetRelayAutoEnable() {
+//		return emElDetRelayAutoEnable;
+//	}
+//
+//
+//	public void setEmElDetRelayAutoEnable(boolean emElDetRelayAutoEnable) {
+//		this.emElDetRelayAutoEnable = emElDetRelayAutoEnable;
+//	}
+//
+//
+//	public boolean isElectionRequestAutoEnable() {
+//		return electionRequestAutoEnable;
+//	}
+//
+//
+//	public void setElectionRequestAutoEnable(boolean electionRequestAutoEnable) {
+//		this.electionRequestAutoEnable = electionRequestAutoEnable;
+//	}
+//
+//
+//	public TimeOutToElect getTimeoutToElect() {
+//		return timeoutToElect;
+//	}
+//
+//
+//	public void setTimeoutToElect(TimeOutToElect timeoutToElect) {
+//		this.timeoutToElect = timeoutToElect;
+//	}
 
 
-	public void setElectionResponseAutoEnable(boolean electionResponseAutoEnable) {
-		this.electionResponseAutoEnable = electionResponseAutoEnable;
-	}
-
-
-	public boolean isElectionDoneAutoEnable() {
-		return electionDoneAutoEnable;
-	}
-
-
-	public void setElectionDoneAutoEnable(boolean electionDoneAutoEnable) {
-		this.electionDoneAutoEnable = electionDoneAutoEnable;
-	}
-
-
-	public boolean isEmElectionAutoEnable() {
-		return emElectionAutoEnable;
-	}
-
-
-	public void setEmElectionAutoEnable(boolean emElectionAutoEnable) {
-		this.emElectionAutoEnable = emElectionAutoEnable;
-	}
-
-
-	public boolean isEmElDetRelayAutoEnable() {
-		return emElDetRelayAutoEnable;
-	}
-
-
-	public void setEmElDetRelayAutoEnable(boolean emElDetRelayAutoEnable) {
-		this.emElDetRelayAutoEnable = emElDetRelayAutoEnable;
-	}
-
-
-	public boolean isElectionRequestAutoEnable() {
-		return electionRequestAutoEnable;
-	}
-
-
-	public void setElectionRequestAutoEnable(boolean electionRequestAutoEnable) {
-		this.electionRequestAutoEnable = electionRequestAutoEnable;
-	}
-
-
-	public TimeOutToElect getTimeoutToElect() {
-		return timeoutToElect;
-	}
-
-
-	public void setTimeoutToElect(TimeOutToElect timeoutToElect) {
-		this.timeoutToElect = timeoutToElect;
-	}
-
-
-	public boolean isFirstELECTION_DONEsent() {
-		return firstELECTION_DONEsent;
-	}
-
-
-	public void setFirstELECTION_DONEsent(boolean firstELECTION_DONEsent) {
-		this.firstELECTION_DONEsent = firstELECTION_DONEsent;
-	}
+//	public boolean isFirstELECTION_DONEsent() {
+//		return firstELECTION_DONEsent;
+//	}
+//
+//
+//	public void setFirstELECTION_DONEsent(boolean firstELECTION_DONEsent) {
+//		this.firstELECTION_DONEsent = firstELECTION_DONEsent;
+//	}
 
 
 	public RelayBatteryMonitor getRelayBatteryMonitor() {
@@ -1734,9 +1659,9 @@ public class RelayElectionManager extends Observable implements Observer {
 	}
 
 
-	public void setTimeoutEmElection(TimeOutEmElection timeoutEmElection) {
-		this.timeoutEmElection = timeoutEmElection;
-	}
+//	public void setTimeoutEmElection(TimeOutEmElection timeoutEmElection) {
+//		this.timeoutEmElection = timeoutEmElection;
+//	}
 
 }
 
@@ -1792,9 +1717,9 @@ class TesterRelayElectionManager{
 			System.out.println("W: " + rem.getW());
 			System.out.println("maxW: " + rem.getMaxW());
 			System.out.println("counter_clients: " + rem.getCounter_clients());
-			System.out.println("electing: " + rem.isElecting());
-			System.out.println("first ELECTION_DONE sent: " + rem.isFirstELECTION_DONEsent());
-			System.out.println("first EM_ELECTION arrived: " + rem.isFirstEM_ELECTIONarrived());
+			//System.out.println("electing: " + rem.isElecting());
+			//System.out.println("first ELECTION_DONE sent: " + rem.isFirstELECTION_DONEsent());
+			//System.out.println("first EM_ELECTION arrived: " + rem.isFirstEM_ELECTIONarrived());
 			System.out.println("apVisibility: " + rem.getRelayAPWNICController().isConnected());
 			System.out.println("aHVisibility: " + rem.getRelayAHWNICController().isConnected());
 			System.out.println("********************************************************************************");
