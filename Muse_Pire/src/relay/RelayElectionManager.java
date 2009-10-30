@@ -12,6 +12,7 @@ import java.util.Observer;
 import java.util.Vector;
 
 import client.ClientMessageFactory;
+import client.timeout.ClientTimeoutFactory;
 import debug.DebugConsole;
 
 import parameters.Parameters;
@@ -195,7 +196,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 		//Parto da relay secondario
 		else if(imRelay){
-			serachingBigBoss();
+			searchingBigBossRelay();
 		}
 		
 		//parto come cliente normale
@@ -252,7 +253,6 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
-			//MANCA IL WHO IS BIG BOS
 			whoIsRelayServer = new WhoIsRelayServer(imBigBoss);
 
 			relayPositionAPMonitor.start();
@@ -276,7 +276,25 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * partire il RelayPositionAPMonitor, il RelayPositionClientsMonitor,
 	 * il RelayBatteryMonitor e il WhoIsRelayServer. Poi passa allo stato di MONITORING.
 	 */
-	private void serachingBigBoss(){
+	
+	private void searchingBigBossRelay(){
+
+		//se non sono in elezione oppure so che è cominciata un elezione di emergenza
+		//if (!electing || (electing && firstEM_ELsent && !imServed)) {
+			DatagramPacket dpOut = null;
+		
+			try {
+				dpOut = RelayMessageFactory.buildWhoIsBigBossRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT_IN);
+				comManager.sendTo(dpOut);
+
+			} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
+			
+			timeoutSearch = RelayTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
+			console.debugMessage(Parameters.DEBUG_WARNING,"RelayElectionManager: stato OFF, inviato WHO_IS_BIG_BOSS_RELAY e start del TIMEOUT_SEARCH");
+		//}
+	}
+
+	private void becomRelay(){
 
 		imBigBoss = true;
 		imRelay = true;
@@ -329,8 +347,8 @@ public class RelayElectionManager extends Observable implements Observer {
 	/* (non-Javadoc)
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
-	public synchronized void update(Observable arg0, Object arg1) {}
-/*
+	public synchronized void update(Observable arg0, Object arg1) {
+
 		//PARTE PER LA GESTIONE DEI MESSAGGI PROVENIENTI DALLA RETE
 		if(arg1 instanceof DatagramPacket){
 
@@ -339,9 +357,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			try {
 				relayMessageReader.readContent(dpIn);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			} catch (IOException e) {e.printStackTrace();}
 
 			/*Cominciamo ad esaminare i vari casi che si possono presentare, in base allo stato in cui ci si trova 
 			e al codice del messaggio che è appena arrivato*/
@@ -353,15 +369,14 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * relayAddress = <IP del Relay>
 			 * resetto TIMEOUT_SEARCH
 			 */
-			/*if(relayMessageReader.getCode() == Parameters.IM_RELAY && 
-					actualStatus == RelayStatus.IDLE){
+			if(relayMessageReader.getCode() == Parameters.IM_BIGBOSS && actualStatus == RelayStatus.IDLE){
 
 				if(timeoutSearch != null) {
 					timeoutSearch.cancelTimeOutSearch();
 					timeoutSearch = null;
 				}
 
-				debugPrint("RelayElectionManager: STATO IDLE: IM_RELAY arrivato");
+				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivato");
 
 				actualRelayAddress = relayMessageReader.getActualRelayAddress();
 				memorizeRelayAddress();
@@ -369,9 +384,11 @@ public class RelayElectionManager extends Observable implements Observer {
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+relayMessageReader.getActualRelayAddress());
 								
-				debugPrint("RelayElectionManager: STATO IDLE: IM_RELAY arrivato: actualRelayAddress: "+ 
-						actualRelayAddress);
+				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivatoa actualRelayAddress: "+actualRelayAddress);
+				becomRelay();
 			}
+		}
+	}
 
 
 			/*[ELECTION_DONE ricevuto] / 
