@@ -268,13 +268,15 @@ public class RelayElectionManager extends Observable implements Observer {
 			whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
 
 			relayPositionAPMonitor.start();
-			relayPositionClientsMonitor.start();
+			
+			//fare partire solo quando qualcuno si collega a lui..
+			//relayPositionClientsMonitor.start();
 			relayBatteryMonitor.start();
 			whoIsRelayServer.start();
 
 			actualStatus = RelayStatus.MONITORING;
 			
-			console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager.becomeRelay(): X -> STATO MONITORING: Monitors e whoIsRelayServer partiti");
+			console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager.becomeBigBossRelay(): X -> STATO MONITORING: whoIsRelayServer partiti");
 
 		} catch (WNICException e) {e.printStackTrace();System.exit(2);}
 	}
