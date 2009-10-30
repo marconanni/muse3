@@ -40,7 +40,7 @@ public class RelayConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
 	 * @return un istanza di RelayRSSICM
 	 */
-	public static RelayCM getWhoIsRelayBigBossConnectionManager(Observer obser){
+	public static RelayCM getWhoIsRelayConnectionManager(Observer obser){
 		return new RelayCM("RelayWhoIsRelayBigBossManager",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInWhoIsRelay(),rpm.getPortOutWhoIsRelay(),obser);
 	}
 	
