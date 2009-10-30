@@ -114,8 +114,8 @@ public class RelayPortMapper {
 		portInAdHocSession = Parameters.RELAY_SESSION_AD_HOC_PORT_IN;
 		portOutAdHocSession = Parameters.RELAY_SESSION_AD_HOC_PORT_OUT;
 		portOutManagedSession = Parameters.RELAY_SESSION_MANAGED_PORT_OUT;
-		portInRSSI = Parameters.RELAY_RSSI_RECEIVER_PORT;
-		portOutRSSI = Parameters.RELAY_RSSI_SENDER_PORT;
+		portInRSSI = Parameters.RSSI_PORT_IN;
+		portOutRSSI = Parameters.RSSI_PORT_OUT;
 
 		try {
 			localAdHocAddress = InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS);

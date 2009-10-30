@@ -448,16 +448,16 @@ public class RelayMessageFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	static public DatagramPacket buildRequestRSSI(int sequenceNumber, InetAddress addr, int port) throws IOException {
+	static public DatagramPacket buildRequestRSSI(int sequenceNumber, InetAddress destAddr, int port,String addr) throws IOException {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.REQUEST_RSSI;
+		String content = sequenceNumber+"_"+Parameters.REQUEST_RSSI+"_"+addr;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
 
-		return new DatagramPacket(data, data.length, addr, port);
+		return new DatagramPacket(data, data.length, destAddr, port);
 
 	}
 	

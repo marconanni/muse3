@@ -38,6 +38,7 @@ public class RelayMessageReader {
 	
 	/*AGGIUNTO DA LUCA IL 6-12 alle 17:43*/
 	private  String actualRelayAddress = null;
+	private  String actualConnectedRelayAddress = null;
 	
 	
 	private  Hashtable<String, int[]> sessionInfo;
@@ -81,6 +82,11 @@ public class RelayMessageReader {
 		c = st.nextToken();
 		code = Integer.parseInt(c);
 		System.out.println("Code "+code);
+		if(code==Parameters.REQUEST_RSSI) actualRelayAddress = st.nextToken();
+		if(code == Parameters.NOTIFY_RSSI)RSSI = Double.parseDouble(st.nextToken());		
+		if(code == Parameters.IM_BIGBOSS) actualConnectedRelayAddress = st.nextToken();
+		if(code == Parameters.IM_RELAY) actualRelayAddress = st.nextToken();
+		
 //		if(code == Parameters.ELECTION_RESPONSE)
 //		{
 //			W = Float.parseFloat(st.nextToken());
@@ -89,18 +95,9 @@ public class RelayMessageReader {
 //		{
 //			newRelayAddress = st.nextToken();
 //		}
-		if(code == Parameters.EM_ELECTION)
-		{
-			W = Float.parseFloat(st.nextToken());
-		}
-		if(code == Parameters.SESSION_INFO)
-		{
-			getHashTable(st);
-		}
-		if(code == Parameters.ACK_SESSION)
-		{
-			getHashTable(st);
-		}
+		if(code == Parameters.EM_ELECTION) W = Float.parseFloat(st.nextToken());
+		if(code == Parameters.SESSION_INFO) getHashTable(st);
+		if(code == Parameters.ACK_SESSION) getHashTable(st);
 //		if(code == Parameters.REQUEST_FILE)
 //		{
 //			filename = st.nextToken();
@@ -111,16 +108,7 @@ public class RelayMessageReader {
 //			portStreamingServer = Integer.parseInt(st.nextToken());
 //			portStreamingCtrlServer = Integer.parseInt(st.nextToken());
 //		}
-		if(code == Parameters.NOTIFY_RSSI)
-		{
-			RSSI = Double.parseDouble(st.nextToken());
-		}
 		
-		/*AGGIUNTO DA LUCA IL 6-12 alle 17:43*/
-		if(code == Parameters.IM_RELAY)
-		{
-			actualRelayAddress = st.nextToken();
-		}
 	}
 
 	/**
@@ -293,5 +281,9 @@ public class RelayMessageReader {
 	/*AGGIUNTO DA LUCA IL 6-12 alle 17:43*/
 	public String getActualRelayAddress() {
 		return actualRelayAddress;
+	}
+	
+	public String getActualConnectedRelayAddress() {
+		return actualConnectedRelayAddress;
 	}
 }
