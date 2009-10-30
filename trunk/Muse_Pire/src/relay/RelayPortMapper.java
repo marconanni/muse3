@@ -64,7 +64,6 @@ public class RelayPortMapper {
 	 * i messaggi di START_TX e STOP_TX allo STREAMINGSERVER e per ricevere il messaggio ACK_RELAY_FORW*/
 	private boolean[] rangeManagedPortInOutControlProxy = new boolean[Parameters.RANGE_ACTIVE_SESSIONS]; 
 
-
 	//PER IL RELAY
 	/*porta su cui il relay attuale ascolta i messaggi di WHO_IS_RELAY e invia messaggi di IM_RELAY*/
 	private int portInWhoIsRelay;
@@ -108,7 +107,6 @@ public class RelayPortMapper {
 			rangeAdHocPortOutControlProxy[i] = true;
 			rangeManagedPortInOutControlProxy[i] = true;
 		}
-
 		portInWhoIsRelay = Parameters.WHO_IS_RELAY_PORT_IN;
 		portOutWhoIsRelay = Parameters.WHO_IS_RELAY_PORT_OUT;
 		portInAdHocElection = Parameters.RELAY_ELECTION_PORT_IN;
@@ -277,7 +275,7 @@ public class RelayPortMapper {
 	public boolean[] getRangeManagedPortInOutControlProxy() {
 		return rangeManagedPortInOutControlProxy;
 	}
-
+	
 	/**Metodo per ottenere la porta su cui il RELAY attuale attende i messaggi WHO_IS_RELAY
 	 * e tramite cui esso risponde inviando il messaggio IM_RELAY
 	 * @return un intero rappresentante la porta di cui sopra 
