@@ -36,7 +36,7 @@ public class WhoIsRelayServer implements Observer {
 	 */
 	public WhoIsRelayServer(boolean imBigBoss){
 		this.imBigBoss = imBigBoss;
-		whoIsRealayManger = RelayConnectionFactory.getWhoIsRelayBigBossConnectionManager(this);
+		whoIsRealayManger = RelayConnectionFactory.getWhoIsRelayConnectionManager(this);
 
 	}
 	
