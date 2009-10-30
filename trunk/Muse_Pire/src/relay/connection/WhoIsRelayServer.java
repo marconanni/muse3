@@ -11,6 +11,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import client.ClientMessageReader;
+import debug.DebugConsole;
 
 import parameters.Parameters;
 
@@ -28,13 +29,15 @@ public class WhoIsRelayServer implements Observer {
 	private RelayCM whoIsRealayManger = null;
 	private RelayMessageReader rmr = null;
 	private boolean imBigBoss = false;
+	private DebugConsole console = null;
 
 
 	/**Metodo per ottenere un WhoIsRelayServer
 	 * @param localAddress l'indirizzo locale del nodo
 	 * @param localInOutPort la porta tramite cui ricevere i messaggi
 	 */
-	public WhoIsRelayServer(boolean imBigBoss){
+	public WhoIsRelayServer(boolean imBigBoss, DebugConsole console){
+		this.console=console;
 		this.imBigBoss = imBigBoss;
 		whoIsRealayManger = RelayConnectionFactory.getWhoIsRelayConnectionManager(this);
 
@@ -42,6 +45,7 @@ public class WhoIsRelayServer implements Observer {
 	
 	public void start(){
 		this.whoIsRealayManger.start();
+		console.debugMessage(Parameters.DEBUG_INFO,"WhoIsRelayServer: partito");
 	}
 
 
@@ -49,6 +53,7 @@ public class WhoIsRelayServer implements Observer {
 	 */
 	public void close(){
 		this.whoIsRealayManger.close();
+		console.debugMessage(Parameters.DEBUG_INFO,"WhoIsRelayServer: fermato");
 	}
 
 	/**Metodo per ottenere il nome del Manager che sta utilizzando l'AConnectionReceiver
@@ -84,23 +89,24 @@ public class WhoIsRelayServer implements Observer {
 				if(rmr.getCode()==Parameters.WHO_IS_RELAY){
 					InetAddress remoteAddress = dp.getAddress();
 					int remotePort = dp.getPort();
-					System.out.println(this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_RELAY da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
-
+					//System.out.println(this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_RELAY da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
+					console.debugMessage(Parameters.DEBUG_INFO, this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_RELAY da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
 					dp = RelayMessageFactory.buildImRelay(this.whoIsRealayManger.getLocalAddress(), remoteAddress,(remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN);
 		
 					this.whoIsRealayManger.sendTo(dp);
-					System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_RELAY inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);
-				
+					//System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_RELAY inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);
+					console.debugMessage(Parameters.DEBUG_INFO, this.whoIsRealayManger.getManagerName()+":  messaggio IM_RELAY inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ ((remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN));
 				}
 				if((rmr.getCode()==Parameters.WHO_IS_BIGBOSS)&&(imBigBoss)){
 					InetAddress remoteAddress = dp.getAddress();
 					int remotePort = dp.getPort();
-					System.out.println(this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_BIGBOSS da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
-
+					//System.out.println(this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_BIGBOSS da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
+					console.debugMessage(Parameters.DEBUG_INFO, this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_BIGBOSS da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
 					dp = RelayMessageFactory.buildImBigBoss(this.whoIsRealayManger.getLocalAddress(), remoteAddress,(remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN);
 		
 					this.whoIsRealayManger.sendTo(dp);
-					System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_BIGBOSS inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);
+					//System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_BIGBOSS inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);
+					console.debugMessage(Parameters.DEBUG_INFO,  this.whoIsRealayManger.getManagerName()+":  messaggio IM_BIGBOSS inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ ((remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN));
 				}
 			} catch (IOException e) {e.printStackTrace();}
 			dp=null;
@@ -116,8 +122,8 @@ class TestWhoIsRelayServer {
 	public static void main(String args[]){
 		System.out.println("TestWhoIsRelayServer");
 
-		WhoIsRelayServer wirs = new WhoIsRelayServer(true);
-		wirs.start();
+		//WhoIsRelayServer wirs = new WhoIsRelayServer(true);
+		//wirs.start();
 
 		/*try {
 			BCAST = InetAddress.getByName(Parameters.BROADCAST_ADDRESS);

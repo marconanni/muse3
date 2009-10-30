@@ -253,7 +253,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
-			whoIsRelayServer = new WhoIsRelayServer(imBigBoss);
+			whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
 
 			relayPositionAPMonitor.start();
 			relayPositionClientsMonitor.start();
