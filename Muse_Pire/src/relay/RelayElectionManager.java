@@ -260,8 +260,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
 					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
-					this,
-					connectedRelayInetAddress);
+					this);
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
@@ -322,8 +321,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
 					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
-					this,
-					connectedRelayInetAddress);
+					this);
 
 			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
@@ -378,7 +376,7 @@ public class RelayElectionManager extends Observable implements Observer {
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+relayMessageReader.getActualConnectedRelayAddress());
 								
-				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivatoa actualConnectRelayAddress: "+actualRelayAddress);
+				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivatoa actualConnectRelayAddress: "+actualConnectedRelayAddress);
 				becomRelay();
 			}
 		}

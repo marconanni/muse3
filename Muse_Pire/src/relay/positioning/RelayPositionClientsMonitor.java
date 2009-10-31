@@ -36,7 +36,6 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	private RelayMessageReader rmr = null;
 	private TimeOutNotifyRSSI tnRSSI = null;
 	private Timer timer = null;
-	private InetAddress connectedRelayInetAddress = null;
 
 	private static InetAddress BCAST = null;
 
@@ -69,8 +68,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	 * il valore di RSSI che essi rilevano in riferimento al Relay
 	 * @param electionManager l'ElectionManager che deve essere avvertito allorchè si rilevi una possibile disconnessione
 	 */
-	public RelayPositionClientsMonitor(int maxNAV, long p, Observer electionManager, InetAddress connectedRelayInetAddress){
-		this.connectedRelayInetAddress=connectedRelayInetAddress;
+	public RelayPositionClientsMonitor(int maxNAV, long p, Observer electionManager){
 		period = p;
 		seqNum = -1;
 		maxNumberOfAverageValues = maxNAV; 
@@ -260,7 +258,7 @@ class TestRelayPositionClientsMonitor{
 
 	public static void main(String args[]) throws UnknownHostException{
 		TestObserver to = new TestObserver();
-		RelayPositionClientsMonitor rpcm = new RelayPositionClientsMonitor(3,6000,to,InetAddress.getLocalHost());
+		RelayPositionClientsMonitor rpcm = new RelayPositionClientsMonitor(3,6000,to);
 		rpcm.start();
 		/*InetAddress localhost = null;
 		try {
