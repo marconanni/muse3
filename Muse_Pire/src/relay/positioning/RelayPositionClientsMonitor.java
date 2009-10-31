@@ -114,7 +114,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 
 		try {
 			//System.out.println("\n*********************INIZIO mainTask*************************");
-			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_IN, relayAddress);
+			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_OUT, relayAddress);
 			numberOfValideRSSI = 0;
 			sumOfRSSI = 0;
 			rrcm.sendTo(dp);	
