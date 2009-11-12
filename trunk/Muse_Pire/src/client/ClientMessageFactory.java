@@ -24,6 +24,7 @@ public class ClientMessageFactory {
 	 * @return DatagramPacket 
 	 * @throws IOException
 	 */
+
 	public static DatagramPacket buildWhoIsRelay(InetAddress addr, int port) throws IOException {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
