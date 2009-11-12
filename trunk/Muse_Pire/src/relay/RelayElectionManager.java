@@ -187,7 +187,6 @@ public class RelayElectionManager extends Observable implements Observer {
 					Parameters.NAME_OF_AD_HOC_NETWORK,
 					Parameters.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
 		} catch (WNICException e) {System.err.println("ERRORE:"+e.getMessage());System.exit(1);}
-	
 		comManager = RelayConnectionFactory.getElectionConnectionManager(this);
 		comManager.start();
 
