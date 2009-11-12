@@ -41,7 +41,7 @@ public class RelayConnectionFactory {
 	 * @return un istanza di RelayRSSICM
 	 */
 	public static RelayCM getWhoIsRelayConnectionManager(Observer obser){
-		return new RelayCM("RelayWhoIsRelayBigBossManager",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInWhoIsRelay(),rpm.getPortOutWhoIsRelay(),obser);
+		return new RelayCM("WhoIsRelayConnetcionManager",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInWhoIsRelay(),rpm.getPortOutWhoIsRelay(),obser);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di ProxyCM quando il Proxy viene creato ex-novo
