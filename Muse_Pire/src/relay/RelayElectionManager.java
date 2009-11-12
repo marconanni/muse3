@@ -327,23 +327,15 @@ public class RelayElectionManager extends Observable implements Observer {
 				Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
 				this);
 		
-		//relayPositionController = new RelayPositionController(relayAHWNICController);
-		//relayPositionController.setConnectedRelayAddress(actualConnectedRelayAddress);
+		relayPositionMonitor.setLocalRelayAddress(actualRelayAddress);
+		relayPositionMonitor.setConnectedRelayAddress(actualConnectedRelayAddress);
+		relayPositionMonitor.start();
 		
 		//Client -> faccio partire nel momento in cui si collega qualche client...
 		//relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
 		whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
-		
-		relayPositionMonitor.start();
-		relayPositionMonitor.startRSSIMonitor();
-		relayPositionMonitor.setLocalRelayAddress(actualRelayAddress);
-		relayPositionMonitor.setConnectedRelayAddress(actualConnectedRelayAddress);
-
-		//relayPositionController.start();
-		//relayBatteryMonitor.start();
 		whoIsRelayServer.start();
-
 		actualStatus = RelayStatus.MONITORING;
 
 		System.out.println("RelayElectionManager.becomeRelay(): X -> STATO MONITORING: " +

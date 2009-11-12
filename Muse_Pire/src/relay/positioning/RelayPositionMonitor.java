@@ -34,8 +34,6 @@ import relay.wnic.exception.WNICException;
  */
 public class RelayPositionMonitor extends Observable implements Observer {
 
-
-
 	private int positiveDisconnectionPrediction;
 	private RelayMessageReader rmr = null;
 	private TimeOutNotifyRSSI tnRSSI = null;
@@ -54,7 +52,6 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	private Vector<Double> averageValues = null;
 	private int maxNumberOfAverageValues;
 
-	//private Logger logger = null;
 	private DatagramPacket dp = null;
 	private DatagramPacket notifyRSSI = null;
 	private RSSIFilter filter = null;
@@ -84,9 +81,9 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	 */
 	public RelayPositionMonitor(boolean imBigBoss, RelayWNICController rwnic, int maxNAV, long p, Observer electionManager){
 		this.rwnic = rwnic;
-		period = p;
+		this.period = p;
 		seqNum = -1;
-		maxNumberOfAverageValues = maxNAV; 
+		this.maxNumberOfAverageValues = maxNAV; 
 		positiveDisconnectionPrediction = 0;
 		averageValues = new Vector<Double>();
 		addObserver(electionManager);
@@ -95,19 +92,27 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		started = false;
 		this.imBigBoss = imBigBoss;
 		this.setDebugConsole(rwnic.getDebugConsole());
-		//logger = new Logger();
 	}
 	
 	/**Metodo per far partire il Thread che sta in ascolto su una determinata porta
 	 * quando gli arriva un messaggio richiama il metodo notify(observer)  
 	 */
 	public void start(){
-		if(enableToMonitor){
+		if(imBigBoss){
 			if(!rrcm.isStarted())
 				rrcm.start();
 			started = true;
 		}
-		
+			
+		else if(enableToMonitor){
+			if(!rrcm.isStarted()){
+				rrcm.start();
+			}
+			started = true;
+		}
+		else{
+			started = false;
+		}
 	}
 
 
@@ -143,7 +148,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 
 		try {
 			//System.out.println("\n*********************INIZIO mainTask*************************");
-			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_OUT, localRelayAddress);
+			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_IN, localRelayAddress);
 			numberOfValideRSSI = 0;
 			sumOfRSSI = 0;
 			rrcm.sendTo(dp);	
@@ -299,22 +304,21 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	}
 	
 	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
-	 * confronti dell'indirizzo del Relay
+	 * confronti dell'indirizzo del Relay (indirizzo BigBoss)
 	 * @param rA una String che rappresenta l'indirizzo del Relay a cui è collegato
 	 */
 	public void setConnectedRelayAddress(String rA) {
 		try {
 			connectedRelayAddress = InetAddress.getByName(rA);
+			enableToMonitor = true;
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
-	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
-	 * confronti dell'indirizzo del Relay
-	 * @param rA una String che rappresenta l'indirizzo del Relay a cui è collegato
+	/**Metodo per impostare l'indirizzo locale del relay
+	 * @param rA una String che rappresenta l'indirizzo locale del Relay
 	 */
 	public void setLocalRelayAddress(String rA) {
 		localRelayAddress =rA;
-		enableToMonitor = true;
 	}
 	
 	public void setDebugConsole(DebugConsole console){
