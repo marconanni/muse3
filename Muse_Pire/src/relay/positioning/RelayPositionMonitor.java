@@ -305,7 +305,6 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	public void setConnectedRelayAddress(String rA) {
 		try {
 			connectedRelayAddress = InetAddress.getByName(rA);
-			enableToMonitor = true;
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
@@ -315,6 +314,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	 */
 	public void setLocalRelayAddress(String rA) {
 		localRelayAddress =rA;
+		enableToMonitor = true;
 	}
 	
 	public void setDebugConsole(DebugConsole console){
