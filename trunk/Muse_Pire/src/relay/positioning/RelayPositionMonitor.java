@@ -63,10 +63,12 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	private int seqNum ;
 	private double sumOfRSSI;
 	private int numberOfValideRSSI;
-	private InetAddress relayAddress;
+	private InetAddress connectedRelayAddress;
+	private String localRelayAddress;
 	private boolean enableToMonitor;
 	private boolean started;
 	private static int sequenceNumber = 0;
+	private boolean imBigBoss=false;
 	
 	private DebugConsole console = null;
 	
@@ -80,7 +82,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	 * il valore di RSSI che essi rilevano in riferimento al Relay
 	 * @param electionManager l'ElectionManager che deve essere avvertito allorchè si rilevi una possibile disconnessione
 	 */
-	public RelayPositionMonitor(RelayWNICController rwnic, int maxNAV, long p, Observer electionManager){
+	public RelayPositionMonitor(boolean imBigBoss, RelayWNICController rwnic, int maxNAV, long p, Observer electionManager){
 		this.rwnic = rwnic;
 		period = p;
 		seqNum = -1;
@@ -91,6 +93,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		rrcm = RelayConnectionFactory.getRSSIConnectionManager(this);	
 		enableToMonitor = false;
 		started = false;
+		this.imBigBoss = imBigBoss;
 		this.setDebugConsole(rwnic.getDebugConsole());
 		//logger = new Logger();
 	}
@@ -140,7 +143,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 
 		try {
 			//System.out.println("\n*********************INIZIO mainTask*************************");
-			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_OUT, relayAddress.toString());
+			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_OUT, localRelayAddress);
 			numberOfValideRSSI = 0;
 			sumOfRSSI = 0;
 			rrcm.sendTo(dp);	
@@ -188,13 +191,13 @@ public class RelayPositionMonitor extends Observable implements Observer {
 				//notifyObservers((DatagramPacket)arg1);
 			}
 			
-			if((rmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(relayAddress)){
+			if((rmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(connectedRelayAddress)&&(!imBigBoss)){
 				try{
 					RSSIvalue = rwnic.getSignalStrenghtValue();
-					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RSSI_PORT_IN);
+					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, connectedRelayAddress, Parameters.RSSI_PORT_IN);
 					sequenceNumber++;
 					rrcm.sendTo(notifyRSSI);
-					console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionController : Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RSSI_PORT_IN);
+					console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionController : Inviato RSSI: "+ RSSIvalue +" a: " + connectedRelayAddress+":"+Parameters.RSSI_PORT_IN);
 				}catch (WNICException e) {
 					console.debugMessage(Parameters.DEBUG_ERROR,"RelayPositionController: Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
 					new WNICException("RelayPositionController: Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
@@ -299,11 +302,19 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	 * confronti dell'indirizzo del Relay
 	 * @param rA una String che rappresenta l'indirizzo del Relay a cui è collegato
 	 */
-	public void setRelayAddress(String rA) {
+	public void setConnectedRelayAddress(String rA) {
 		try {
-			relayAddress = InetAddress.getByName(rA);
+			connectedRelayAddress = InetAddress.getByName(rA);
 			enableToMonitor = true;
 		} catch (UnknownHostException e) {e.printStackTrace();}
+	}
+	
+	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
+	 * confronti dell'indirizzo del Relay
+	 * @param rA una String che rappresenta l'indirizzo del Relay a cui è collegato
+	 */
+	public void setLocalRelayAddress(String rA) {
+		localRelayAddress =rA;
 	}
 	
 	public void setDebugConsole(DebugConsole console){

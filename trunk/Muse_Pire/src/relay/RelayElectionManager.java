@@ -257,11 +257,12 @@ public class RelayElectionManager extends Observable implements Observer {
 					this);
 
 			//Compresi client e realy secondari
-			relayPositionMonitor = new RelayPositionMonitor(
+			relayPositionMonitor = new RelayPositionMonitor(imBigBoss,
 					relayAHWNICController,
 					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
 					this);
+			relayPositionMonitor.setLocalRelayAddress(actualRelayAddress);
 			
 			
 
@@ -320,7 +321,8 @@ public class RelayElectionManager extends Observable implements Observer {
 		/*Fine Vedere se sta parte serve*/
 
 		//Compresi client e realy secondari
-		relayPositionMonitor = new RelayPositionMonitor(relayAHWNICController,
+		relayPositionMonitor = new RelayPositionMonitor(imBigBoss,
+				relayAHWNICController,
 				Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 				Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
 				this);
@@ -335,6 +337,8 @@ public class RelayElectionManager extends Observable implements Observer {
 		
 		relayPositionMonitor.start();
 		relayPositionMonitor.startRSSIMonitor();
+		relayPositionMonitor.setLocalRelayAddress(actualRelayAddress);
+		relayPositionMonitor.setConnectedRelayAddress(actualConnectedRelayAddress);
 
 		//relayPositionController.start();
 		//relayBatteryMonitor.start();
