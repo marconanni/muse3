@@ -262,7 +262,7 @@ public class RelayElectionManager extends Observable implements Observer {
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
 					this);
 
-			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
+			//relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
 			whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
 
@@ -270,7 +270,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			
 			//fare partire solo quando qualcuno si collega a lui..
 			//relayPositionClientsMonitor.start();
-			relayBatteryMonitor.start();
+			//relayBatteryMonitor.start();
 			whoIsRelayServer.start();
 
 			actualStatus = RelayStatus.MONITORING;
