@@ -91,6 +91,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		rrcm = RelayConnectionFactory.getRSSIConnectionManager(this);	
 		enableToMonitor = false;
 		started = false;
+		this.setDebugConsole(rwnic.getDebugConsole());
 		//logger = new Logger();
 	}
 	
