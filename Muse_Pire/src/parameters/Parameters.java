@@ -14,7 +14,7 @@ public class Parameters {
 	 * 
 	 * */	
 	/** indirizzo IP del SERVER */
-	public static final String SERVER_ADDRESS = "192.168.0.4";
+	public static final String SERVER_ADDRESS = "192.168.2.4";
 	//public static final String SERVER_ADDRESS = "192.255.0.1";
 	
 	/** indirizzo IP del CLIENT */
@@ -24,12 +24,12 @@ public class Parameters {
 	
 	/** indirizzo IP del RELAY sulla rete Ad-Hoc */
 	//public static final String RELAY_AD_HOC_ADDRESS = "192.168.2.2";
-	public static final String RELAY_AD_HOC_ADDRESS = "192.168.0.4";
+	public static final String RELAY_AD_HOC_ADDRESS = "192.168.0.2";
 	//public static final String RELAY_AD_HOC_ADDRESS = "localhost";
 	
 	/** indirizzo IP del RELAY sulla rete Managed */
 	//public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
-	public static final String RELAY_MANAGED_ADDRESS = "192.168.0.4";
+	public static final String RELAY_MANAGED_ADDRESS = "192.168.2.4";
 	
 	/** indirizzo IP di BROADCAST sulla rete Ad-Hoc */
 	//public static final String BROADCAST_ADDRESS = "192.168.1.255";
@@ -39,13 +39,13 @@ public class Parameters {
 	public static final String NAME_OF_AD_HOC_NETWORK = "marco";
 	
 	/** Nome della rete Managed */
-	public static final String NAME_OF_MANAGED_NETWORK = "ALMAWIFI";
+	public static final String NAME_OF_MANAGED_NETWORK = "lord";
 	
 	/** Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc */
-	public static final String NAME_OF_AD_HOC_RELAY_INTERFACE = "wlan0";
+	public static final String NAME_OF_AD_HOC_RELAY_INTERFACE = "wlan1";
 	
 	/**Nome dell'interfaccia con cui il Relay si affaccia sulla rete Managed*/
-	public static final String NAME_OF_MANAGED_RELAY_INTERFACE  = "wlan1";
+	public static final String NAME_OF_MANAGED_RELAY_INTERFACE  = "wlan0";
 	
 	/** Nome dell'interfaccia con cui il Client si affaccia sulla rete Ad-Hoc */
 	public static final String NAME_OF_CLIENT_INTERFACE = "wlan0";
@@ -61,7 +61,7 @@ public class Parameters {
 	 * relay principale (collegato col nodo server) -> BIG BOSS	IMRELAY = true && IMBIGBOSS = true
 	 * relay secondario (collegato col nodo BIG BOSS) 			IMRELAY = true && IMBIGBOSS = false
 	 */
-	public static final boolean IMRELAY=false;
+	public static final boolean IMRELAY=true;
 	public static final boolean IMBIGBOSS=false;
 	
 	/** Specifica il numero di sessioni attive massime che si possono avere sul Relay */
@@ -100,12 +100,6 @@ public class Parameters {
 	 * WHO_IS_RELAY */
 	public static final int CLIENT_PORT_ELECTION_OUT = 3003;
 	
-	/** porta su cui il CLIENT riceve i messaggi di REQUEST_RSSI
-	 *  e la porta da cui invia NOTIFY_RSSI al RELAY
-	 */
-	public static final int CLIENT_RSSI_PORT_IN = 3004;
-	public static final int CLIENT_RSSI_PORT_OUT = 3005;
-	
 	/** porta per la ricezione del flusso RTP sul CLIENT */
 	public static final int CLIENT_PORT_RTP_IN = 3006;
 	
@@ -130,12 +124,6 @@ public class Parameters {
 	/** porta per la gestionee della elezione sul RELAY, rispettivamente in uscita */
 	public static final int RELAY_ELECTION_PORT_OUT = 4006;
 		
-	/** porta su cui il RELAY riceve i messaggi di NOTIFY_RSSI inviati dai CLIENTS */
-	public static final int RELAY_RSSI_RECEIVER_PORT = 4007;
-	
-	/** porta da cui il relay invia i REQUEST_RSSI ai CLIENTS */
-	public static final int RELAY_RSSI_SENDER_PORT = 4008;
-	
 	/** valori iniziali dei range di porte RTP in ingresso 
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
 	public static final int PROXY_INITIAL_PORT_IN_RTP = 5000;
@@ -155,6 +143,14 @@ public class Parameters {
 	/** valori iniziali dei range di porte di controllo in ingresso/uscita sulla rete managed 
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
 	public static final int PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL = 9000;
+	
+	//Client && Relay
+		/** porta su cui il CLIENT e RELAY riceve i messaggi di REQUEST_RSSI
+		 *  e la porta da cui invia NOTIFY_RSSI al RELAY corrispondente
+		 */
+	public static final int RSSI_PORT_IN = 3004;
+	public static final int RSSI_PORT_OUT = 3005;
+	
 	
 	/*
 	 ********************* CONFIGURAZIONE BUFFER *****************************
