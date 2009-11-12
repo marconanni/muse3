@@ -69,6 +69,11 @@ public class RelayPositionAPMonitor extends Observable {
 			public void run(){ mainTask();} 
 		}, 0L , period );				
 	}
+	
+	public void stop(){
+		timer.cancel();
+		started = false;
+	}
 
 
 	/**Metodo per chiudere il RelayPositionClientsMonitor

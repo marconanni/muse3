@@ -20,8 +20,7 @@ import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
 import relay.connection.WhoIsRelayServer;
 import relay.positioning.RelayPositionAPMonitor;
-import relay.positioning.RelayPositionClientsMonitor;
-import relay.positioning.RelayPositionController;
+import relay.positioning.RelayPositionMonitor;
 import relay.battery.RelayBatteryMonitor;
 import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutClientDetection;
@@ -82,6 +81,8 @@ public class RelayElectionManager extends Observable implements Observer {
 
 	//Vector da riempire con le Couple relative agli ELECTION_RESPONSE ricevuti dal Relay uscente
 	private Vector<Couple> possibleRelay = null; 
+	
+	private RelayCM RSSIService;
 
 	//peso del nodo 
 	private double W = -1;
@@ -119,11 +120,11 @@ public class RelayElectionManager extends Observable implements Observer {
 	//il RelayPositionAPMonitor per conoscere la propria situazione nei confronti dell'AP
 	private RelayPositionAPMonitor relayPositionAPMonitor = null;
 	
-	private RelayPositionController relayPositionController = null;
+	//private RelayPositionController relayPositionController = null;
 	
 	//il RelayPositionClientsMonitor per conoscere la propria situazione nei confronti dei clients attualmente serviti
 	//compreso BIG BOSS in caso di relay secondario
-	private RelayPositionClientsMonitor relayPositionClientsMonitor = null;
+	private RelayPositionMonitor relayPositionMonitor = null;
 	
 	//il RelayBatteryMonitor per conoscere la situazione della propria batteria
 	private RelayBatteryMonitor relayBatteryMonitor = null;
@@ -257,22 +258,29 @@ public class RelayElectionManager extends Observable implements Observer {
 					this);
 
 			//Compresi client e realy secondari
-			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
+			relayPositionMonitor = new RelayPositionMonitor(
+					relayAHWNICController,
 					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
 					this);
+			
+			
 
 			//relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
 			whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
 
-			relayPositionAPMonitor.start();
+			//relayPositionAPMonitor.start();
 			
 			//fare partire solo quando qualcuno si collega a lui..
 			//relayPositionClientsMonitor.start();
 			//relayBatteryMonitor.start();
 			whoIsRelayServer.start();
-
+			
+			//in teoria solo quando ce traffico...
+			relayPositionMonitor.start();
+			relayPositionMonitor.startRSSIMonitor();
+			
 			actualStatus = RelayStatus.MONITORING;
 			
 			console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager.becomeBigBossRelay(): X -> STATO MONITORING: whoIsRelayServer partiti");
@@ -289,7 +297,7 @@ public class RelayElectionManager extends Observable implements Observer {
 	private void searchingBigBossRelay(){
 		DatagramPacket dpOut = null;
 		try {
-			dpOut = RelayMessageFactory.buildWhoIsBigBossRelay(BCAST,	Parameters.WHO_IS_RELAY_PORT_IN);
+			dpOut = RelayMessageFactory.buildWhoIsBigBossRelay(BCAST,Parameters.WHO_IS_RELAY_PORT_IN);
 			comManager.sendTo(dpOut);
 		} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
 		timeoutSearch = RelayTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
@@ -312,35 +320,31 @@ public class RelayElectionManager extends Observable implements Observer {
 //		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
 		/*Fine Vedere se sta parte serve*/
 
-		try {
-			
-			relayPositionController = new RelayPositionController(relayAHWNICController);
-			relayPositionController.setConnectedRelayAddress(actualConnectedRelayAddress);
-			
-			//Compresi client e realy secondari
-			relayPositionClientsMonitor = new RelayPositionClientsMonitor(
-					Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
-					Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
-					this);
+		//Compresi client e realy secondari
+		relayPositionMonitor = new RelayPositionMonitor(relayAHWNICController,
+				Parameters.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
+				Parameters.POSITION_CLIENTS_MONITOR_PERIOD,
+				this);
+		
+		//relayPositionController = new RelayPositionController(relayAHWNICController);
+		//relayPositionController.setConnectedRelayAddress(actualConnectedRelayAddress);
+		
+		//Client -> faccio partire nel momento in cui si collega qualche client...
+		//relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
 
-			relayBatteryMonitor = new RelayBatteryMonitor(Parameters.BATTERY_MONITOR_PERIOD,this);
+		whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
+		
+		relayPositionMonitor.start();
+		relayPositionMonitor.startRSSIMonitor();
 
-			whoIsRelayServer = new WhoIsRelayServer(imBigBoss,console);
+		//relayPositionController.start();
+		//relayBatteryMonitor.start();
+		whoIsRelayServer.start();
 
-			relayPositionClientsMonitor.start();
-			relayPositionController.start();
-			//relayBatteryMonitor.start();
-			whoIsRelayServer.start();
+		actualStatus = RelayStatus.MONITORING;
 
-			actualStatus = RelayStatus.MONITORING;
-
-			System.out.println("RelayElectionManager.becomeRelay(): X -> STATO MONITORING: " +
-			"Monitors e whoIsRelayServer partiti");
-
-		} catch (WNICException e) {
-			e.printStackTrace();
-			System.exit(2);
-		}
+		System.out.println("RelayElectionManager.becomeRelay(): X -> STATO MONITORING: " +
+		"Monitors e whoIsRelayServer partiti");
 	}
 
 
@@ -1402,8 +1406,8 @@ public class RelayElectionManager extends Observable implements Observer {
 	public RelayPositionAPMonitor getRelayPositionAPMonitor() {return relayPositionAPMonitor;}
 	public void setRelayPositionAPMonitor(RelayPositionAPMonitor relayPositionAPMonitor) {this.relayPositionAPMonitor = relayPositionAPMonitor;}
 
-	public RelayPositionClientsMonitor getRelayPositionClientsMonitor() {return relayPositionClientsMonitor;}
-	public void setRelayPositionClientsMonitor(RelayPositionClientsMonitor relayPositionClientsMonitor) {this.relayPositionClientsMonitor = relayPositionClientsMonitor;}
+	public RelayPositionMonitor getRelayPositionMonitor() {return relayPositionMonitor;}
+	public void setRelayPositionMonitor(RelayPositionMonitor relayPositionMonitor) {this.relayPositionMonitor = relayPositionMonitor;}
 
 	public WhoIsRelayServer getWhoIsRelayServer() {return whoIsRelayServer;}
 	public void setWhoIsRelayServer(WhoIsRelayServer whoIsRelayServer) {this.whoIsRelayServer = whoIsRelayServer;}
