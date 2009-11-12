@@ -10,6 +10,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import debug.DebugConsole;
+
 import parameters.Parameters;
 
 import relay.RelayMessageFactory;
@@ -20,7 +22,9 @@ import relay.connection.RelayConnectionFactory;
 import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutNotifyRSSI;
 import relay.timeout.TimeOutSearch;
+import relay.wnic.RelayWNICController;
 import relay.wnic.exception.InvalidParameter;
+import relay.wnic.exception.WNICException;
 
 
 /**Classe che rappresenta un oggetto in grado di prevedere un possibile allontanamento del nodo Relay
@@ -28,7 +32,7 @@ import relay.wnic.exception.InvalidParameter;
  * @author  Luca Campeti
  *
  */
-public class RelayPositionClientsMonitor extends Observable implements Observer {
+public class RelayPositionMonitor extends Observable implements Observer {
 
 
 
@@ -52,13 +56,21 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 
 	//private Logger logger = null;
 	private DatagramPacket dp = null;
+	private DatagramPacket notifyRSSI = null;
 	private RSSIFilter filter = null;
 	private long period ;
 	private RelayCM rrcm;
 	private int seqNum ;
 	private double sumOfRSSI;
 	private int numberOfValideRSSI;
-	private String relayAddress;
+	private InetAddress relayAddress;
+	private boolean enableToMonitor;
+	private boolean started;
+	private static int sequenceNumber = 0;
+	
+	private DebugConsole console = null;
+	
+	private RelayWNICController rwnic = null;
 
 
 	/**Costruttore del RelayPositioniClientsMonitor che avverte il RelayElectionManager 
@@ -68,7 +80,8 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	 * il valore di RSSI che essi rilevano in riferimento al Relay
 	 * @param electionManager l'ElectionManager che deve essere avvertito allorchè si rilevi una possibile disconnessione
 	 */
-	public RelayPositionClientsMonitor(int maxNAV, long p, Observer electionManager){
+	public RelayPositionMonitor(RelayWNICController rwnic, int maxNAV, long p, Observer electionManager){
+		this.rwnic = rwnic;
 		period = p;
 		seqNum = -1;
 		maxNumberOfAverageValues = maxNAV; 
@@ -76,8 +89,21 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 		averageValues = new Vector<Double>();
 		addObserver(electionManager);
 		rrcm = RelayConnectionFactory.getRSSIConnectionManager(this);	
-		
+		enableToMonitor = false;
+		started = false;
 		//logger = new Logger();
+	}
+	
+	/**Metodo per far partire il Thread che sta in ascolto su una determinata porta
+	 * quando gli arriva un messaggio richiama il metodo notify(observer)  
+	 */
+	public void start(){
+		if(enableToMonitor){
+			if(!rrcm.isStarted())
+				rrcm.start();
+			started = true;
+		}
+		
 	}
 
 
@@ -85,8 +111,9 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	 * degli RSSI che i Client serviti avvertono nei confronti del nodo Relay per scoprire
 	 * se si sta verificando una disconnessione dai Clients serviti. 
 	 */
-	public void start() {
-		rrcm.start();
+	public void startRSSIMonitor() {
+		if(!rrcm.isStarted())
+			rrcm.start();
 		timer = new Timer();
 		timer.schedule(new TimerTask(){
 
@@ -112,12 +139,13 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 
 		try {
 			//System.out.println("\n*********************INIZIO mainTask*************************");
-			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_OUT, relayAddress);
+			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, Parameters.RSSI_PORT_OUT, relayAddress.toString());
 			numberOfValideRSSI = 0;
 			sumOfRSSI = 0;
 			rrcm.sendTo(dp);	
 			seqNum++;
 			tnRSSI = RelayTimeoutFactory.getTimeOutNotifyRSSI(this,Parameters.TIMEOUT_NOTIFY_RSSI);
+			console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionCOntroller: spedito RSSI Request a tutti");
 			//System.out.println("***********************FINE mainTask*************************\n");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -130,6 +158,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 	public synchronized void update(Observable arg0, Object arg1) {
 
 		if(arg1 instanceof DatagramPacket){
+			int RSSIvalue =-1;
 
 			rmr= new RelayMessageReader();
 
@@ -146,7 +175,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 				double RSSIValue = rmr.getRSSI();
 
 				System.out.println("RelayPositionClientsMonitor.update(): ricevuto nuovo valore di RSSI: " +rmr.getRSSI());
-
+				console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI:"+ ((DatagramPacket)arg1).getAddress()+" : "+rmr.getRSSI());
 
 				if(RSSIValue < Parameters.VALID_RSSI_THRS && RSSIValue > 0 && RSSIValue != Double.NaN){
 					sumOfRSSI = sumOfRSSI + RSSIValue;
@@ -157,6 +186,22 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 				//setChanged();
 				//notifyObservers((DatagramPacket)arg1);
 			}
+			
+			if((rmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(relayAddress)){
+				try{
+					RSSIvalue = rwnic.getSignalStrenghtValue();
+					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RSSI_PORT_IN);
+					sequenceNumber++;
+					rrcm.sendTo(notifyRSSI);
+					console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionController : Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RSSI_PORT_IN);
+				}catch (WNICException e) {
+					console.debugMessage(Parameters.DEBUG_ERROR,"RelayPositionController: Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+					new WNICException("RelayPositionController: Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+				}catch (IOException e) {e.printStackTrace();}
+			}else{
+				//console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionController: Faccio niente");
+			}
+				
 			rmr = null;
 		}
 
@@ -169,31 +214,33 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 
 				if(numberOfValideRSSI != 0){
 
-					System.out.println("RelayPositionClientsMonitor.update(): [0]. SCATTATO IL TIMEOUT_NOTIFY_RSSI");	
+					//System.out.println("RelayPositionClientsMonitor.update(): [0]. SCATTATO IL TIMEOUT_NOTIFY_RSSI");	
 
 					try {
-						System.err.println("UPDATE-TIMEOUTNOTIFYRSSI: numberOfValideRSSI="+numberOfValideRSSI);
+						//System.err.println("UPDATE-TIMEOUTNOTIFYRSSI: numberOfValideRSSI="+numberOfValideRSSI);
 						//calcolo media degli RSSI ottenuti allo scadere del TIMEOUT_NOTIFY_RSSI
 						double toInsert = (double)((double)sumOfRSSI/(double)numberOfValideRSSI);
 						addNewAverageValue(toInsert);
 						
-						System.out.print("---->[");
+						//System.out.print("---->[");
 						for(int i = 0; i<getLastAverageValues().length-1;i++)System.out.print(getLastAverageValues()[i]+", ");
-						System.out.println(getLastAverageValues()[getLastAverageValues().length-1]+"]");
+						//System.out.println(getLastAverageValues()[getLastAverageValues().length-1]+"]");
 
 						filter = new GreyModel_v2(getLastAverageValues());
 
 						double prevision = filter.predictRSSI();
 
-						System.out.println("RelayPositionClientsMonitor.update(): [1]. RSSI PREVISTO: "+ prevision);
+						//System.out.println("RelayPositionClientsMonitor.update(): [1]. RSSI PREVISTO: "+ prevision);
+						console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionController: RSSI PREVISTO "+prevision);
 
 						if(prevision >= Parameters.CLIENTS_DISCONNECTION_THRS){
 							positiveDisconnectionPrediction++;
 
-							System.out.println("RelayPositionClientsMonitor.update(): [2]. RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE. PREDIZIONE DI DISCONNESSIONE No"+positiveDisconnectionPrediction);
-
+							//System.out.println("RelayPositionClientsMonitor.update(): [2]. RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE. PREDIZIONE DI DISCONNESSIONE No"+positiveDisconnectionPrediction);
+							console.debugMessage(Parameters.DEBUG_INFO,"RelayPositionController: RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE. PREDIZIONE DI DISCONNESSIONE No"+positiveDisconnectionPrediction);
 							if(positiveDisconnectionPrediction == Parameters.NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION){
-								System.out.println("RelayPositionClientsMonitor.update(): [3]. DISCONNESSIONE RILEVATA COME SICURA. AVVERTO L'OBSERVER");
+								//System.out.println("RelayPositionClientsMonitor.update(): [3]. DISCONNESSIONE RILEVATA COME SICURA. AVVERTO L'OBSERVER");
+								console.debugMessage(Parameters.DEBUG_INFO, " RelayPositionController:DISCONNESSIONE RILEVATA COME SICURA. AVVERTO L'OBSERVER");
 								setChanged();
 								notifyObservers("DISCONNECTION_WARNING");
 							}
@@ -201,7 +248,7 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 						else{
 							positiveDisconnectionPrediction=0;				
 
-							System.out.println("RelayPositionClientsMonitor.update(): [2]. RSSI PREVISTO NON SUPERA SOGLIA DI DISCONNESSIONE.");
+							//System.out.println("RelayPositionClientsMonitor.update(): [2]. RSSI PREVISTO NON SUPERA SOGLIA DI DISCONNESSIONE.");
 						}	
 					} catch (InvalidParameter e) {
 						// TODO Auto-generated catch block
@@ -247,14 +294,25 @@ public class RelayPositionClientsMonitor extends Observable implements Observer 
 		return res;
 	}
 	
+	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
+	 * confronti dell'indirizzo del Relay
+	 * @param rA una String che rappresenta l'indirizzo del Relay a cui è collegato
+	 */
 	public void setRelayAddress(String rA) {
-		relayAddress = rA;
+		try {
+			relayAddress = InetAddress.getByName(rA);
+			enableToMonitor = true;
+		} catch (UnknownHostException e) {e.printStackTrace();}
+	}
+	
+	public void setDebugConsole(DebugConsole console){
+		this.console = console;
 	}
 }
 
 
 
-class TestRelayPositionClientsMonitor{
+/*class TestRelayPositionClientsMonitor{
 
 	public static void main(String args[]) throws UnknownHostException{
 		TestObserver to = new TestObserver();
@@ -285,7 +343,7 @@ class TestRelayPositionClientsMonitor{
 			e.printStackTrace();
 		}
 
-	}*/
+	}
 	}
 	}
 

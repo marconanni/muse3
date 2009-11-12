@@ -109,11 +109,13 @@ public class RelayPortMapper {
 		}
 		portInWhoIsRelay = Parameters.WHO_IS_RELAY_PORT_IN;
 		portOutWhoIsRelay = Parameters.WHO_IS_RELAY_PORT_OUT;
+		
 		portInAdHocElection = Parameters.RELAY_ELECTION_PORT_IN;
 		portOutAdHocElection = Parameters.RELAY_ELECTION_PORT_OUT;
 		portInAdHocSession = Parameters.RELAY_SESSION_AD_HOC_PORT_IN;
 		portOutAdHocSession = Parameters.RELAY_SESSION_AD_HOC_PORT_OUT;
 		portOutManagedSession = Parameters.RELAY_SESSION_MANAGED_PORT_OUT;
+		
 		portInRSSI = Parameters.RSSI_PORT_IN;
 		portOutRSSI = Parameters.RSSI_PORT_OUT;
 
