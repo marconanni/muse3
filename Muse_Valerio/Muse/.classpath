@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="unibo"/>
+	<classpathentry kind="src" path="sv60122"/>
+	<classpathentry kind="src" path="muse"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Programmi/Java/JMF2.1.1e/lib/mediaplayer.jar"/>
+	<classpathentry kind="lib" path="C:/Programmi/Java/JMF2.1.1e/lib/multiplayer.jar"/>
+	<classpathentry kind="lib" path="C:/Programmi/Java/JMF2.1.1e/lib/customizer.jar"/>
+	<classpathentry kind="lib" path="lib/Jama-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/nosource.jar"/>
+	<classpathentry kind="src" path="srcRTP"/>
+	<classpathentry kind="src" path="srcJMFnoRTP"/>
+	<classpathentry kind="lib" path="C:/Programmi/Java/JMF2.1.1e/lib/sound.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

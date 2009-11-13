@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="Muse/muse"/>
+	<classpathentry kind="src" path="Muse/sv60122"/>
+	<classpathentry kind="src" path="Muse/unibo"/>
+	<classpathentry kind="src" path="Muse/srcJMFnoRTP"/>
+	<classpathentry kind="src" path="Muse/srcRTP"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="Muse/lib/Jama-1.0.2.jar"/>
+	<classpathentry kind="lib" path="Muse/lib/nosource.jar"/>
+	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/customizer.jar"/>
+	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/jmf.jar"/>
+	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/mediaplayer.jar"/>
+	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/multiplayer.jar"/>
+	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/sound.jar"/>
+	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/mp3plugin.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
