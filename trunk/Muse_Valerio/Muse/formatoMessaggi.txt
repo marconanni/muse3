@@ -1,0 +1,18 @@
+Formato stringa di una richiesta di attivazione proxy da parte del client:
+
+codice richiesta attivazione+"_"+ip server+"_"+porta server+"_"+porta controllo client+"_"+porta ricezione client
+
+Per i codici dei messaggi consultare la classe parameters.Parameters
+
+***************************************************************************
+
+Formato stringa di un messsaggio di inizio periodo di off
+
+codice inizio periodo di off+"_"+durata periodo di off
+
+***************************************************************************
+
+Formato stringa di un messaggio di fine periodo di off
+
+codice fine periodo di off
+
