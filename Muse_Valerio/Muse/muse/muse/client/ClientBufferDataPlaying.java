@@ -200,11 +200,12 @@ proxyIP---->l'indirizzo IP del mittente
 	{
 		try
 		{
-			System.out.println("--------------------------------playingStreamRTP()");
+			System.out.println("ClientBufferDataPlaying metodo playingStreamRTP()");
 			Manager.setHint(Manager.PLUGIN_PLAYER,new Boolean(true));
 			rtpRx=new RTPReceiverPS(clientPortRTP);
-			rtpRx.setSender(proxyIP,proxyPortRTP);
+			rtpRx.setSender(proxyIP,proxyPortRTP);//da cambiare solo i nomi in realtà sono indirizzo e porta del server
 			dsInput=rtpRx.receiveData();
+			System.out.println("ricevuto uno stream, si è sbloccato il thread playingStreamRTP");
 			//clReport.startPSTransmission();
 			rtpRx.addReceiveStreamEventListener(this);
 			// ***** PARSER *****
