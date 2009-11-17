@@ -22,16 +22,17 @@ public class ClientController extends Thread implements IStartpointListener{
 	//valore booleano per l'esecuzione dei thread
 	private boolean running;
 	//thread per il controllo dell throughput
-	private Thread throughputCtrl;
+	//private Thread throughputCtrl;
 	//manager per la ricezione del treno di pacchetti proveniente dal proxy
 	private ConnectionManager recMgr;
 	//manager per l'invio di messaggi di notifica dello stato della trasmissione al proxy
 	private ConnectionManager sendMgr;
-	//porta su cui � in ascolto il thread di controllo lato proxy
+	
 
-
-	private int receivingPort;
-	private InetAddress serverAddr;
+	private int serverPort;//porta trasmissione del server
+	private InetAddress serverAddr;//indirizzo del server
+	private int receivingPort;//porta ricezione stream
+	
 	private double bitRate;
 	private double delay;
 
@@ -47,12 +48,12 @@ public class ClientController extends Thread implements IStartpointListener{
 	BufferedWriter bw = null;
 	
 	
-	private int serverPort;
+	
 	
 	/**
 	 * Enable or disable handoff handling
 	 */
-	boolean handoffEnable=Parameters.enableHandoff;
+	//boolean handoffEnable=Parameters.enableHandoff;
 	
 	public ClientController(int recPort, int sendPort, IClientView ctrl, int r, int s, int serverPort, int receivingPort,InetAddress serverAddr){
 		view = ctrl;

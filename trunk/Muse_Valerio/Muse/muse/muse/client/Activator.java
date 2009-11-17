@@ -52,8 +52,10 @@ public class Activator {
 			
 			int res = 0;
 			res = mgr.receivePacket();
+			/*//questo ciclo non serve: receivePacket() è bloccante
 			while(res != 0)
 				res = mgr.receivePacket();
+			*/
 			idxRec++;
 			DatagramPacket response = mgr.getPacket();
 			ClientMessageReader.readContent(response);
@@ -120,8 +122,10 @@ public class Activator {
 			//attesa del messaggio di conferma da parte del server
 			int res = 0;
 			res = mgr.receivePacket();
+			/*//questo ciclo non serve: receivePacket() è bloccante
 			while(res != 0)
 				res = mgr.receivePacket();
+			*/
 			System.out.println("ricevuto un messaggio dal server");
 			idxRec++;			
 			ClientMessageReader.readContent(mgr.getPacket());
