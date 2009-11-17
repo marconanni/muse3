@@ -12,7 +12,5 @@
 	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/jmf.jar"/>
 	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/mediaplayer.jar"/>
 	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/multiplayer.jar"/>
-	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/sound.jar"/>
-	<classpathentry kind="lib" path="/home/vsandri/JMF-2.1.1e/lib/mp3plugin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
