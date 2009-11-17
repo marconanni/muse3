@@ -29,6 +29,8 @@ import unibo.core.*;
 
 import sv60122.dbgUtil.*;
 
+
+
 public class ClientBufferDataPlaying implements ControllerListener, ReceiveStreamListener, BufferFullListener
 {
 	//MODIFICA AMBRA: booleano che indica se � stato inviato un messaggio di buffer full al proxy
@@ -222,6 +224,9 @@ proxyIP---->l'indirizzo IP del mittente
 			
 			parserThread.start();
 			System.out.println("ClientChainBufferDataPlaying: parser started");
+			
+			
+
 		}
 		catch(IOException e)
 		{
@@ -279,6 +284,7 @@ proxyIP---->l'indirizzo IP del mittente
 			catch(InterruptedException e){ System.err.println(e); }
 			buffer.setFrame(frame); //inserisco un frame fittizio perche' segnali l'EndOfMedia, attendo un poco per lasciare il tempo di arrivare ad atri pacchetti.
 			System.out.println("ClientChainBufferDataPlaying update method: Inserito nel CircularBuffer il frame con flag EOM\n");
+
 		}
 	}
 

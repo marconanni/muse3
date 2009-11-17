@@ -41,7 +41,7 @@ public class ClientController extends Thread implements IStartpointListener{
 	private Object mutex;
 	private Object suspensionObject;
 	private boolean run;
-	private WNICManager wm = null;
+	//private WNICManager wm = null;
 	private HandoffManager hm = null;
 	private boolean executeBF = false;
 	BufferedWriter bw = null;
@@ -80,27 +80,7 @@ public class ClientController extends Thread implements IStartpointListener{
 		System.out.println("ClientController avviato");
 		streamPlayer = new ClientBufferDataPlaying(serverPort,receivingPort,serverAddr,Parameters.CLIENT_BUFFER,Parameters.TTW, this,view);
 		streamPlayer.start();
-/*
-		try{
-			wm = new WNICManager(serverAddr, ctrlPortProxy, sendMgr, streamPlayer, this, suspensionObject);
-			Thread wThread = new Thread(wm);
-			wThread.setPriority(8);			
-			System.out.println("WNIC PRIORITY "+wThread.getPriority());
-			wThread.start();
-			if(handoffEnable){
-				hm = new HandoffManager(wm, streamPlayer, this);
-				Thread hThread = new Thread(hm);
-				hThread.setPriority(7);
-				System.out.println("HANDOFF PRIORITY "+hThread.getPriority());
-				hThread.start();
-			}
-			System.out.println("CONTROLLER PRIORITY "+this.getPriority());			
-		}
-		catch(Exception x){
-			System.err.println("Impossibile istanziare WNICManager: "+x.getMessage());
-			killAll();
-		}		
-*/		
+
 		view.debugMessage("ClientController:attesa messaggi...");
 		System.out.println("ClientController:attesa messaggi...");
 		while(run){			
@@ -110,11 +90,9 @@ public class ClientController extends Thread implements IStartpointListener{
 					ClientMessageReader.readContent(recMgr.getPacket());
 					
 					int code = ClientMessageReader.getCode();
-					if(code == Parameters.BAND_ESTIMATION_REQ){
-						System.out.println("Ricevuta richiesta banda del proxy");
-						view.debugMessage("Ricevuta richiesta banda del proxy");
-						synchronized(mutex){mutex.notify();}
-					}
+					
+					System.out.println("------------------------------------ ClientController: codice messaggio arrivato: "+code);
+					
 					if(code == Parameters.START_PLAYBACK)
 					{
 						//delay = Double.parseDouble(ClientMessageReader.getFirstParam());
@@ -126,11 +104,12 @@ public class ClientController extends Thread implements IStartpointListener{
 //						throughputCtrl = new Thread(){ public void run(){ throughputControl(); } };
 //						//avvio thread di controllo dello throughput
 //						throughputCtrl.setPriority(10);
-//						throughputCtrl.start();
+//						throughputCtrl.start();						
+						
 					}
 					if((code == Parameters.START_OFF)||(code == Parameters.ACK)){
 						System.out.println("Ricevuto messaggio di START_OFF/ACK");
-						wm.addRequest(ClientMessageReader.getMessage());
+//						wm.addRequest(ClientMessageReader.getMessage());
 					}
 					if(code == Parameters.ERROR){
 						//chiusura thread
@@ -146,18 +125,18 @@ public class ClientController extends Thread implements IStartpointListener{
 			}
 		}
 	}
-
+/*
 	private void throughputControl() throws IOException{
 		while(running)
 		{
 			try {
-				while(!wm.isWNICActive())
+//				while(!wm.isWNICActive())
 				{
 					System.out.println("La scheda non � attiva");
 					Thread.sleep(1000);
 				}
 			}
-			catch (WNICException e1) {e1.printStackTrace();}
+//			catch (WNICException e1) {e1.printStackTrace();}
 			catch(InterruptedException e){}
 			
 			if(streamPlayer.isPlaying())
@@ -188,7 +167,7 @@ public class ClientController extends Thread implements IStartpointListener{
 				} 
 			}
 		}
-	
+*/	
 	
 	
 	//MODIFICA: il metodo viene invocato dal ClientChainBufferDataPlaying
@@ -221,6 +200,7 @@ public class ClientController extends Thread implements IStartpointListener{
 		test.start();
 		
 		//inizializzazione thread di controllo dello throughput
+		/*
 		throughputCtrl = new Thread(){ public void run(){ try {
 			throughputControl();
 		} catch (IOException e) {
@@ -230,6 +210,7 @@ public class ClientController extends Thread implements IStartpointListener{
 		//avvio thread di controllo dello throughput
 		throughputCtrl.setPriority(10);
 		throughputCtrl.start();
+		*/
 	}
 	
 	public void testThread()
@@ -241,9 +222,9 @@ public class ClientController extends Thread implements IStartpointListener{
 			while(running)
 			{				
 				Thread.sleep(30000);
-				bw.write("***TEST***: lo stato acceso/spento della wnic e' cambiato "+wm.getNumberOfSwitches()+" volte\n");
-				bw.write("***TEST***: la scheda e' rimasta accesa per "+wm.getWNICtotalTimeOn()+" millisecondi\n");
-				bw.write("***TEST***: la scheda e' rimasta spenta per "+wm.getWNICtotalTimeOff()+" millisecondi\n");
+//				bw.write("***TEST***: lo stato acceso/spento della wnic e' cambiato "+wm.getNumberOfSwitches()+" volte\n");
+//				bw.write("***TEST***: la scheda e' rimasta accesa per "+wm.getWNICtotalTimeOn()+" millisecondi\n");
+//				bw.write("***TEST***: la scheda e' rimasta spenta per "+wm.getWNICtotalTimeOff()+" millisecondi\n");
 				bw.write("***TEST***: memory in use Bytes "+Runtime.getRuntime().totalMemory()+"\n");
 				bw.write("\n\n");
 			}		
@@ -267,8 +248,8 @@ public class ClientController extends Thread implements IStartpointListener{
 		System.out.println("Chiusura processi");
 		try { if (bw != null) bw.close(); } catch (Exception e) {e.printStackTrace();}		
 		running = false;
-		if(wm != null)
-			wm.endAll();
+//		if(wm != null)
+//			wm.endAll();
 		if(hm != null)
 			hm.endAll();
 		streamPlayer.close();
