@@ -59,7 +59,8 @@ public class ClientMessageReader {
 		  c = st.nextToken();
 		  code = Integer.parseInt(c);
 		  		System.out.println("ClientMessageReader: il codice del messaggio ricevuto è "+code);
-		  if((code == Parameters.START_OFF)||(code == Parameters.START_PLAYBACK) || (code == Parameters.FILES_RESPONSE))
+		  	//	||(code == Parameters.START_PLAYBACK) 
+		  if((code == Parameters.START_OFF)|| (code == Parameters.FILES_RESPONSE))
 		  {
 			  firstParam = st.nextToken();
 		  }

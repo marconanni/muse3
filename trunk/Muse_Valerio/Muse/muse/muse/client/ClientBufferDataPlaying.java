@@ -149,11 +149,14 @@ proxyIP---->l'indirizzo IP del mittente
 		if(!getPlayingFlag())
 		{
 			setPlayingFlag(true);
+			//l'esecuzione arriva fin qui
 			if(mux==null)
 			{
 				setPlayingFlag(false);
 				return false;
 			}
+			
+			
 			muxThread.start();
 			System.out.println("ClientChainBufferDataPlaying: muxThread started");
 
@@ -169,8 +172,8 @@ proxyIP---->l'indirizzo IP del mittente
 			
 			view.setPlayer(player);
 			//
-			
-/*			Frame frame = new Frame("Now Playing...");
+			/*
+			Frame frame = new Frame("Now Playing...");
 			if(player.getVisualComponent()!=null)
 			{
 				frame.add(player.getVisualComponent());
@@ -187,11 +190,14 @@ proxyIP---->l'indirizzo IP del mittente
 					System.exit(0);
 				}
 			});
-
-			frame.setVisible(true);*/
+			
+			frame.setVisible(true);
+			*/
 			//
+			System.out.println("PLAYER.START()");
 			player.start();
 		}
+		
 		return playing;
 	}
 

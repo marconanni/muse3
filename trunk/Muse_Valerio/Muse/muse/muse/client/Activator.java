@@ -18,7 +18,7 @@ public class Activator {
 	//controller frame
 	private IClientView view;
 	//indice dei messaggi
-	private int idxRec = 0, idxSend = 1;	
+	public int idxRec = 0, idxSend = 1;	
 	
 	//int indexServer=0;
 	private int serverPort=0;
@@ -36,13 +36,12 @@ public class Activator {
 		while(opRes != 0)
 			opRes = mgr.openSocket(Parameters.CLIENT_ACTIVATOR_PORT);
 		//la porta a cui � collegata la socket � occupata
-		grid[Parameters.CLIENT_ACTIVATOR_PORT] = false;
-		
-		
+		grid[Parameters.CLIENT_ACTIVATOR_PORT] = false;		
 	}
 	
-	public String[] filesRequest()
-	{
+	
+	//se viene richiesta la lista file
+	public String[] filesRequest(){
 		System.out.println("Richiesta lista files");
 		DatagramPacket request=null;
 		try {
@@ -63,15 +62,15 @@ public class Activator {
 			if(code == Parameters.FILES_RESPONSE){
 				System.out.println("Lista files ricevuta");
 				String message = ClientMessageReader.getFirstParam();
-
 				return message.split(",");
 			}
 		} catch (Exception e) {e.printStackTrace();}
 		return null;
 	}
 	
-	public void init(IClientView frameCtrl){
-		
+	
+	//se viene richiesto un file
+	public void init(IClientView frameCtrl){		
 		this.view = frameCtrl;
 		String filename = view.getFilename();
 		view.debugMessage("ClientActivator: richiesto "+filename);
@@ -111,7 +110,7 @@ public class Activator {
 
 		try{
 			InetAddress serverAddr = InetAddress.getByName(Parameters.SERVER_ADDRESS);
-			//messaggio di richiesta file al server
+			//messaggio di richiesta file al SERVER
 			DatagramPacket request = ClientMessageFactory.buildFileRequest(idxSend++, serverAddr, Parameters.SERVER_REQUEST, filename, receivingPort);
 			//indexServer++;//incremento il numero del messaggio
 			
