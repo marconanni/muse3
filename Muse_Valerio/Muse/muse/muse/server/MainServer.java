@@ -101,7 +101,7 @@ public class MainServer extends Thread{
 				if(code == Parameters.FILE_REQUEST){
 					dc.debugMessage("Ricevuta richiesta file da parte del client");
 					System.out.println("Ricevuta richiesta file da parte del client");
-					//proxyIP = packet.getAddress();
+
 					clientIP = packet.getAddress();
 							System.out.println("FILE_REQUEST----clientIP: "+clientIP);
 					String filename = ServerMessageReader.getSecondParam();
@@ -128,7 +128,9 @@ public class MainServer extends Thread{
 							break;
 						}
 					}	
-
+					
+										
+					
 					dc.debugMessage("Client IP: "+clientIP.getHostAddress()+", Client Port: "+clientPort);
 					System.out.println("Client IP: "+clientIP.getHostAddress()+", Client Port: "+clientPort);
 					StreamingServer sender = new StreamingServer(filePath, streamingPort, clientIP.getHostAddress(), clientPort, dc);
@@ -138,6 +140,21 @@ public class MainServer extends Thread{
 					manager.sendPacket(confirm);
 					System.out.println("Inviata conferma al client");
 					dc.debugMessage("Inviata conferma al client");
+
+					
+//----------------------------------------------------------
+					//aspetto un pacchetto da ClientController
+					res = manager.receivePacket();
+					ServerMessageReader.readContent(manager.getPacket());
+					int codice = ServerMessageReader.getCode();
+					System.out.println("-------ARRIVATO MESSAGGIO DA CLIENTCONTROLLER CODICE: "+codice+" ------------");
+					//aggiungo queste righe per mandare un messaggio al client in cui dico START_PLAYBACK
+					System.out.println("RIPONDO SU "+packet.getAddress()+" "+codice);
+					DatagramPacket vai=ServerMessageFactory.vai(msgIdx++, packet.getAddress(), codice);
+					manager.sendPacket(vai);					
+//------------------------------------------------------------			
+					
+					
 				}
 				if(code==Parameters.ACK)
 				{

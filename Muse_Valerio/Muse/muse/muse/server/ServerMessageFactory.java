@@ -76,4 +76,19 @@ public class ServerMessageFactory {
 	    return new DatagramPacket(data, data.length, addr, port);	    
 	  }
 	  
+//----------------------
+	  //aggiungo questo metodo per dire al client START_PLAYBACK
+	  static protected DatagramPacket vai(int sequenceNum, InetAddress addr, int port)throws IOException{
+		  ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		  DataOutputStream doStream = new DataOutputStream(boStream);
+		  String content = sequenceNum+"_"+Parameters.START_PLAYBACK;
+		  doStream.writeUTF(content);
+		  doStream.flush();
+		  byte[] data = boStream.toByteArray();
+		    
+		  return new DatagramPacket(data, data.length, addr, port);
+	  }
+//----------------------
+	  
+	  
 }
