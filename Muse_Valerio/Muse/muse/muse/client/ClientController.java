@@ -22,17 +22,16 @@ public class ClientController extends Thread implements IStartpointListener{
 	//valore booleano per l'esecuzione dei thread
 	private boolean running;
 	//thread per il controllo dell throughput
-	//private Thread throughputCtrl;
+	private Thread throughputCtrl;
 	//manager per la ricezione del treno di pacchetti proveniente dal proxy
 	private ConnectionManager recMgr;
 	//manager per l'invio di messaggi di notifica dello stato della trasmissione al proxy
 	private ConnectionManager sendMgr;
-	
+	//porta su cui � in ascolto il thread di controllo lato proxy
 
-	private int serverPort;//porta trasmissione del server
-	private InetAddress serverAddr;//indirizzo del server
-	private int receivingPort;//porta ricezione stream
-	
+
+	private int receivingPort;
+	private InetAddress serverAddr;
 	private double bitRate;
 	private double delay;
 
@@ -42,18 +41,19 @@ public class ClientController extends Thread implements IStartpointListener{
 	private Object mutex;
 	private Object suspensionObject;
 	private boolean run;
-	//private WNICManager wm = null;
+	private WNICManager wm = null;
 	private HandoffManager hm = null;
 	private boolean executeBF = false;
 	BufferedWriter bw = null;
 	
+	private int controlPort;
 	
-	
+	private int serverPort;
 	
 	/**
 	 * Enable or disable handoff handling
 	 */
-	//boolean handoffEnable=Parameters.enableHandoff;
+	boolean handoffEnable=Parameters.enableHandoff;
 	
 	public ClientController(int recPort, int sendPort, IClientView ctrl, int r, int s, int serverPort, int receivingPort,InetAddress serverAddr){
 		view = ctrl;
@@ -65,10 +65,13 @@ public class ClientController extends Thread implements IStartpointListener{
 		sendMgr.openSocket(sendPort);
 		mutex = new Object();
 		
-		this.serverPort=serverPort;
+		this.serverPort=serverPort;//porta trasmissione del server
 
-		this.receivingPort = receivingPort;
-		this.serverAddr = serverAddr;
+		this.receivingPort = receivingPort;//porta ricezione stream del client
+		this.serverAddr = serverAddr;//indirizzo server
+		
+		this.controlPort=recPort;
+		
 		rec = r;
 		send = s;
 		run = true;
@@ -81,36 +84,79 @@ public class ClientController extends Thread implements IStartpointListener{
 		System.out.println("ClientController avviato");
 		streamPlayer = new ClientBufferDataPlaying(serverPort,receivingPort,serverAddr,Parameters.CLIENT_BUFFER,Parameters.TTW, this,view);
 		streamPlayer.start();
-
+/*
+		try{
+			wm = new WNICManager(serverAddr, ctrlPortProxy, sendMgr, streamPlayer, this, suspensionObject);
+			Thread wThread = new Thread(wm);
+			wThread.setPriority(8);			
+			System.out.println("WNIC PRIORITY "+wThread.getPriority());
+			wThread.start();
+			if(handoffEnable){
+				hm = new HandoffManager(wm, streamPlayer, this);
+				Thread hThread = new Thread(hm);
+				hThread.setPriority(7);
+				System.out.println("HANDOFF PRIORITY "+hThread.getPriority());
+				hThread.start();
+			}
+			System.out.println("CONTROLLER PRIORITY "+this.getPriority());			
+		}
+		catch(Exception x){
+			System.err.println("Impossibile istanziare WNICManager: "+x.getMessage());
+			killAll();
+		}		
+*/		
 		view.debugMessage("ClientController:attesa messaggi...");
 		System.out.println("ClientController:attesa messaggi...");
-		while(run){			
+		
+//-------------------------
+		//mando un messaggio al server perchè mi deve rispondere con uno start playback
+		try {
+			DatagramPacket miomessaggio = ClientMessageFactory.buildNoParamMessage(send++, serverAddr, Parameters.SERVER_REQUEST, controlPort);//il messaggio dovrebbe essere a questo punto della comunicazione il numero 3 (controllare), come codice spedisco la porta di controllo
+			sendMgr.sendPacket(miomessaggio);
+			System.out.println("-----------SPEDITO MESSAGGIO VAI AL SERVER INDIRIZZO "+serverAddr+" porta "+serverPort+" ----------");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+//-------------------------
+		while(run){				
 			int res = recMgr.receivePacket();
+			System.out.println("RICEVUTO PACCHETTO");
 			if(res == 0){
+				System.out.println("MESSAGGIO RICEVUTO DENTRO CLIENTCONTROLLER");
 				try{
 					ClientMessageReader.readContent(recMgr.getPacket());
 					
 					int code = ClientMessageReader.getCode();
 					
-					System.out.println("------------------------------------ ClientController: codice messaggio arrivato: "+code);
+					System.out.println("");
+					System.out.println("ClientController valore del codice: "+code);
+					System.out.println("");
 					
+//					if(code == Parameters.BAND_ESTIMATION_REQ){
+//						System.out.println("Ricevuta richiesta banda del proxy");
+//						view.debugMessage("Ricevuta richiesta banda del proxy");
+//						synchronized(mutex){mutex.notify();}
+//					}
 					if(code == Parameters.START_PLAYBACK)
 					{
 						//delay = Double.parseDouble(ClientMessageReader.getFirstParam());
-						delay=70;
+//						delay=70;
+						delay=200;
 						System.out.println("Ricevuto messaggio di start con delay: "+delay);
 						view.debugMessage("Ricevuto messaggio di start con delay: "+delay);
 						spTimer = new StartpointTimer(this,delay);
+						System.out.println("PARTITO START POINT TIMER");
 //						//inizializzazione thread di controllo dello throughput
 //						throughputCtrl = new Thread(){ public void run(){ throughputControl(); } };
 //						//avvio thread di controllo dello throughput
 //						throughputCtrl.setPriority(10);
-//						throughputCtrl.start();						
-						
+//						throughputCtrl.start();
 					}
 					if((code == Parameters.START_OFF)||(code == Parameters.ACK)){
 						System.out.println("Ricevuto messaggio di START_OFF/ACK");
-//						wm.addRequest(ClientMessageReader.getMessage());
+						wm.addRequest(ClientMessageReader.getMessage());
 					}
 					if(code == Parameters.ERROR){
 						//chiusura thread
@@ -126,25 +172,23 @@ public class ClientController extends Thread implements IStartpointListener{
 			}
 		}
 	}
-/*
+
 	private void throughputControl() throws IOException{
 		while(running)
 		{
 			try {
-//				while(!wm.isWNICActive())
+				while(!wm.isWNICActive())
 				{
 					System.out.println("La scheda non � attiva");
 					Thread.sleep(1000);
 				}
 			}
-//			catch (WNICException e1) {e1.printStackTrace();}
+			catch (WNICException e1) {e1.printStackTrace();}
 			catch(InterruptedException e){}
 			
 			if(streamPlayer.isPlaying())
 			{
-				
-
-					if(bitRate < Parameters.MIN_THROUGHPUT)
+				if(bitRate < Parameters.MIN_THROUGHPUT)
 					{
 						
 						try {
@@ -168,7 +212,7 @@ public class ClientController extends Thread implements IStartpointListener{
 				} 
 			}
 		}
-*/	
+	
 	
 	
 	//MODIFICA: il metodo viene invocato dal ClientChainBufferDataPlaying
@@ -201,17 +245,15 @@ public class ClientController extends Thread implements IStartpointListener{
 		test.start();
 		
 		//inizializzazione thread di controllo dello throughput
-		/*
-		throughputCtrl = new Thread(){ public void run(){ try {
-			throughputControl();
-		} catch (IOException e) {
+		//throughputCtrl = new Thread(){ public void run(){ try {
+			//throughputControl();
+		//} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} } };
+		//	e.printStackTrace();
+		//} } };
 		//avvio thread di controllo dello throughput
-		throughputCtrl.setPriority(10);
-		throughputCtrl.start();
-		*/
+		//throughputCtrl.setPriority(10);
+		//throughputCtrl.start();
 	}
 	
 	public void testThread()
@@ -223,9 +265,9 @@ public class ClientController extends Thread implements IStartpointListener{
 			while(running)
 			{				
 				Thread.sleep(30000);
-//				bw.write("***TEST***: lo stato acceso/spento della wnic e' cambiato "+wm.getNumberOfSwitches()+" volte\n");
-//				bw.write("***TEST***: la scheda e' rimasta accesa per "+wm.getWNICtotalTimeOn()+" millisecondi\n");
-//				bw.write("***TEST***: la scheda e' rimasta spenta per "+wm.getWNICtotalTimeOff()+" millisecondi\n");
+				bw.write("***TEST***: lo stato acceso/spento della wnic e' cambiato "+wm.getNumberOfSwitches()+" volte\n");
+				bw.write("***TEST***: la scheda e' rimasta accesa per "+wm.getWNICtotalTimeOn()+" millisecondi\n");
+				bw.write("***TEST***: la scheda e' rimasta spenta per "+wm.getWNICtotalTimeOff()+" millisecondi\n");
 				bw.write("***TEST***: memory in use Bytes "+Runtime.getRuntime().totalMemory()+"\n");
 				bw.write("\n\n");
 			}		
@@ -249,8 +291,8 @@ public class ClientController extends Thread implements IStartpointListener{
 		System.out.println("Chiusura processi");
 		try { if (bw != null) bw.close(); } catch (Exception e) {e.printStackTrace();}		
 		running = false;
-//		if(wm != null)
-//			wm.endAll();
+		if(wm != null)
+			wm.endAll();
 		if(hm != null)
 			hm.endAll();
 		streamPlayer.close();

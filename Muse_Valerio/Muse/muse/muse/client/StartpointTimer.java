@@ -27,7 +27,10 @@ public class StartpointTimer
 		}
 		while((start - System.currentTimeMillis())>0);
 		System.out.println("Startpoint giunto!");
-		if(spListener!=null) spListener.startStreamPlaying();
+		if(spListener!=null){
+			System.out.println("StartPointerTimer: faccio startStreamPlaying");
+			spListener.startStreamPlaying();
+			}
 		runner.interrupt();
 	}
 
