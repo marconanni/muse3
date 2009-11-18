@@ -68,7 +68,7 @@ public class Parameters {
 	/**
 	 * indirizzo IP del server
 	 */
-	public static final String SERVER_ADDRESS = "192.168.70.109";
+	public static final String SERVER_ADDRESS = "192.168.70.81";
 	//public static final String SERVER_ADDRESS = "192.255.0.1";
 	//public static final String SERVER_ADDRESS = "127.0.1.1";
 
@@ -87,7 +87,7 @@ public class Parameters {
 	 *se si vuole testare il funzionamento della LAN
 	 */
 
-	public static final String CLIENT_ADDRESS = "192.168.70.109";
+	public static final String CLIENT_ADDRESS = "192.168.70.81";
 	//public static final String CLIENT_ADDRESS = "192.255.0.2";
 	//public static final String CLIENT_ADDRESS= "127.0.1.1";
 	
