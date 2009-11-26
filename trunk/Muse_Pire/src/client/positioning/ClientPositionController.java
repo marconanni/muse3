@@ -100,12 +100,12 @@ public class ClientPositionController implements Observer{
 			try {
 				cmr.readContent((DatagramPacket)arg1);
 				console.debugMessage(Parameters.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
-				if((cmr.getCode() == Parameters.REQUEST_RSSI)&&((DatagramPacket)arg1).getAddress().equals(relayAddress)){
+				if((cmr.getCode() == Parameters.REQUEST_RSSI)&&(cmr.getAddress().equals(relayAddress))){
 					RSSIvalue = cwnic.getSignalStrenghtValue();
-					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RELAY_RSSI_RECEIVER_PORT);
+					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RSSI_PORT_IN);
 					sequenceNumber++;
 					crscm.sendTo(notifyRSSI);
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RELAY_RSSI_RECEIVER_PORT);
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RSSI_PORT_IN);
 				}else{
 					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
 				

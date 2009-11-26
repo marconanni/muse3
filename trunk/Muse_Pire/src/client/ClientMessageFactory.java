@@ -38,6 +38,25 @@ public class ClientMessageFactory {
 	}
 	
 	/**
+	 * Messaggio di acknolege, conferma della connessione al nodo o BigBoss o relay attivo
+	 * @category electionManager
+	 * @param destination Address
+	 * @param destination Port
+	 * @param node type (client, relay attivo, relay passivo, BigBoss passivo)
+	 * @return DatagramPacket da inviare
+	 * @throws IOException
+	 */
+	static public DatagramPacket buildAckConnection(InetAddress addr, int port, int typeNode) throws IOException {
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = 0+"_"+Parameters.ACK_CONNECTION+"_"+typeNode;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+		return new DatagramPacket(data, data.length, addr, port);
+	}
+	
+	/**
 	 * Messaggio di Election_Beacon.
 	 * <br/> 
 	 * @param int sequenceNumber
@@ -50,7 +69,7 @@ public class ClientMessageFactory {
 		
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = 0+"_"+Parameters.ELECTION_BEACON;
+		String content = sequenceNumber+"_"+Parameters.ELECTION_BEACON;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();

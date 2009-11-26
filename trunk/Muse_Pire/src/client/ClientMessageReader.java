@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.util.StringTokenizer;
 
 import parameters.Parameters;
@@ -35,6 +36,8 @@ public class ClientMessageReader {
 	
 	//AGGIUNTO DA LUCA 8-12 alle 01:53
 	private  String newRelayAddress = null;
+	
+	private InetAddress messageAddress = null;
 
 	public ClientMessageReader(){}
 	/**
@@ -45,6 +48,7 @@ public class ClientMessageReader {
 	 * @throws IOException
 	 */
 	public synchronized void readContent(DatagramPacket dp) throws IOException {
+		messageAddress = dp.getAddress();
 		ByteArrayInputStream biStream = new ByteArrayInputStream(dp.getData(), 0, dp.getLength());
 		DataInputStream diStream = new DataInputStream(biStream);
 		message = diStream.readUTF();
@@ -102,6 +106,10 @@ public class ClientMessageReader {
 	 */
 	public  int getSequenceNumber() {
 		return sequenceNumber;
+	}
+	
+	public InetAddress getAddress(){
+		return messageAddress;
 	}
 
 	/**

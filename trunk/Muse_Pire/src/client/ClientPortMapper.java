@@ -35,8 +35,8 @@ public class ClientPortMapper {
 		portElectionOut = Parameters.CLIENT_PORT_ELECTION_OUT;
 		portSessionIn = Parameters.CLIENT_PORT_SESSION_IN;
 		portSessionOut = Parameters.CLIENT_PORT_SESSION_OUT;
-		portRSSIOut = Parameters.CLIENT_RSSI_PORT_OUT;
-		portRSSIIn = Parameters.CLIENT_RSSI_PORT_IN;
+		portRSSIOut = Parameters.RSSI_PORT_OUT;
+		portRSSIIn = Parameters.RSSI_PORT_IN;
 		portRTPIn = Parameters.CLIENT_PORT_RTP_IN;
 		
 		try {
