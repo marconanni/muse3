@@ -2,19 +2,11 @@ package relay.connection;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
-
-import client.ClientMessageReader;
 import debug.DebugConsole;
-
 import parameters.Parameters;
-
 import relay.RelayMessageFactory;
 import relay.RelayMessageReader;
 
@@ -91,7 +83,7 @@ public class WhoIsRelayServer implements Observer {
 					int remotePort = dp.getPort();
 					//System.out.println(this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_RELAY da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
 					console.debugMessage(Parameters.DEBUG_INFO, this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_RELAY da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
-					dp = RelayMessageFactory.buildImRelay(this.whoIsRealayManger.getLocalAddress(), remoteAddress,(remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN);
+					dp = RelayMessageFactory.buildImRelay(remoteAddress,(remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN);
 		
 					this.whoIsRealayManger.sendTo(dp);
 					//System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_RELAY inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);
@@ -102,7 +94,7 @@ public class WhoIsRelayServer implements Observer {
 					int remotePort = dp.getPort();
 					//System.out.println(this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_BIGBOSS da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
 					console.debugMessage(Parameters.DEBUG_INFO, this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_BIGBOSS da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
-					dp = RelayMessageFactory.buildImBigBoss(this.whoIsRealayManger.getLocalAddress(), remoteAddress,(remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN);
+					dp = RelayMessageFactory.buildImBigBoss(remoteAddress,(remotePort == Parameters.CLIENT_PORT_ELECTION_OUT)?Parameters.CLIENT_PORT_ELECTION_IN : Parameters.RELAY_ELECTION_PORT_IN);
 		
 					this.whoIsRealayManger.sendTo(dp);
 					//System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_BIGBOSS inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);

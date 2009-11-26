@@ -1,5 +1,8 @@
 package relay.positioning;
 
+
+
+import gov.sns.tools.math.Vector;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
 
@@ -15,7 +18,7 @@ public class GreyModel implements RSSIFilter
 	/**
 	 * Numero minimo di campioni di segnale necessari ad effettuare una predizione col Grey Model
 	 */
-	public static final int MIN_NUMBER_OF_RSSI=3;
+	public static final int NUMBER_OF_RSSI=5;
 	public static final double PREVISION_THRS=20;
 	private double realValues[];
 	private long predictedTime=-1;
@@ -41,21 +44,26 @@ public class GreyModel implements RSSIFilter
 	 */
 	public double predictRSSI()
 	{
-		predictedTime=realValues.length+2;
+		predictedTime=realValues.length;
 	
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-		if(realValues.length<MIN_NUMBER_OF_RSSI)
+		if(realValues.length<=NUMBER_OF_RSSI){
 			return realValues[realValues.length-1];
+		}
 		
 		try
 		{
 			if(!computed)
 			{
 				//calcola X1
+				System.out.println("Calcola X1");
 				X1= new double[realValues.length];
-				X1[0]=realValues[0];
-				for(int i=1;i<realValues.length;i++)
-					X1[i]=X1[i-1]+realValues[i];		
+				//X1[0]=realValues[0];
+				for(int i=0;i<realValues.length;i++)
+					if(i==0)
+						X1[i]=realValues[i];
+					else
+						X1[i]=X1[i-1]+realValues[i];		
 				//calcola B
 				double[][] B= new double[realValues.length-1][2];
 				for(int i=1;i<realValues.length;i++)
@@ -64,28 +72,19 @@ public class GreyModel implements RSSIFilter
 					B[i-1][1]=1;
 				}
 				//calcola y
-				double[][] y= new double[realValues.length-1][1];
-				for(int i=0;i<(realValues.length-1);i++)
-					y[i][0]=realValues[i+1];
-				//calcola a e u
-				Matrix bmatr= new Matrix(B);
-				Matrix bt= bmatr.transpose();
-				Matrix res= bt.times(bmatr);
-				Matrix inverse;
-				if(res.det()==0)
-				{
-					//m e' singolare, calcola la pseudoinversa con la singular value decomposition
-					SingularValueDecomposition svd= new SingularValueDecomposition(res);
-					//svd = U*S*V'
-					Matrix invS=svd.getS().inverse();
-					inverse=(svd.getV()).times(invS);
-					inverse=inverse.times(svd.getU().transpose());
+				Vector yn;
+				double[] tmp = new double[realValues.length-1];
+				for(int i=0;i<(realValues.length-1);i++){
+					tmp[i] = realValues[i+1];
 				}
-				else
-					inverse= res.inverse();
-				Matrix ymatr= new Matrix(y);
+				yn = new Vector(tmp); //Vettore Yn
+				Matrix bmatr= new Matrix(B);   //creo la matrice B
+				Matrix bt= bmatr.transpose();	//B^T
+				Matrix res= bt.times(bmatr);	//(B^T*B)
+				Matrix inverse;
+				inverse= res.inverse();		//(B^T*B)^-1
 				res=inverse.times(bt);
-				res= res.times(ymatr);
+				res= res.times(yn);
 				double [][] r=res.getArrayCopy();
 				a=r[0][0];
 				u=r[1][0];
@@ -98,10 +97,10 @@ public class GreyModel implements RSSIFilter
 
 			//return xk1-xk;
 			double res=xk1-xk;
-			/*if(res==Double.NaN)
+			if(res==Double.NaN)
 				res= realValues[realValues.length-1];
 			if(Math.abs(res-realValues[realValues.length-1])>=PREVISION_THRS)
-				res= realValues[realValues.length-1];*/
+				res= realValues[realValues.length-1];
 			return res;
 
 		}
@@ -131,7 +130,7 @@ public class GreyModel implements RSSIFilter
 		this.time=time;
 
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-		if(realValues.length<MIN_NUMBER_OF_RSSI)
+		if(realValues.length<NUMBER_OF_RSSI)
 			return realValues[realValues.length-1];
 		try
 		{
