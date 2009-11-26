@@ -48,11 +48,9 @@ public class RelayBatteryMonitor extends Observable {
 	 * il livello della batteria scenda sotto la soglia di sicurezza
 	 */
 	public RelayBatteryMonitor(long p, Observer electionManager){
-
 		period = p;
 		addObserver(electionManager);
 		started = false;
-		//logger = new Logger();
 	}
 
 
@@ -76,23 +74,12 @@ public class RelayBatteryMonitor extends Observable {
 
 	private void mainTask(){
 		try{
-
-			System.out.println("\n***********************INIZIO mainTask*************************");
-
 			batteryLevel = getBatteryLevel();
-
-			System.out.println("\nNUOVO LIVELLO BATTERIA: " + batteryLevel +" /1");			
-
 			if(batteryLevel <= Parameters.BATTERY_LOW_THRS){
-
 				System.err.println("BATTERIA VICINISSIMA ALL'ESAURIMENTO...");
 				setChanged();
 				notifyObservers("DISCONNECTION_WARNING");
 			}
-
-
-			System.out.println("***********************FINE mainTask*************************\n");
-
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -117,16 +104,12 @@ public class RelayBatteryMonitor extends Observable {
 			result = result.substring(result.length()-3, result.length()).trim();
 			res = (double)((double)Double.parseDouble(result)/(double)100);
 			
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
+		} catch (InterruptedException e) {e.printStackTrace();} 
 		return res;
 	}
 }
 
-/*class TestRelayBattery{
+class TestRelayBattery{
 	
 	public static void main(String args[]){
 		TestBatteryObserver tbo = new TestBatteryObserver();
@@ -138,12 +121,10 @@ public class RelayBatteryMonitor extends Observable {
 
 class TestBatteryObserver implements Observer {
 
-	 (non-Javadoc)
-	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-	 
+
 	@Override
 	public void update(Observable arg0, Object arg1) {
 		System.out.println("RICEVUTO MESSAGGIO: " + (String)arg1);
 		((RelayBatteryMonitor)arg0).close();
 	}
-}*/
+}

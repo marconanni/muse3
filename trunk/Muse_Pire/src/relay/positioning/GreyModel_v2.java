@@ -15,7 +15,7 @@ public class GreyModel_v2 implements RSSIFilter
 	/**
 	 * Numero minimo di campioni di segnale necessari ad effettuare una predizione col Grey Model
 	 */
-	public static final int MIN_NUMBER_OF_RSSI=3;
+	public static final int MIN_NUMBER_OF_RSSI=5;
 	public static final double PREVISION_THRS=20;
 	private double realValues[];
 	private long predictedTime=-1;
@@ -44,7 +44,7 @@ public class GreyModel_v2 implements RSSIFilter
 		predictedTime=realValues.length;
 	
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-		if(realValues.length<MIN_NUMBER_OF_RSSI)
+		if(realValues.length<=MIN_NUMBER_OF_RSSI)
 			return realValues[realValues.length-1];
 		
 		try
@@ -98,10 +98,12 @@ public class GreyModel_v2 implements RSSIFilter
 
 			//return xk1-xk;
 			double res=xk1-xk;
-			if(res==Double.NaN)
+			if(res==Double.NaN){
 				res= realValues[realValues.length-1];
-			if(Math.abs(res-realValues[realValues.length-1])>=PREVISION_THRS)
+			}
+			if(Math.abs(res-realValues[realValues.length-1])>=PREVISION_THRS){
 				res= realValues[realValues.length-1];
+			}
 			return res;
 
 		}
