@@ -30,6 +30,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	private static InetAddress BCAST = null;			//indirizzo broadcast in forma InetAddress
 	private ClientStatus actualStatus = null;			//stato attuale del ClientElectionManager
 	private String actualRelayAddress = null;			//indirizzo del Relay attuale in forma String
+	private InetAddress actualRelayInetAddress = null;
 	private boolean electing = false;					//boolean che indica se si è in stato di elezione
 	private boolean firstEM_ELsent = false ;			//boolean che indica se è stato già spedito un messaggio EM_EL_DET_CLIENT
 	private boolean imServed = false;					//boolean che indica se questo nodo Client è coinvolto in una sessione RTP
@@ -121,7 +122,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			clientMessageReader = new ClientMessageReader();
 			try {
 				clientMessageReader.readContent(dpIn);
-			} catch (IOException e) {e.printStackTrace();System.out.println("ERRRRRORRRREEEEE");}
+			} catch (IOException e) {e.printStackTrace();console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager : errore durante la lettura del pacchetto election");}
 
 			/*Cominciamo ad esaminare i vari casi che si possono presentare, in base allo stato in cui ci si trova 
 				e al codice del messaggio che è appena arrivato*/
@@ -135,8 +136,11 @@ public class ClientElectionManager extends Observable implements Observer{
 			//2) memorizzare tutte le risposte e ricevute in coppia (ip,RSSI) del relay e poi prendere quello con il segnale + alto->+ vicino
 			//3) Non ci poniamo questo problema e ci colleghiamo al relay staticamente (richiede di conoscere l'ip del relay on startup)
 			if((clientMessageReader.getCode() == Parameters.IM_RELAY) && (actualStatus == ClientStatus.OFF)){
+				//DatagramPacket dpOut = null;
 				actualStatus = ClientStatus.IDLE;
+				
 				actualRelayAddress = clientMessageReader.getActualRelayAddress();
+				memorizeRelayAddress();
 				electing = false;
 				firstEM_ELsent = false;
 				
@@ -147,12 +151,61 @@ public class ClientElectionManager extends Observable implements Observer{
 					timeoutSearch = null;
 				}
 
-				//Notifico ClientSessionManager
+				//Notifico ClientSessionManager e anche il relay a cui sono connesso
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+actualRelayAddress);
+				/*try {
+					dpOut = ClientMessageFactory.buildAckConnection(InetAddress.getByName(actualRelayAddress), Parameters.RELAY_ELECTION_PORT_IN, InetAddress.getLocalHost().toString());
+					comManager.sendTo(dpOut);
+				} catch (UnknownHostException e) {e.printStackTrace();
+				} catch (IOException e) {e.printStackTrace();}
+				comManager.sendTo(dpOut);*/
+				
+				DatagramPacket dpOut = null;
+				try {
+					dpOut = ClientMessageFactory.buildAckConnection(actualRelayInetAddress, Parameters.RELAY_ELECTION_PORT_IN,Parameters.TYPECLIENT);
+					comManager.sendTo(dpOut);
+				} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
 
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: client creato e ACK_CONNECTION spedito");
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
-				setImServed(true);
+				//setImServed(true);
+			}
+			
+			else if((clientMessageReader.getCode() == Parameters.ELECTION_REQUEST) && (actualStatus == ClientStatus.IDLE) &&(clientMessageReader.getAddress().equals(actualRelayInetAddress))){
+
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_REQUEST arrivato " + (imServed?"e sono servito":"ma non sono servito"));
+
+				if(timeoutSearch != null){
+					timeoutSearch.cancelTimeOutSearch();
+					timeoutSearch = null;
+				}
+
+				electing = true;
+				actualRelayAddress = null;
+				actualRelayInetAddress = null;
+
+				if (imServed) {
+
+					DatagramPacket dpOut = null;
+
+					try {
+						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.RELAY_ELECTION_PORT_IN);
+						comManager.sendTo(dpOut);
+						indexELECTION_BEACON++;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+					timeoutFailToElect = ClientTimeoutFactory.getTimeOutFailToElect(this,Parameters.TIMEOUT_FAIL_TO_ELECT);
+
+					actualStatus = ClientStatus.WAITING_END_ELECTION;
+
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato && imServed==true e start TIMEOUT_FAIL_TO_ELECT");
+				}
+
+				setChanged();
+				notifyObservers("RECIEVED_ELECTION_REQUEST");
 			}
 
 
@@ -205,40 +258,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			 *start TIMEOUT_FAIL_TO_ELECT
 			 *relayAddress = null;
 			 */
-			else if(clientMessageReader.getCode() == Parameters.ELECTION_REQUEST && actualStatus == ClientStatus.IDLE){
-
-				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_REQUEST arrivato " + (imServed?"e sono servito":"ma non sono servito"));
-
-				if(timeoutSearch != null){
-					timeoutSearch.cancelTimeOutSearch();
-					timeoutSearch = null;
-				}
-
-				electing = true;
-				actualRelayAddress = null;
-
-				if (imServed) {
-
-					DatagramPacket dpOut = null;
-
-					try {
-						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.RELAY_ELECTION_PORT_IN);
-						comManager.sendTo(dpOut);
-						indexELECTION_BEACON++;
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-					timeoutFailToElect = ClientTimeoutFactory.getTimeOutFailToElect(this,Parameters.TIMEOUT_FAIL_TO_ELECT);
-
-					actualStatus = ClientStatus.WAITING_END_ELECTION;
-
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato && imServed==true e start TIMEOUT_FAIL_TO_ELECT");
-				}
-
-				setChanged();
-				notifyObservers("RECIEVED_ELECTION_REQUEST");
-			}
+			
 
 
 			/*[ arrivato EM_EL_DET_X && !served] / 
@@ -471,6 +491,15 @@ public class ClientElectionManager extends Observable implements Observer{
 		clientPositionController.setRelayAddress(actualRelayAddress);
 	}
 	
+	/**Metodo per memorizzare l'InetAddress relativo all'actualRelayAddress
+	 * che è in forma di String 
+	 */
+	private void memorizeRelayAddress(){
+		try {
+			actualRelayInetAddress = InetAddress.getByName(actualRelayAddress);
+		} catch (UnknownHostException e) {e.printStackTrace();}
+	}
+	
 	/**Metodi get e set delle rispettive variabili
 	 */
 	public DebugConsole getDebugCondole(){return console;}
@@ -480,6 +509,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	public ClientStatus getActualStatus() {return actualStatus;}
 	public void setActualStatus(ClientStatus actualStatus) {this.actualStatus = actualStatus;}
 	public String getActualRelayAddress() {return actualRelayAddress;}
+	public InetAddress getActualRelayInetAddress(){return actualRelayInetAddress;}
 	public void setActualRelayAddress(String actualRelayAddress) {this.actualRelayAddress = actualRelayAddress;}
 	public boolean isElecting() {return electing;}
 	public void setElecting(boolean electing) {this.electing = electing;}
