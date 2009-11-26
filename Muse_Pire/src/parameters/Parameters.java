@@ -14,7 +14,7 @@ public class Parameters {
 	 * 
 	 * */	
 	/** indirizzo IP del SERVER */
-	public static final String SERVER_ADDRESS = "192.168.2.4";
+	public static final String SERVER_ADDRESS = "192.168.184.177";
 	//public static final String SERVER_ADDRESS = "192.255.0.1";
 	
 	/** indirizzo IP del CLIENT */
@@ -29,7 +29,7 @@ public class Parameters {
 	
 	/** indirizzo IP del RELAY sulla rete Managed */
 	//public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
-	public static final String RELAY_MANAGED_ADDRESS = "192.168.2.4";
+	public static final String RELAY_MANAGED_ADDRESS = "192.168.184.177";
 	
 	/** indirizzo IP di BROADCAST sulla rete Ad-Hoc */
 	//public static final String BROADCAST_ADDRESS = "192.168.1.255";
@@ -39,7 +39,7 @@ public class Parameters {
 	public static final String NAME_OF_AD_HOC_NETWORK = "marco";
 	
 	/** Nome della rete Managed */
-	public static final String NAME_OF_MANAGED_NETWORK = "lord";
+	public static final String NAME_OF_MANAGED_NETWORK = "ALMAWIFI";
 	
 	/** Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc */
 	public static final String NAME_OF_AD_HOC_RELAY_INTERFACE = "wlan1";
@@ -62,7 +62,8 @@ public class Parameters {
 	 * relay secondario (collegato col nodo BIG BOSS) 			IMRELAY = true && IMBIGBOSS = false
 	 */
 	public static final boolean IMRELAY=true;
-	public static final boolean IMBIGBOSS=false;
+	public static final boolean IMBIGBOSS=true;
+	public static final boolean IMPOSSIBLEBIGBOSS = true;
 	
 	/** Specifica il numero di sessioni attive massime che si possono avere sul Relay */
 	public static final int RANGE_ACTIVE_SESSIONS = 1000;
@@ -175,11 +176,28 @@ public class Parameters {
 	public static final int IM_BIGBOSS = 1;
 	public static final int WHO_IS_RELAY = 2;
 	public static final int IM_RELAY = 3;
+	public static final int ACK_CONNECTION = 4;
+	
+	public static final int TYPEBIGBOSS = 100;
+	public static final int TYPEPOSSIBLEBIGBOSSTYPE = 101;
+	public static final int TYPERELAY = 102;
+	public static final int TYPEPOSSIBLERELAY = 103;
+	public static final int TYPECLIENT = 104;
+	
+	public static final int ELECTION_REQUEST = 10;
+	public static final int ELECTION_BEACON = 11;
+	public static final int ELECTION_RELAY_BEACON = 12;
+	public static final int ELECTION_RESPONSE = 13;
+	public static final int ELECTION_DONE = 14;
+	
+	
+	public static final int REQUEST_FILE = 14;
+	public static final int FORWARD_REQ_FILE = 15;		//Richiesta file al server
+	public static final int ACK_RELAY_FORW = 16;
+	public static final int ACK_CLIENT_REQ = 17;
+	
 
-	public static final int ELECTION_REQUEST = 2;
-	public static final int ELECTION_BEACON = 3;
-	public static final int ELECTION_RESPONSE = 4;
-	public static final int ELECTION_DONE = 5;
+
 	
 	public static final int EM_EL_DET_CLIENT = 6;
 	public static final int EM_EL_DET_RELAY = 7;
@@ -195,10 +213,7 @@ public class Parameters {
 	public static final int NOTIFY_RSSI = 21;
 
 
-	public static final int REQUEST_FILE = 14;
-	public static final int FORWARD_REQ_FILE = 15;		//Richiesta file al server
-	public static final int ACK_RELAY_FORW = 16;
-	public static final int ACK_CLIENT_REQ = 17;
+
 	
 	public static final int START_TX = 18;
 	public static final int STOP_TX = 19;
@@ -273,11 +288,11 @@ public class Parameters {
 	 * 
 	 * */
 	/**Soglia superata la quale si considera molto probabile il presentarsi di una disconnessione dall'AP */
-	public static final double AP_DISCONNECTION_THRS = 69;
+	public static final double AP_DISCONNECTION_THRS = 83;
 	
 	/** Numero massimo di riscontri positivi per la disconnessione dall'AP raggiunto 
 	 *  il quale la disconnessione è considerata come certa */
-	public static final int NUMBER_OF_AP_DISCONNECTION_DETECTION = 1;
+	public static final int NUMBER_OF_AP_DISCONNECTION_DETECTION = 3;
 	
 	/** Soglia al di sopra della quale un valore RSSI non viene considerato nel calcolo della media
 	 *  degli RSSI rilevati dai Clients serviti nei confronti del Relay attuale */
