@@ -10,14 +10,12 @@ import parameters.PortConfiguration;
 
 import relay.messages.RelayMessageFactory;
 import relay.position.RelayPositionMonitor;
-import relay.wnic.RelayWNICController;
 
 class TestRelayPositionMonitor{
 
 	public static void main(String args[]) throws UnknownHostException{
 		TestObserver to = new TestObserver();
-		RelayWNICController wnc = null;
-		RelayPositionMonitor rpcm = new RelayPositionMonitor(false,wnc,50,1000,to);
+		RelayPositionMonitor rpcm = new RelayPositionMonitor(50,1000,to);
 		rpcm.start();
 		InetAddress localhost = null;
 		try {

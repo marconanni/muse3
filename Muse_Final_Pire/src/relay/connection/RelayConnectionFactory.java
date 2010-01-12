@@ -26,8 +26,15 @@ public class RelayConnectionFactory {
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
 	 * @return un istanza di RelayRSSICM*/
-	public static RelayCM getRSSIConnectionManager(Observer obser){
+	public static RelayCM getRSSIClusterConnectionManager(Observer obser){
 		return new RelayCM("RelayRSSICM",rpm.getLocalClusterAdHocHostAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
+	}
+	
+	/**Metoto statico per ottenere un'istanza di RelayRSSICM
+	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
+	 * @return un istanza di RelayRSSICM*/
+	public static RelayCM getRSSIClusterHeadConnectionManager(Observer obser){
+		return new RelayCM("RelayRSSICM",rpm.getLocalClusterHeadAdHocHostAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM

@@ -5,21 +5,35 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Observable;
+import java.util.Observer;
+
+import parameters.DebugConfiguration;
+import parameters.MessageCodeConfiguration;
+import parameters.PortConfiguration;
+
+import relay.connection.RelayCM;
+import relay.connection.RelayConnectionFactory;
+import relay.messages.RelayMessageFactory;
+import relay.messages.RelayMessageReader;
+import relay.wnic.RelayWNICController;
+import relay.wnic.WNICFinder;
+import relay.wnic.exception.OSException;
+import relay.wnic.exception.WNICException;
 
 import debug.DebugConsole;
 
-public class RelayPositionMonitorCOntroller {
+public class RelayPositionMonitorCOntroller implements Observer {
 	private DatagramPacket notifyRSSI = null;
 	private boolean enableToMonitor;
 	private boolean started;
 
-	private ClientCM  crscm = null ;
-	private ClientWNICController cwnic = null; 
+	private RelayCM  rrscm = null ;
+	private RelayWNICController cwnic = null; 
 
 	private InetAddress relayAddress = null;
 	private static int sequenceNumber = 0;
 
-	private ClientMessageReader cmr = null;
+	private RelayMessageReader cmr = null;
 	private DebugConsole console = null;
 	
 	/**Metodo per ottenere un ClientPositionController
@@ -27,12 +41,12 @@ public class RelayPositionMonitorCOntroller {
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
 	 * @throws WNICException 
 	 */
-	public ClientPositionController(String interf, String essidName) throws WNICException{
-		crscm = ClientConnectionFactory.getRSSIConnectionManager(this);
+	public RelayPositionMonitorCOntroller(String interf, String essidName) throws WNICException{
+		rrscm = RelayConnectionFactory.getRSSIClusterHeadConnectionManager(this);
 		
 		try {
-			cwnic = WNICFinder.getCurrentWNIC(interf, essidName);
-		} catch (OSException e) {new WNICException("ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
+			cwnic = WNICFinder.getCurrentWNIC(interf, essidName,0);
+		} catch (OSException e) {new WNICException("RelayPositionMonitorController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
 		console = cwnic.getDebugConsole();
 		enableToMonitor = false;
 		started = false;
@@ -44,20 +58,20 @@ public class RelayPositionMonitorCOntroller {
 	 */
 	public void start(){
 		if(enableToMonitor){
-			crscm.start();
+			rrscm.start();
 			started = true;
 		}
 	}
 	
 	public void stopReceiving(){
-		crscm.stopReceiving();
+		rrscm.stopReceiving();
 		enableToMonitor = false;
 		started = false;
 	}
 	
 	public void resumeReceiving(){
 		if(enableToMonitor){
-			crscm.resumeReceiving();
+			rrscm.resumeReceiving();
 			started = true;
 		}
 	}
@@ -67,7 +81,7 @@ public class RelayPositionMonitorCOntroller {
 	public void close(){
 		if(started){
 			started = false;
-			crscm.close();
+			rrscm.close();
 			cwnic = null;
 		}
 	}
@@ -76,16 +90,16 @@ public class RelayPositionMonitorCOntroller {
 
 		if(arg1 instanceof DatagramPacket){
 			int RSSIvalue =-1;
-			cmr = new ClientMessageReader();
+			cmr = new RelayMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);
-				console.debugMessage(Parameters.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
-				if((cmr.getCode() == Parameters.REQUEST_RSSI)&&(cmr.getAddress().equals(relayAddress))){
+				console.debugMessage(DebugConfiguration.DEBUG_WARNING, "RelayPositionMonitorController: ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
+				if((cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI)){
 					RSSIvalue = cwnic.getSignalStrenghtValue();
-					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, Parameters.RSSI_PORT_IN);
+					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, PortConfiguration.RSSI_PORT_IN);
 					sequenceNumber++;
-					crscm.sendTo(notifyRSSI);
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RSSI_PORT_IN);
+					rrscm.sendTo(notifyRSSI);
+					console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionMonitorController(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RSSI_PORT_IN);
 				}else{
 					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
 				
