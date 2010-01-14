@@ -20,17 +20,18 @@ import server.connection.ServerConnectionFactory;
 import server.connection.ServerCM;
 
 /**
- * @author Leo Di Carlo
+ * @author Leo Di Carlo, Marco Nanni
  *
  */
 public class ServerSessionManager implements Observer{
 
+	//Marco: Il server Session manager gira sull Access Point
 
 	private String status;
-	private int numberOfSession;
-	private Hashtable<String, StreamingServer> ssReferences;
+	private int numberOfSession;  // Marco: è il numero delle sessioni aperte
+	private Hashtable<String, StreamingServer> ssReferences;   // Marco: c'è uno Streaming server per ogni flusso, quindi uno per ogni client servito nella rete. l'Ip dovrebbe essere l'IP del client, che rappresenta un identificatore univoco per la sessione di streaming
 	private DatagramPacket message;
-	public static final ServerSessionManager INSTANCE = new ServerSessionManager();
+	public static final ServerSessionManager INSTANCE = new ServerSessionManager(); // Marco: il Server Session Manager è un singleton
 	private String newRelayAddress;
 	private ServerCM connManager;
 	private DebugConsolle consolle;
@@ -90,9 +91,19 @@ public class ServerSessionManager implements Observer{
 				}
 			}
 			if(ServerMessageReader.getCode() == Parameters.REDIRECT)
+				/*
+				           ricevuto il REDIRECT, CONSIDERA IL MITTENTE DEL MESSAGGIO (ottenuto dal
+
+  						header del pacchetto UDP) come NEW RELAY e in seguito consulta la sua HashTable
+						  riempita con coppie (ip_client, StreamingServer), e per ogni sua entry impone al relativo
+						  StreamingServer di fermare temporaneamente la produzione di frames, di ridirigere la
+						  propria sessione RTP alle stesse porte ma su l’IP del NEW RELAY, e, in seguito, di
+						  riprendere la trasmissione.
+
+				 */
 			{
 				consolle.debugMessage("SERVER_SESSION_MANAGER: Arrivata una richiesta di REDIRECT");
-				this.newRelayAddress = this.message.getAddress().getHostAddress();
+				this.newRelayAddress = this.message.getAddress().getHostAddress(); // Marco: estrae dal messaggio il mittente: è il nuovo relay
 				if(!ssReferences.isEmpty())
 				{
 					Enumeration keys = ssReferences.keys();
