@@ -2,8 +2,6 @@ package relay.position;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -22,7 +20,7 @@ import relay.wnic.exception.WNICException;
 
 import debug.DebugConsole;
 
-public class RelayPositionMonitorCOntroller implements Observer {
+public class RelayPositionMonitorController implements Observer {
 	private DatagramPacket notifyRSSI = null;
 	private boolean enableToMonitor;
 	private boolean started;
@@ -30,7 +28,6 @@ public class RelayPositionMonitorCOntroller implements Observer {
 	private RelayCM  rrscm = null ;
 	private RelayWNICController cwnic = null; 
 
-	private InetAddress relayAddress = null;
 	private static int sequenceNumber = 0;
 
 	private RelayMessageReader cmr = null;
@@ -41,7 +38,7 @@ public class RelayPositionMonitorCOntroller implements Observer {
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
 	 * @throws WNICException 
 	 */
-	public RelayPositionMonitorCOntroller(String interf, String essidName) throws WNICException{
+	public RelayPositionMonitorController(String interf, String essidName) throws WNICException{
 		rrscm = RelayConnectionFactory.getRSSIClusterHeadConnectionManager(this);
 		
 		try {
@@ -96,16 +93,16 @@ public class RelayPositionMonitorCOntroller implements Observer {
 				console.debugMessage(DebugConfiguration.DEBUG_WARNING, "RelayPositionMonitorController: ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
 				if((cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI)){
 					RSSIvalue = cwnic.getSignalStrenghtValue();
-					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, PortConfiguration.RSSI_PORT_IN);
+					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue,((DatagramPacket)arg1).getAddress(), PortConfiguration.RSSI_PORT_IN);
 					sequenceNumber++;
 					rrscm.sendTo(notifyRSSI);
-					console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionMonitorController(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+Parameters.RSSI_PORT_IN);
+					console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionMonitorController(): Inviato RSSI: "+ RSSIvalue +" a: " + ((DatagramPacket)arg1).getAddress()+":"+PortConfiguration.RSSI_PORT_IN);
 				}else{
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
+					console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
 				
 				}
 			} catch (WNICException e) {
-					console.debugMessage(Parameters.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+					console.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
 					new WNICException("ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
 				
 			} catch (IOException e) {e.printStackTrace();}
@@ -113,19 +110,8 @@ public class RelayPositionMonitorCOntroller implements Observer {
 		}
 	}
 
-	public ClientWNICController getClientWNICController(){
+	public RelayWNICController getRelayWNICController(){
 		return this.cwnic;
-	}
-	
-	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
-	 * confronti dell'indirizzo del Relay
-	 * @param rA una String che rappresenta l'indirizzo del Relay
-	 */
-	public void setRelayAddress(String rA) {
-		try {
-			relayAddress = InetAddress.getByName(rA);
-			enableToMonitor = true;
-		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
 	/**Server per visualizzare i messagi di debug

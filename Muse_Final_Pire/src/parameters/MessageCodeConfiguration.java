@@ -2,6 +2,9 @@ package parameters;
 
 public class MessageCodeConfiguration {
 	
+	public static final int TYPERELAY = 0;
+	public static final int TYPECLIENT = 1;
+	
 	public static final int WHO_IS_RELAY = 2;
 	public static final int IM_RELAY = 3;
 	
