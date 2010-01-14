@@ -161,7 +161,7 @@ public class StreamingServer implements ControllerListener, Observer{
 
 		if(status.equals("Trasmitting"))
 		{
-			this.stopProcessor();
+			this.stopProcessor();  // Marco: i metodi di startProcessor e Stop Processor servono idealmente per far partire o far arrestare il flusso
 			try {
 				if(this.proxyAddress != null)
 				{
