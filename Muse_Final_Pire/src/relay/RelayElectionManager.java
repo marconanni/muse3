@@ -92,6 +92,18 @@ public class RelayElectionManager extends Observable implements Observer{
 			BCASTHEAD  = InetAddress.getByName(NetConfiguration.CLUSTER_HEAD_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
+	
+	/**Metodo per ottenere l'instanza della classe singleton RelayElectionManager
+	 * @param imRelay un boolean che indica se il nodo è il Relay attuale o meno.
+	 * @return un riferimento al singleton RelayElectionManager
+	 */
+	public static RelayElectionManager getInstance(boolean imBigBoss, boolean imRelay, RelaySessionManager sessionManager){
+		if(INSTANCE == null)
+			try {
+				INSTANCE = new RelayElectionManager(imBigBoss, imRelay, sessionManager);
+			} catch (Exception e) {e.printStackTrace();}
+			return INSTANCE;
+	}
 
 
 	/**Costruttore per ottenere un RelayElectionManager. 
