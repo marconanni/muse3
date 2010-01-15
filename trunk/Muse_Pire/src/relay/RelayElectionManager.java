@@ -2,17 +2,13 @@ package relay;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-import client.ClientMessageFactory;
-import client.timeout.ClientTimeoutFactory;
+
 import debug.DebugConsole;
 
 import parameters.Parameters;
@@ -23,11 +19,9 @@ import relay.positioning.RelayPositionAPMonitor;
 import relay.positioning.RelayPositionMonitor;
 import relay.battery.RelayBatteryMonitor;
 import relay.timeout.RelayTimeoutFactory;
-import relay.timeout.TimeOutClientDetection;
 import relay.timeout.TimeOutElectionBeacon;
 import relay.timeout.TimeOutFailToElect;
 import relay.timeout.TimeOutSearch;
-import relay.timeout.TimeOutEmElection;
 import relay.timeout.TimeOutToElect;
 import relay.wnic.RelayWNICController;
 import relay.wnic.WNICFinder;
@@ -47,6 +41,7 @@ public class RelayElectionManager extends Observable implements Observer {
 		WAITING_WHO_IS_RELAY,
 		IDLE,
 		MONITORING,
+		WAITING_BEACON,
 		ACTIVE_NORMAL_ELECTION,
 		WAITING_END_NORMAL_ELECTION,
 		ACTIVE_EMERGENCY_ELECTION,
@@ -83,8 +78,6 @@ public class RelayElectionManager extends Observable implements Observer {
 	//Vector da riempire con le Couple relative agli ELECTION_RESPONSE ricevuti dal Relay uscente
 	private Vector<Couple> possibleRelay = null; 
 	
-	private RelayCM RSSIService;
-
 	//peso del nodo 
 	private double W = -1;
 	
@@ -97,6 +90,9 @@ public class RelayElectionManager extends Observable implements Observer {
 	//boolean che indica se è stato già ricevuto un EM_ELECTION
 	//private boolean firstEM_ELECTIONarrived = false;
 	
+	//indici dei messaggi inviati
+	private int indexELECTION_RELAY_BEACON=0;
+	
 	//boolean che indica se è stato già inviato un ELECTION_DONE
 	private boolean firstELECTION_DONEsent = false;
 
@@ -106,10 +102,9 @@ public class RelayElectionManager extends Observable implements Observer {
 	//boolean che indica se si è il Relay e attivo o meno
 	private boolean imRelay = false;
 	
-	//boolean che indica se può sostituire il nodo BigBoss ( cioè risulta essere bigboss passivo)
-	//caso contrario risulta essere un relay passivo
-	//viene preso in considerazione quando imBigBoss e imRelay sono false
+	//boolean che indica se può sostituire il nodo BigBoss o relay attivo ( cioè risulta essere bigboss passivo)
 	private boolean imPossibleBigBoss = false;
+	private boolean imPossibleRelay =false;
 	
 	//numero di clients rilevati al momento a 1 hop da questo nodo
 	private int counter_clients = 0;
@@ -176,12 +171,13 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * @param imRelay un boolean che a true indica che il nodo è stato creato per essere Relay
 	 * @throws Exception
 	 */
-	private RelayElectionManager(boolean imBigBoss, boolean imRelay,boolean imPossibleBigBoss, RelaySessionManager sessionManager) throws Exception{
+	private RelayElectionManager(boolean imBigBoss, boolean imRelay,boolean imPossibleBigBoss,boolean imPossibleRelay, RelaySessionManager sessionManager) throws Exception{
 
 		this.actualStatus = RelayStatus.OFF;
 		this.imBigBoss = imBigBoss;
 		this.imRelay = imRelay;
 		this.imPossibleBigBoss = imPossibleBigBoss;
+		this.imPossibleRelay = imPossibleRelay;
 		this.addObserver(sessionManager);
 		this.console = new DebugConsole();
 		this.console.setTitle("RELAY ELECTION MANAGER DEBUG CONSOLE");
@@ -233,10 +229,10 @@ public class RelayElectionManager extends Observable implements Observer {
 	 * @param imRelay un boolean che indica se il nodo è il Relay attuale o meno.
 	 * @return un riferimento al singleton RelayElectionManager
 	 */
-	public static RelayElectionManager getInstance(boolean imBigBoss, boolean imRelay, boolean imPossibleBigBoss, RelaySessionManager sessionManager){
+	public static RelayElectionManager getInstance(boolean imBigBoss, boolean imRelay, boolean imPossibleBigBoss, boolean imPossibleRelay, RelaySessionManager sessionManager){
 		if(INSTANCE == null)
 			try {
-				INSTANCE = new RelayElectionManager(imBigBoss, imRelay,imPossibleBigBoss, sessionManager);
+				INSTANCE = new RelayElectionManager(imBigBoss, imRelay, imPossibleBigBoss, imPossibleRelay, sessionManager);
 			} catch (Exception e) {e.printStackTrace();}
 			return INSTANCE;
 	}
@@ -249,8 +245,9 @@ public class RelayElectionManager extends Observable implements Observer {
 	private void becomeBigBossRelay(){
 
 		imBigBoss = true;
-		imRelay = true;
+		imRelay = false;
 		imPossibleBigBoss = false;
+		imPossibleRelay = false;
 
 		localRelayAddress = Parameters.RELAY_AD_HOC_ADDRESS;
 		memorizeLocalRelayAddress();
@@ -291,7 +288,7 @@ public class RelayElectionManager extends Observable implements Observer {
 		
 			actualStatus = RelayStatus.IDLE;
 				
-			console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager.becomeBigBossRelay(): X -> STATO IDLE: APMonitoring e WhoIsRelayServer partiti");
+			console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager.becomeBigBossRelay(): X -> STATO ["+actualStatus.toString()+"]: APMonitoring e WhoIsRelayServer partiti");
 			
 		} catch (WNICException e) {e.printStackTrace();System.exit(2);}
 	}
@@ -332,8 +329,8 @@ public class RelayElectionManager extends Observable implements Observer {
 
 		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
-//		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
-//		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
+		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutFailToElect();
+		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutElectionBeacon();
 //		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
 //		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
 		/*Fine Vedere se sta parte serve*/
@@ -377,35 +374,41 @@ public class RelayElectionManager extends Observable implements Observer {
 
 		//PARTE PER LA GESTIONE DEI MESSAGGI PROVENIENTI DALLA RETE
 		if(arg1 instanceof DatagramPacket){
-
 			DatagramPacket dpIn = (DatagramPacket)arg1;
 			relayMessageReader = new RelayMessageReader();
-
 			try {
 				relayMessageReader.readContent(dpIn);
-			} catch (IOException e) {e.printStackTrace();}
+			} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"RElayElectionManager : errore durante la lettura del pacchetto election");e.printStackTrace();}
 			
+			
+/********************** STATO: WAITING_WHO_IS_RELAY **********************/ 
+	
 			/*
-			 * Relay secondario attivo in cerca del big boss
+			 * Relay secondario attivo in attesa di risposta da parte del BigBoss
 			 */
-			if(relayMessageReader.getCode() == Parameters.IM_BIGBOSS && actualStatus == RelayStatus.WAITING_WHO_IS_RELAY){
+			if((relayMessageReader.getCode() == Parameters.IM_BIGBOSS) && 
+			   (actualStatus == RelayStatus.WAITING_WHO_IS_RELAY) && 
+			   (imRelay)){
+					
 				if(timeoutSearch != null) {
 					timeoutSearch.cancelTimeOutSearch();
 					timeoutSearch = null;
 				}
-				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivato");
 				connectedRelayAddress = relayMessageReader.getActualConnectedRelayAddress();
 				memorizeConnectedRelayAddress();
 				setChanged();
 				notifyObservers("BIGBOSS_FOUND:"+relayMessageReader.getActualConnectedRelayAddress());
-				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO IDLE: IM_BIG_BOSS_RELAY arrivatoa connectRelayAddress: "+connectedRelayAddress);
-				becomRelay();
+				console.debugMessage(Parameters.DEBUG_INFO, "RelayElectionManager: STATO ["+actualStatus.toString()+"], IM_BIG_BOSS arrivato: connectRelayAddress: ["+connectedRelayAddress+"]");
+				becomRelay(); //stato idle
 			}
 			
 			/*
-			 * Client o relay passivo in cerca di un relay attivo (Big boss o relay secondario)
+			 * Client o relay passivo in attesa di risposta da parte di un relay o BigBoss attivi
 			 */
-			if(relayMessageReader.getCode() == Parameters.IM_RELAY && actualStatus == RelayStatus.WAITING_WHO_IS_RELAY){
+			if((relayMessageReader.getCode() == Parameters.IM_RELAY) && 
+			   (actualStatus == RelayStatus.WAITING_WHO_IS_RELAY)){
+				
+				console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: STATO ["+actualStatus.toString()+"]: IM_RELAY arrivato");
 				if(timeoutSearch != null) {
 					timeoutSearch.cancelTimeOutSearch();
 					timeoutSearch = null;
@@ -415,57 +418,42 @@ public class RelayElectionManager extends Observable implements Observer {
 				memorizeConnectedRelayAddress();
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+connectedRelayAddress);
-				console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: STATO IDLE: IM_RELAY arrivato: connectedRelayAddress: "+ connectedRelayAddress);
+				console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: STATO ["+actualStatus.toString()+"]: connectedRelayAddress: ["+ connectedRelayAddress+"]");
 			}
+				
+/********************** STATO: IDLE,MONITORING *********************/
 			
 			/*
 			 * Conferma da parte di un nodo della connessione al Big Boss
 			 */
-			if(relayMessageReader.getCode()==Parameters.ACK_CONNECTION && imBigBoss){
-				if(relayMessageReader.getTypeNode()==Parameters.TYPERELAY)
+			if((relayMessageReader.getCode()==Parameters.ACK_CONNECTION) && 
+			   (imBigBoss)){
+				
+				if(relayMessageReader.getTypeNode()==Parameters.TYPERELAY){
 					active_relays++;
+					setChanged();
+					notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
+					console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso, IP ["+relayMessageReader.getPacketAddess().toString()+"]");
+				}else
+					console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: nuovo client o relay,bigboss passivo si è connesso IP ["+relayMessageReader.getPacketAddess().toString()+"]");
 				startRelayPositionMonitoring();
-				setChanged();
-				notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
-				console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
 			}
 			
-			
-			
-			/*[ELECTION_REQUEST arrivato && ap Visibility == false] / 
-			 *electing = true
+			/* richiesta di elezione da parte del BigBoss (se il nodo è un possibile sostituto)
+			 * 1. Prende atto dell'inizio dell'elezione
+   			 * 2. Setta un TIMEOUT_FAIL_TO_ELECT (vedi 2.3.1)
+   			 * 3. Setta un TIMEOUT_ELECTION_BEACON, scaduto il quale assume di aver ottenuto un messaggio di ELECTION_BEACON e ELECTION_RELAY_BEACON da parti di tutti i nodi coinvolti nell'elezione e presenti nel prorprio raggio di copertura e completare il calcolo del proprio peso da inviare in UNICAST al BIG BOSS da sostituire.
+   			 * 4. Si mette in attesa di messaggi ELECTION_BEACON da parte dei client attivi coinvolti nelle elezione
+   			 * 5. Si mette in attesa di messaggi ELECTION_RELAY_BEACON da parte dei relay attivi.
 			 */
-
-			/*[ELECTION_REQUEST arrivato && ap Visibility == true] / 
-			 *electing = true
-			 *counter_clients = 0
-			 *status = ActiveNormalElection
-			 *start TIMEOUT_FAIL_TO_ELECT
-			 */
-			else if((relayMessageReader.getCode() == Parameters.ELECTION_REQUEST) && 
+			else if((relayMessageReader.getCode() == Parameters.ELECTION_BIGBOSS_REQUEST) && 
 					(actualStatus == RelayStatus.IDLE) &&
-					(dpIn.getAddress().getHostAddress().equals(connectedRelayInetAddress))
-			){
+					(imPossibleBigBoss)){
 				try {
-					console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: STATO IDLE:  ELECTION_REQUEST arrivato && ap Visibility == "+ 
-							relayAPWNICController.isConnected());
-				} catch (WNICException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+					console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager possible BigBoss: STATO ["+actualStatus.toString()+"], ELECTION_REQUEST arrivato, AP Visibility ["+ 
+							relayAPWNICController.isConnected()+"]");
+				} catch (WNICException e1) {e1.printStackTrace();}
 
-				//Questa parte c'è nel caso il nodo ex relay non si disconnetta ma rientri nella Dense Manet
-				//Solo quando riceve una richiesta di elezione può liberarsi delle vecchie informazioni sulla 
-				//precedente elezione
-
-				firstELECTION_DONEsent = false;
-
-				if(possibleRelay != null){
-					possibleRelay.clear();
-					possibleRelay = null;
-				}
-
-				connectedRelayAddress = null;
 				electing = true;
 				counter_clients = 0;
 				counter_relays = 0;
@@ -473,28 +461,74 @@ public class RelayElectionManager extends Observable implements Observer {
 				W = -1;
 
 				try {
-
 					//ap Visibility == true
 					if(relayAPWNICController.isConnected()){
-
-						//timeoutElectionBeacon = RelayTimeoutFactory.getTimeOutElectionBeacon(this, Parameters.TIMEOUT_ELECTION_BEACON);
+						timeoutElectionBeacon = RelayTimeoutFactory.getTimeOutElectionBeacon(this, Parameters.TIMEOUT_ELECTION_BEACON);
 						timeoutFailToElect = RelayTimeoutFactory.getTimeOutFailToElect(this, Parameters.TIMEOUT_FAIL_TO_ELECT);
-
 						actualStatus  = RelayStatus.ACTIVE_NORMAL_ELECTION;
-						console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: STATO IDLE -> ACTIVE_NORMAL_ELECTION:  " +
-								"ELECTION_REQUEST arrivato && ap Visibility == true " +
-						"e TIMEOUT_ELECTION_BEACON, TIMEOUT_FAIL_TO_ELECT partiti");
+						console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: STATO ["+actualStatus.toString()+"], TIMEOUT_ELECTION_BEACON, TIMEOUT_FAIL_TO_ELECT partiti \nAttesa di messaggi ELECTION_BACON e ELECTION_RELAY_BACON");
 					} 			
-
-				} catch (WNICException e) {
-					e.printStackTrace();
-				}
-				
+				} catch (WNICException e) {e.printStackTrace();}
 				setChanged();
-				notifyObservers("ELECTION_REQUEST_RECEIVED");
-
+				notifyObservers("ELECTION_BIGBOSS_REQUEST_RECEIVED");
 			}
+			
+			
+			/* richiesta di elezione da parte del BigBoss (relay attivo)
+			 * 1. Prende atto dell'inizio dell'elezione
+			 * 2. Effettua un BROADCAST del messaggio ELECTION_RELAY_BEACON destinati ai nodi possibili sostituti (Big Boss passivi) con visibilità dell'AP
+			 * 3. Setta un TIMEOUT_FAIL_TO_ELECT (vedi 2.3.1)
+			 * 4. in attesa del messaggio di ELECTION_BIGBOSS_DONE da parte del nuovo BIG BOSS appena eletto..
+			 */
+			else if((relayMessageReader.getCode() == Parameters.ELECTION_BIGBOSS_REQUEST) && 
+					(actualStatus == RelayStatus.MONITORING) &&
+					(imRelay)){
+				electing = true;
+				
+				DatagramPacket dpOut = null;
+				try {
+					dpOut = RelayMessageFactory.buildElectioRelayBeacon(indexELECTION_RELAY_BEACON,BCAST,Parameters.RELAY_ELECTION_PORT_IN);
+					comManager.sendTo(dpOut);
+					indexELECTION_RELAY_BEACON++;
+					actualStatus  = RelayStatus.ACTIVE_NORMAL_ELECTION;
+				} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di ELECTION_RELAY_BEACON");e.getStackTrace();}
+					
+				timeoutFailToElect = RelayTimeoutFactory.getTimeOutFailToElect(this, Parameters.TIMEOUT_FAIL_TO_ELECT);
+				console.debugMessage(Parameters.DEBUG_INFO,"RelayElectionManager: ELECTION_BIGBOSS_REQUEST arrivato STATO MONITORING -> ACTIVE_NORMAL_ELECTION\n" +
+															"ELECTION_RELAY_BEACON spedito in broadcast, TIMEOUT_FAIL_TO_ELECT partiti");
+				setChanged();
+				notifyObservers("ELECTION_BIGBOSS_REQUEST_RECEIVED");
+			}
+			
+			/** STATO: ACTIVE_NORMAL_ELECTION **/
+			/* Arrivo del messaggio di ELECTION_BEACON (nodi possibile sostituti sia BigBoss sia relay Attivi)
+			 * 1. Se questo è il primo messaggio ricevuto resetta ed incrementa il counter_clients
+			 * 2. Se non è il primo messaggio ricevuto incrementa il counter_clients
+			 */
+			else if((relayMessageReader.getCode() == Parameters.ELECTION_BEACON) && 
+					(actualStatus == RelayStatus.ACTIVE_NORMAL_ELECTION) &&
+					(imPossibleRelay || imPossibleBigBoss)){
+
+				counter_clients++;
+				console.debugMessage(Parameters.DEBUG_INFO,"RelayElectioneManager "+((imPossibleBigBoss)?"ImPossibleBigBoss":"ImPossibleRelay")+" ELECTION_BEACON arrivato, counterClient = ["+counter_clients+"]");
+			}
+			
+			/* Arrivo del messaggio di ELECTION_RELAY_BEACON (solo nodi Possibile BigBoss con visibilità dell'AP):
+			 * 1. Se questo è il primo messaggio ricevuto resetta ed incrementa il counter_relays
+			 * 2. Se non è il primo messaggio ricevuto incrementa il counter_relays
+			 */
+			else if ((relayMessageReader.getCode()==Parameters.ELECTION_RELAY_BEACON)&&
+					(actualStatus == RelayStatus.ACTIVE_NORMAL_ELECTION)&&
+					(imPossibleBigBoss)){
+				counter_relays++;
+				console.debugMessage(Parameters.DEBUG_INFO,"RelayElectioneManager ImPossibleBigBoss ELECTION_RELAY_BEACON arrivato, counterRelayst = ["+counter_relays+"]");
+			}
+			
 		}
+		
+		
+		
+		
 		if(arg1 instanceof String){
 
 			String event = (String) arg1;
@@ -536,9 +570,9 @@ public class RelayElectionManager extends Observable implements Observer {
 
 				try {
 					//invio ai Relay
-					dpOut = RelayMessageFactory.buildElectionRequest(BCAST, Parameters.RELAY_ELECTION_PORT_IN, active_relays);
+					dpOut = RelayMessageFactory.buildElectionBigBossRequest(BCAST, Parameters.RELAY_ELECTION_PORT_IN, active_relays);
 					comManager.sendTo(dpOut);
-					dpOut = RelayMessageFactory.buildElectionRequest(BCAST, Parameters.CLIENT_PORT_ELECTION_IN,active_relays);
+					dpOut = RelayMessageFactory.buildElectionBigBossRequest(BCAST, Parameters.CLIENT_PORT_ELECTION_IN,active_relays);
 					comManager.sendTo(dpOut);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -554,6 +588,7 @@ public class RelayElectionManager extends Observable implements Observer {
 						"DISCONNECTION_WARNING sollevato da uno dei Monitor, ELECTION_REQUEST inviato, " +
 				"TIMEOUT_TO_ELECT partito ");
 			}
+			
 		}
 		
 	}
@@ -644,16 +679,7 @@ public class RelayElectionManager extends Observable implements Observer {
 
 			/**INIZIO STATO ACTIVE_NORMAL_ELECTION**/	
 
-			/*[ELECTION_BEACON arrivato] / 
-			 *counter_clients++ 
-			 */
-			/*else if(relayMessageReader.getCode() == Parameters.ELECTION_BEACON && 
-					actualStatus == RelayStatus.ACTIVE_NORMAL_ELECTION){
 
-				counter_clients++;
-				debugPrint("RelayElectionManager: STATO ACTIVE_NORMAL_ELECTION: ELECTION_BEACON arrivato " +
-						"(counter_clients:"+counter_clients+")");
-			}
 			/**FINE STATO ACTIVE_NORMAL_ELECTION**/	
 
 
@@ -1412,9 +1438,13 @@ public class RelayElectionManager extends Observable implements Observer {
 	public void setConnectedRelayInetAddress(InetAddress connectedRelayInetAddress) {this.connectedRelayInetAddress = connectedRelayInetAddress;}
 
 	public boolean isImRelay() {return imRelay;}
-	public boolean isImBigBossRelay(){return imBigBoss;}
+	public boolean isImBigBoss(){return imBigBoss;}
+	public boolean isImPossibleBigBoss(){return imPossibleBigBoss;}
+	public boolean isImPossibleRelay(){return imPossibleRelay;}
 	public void setImRelay(boolean imRelay) {this.imRelay = imRelay;}
-	public void setImBigBossRelay(boolean imBigBoss) {this.imBigBoss = imBigBoss;}
+	public void setImBigBoss(boolean imBigBoss) {this.imBigBoss = imBigBoss;}
+	public void setImPossibleBigBoss(boolean imPossibleBigBoss) {this.imPossibleBigBoss = imPossibleBigBoss;}
+	public void setImPossibleRelay(boolean imPossibleRelay) {this.imPossibleRelay = imPossibleRelay;}
 	
 	public RelayMessageReader getRelayMessageReader() {return relayMessageReader;}
 	public void setRelayMessageReader(RelayMessageReader relayMessageReader) {this.relayMessageReader = relayMessageReader;}
@@ -1440,6 +1470,9 @@ public class RelayElectionManager extends Observable implements Observer {
 	//Timeout per rieleggere un nuovo big boss o un relay secondario
 	public TimeOutToElect getTimeoutToElect() {return timeoutToElect;}
 	public void setTimeoutToElect(TimeOutToElect timeoutToElect) {this.timeoutToElect = timeoutToElect;}
+	
+	public int getIndexELECTION_RELAY_BEACON() {return indexELECTION_RELAY_BEACON;}
+	public void setIndexELECTION_RELAY_BEACON(int indexELECTION_RELAY_BEACON) {this.indexELECTION_RELAY_BEACON = indexELECTION_RELAY_BEACON;}
 		
 	public Vector<Couple> getPossibleRelay() {return possibleRelay;}
 	public void setPossibleRelay(Vector<Couple> possibleRelay) {this.possibleRelay = possibleRelay;}
