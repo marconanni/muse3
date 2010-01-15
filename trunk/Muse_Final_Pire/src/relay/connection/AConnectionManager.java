@@ -22,6 +22,7 @@ public class AConnectionManager {
 	protected String managerName = "AConnectionManager";
 	private InetAddress localAddress;
 	private int localOutputPort = -1;
+	private int localInputPort = -1;
 	
 	/**Metodo per ottenere un AConnectionManager
 	 * @param localAdHocAddress una Stringa che rappresenta l'indirizzo locale sulla rete Ad-Hoc del nodo
@@ -33,6 +34,7 @@ public class AConnectionManager {
 		if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 		this.setLocalAddress(localAddress);
 		this.setLocalOutputPort(localOutputPort);
+		this.setLocalInputPort(localInputPort);
 	
 		try {
 			adHocOutputSocket = new DatagramSocket(localOutputPort,localAddress);
@@ -46,6 +48,7 @@ public class AConnectionManager {
 	public void start(){
 		if(receiverAdHoc!=null){
 			receiverAdHocThread.start();
+			System.out.println("Ricezione messaggi IP: "+localAddress.toString()+":"+localInputPort);
 			started = true;
 		}
 	}
@@ -97,6 +100,7 @@ public class AConnectionManager {
 	public void setLocalAddress(InetAddress localAddress){this.localAddress = localAddress;}
 	public InetAddress getLocalAddress(){return localAddress;}
 	public void setLocalOutputPort(int localOutputPort) {this.localOutputPort = localOutputPort;}
-	public int getLocalOutputPort() {return localOutputPort;}
-
+	public int getLocalOutputPort() {return localInputPort;}
+	public void setLocalInputPort(int localInputPort) {this.localInputPort = localInputPort;}
+	public int getLocalInputPort() {return localInputPort;}
 }
