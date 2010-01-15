@@ -66,7 +66,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	 * @param p il periodo con cui il RelayPositioniClientsMonitor richiede ai Clients 
 	 * @param electionManager l'ElectionManager che deve essere avvertito allorchè si rilevi una possibile disconnessione
 	 */
-	public RelayPositionMonitor(int maxNAV, long p, Observer electionManager){
+	public RelayPositionMonitor(int maxNAV, long p, Observer electionManager, DebugConsole console){
 		this.period = p;
 		seqNum = -1;
 		this.maxNumberOfAverageValues = maxNAV; 
@@ -74,6 +74,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		averageValues = new Vector<Double>();
 		addObserver(electionManager);
 		rrcm = RelayConnectionFactory.getRSSIClusterConnectionManager(this);	
+		setDebugConsole(console);
 		setStarted(false);
 	}
 	
@@ -213,11 +214,6 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		return res;
 	}
 	
-
-	public void setDebugConsole(DebugConsole console){
-		this.console = console;
-	}
-
 	public void setStarted(boolean started) {
 		this.started = started;
 	}
@@ -225,4 +221,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	public boolean isStarted() {
 		return started;
 	}
+	
+	public void setDebugConsole(DebugConsole console){this.console = console;}
+	public DebugConsole getDebugConsole(){return console;}
 }
