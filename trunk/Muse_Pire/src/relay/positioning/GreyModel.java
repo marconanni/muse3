@@ -1,7 +1,4 @@
 package relay.positioning;
-
-
-
 import gov.sns.tools.math.Vector;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
@@ -10,7 +7,6 @@ import Jama.SingularValueDecomposition;
  * Grey model per il filtraggio dei valori degli RSSI.
  * @author Zapparoli Pamela
  * @version 1.0
- *
  */
 
 public class GreyModel implements RSSIFilter
@@ -110,7 +106,6 @@ public class GreyModel implements RSSIFilter
 		}
 	}
 //++++++++++++++++++++++++++++++++++++ROBA NUOVA+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	
 
 	/**
 	 * Predice il valore che il segnale avra' fra time secondi 

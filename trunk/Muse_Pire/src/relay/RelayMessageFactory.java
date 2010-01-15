@@ -213,6 +213,60 @@ public class RelayMessageFactory {
 		byte[] data = boStream.toByteArray();
 		return new DatagramPacket(data, data.length, addr, port);
 	}
+	
+	/**
+	 * Messaggio di ElectionBigBossRequest da parte del BigBoss (elezione di un nuovo BigBoss)
+	 * @param Destination Address
+	 * @param Destination Port
+	 * @param int Active Relays (numeri di relay attivi attualmente connessi al BigBoss)
+	 * @return DatagramPacket da inviare 
+	 * @throws IOException
+	 */
+	static public DatagramPacket buildElectionBigBossRequest(InetAddress addr, int port,int active_relays) throws IOException {
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = 0+"_"+Parameters.ELECTION_BIGBOSS_REQUEST+"_"+active_relays;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+		return new DatagramPacket(data, data.length, addr, port);
+	}
+	
+	/**
+	 * Messaggio di ElectionRelayRequest da parte del Relay attivo (elezione di un relay attivo)
+	 * @param Destination Address
+	 * @param Destination Port
+	 * @return DatagramPacket da inviare 
+	 * @throws IOException
+	 */
+	static public DatagramPacket buildElectionRelayRequest(InetAddress addr, int port) throws IOException {
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = 0+"_"+Parameters.ELECTION_RELAY_REQUEST;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+		return new DatagramPacket(data, data.length, addr, port);
+	}
+	
+	/**
+	 * Messaggio di Election_Relay_Beacon in caso di elezione di un nuovo BigBoss
+	 * @category electionManager
+	 * @param int sequenceNumber
+	 * @param destination Address 
+	 * @param Destination Port
+	 * @return DatagramPacket da inviare 
+	 * @throws IOException
+	 */
+	public static DatagramPacket buildElectioRelayBeacon(int sequenceNumber, InetAddress addr, int port) throws IOException{
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = sequenceNumber+"_"+Parameters.ELECTION_RELAY_BEACON;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+		return new DatagramPacket(data, data.length, addr, port);
+	}
 
 	/**
 	 * Messaggio di REQUEST_RSSI, richiesta della potenza del segnale
@@ -251,28 +305,7 @@ public class RelayMessageFactory {
 		return new DatagramPacket(data, data.length, addr, port);
 	}
 	
-	
-	
-	/**
-	 * Messaggio di ElectionRequest
-	 * @param sequenceNumber
-	 * @param addr
-	 * @param port
-	 * @return
-	 * @throws IOException
-	 */
-	static public DatagramPacket buildElectionRequest(InetAddress addr, int port,int active_relays) throws IOException {
 
-		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = 0+"_"+Parameters.ELECTION_REQUEST+"_"+active_relays;
-		doStream.writeUTF(content);
-		doStream.flush();
-		byte[] data = boStream.toByteArray();
-
-		return new DatagramPacket(data, data.length, addr, port);
-
-	}
 
 
 	/**
@@ -305,15 +338,13 @@ public class RelayMessageFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	static public DatagramPacket buildElectionDone(int sequenceNumber, String newRelayAddress,InetAddress addr, int port) throws IOException {
-
+	static public DatagramPacket buildElectionBigBossDone(int sequenceNumber, String newRelayAddress,InetAddress addr, int port) throws IOException {
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.ELECTION_DONE+"_"+newRelayAddress;
+		String content = sequenceNumber+"_"+Parameters.ELECTION_BIGBOSS_DONE+"_"+newRelayAddress;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
-
 		return new DatagramPacket(data, data.length, addr, port);
 
 	}
