@@ -14,12 +14,12 @@ public class Parameters {
 	 * 
 	 * */	
 	/** indirizzo IP del SERVER */
-	public static final String SERVER_ADDRESS = "192.168.184.177";
+	public static final String SERVER_ADDRESS = "192.168.2.4";
 	//public static final String SERVER_ADDRESS = "192.255.0.1";
 	
 	/** indirizzo IP del CLIENT */
 	//public static final String CLIENT_ADDRESS = "192.168.1.11";
-	public static final String CLIENT_ADDRESS = "192.168.0.4";
+	public static final String CLIENT_ADDRESS = "192.168.0.8";
 	//public static final String CLIENT_ADDRESS = "localhost";
 	
 	/** indirizzo IP del RELAY sulla rete Ad-Hoc */
@@ -29,7 +29,7 @@ public class Parameters {
 	
 	/** indirizzo IP del RELAY sulla rete Managed */
 	//public static final String RELAY_MANAGED_ADDRESS = "192.168.2.2";
-	public static final String RELAY_MANAGED_ADDRESS = "192.168.184.177";
+	public static final String RELAY_MANAGED_ADDRESS = "192.168.2.4";
 	
 	/** indirizzo IP di BROADCAST sulla rete Ad-Hoc */
 	//public static final String BROADCAST_ADDRESS = "192.168.1.255";
@@ -39,7 +39,7 @@ public class Parameters {
 	public static final String NAME_OF_AD_HOC_NETWORK = "marco";
 	
 	/** Nome della rete Managed */
-	public static final String NAME_OF_MANAGED_NETWORK = "ALMAWIFI";
+	public static final String NAME_OF_MANAGED_NETWORK = "lord";
 	
 	/** Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc */
 	public static final String NAME_OF_AD_HOC_RELAY_INTERFACE = "wlan1";
@@ -63,7 +63,8 @@ public class Parameters {
 	 */
 	public static final boolean IMRELAY=true;
 	public static final boolean IMBIGBOSS=true;
-	public static final boolean IMPOSSIBLEBIGBOSS = true;
+	public static final boolean IMPOSSIBLEBIGBOSS = false;
+	public static final boolean IMPOSSIBLERELAY = false;
 	
 	/** Specifica il numero di sessioni attive massime che si possono avere sul Relay */
 	public static final int RANGE_ACTIVE_SESSIONS = 1000;
@@ -184,11 +185,13 @@ public class Parameters {
 	public static final int TYPEPOSSIBLERELAY = 103;
 	public static final int TYPECLIENT = 104;
 	
-	public static final int ELECTION_REQUEST = 10;
-	public static final int ELECTION_BEACON = 11;
-	public static final int ELECTION_RELAY_BEACON = 12;
-	public static final int ELECTION_RESPONSE = 13;
-	public static final int ELECTION_DONE = 14;
+	public static final int ELECTION_BIGBOSS_REQUEST = 10;
+	public static final int ELECTION_RELAY_REQUEST = 11;
+	public static final int ELECTION_BEACON = 12;
+	public static final int ELECTION_RELAY_BEACON = 13;
+	public static final int ELECTION_RESPONSE = 14;
+	public static final int ELECTION_BIGBOSS_DONE = 15;
+	public static final int ELECTION_RELAY_DONE = 16;
 	
 	
 	public static final int REQUEST_FILE = 14;
