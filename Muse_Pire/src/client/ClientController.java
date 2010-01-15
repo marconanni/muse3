@@ -21,7 +21,7 @@ public class ClientController {
 		//if(frame.getController() != null)
 		//frameController = frame.getController();
 		this.console = new DebugConsole();
-		this.console.setTitle("DEBUG CLIENTCONTROLLER (ELECTION & SESSION) CONSOLE");
+		this.console.setTitle("CLientElectionManager debug console");
 		//this.sessionManager = ClientSessionManager.getInstance();
 		//this.sessionManager.setDebugConsole(this.console);
 		//this.sessionManager.setFrameController(frameController);

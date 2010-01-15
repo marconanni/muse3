@@ -57,19 +57,19 @@ public class ClientMessageFactory {
 	}
 	
 	/**
-	 * Messaggio di Election_Beacon.
-	 * <br/> 
-	 * @param int sequenceNumber
-	 * @param InetAddress addr 
-	 * @param int port
-	 * @return DatagramPacket 
+	 * Messaggio di Election_Beacon in caso di elezione di un nuovo nodo (big boss o relay attivo)
+	 * @category electionManager
+	 * @param destination Address
+	 * @param destination Port
+	 * @param relayAddress indirizzo ip del nodo da sostituire
+	 * @return DatagramPacket da inviare 
 	 * @throws IOException
 	 */
-	public static DatagramPacket buildElectioBeacon(int sequenceNumber, InetAddress addr, int port) throws IOException{
+	public static DatagramPacket buildElectioBeacon(int sequenceNumber, InetAddress addr, int port, String relayAddress) throws IOException{
 		
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.ELECTION_BEACON;
+		String content = sequenceNumber+"_"+Parameters.ELECTION_BEACON+"_"+relayAddress;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();

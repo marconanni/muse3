@@ -47,7 +47,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	private DebugConsole console = null;								//Serve per mostrare i messaggi di debug del CLientElectionManager
 	//private ClientFrameController frameController = null;				//ClientFrameController assegnabile al ClientElectionManager
 	
-	public enum ClientStatus {OFF, IDLE, WAITING_END_ELECTION,}			//stati in cui si può trovare il ClientElectionManager
+	public enum ClientStatus {OFF,WAITING_WHO_IS_RELAY, IDLE, ACTIVE, WAITING_END_ELECTION,}			//stati in cui si può trovare il ClientElectionManager
 	
 	static {
 		try {
@@ -75,7 +75,7 @@ public class ClientElectionManager extends Observable implements Observer{
 		} catch (WNICException e) {console.debugMessage(Parameters.DEBUG_ERROR,e.getMessage());stop = true;}
 		
 		if(stop)
-			console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" e non può continuare in quanto la scheda di rete nn è configurata correttamente");
+			console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" e non può continuare in quanto la scheda di rete non è configurata correttamente");
 		else{
 			console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: Scheda wireless configurata correttamente ora cerca il relay");
 			searchingRelay();
@@ -105,8 +105,9 @@ public class ClientElectionManager extends Observable implements Observer{
 
 			} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
 			
+			actualStatus = ClientStatus.WAITING_WHO_IS_RELAY;
 			timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,	Parameters.TIMEOUT_SEARCH);
-			console.debugMessage(Parameters.DEBUG_WARNING,"ClientElectionManager: stato OFF, inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
+			console.debugMessage(Parameters.DEBUG_WARNING,"ClientElectionManager: stato OFF->WAITING_WHO_IS_RELAY, inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 		}
 	}
 	
@@ -122,29 +123,22 @@ public class ClientElectionManager extends Observable implements Observer{
 			clientMessageReader = new ClientMessageReader();
 			try {
 				clientMessageReader.readContent(dpIn);
-			} catch (IOException e) {e.printStackTrace();console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager : errore durante la lettura del pacchetto election");}
+			} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager : errore durante la lettura del pacchetto election");e.printStackTrace();}
 
-			/*Cominciamo ad esaminare i vari casi che si possono presentare, in base allo stato in cui ci si trova 
-				e al codice del messaggio che è appena arrivato*/
+			/*Cominciamo ad esaminare i vari casi che si possono presentare, in base allo stato in cui ci si trova e al codice del messaggio che è appena arrivato*/
 
+			/*
+			 * Client si collega al primo nodo che gli risponde al messaggio di WHO_IS_RELAY (BigBoss o relay attivo)
+			 */
+			if((clientMessageReader.getCode() == Parameters.IM_RELAY) && (actualStatus == ClientStatus.WAITING_WHO_IS_RELAY)){
 
-			/** INIZIO STATO IDLE**/	
-			
-			//Da vedere a quale relay il cliente si deve collegare
-			//SOLUZIONI:
-			//1) al primo che risponde (synchronize il cambio di actualstatus)
-			//2) memorizzare tutte le risposte e ricevute in coppia (ip,RSSI) del relay e poi prendere quello con il segnale + alto->+ vicino
-			//3) Non ci poniamo questo problema e ci colleghiamo al relay staticamente (richiede di conoscere l'ip del relay on startup)
-			if((clientMessageReader.getCode() == Parameters.IM_RELAY) && (actualStatus == ClientStatus.OFF)){
-				//DatagramPacket dpOut = null;
 				actualStatus = ClientStatus.IDLE;
-				
 				actualRelayAddress = clientMessageReader.getActualRelayAddress();
 				memorizeRelayAddress();
 				electing = false;
 				firstEM_ELsent = false;
 				
-				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: IM_RELAY arrivato: -> stao IDLE e actualRelayAddress: " + actualRelayAddress+".\nPronto per richiesta file e iniziare streaming RTP.");
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: IM_RELAY arrivato, Stato IDLE e actualRelayAddress: " + actualRelayAddress+".\nPronto per richiesta file e iniziare streaming RTP.");
 				
 				if(timeoutSearch != null) {
 					timeoutSearch.cancelTimeOutSearch();
@@ -154,12 +148,6 @@ public class ClientElectionManager extends Observable implements Observer{
 				//Notifico ClientSessionManager e anche il relay a cui sono connesso
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+actualRelayAddress);
-				/*try {
-					dpOut = ClientMessageFactory.buildAckConnection(InetAddress.getByName(actualRelayAddress), Parameters.RELAY_ELECTION_PORT_IN, InetAddress.getLocalHost().toString());
-					comManager.sendTo(dpOut);
-				} catch (UnknownHostException e) {e.printStackTrace();
-				} catch (IOException e) {e.printStackTrace();}
-				comManager.sendTo(dpOut);*/
 				
 				DatagramPacket dpOut = null;
 				try {
@@ -169,41 +157,74 @@ public class ClientElectionManager extends Observable implements Observer{
 
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: client creato e ACK_CONNECTION spedito");
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
-				//setImServed(true);
+				setImServed(true);
 			}
 			
-			else if((clientMessageReader.getCode() == Parameters.ELECTION_REQUEST) && (actualStatus == ClientStatus.IDLE) &&(clientMessageReader.getAddress().equals(actualRelayInetAddress))){
-
+			/*
+			 * Richiesta di elezione di un nuovo nodo sostituto (BigBoss o relay attivo)
+			 * 1. Prende atto dell’inizio dell’elezione
+			 * 2. Effettua un BROADCAST del messaggio ELECTION_BEACON destinati ai nodi possibili sostituti con visibilità dell'AP.
+			 * 3. setta un TIMEOUT_FAIL_TO_ELECT
+			 * PS: se non è in corso una sessione rtp prende solo atto dell'inizio dell'elezione
+			 */
+			else if(((clientMessageReader.getCode() == Parameters.ELECTION_BIGBOSS_REQUEST)||(clientMessageReader.getCode()==Parameters.ELECTION_RELAY_REQUEST)) && ((actualStatus == ClientStatus.ACTIVE)||(actualStatus == ClientStatus.IDLE)) &&(clientMessageReader.getAddress().equals(actualRelayInetAddress))){
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_REQUEST arrivato " + (imServed?"e sono servito":"ma non sono servito"));
-
 				if(timeoutSearch != null){
 					timeoutSearch.cancelTimeOutSearch();
 					timeoutSearch = null;
 				}
-
 				electing = true;
-				actualRelayAddress = null;
-				actualRelayInetAddress = null;
-
+				actualStatus = ClientStatus.WAITING_END_ELECTION;
+				
+				//Sessiono RTP in corso
 				if (imServed) {
-
 					DatagramPacket dpOut = null;
-
 					try {
-						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.RELAY_ELECTION_PORT_IN);
+						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.RELAY_ELECTION_PORT_IN, actualRelayAddress);
+						comManager.sendTo(dpOut);
+						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.CLIENT_PORT_ELECTION_IN, actualRelayAddress);
 						comManager.sendTo(dpOut);
 						indexELECTION_BEACON++;
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
+					} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager: ERRORE nel spedire il messaggio di ELECTION BEACON");e.printStackTrace();}
 					timeoutFailToElect = ClientTimeoutFactory.getTimeOutFailToElect(this,Parameters.TIMEOUT_FAIL_TO_ELECT);
-
-					actualStatus = ClientStatus.WAITING_END_ELECTION;
-
-					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato && imServed==true e start TIMEOUT_FAIL_TO_ELECT");
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO ACTIVE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato, start TIMEOUT_FAIL_TO_ELECT");
+				}else{
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato");
 				}
+				setChanged();
+				notifyObservers("RECIEVED_ELECTION_REQUEST");
+			}
+			
+			/*
+			 * Richiesta di elezione, ma il nodo non ha ricevuto il messaggio di ELECTION_REQUEST, riceve però i messaggi di ELECTION_BEACON da altri nodi coinvolti (tutti connessi al nodo che deve essere sostituito)
+			 * 1. Se ha già inviato in BROADCAST il messaggio di ELECTION_BEACON non fa nulla
+			 * 2. Se NON ha già inviato in BROADCAST il messaggio di ELECTION_BEACON invia a sua volta in BROADCAST un messaggio ELECTION_BACON (maggiore sicurezza che tutti i nodi coinvolti partecipano all'elezione)
+			 * PS: se non è in corso una sessione rtp prende solo atto dell'inizio dell'elezione
+			 */
+			else if((clientMessageReader.getCode()==Parameters.ELECTION_BEACON)&&(clientMessageReader.getRelayAddressBacon().equals(actualRelayAddress))&&(indexELECTION_BEACON==0)){
+				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_REQUEST arrivato " + (imServed?"e sono servito":"ma non sono servito"));
+				if(timeoutSearch != null){
+					timeoutSearch.cancelTimeOutSearch();
+					timeoutSearch = null;
+				}
+				electing = true;
+				actualStatus = ClientStatus.WAITING_END_ELECTION;
 
+				//Sessiono RTP in corso
+				if (imServed) {
+					DatagramPacket dpOut = null;
+					try {
+						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.RELAY_ELECTION_PORT_IN, actualRelayAddress);
+						comManager.sendTo(dpOut);
+						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST,Parameters.CLIENT_PORT_ELECTION_IN, actualRelayAddress);
+						comManager.sendTo(dpOut);
+						indexELECTION_BEACON++;
+					} catch (IOException e) {console.debugMessage(Parameters.DEBUG_ERROR,"ClientElectionManager: ERRORE nel spedire il messaggio di ELECTION BEACON");e.printStackTrace();}
+					timeoutFailToElect = ClientTimeoutFactory.getTimeOutFailToElect(this,Parameters.TIMEOUT_FAIL_TO_ELECT);
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO ACTIVE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato, start TIMEOUT_FAIL_TO_ELECT");
+				}else{
+					console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE -> WAITING_END_ELECTION: ELECTION_REQUEST arrivato");
+				}
 				setChanged();
 				notifyObservers("RECIEVED_ELECTION_REQUEST");
 			}
@@ -213,7 +234,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			 *relayAddress = <IP del NEW RELAY>
 			 *reset TIMEOUT_SEARCH
 			 */
-			else if(clientMessageReader.getCode() == Parameters.ELECTION_DONE && actualStatus == ClientStatus.IDLE){
+			else if(((clientMessageReader.getCode() == Parameters.ELECTION_RELAY_DONE)||(clientMessageReader.getCode()==Parameters.ELECTION_BIGBOSS_DONE))&& actualStatus == ClientStatus.WAITING_END_ELECTION){
 
 				console.debugMessage(Parameters.DEBUG_INFO,"ClientElectionManager: STATO IDLE: ELECTION_DONE arrivato");
 
@@ -310,7 +331,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			 *status = idle
 			 *reset TIMEOUT_FAIL_TO_ELECT 
 			 */
-			else if(clientMessageReader.getCode() == Parameters.ELECTION_DONE &&
+			else if(clientMessageReader.getCode() == Parameters.ELECTION_RELAY_DONE &&
 					actualStatus == ClientStatus.WAITING_END_ELECTION){
 
 				if(timeoutFailToElect != null) {
