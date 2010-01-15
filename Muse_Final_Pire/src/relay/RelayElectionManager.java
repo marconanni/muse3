@@ -234,7 +234,8 @@ public class RelayElectionManager extends Observable implements Observer{
 			relayPositionMonitor = new RelayPositionMonitor(
 											ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 											TimeOutConfiguration.POSITION_CLIENTS_MONITOR_PERIOD,
-											this);
+											this,
+											relayClusterWNICController.getDebugConsole());
 			
 			
 			//Monitoraggio della batteria
@@ -246,6 +247,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				
 			actualStatus = RelayStatus.IDLE;
 			console.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomeBigBossRelay(): stato ["+actualStatus.toString()+"]: APMonitoring e WhoIsRelayServer partiti");
+			monitoring();
 			
 		} catch (WNICException e) {e.printStackTrace();System.exit(2);}
 	}
@@ -260,7 +262,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		} catch (IOException e) {console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
 		timeoutSearch = RelayTimeoutFactory.getTimeOutSearch(this,	TimeOutConfiguration.TIMEOUT_SEARCH);
 		actualStatus=RelayStatus.WAITING_WHO_IS_RELAY;
-		console.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_BIG_BOSS_RELAY e start del TIMEOUT_SEARCH");
+		console.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 	}
 	
 	private void becomRelay(){
@@ -281,7 +283,8 @@ public class RelayElectionManager extends Observable implements Observer{
 		relayPositionMonitor = new RelayPositionMonitor(
 				ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
 				TimeOutConfiguration.POSITION_CLIENTS_MONITOR_PERIOD,
-				this);
+				this,
+				relayClusterWNICController.getDebugConsole());
 		
 	
 		//Client -> faccio partire nel momento in cui si collega qualche client...
@@ -364,12 +367,27 @@ public class RelayElectionManager extends Observable implements Observer{
 				console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
 			}
 		}
+		
+		if(arg1 instanceof String){
+
+			String event = (String) arg1;
+			
+			/*[TIMEOUT_SEARCH scattato] --> SearchingRelay*/
+			if(event.equals("TIMEOUTSEARCH") &&	actualStatus == RelayStatus.WAITING_WHO_IS_RELAY){
+				console.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager: STATO OFF: TIMEOUT_SEARCH scattato");
+				if(IMRELAY)
+					searchingBigBossRelay();
+//				else
+//					searchingRelay();
+			}
+		}
 	}
 	
 	public void monitoring(){
 		relayPositionAPMonitor.start();
+		relayPositionMonitor.start();
 		relayPositionMonitor.startRSSIMonitor();
-		relayBatteryMonitor.start();
+		//relayBatteryMonitor.start();
 		actualStatus = RelayStatus.MONITORING;
 	}
 	
