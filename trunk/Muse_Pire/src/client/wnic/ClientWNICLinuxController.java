@@ -29,7 +29,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		interf = ethX;
 		essidName = netName;
 		setDebugConsole(new DebugConsole());
-		console.setTitle("CLIENT WNIC LINUX CONTROLLER - Debug conole");
+		console.setTitle("CLIENT WNIC LINUX CONTROLLER - Interface: ["+interf+"] ESSID: ["+essidName+"]");
 		
 		refreshStatus(true);
 
