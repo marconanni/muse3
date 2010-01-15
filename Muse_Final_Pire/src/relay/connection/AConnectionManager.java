@@ -38,6 +38,7 @@ public class AConnectionManager {
 	
 		try {
 			adHocOutputSocket = new DatagramSocket(localOutputPort,localAddress);
+			System.out.println("Invia messaggi da IP: "+localAddress.toString()+":"+localOutputPort);
 		} catch (SocketException e) {e.printStackTrace();}
 
 		receiverAdHoc = new AConnectionReceiver(observer,localAddress,localInputPort);
