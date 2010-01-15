@@ -67,7 +67,7 @@ public class RelayMessageReader {
 		if(code == Parameters.IM_BIGBOSS) actualConnectedRelayAddress = packetAddress.toString();
 		if(code == Parameters.IM_RELAY) actualConnectedRelayAddress = packetAddress.toString();
 		if(code == Parameters.ACK_CONNECTION) typeNode = Integer.valueOf(st.nextToken());
-		if(code == Parameters.ELECTION_REQUEST)active_relays =Integer.valueOf(st.nextToken());
+	//	if(code == Parameters.ELECTION_REQUEST)active_relays =Integer.valueOf(st.nextToken());
 	
 //		if(code == Parameters.ELECTION_RESPONSE) W = Float.parseFloat(st.nextToken());
 //		if(code == Parameters.ELECTION_DONE) newRelayAddress = st.nextToken();
