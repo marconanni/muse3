@@ -118,6 +118,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	private void mainTask(){
 		DatagramPacket dp = null;
 		try {
+			//BCAST
 			dp = RelayMessageFactory.buildRequestRSSI(seqNum,BCAST, PortConfiguration.RSSI_PORT_IN);
 			numberOfValideRSSI = 0;
 			sumOfRSSI = 0;

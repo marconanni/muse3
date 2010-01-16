@@ -86,6 +86,22 @@ public class RelayElectionManager extends Observable implements Observer{
 		WAITING_RESPONSE
 	}
 	
+//	byte [] mask = { (byte)255, 0, 0, 0 };
+//	byte[] addrBytes = InetAddress.getByName("126.5.6.7").getAddress();
+//	for (int i=0; i < 4; i++) {
+//	  addrBytes[i] |= ((byte)0xFF) ^ mask[i];
+//	}
+//	InetAddress bcastAddr = InetAddress.getByAddress(addrBytes);
+
+	
+//	byte [] mask = { (byte)255, (byte)255, (byte)255, 0 };
+//	byte[] addrBytes = InetAddress.getByName(NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS).getAddress();
+//	for (int i=0; i < 4; i++) {
+//	  addrBytes[i] |= ((byte)0xFF) ^ mask[i];
+//	}
+//	InetAddress bcastAddr = InetAddress.getByAddress(addrBytes);
+
+	
 	static { 
 		try {
 			BCAST  = InetAddress.getByName(NetConfiguration.CLUSTER_BROADCAST_ADDRESS);
