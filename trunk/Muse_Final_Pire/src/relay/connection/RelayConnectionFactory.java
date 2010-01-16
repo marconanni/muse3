@@ -13,35 +13,35 @@ public class RelayConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayElectionCM
 	 * @return un istanza di RelayElectionCM*/
 	public static RelayCM getClusterElectionConnectionManager(Observer obser){
-		return new RelayCM("RelayElectionCM Cluster",rpm.getLocalClusterAdHocHostAddress(),rpm.getPortInClusterAdHocElection(),rpm.getPortOutClusterAdHocElection(),obser);
+		return new RelayCM("RelayElectionCM Cluster",rpm.getLocalClusterAdHocAddress(),rpm.getLocalClusterAdHocBCASTAddress(),rpm.getPortInClusterAdHocElection(),rpm.getPortOutClusterAdHocElection(),obser);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di RelayClusterHeadElectionCM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayElectionCM
 	 * @return un istanza di RelayElectionCM*/
 	public static RelayCM getClusterHeadElectionConnectionManager(Observer obser){
-		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAdHocHostAddress(),rpm.getPortInClusterHeadAdHocElection(),rpm.getPortOutClusterHeadAdHocElection(),obser);
+		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAdHocAddress(),rpm.getLocalClusterHeadAdHocBCASTAddress(),rpm.getPortInClusterHeadAdHocElection(),rpm.getPortOutClusterHeadAdHocElection(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
 	 * @return un istanza di RelayRSSICM*/
 	public static RelayCM getRSSIClusterConnectionManager(Observer obser){
-		return new RelayCM("RelayRSSICM",rpm.getLocalClusterAdHocHostAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
+		return new RelayCM("RelayRSSICM",rpm.getLocalClusterAdHocAddress(),rpm.getLocalClusterAdHocBCASTAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
 	 * @return un istanza di RelayRSSICM*/
 	public static RelayCM getRSSIClusterHeadConnectionManager(Observer obser){
-		return new RelayCM("RelayRSSICM",rpm.getLocalClusterHeadAdHocHostAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
+		return new RelayCM("RelayRSSICM",rpm.getLocalClusterHeadAdHocAddress(),rpm.getLocalClusterHeadAdHocBCASTAddress(),rpm.getPortInRSSI(),rpm.getPortOutRSSI(),obser);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
 	 * @return un istanza di RelayRSSICM*/
 	public static RelayCM getWhoIsRelayConnectionManager(Observer obser){
-		return new RelayCM("WhoIsRelayConnetcionManager",rpm.getLocalClusterAdHocHostAddress(),rpm.getPortInWhoIsRelay(),rpm.getPortOutWhoIsRelay(),obser);
+		return new RelayCM("WhoIsRelayConnetcionManager",rpm.getLocalClusterAdHocAddress(),rpm.getLocalClusterAdHocBCASTAddress(),rpm.getPortInWhoIsRelay(),rpm.getPortOutWhoIsRelay(),obser);
 	}
 }
 
