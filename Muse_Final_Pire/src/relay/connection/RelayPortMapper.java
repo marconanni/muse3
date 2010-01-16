@@ -26,6 +26,9 @@ public class RelayPortMapper {
 	private int portOutRSSI;
 	private int portInRSSI;
 	
+	private InetAddress localClusterAdHocBCASTAddress = null;		
+	private InetAddress localClusterHeadAdHocBCASTAddress = null;
+	
 	/*indirizzi locali per il relay*/
 	private InetAddress localClusterAdHocAddress =null;
 	private InetAddress localClusterHeadAdHocAddress =null;
@@ -58,6 +61,8 @@ public class RelayPortMapper {
 			localClusterAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS);
 			localClusterHeadAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS);
 			localManagedAddress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS);
+			localClusterAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.CLUSTER_BROADCAST_ADDRESS);
+			localClusterHeadAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.CLUSTER_HEAD_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
  	
@@ -90,12 +95,15 @@ public class RelayPortMapper {
 
 	/**Metodo per ottenere l'indirizzo del nodo locale sulla rete Ad-Hoc
 	 * @return un InetAddress rappresentante l'indirizzo di cui sopra*/
-	public InetAddress getLocalClusterAdHocHostAddress() {return localClusterAdHocAddress;}
-	public InetAddress getLocalClusterHeadAdHocHostAddress() {return localClusterHeadAdHocAddress;}
+	public InetAddress getLocalClusterAdHocAddress() {return localClusterAdHocAddress;}
+	public InetAddress getLocalClusterHeadAdHocAddress() {return localClusterHeadAdHocAddress;}
+	public InetAddress getLocalClusterAdHocBCASTAddress() {return localClusterAdHocBCASTAddress;}
+	public InetAddress getLocalClusterHeadAdHocBCASTAddress() {return localClusterHeadAdHocBCASTAddress;}
 	
 	/**Metodo per ottenere l'indirizzo del nodo locale sulla rete Managed
 	 * @return un InetAddress rappresentante l'indirizzo di cui sopra*/
-	public InetAddress getLocalManagedHostAddress() {return localManagedAddress;}	
+	public InetAddress getLocalManagedAddress() {return localManagedAddress;}
+
 }
 
 

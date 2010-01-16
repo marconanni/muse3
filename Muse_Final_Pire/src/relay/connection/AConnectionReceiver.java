@@ -71,7 +71,6 @@ public class AConnectionReceiver extends Observable implements Runnable{
 
 			try {
 				inSocket.receive(dataIn);
-				System.out.println(managerName+": ricevuto messaggio da : " +dataIn.getAddress().getHostAddress() + " porta: " +dataIn.getPort());
 			}
 			catch (IOException e) {
 				System.out.println(managerName+": " + e.getMessage());
