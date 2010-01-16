@@ -53,7 +53,6 @@ public class GreyModel implements RSSIFilter
 			if(!computed)
 			{
 				//calcola X1
-				System.out.println("Calcola X1");
 				X1= new double[realValues.length];
 				//X1[0]=realValues[0];
 				for(int i=0;i<realValues.length;i++)
