@@ -161,7 +161,7 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 		//scheda spenta
 		if (line1.contains("off/any") || line2.contains("Not-Associated")){
 			isAssociated = false;
-			essidFound = false;
+			//essidFound = false;
 			if(debug){
 				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_WARNING,"L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
 				else System.out.println("L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
@@ -175,30 +175,26 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
 				else System.out.println("L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
 			}
-			if(line1.contains(essidName)){
-				essidFound = true;
-				if(debug){
-					if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
-					else System.out.println("L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
-				}
-			}else {
-				essidFound = false;
-				if(debug){
-					if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
-					else System.out.println("L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
-				}
-			}	
+		}
+		if(line1.contains(essidName)){
+			essidFound = true;
+			if(debug){
+				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
+				else System.out.println("L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
+			}
+		}else {
+			essidFound = false;
+			if(debug){
+				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
+				else System.out.println("L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
+			}
+		}
 			
 			//controllo il mode della scheda (deve essere Ad-Hoc)
 			//res = interfaceInfo.readLine();
 			if(line2.contains("Ad-Hoc")) modeAdHoc = true;
 			else modeAdHoc = false;
-		}else{
-			if(debug){
-				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
-				else System.out.println("L'interfaccia "+ interf +" NON ESISTE!");
-			}
-		}
+		
 	}
 
 	/**
