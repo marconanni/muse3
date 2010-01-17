@@ -55,7 +55,7 @@ public class RelayMessageReader {
 
 		if(code==MessageCodeConfiguration.REQUEST_RSSI) actualConnectedRelayAddress = packetAddress.toString();
 		if(code == MessageCodeConfiguration.NOTIFY_RSSI)RSSI = Double.parseDouble(st.nextToken());		
-		if(code == MessageCodeConfiguration.IM_RELAY) actualConnectedRelayAddress = packetAddress.toString();
+		if(code == MessageCodeConfiguration.IM_RELAY) actualConnectedRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
 		if(code == MessageCodeConfiguration.ACK_CONNECTION) typeNode = Integer.valueOf(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_REQUEST)active_relays =Integer.valueOf(st.nextToken());
 	}
