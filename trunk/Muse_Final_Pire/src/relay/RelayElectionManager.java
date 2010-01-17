@@ -195,7 +195,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		
 		//Il big boss non comunica col server e quindi non serve un connection Manager col server
 		//Ogni relay di ogni cluster comunica col big boss, ovvero il relay del cluster head
-		if(isRELAY() || isPOSSIBLE_RELAY()){
+		if(isRELAY() && isPOSSIBLE_RELAY()){
 			comClusterHeadManager = RelayConnectionFactory.getClusterHeadElectionConnectionManager(this);
 			comClusterHeadManager.start();
 		}
@@ -285,7 +285,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				
 			actualStatus = RelayStatus.IDLE;
 			consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomeBigBossRelay(): stato ["+actualStatus.toString()+"]: APMonitoring e WhoIsRelayServer partiti");
-			//monitoring();
+			//	monitoring();
 			
 		} catch (WNICException e) {e.printStackTrace();System.exit(2);}
 	}
@@ -335,7 +335,6 @@ public class RelayElectionManager extends Observable implements Observer{
 		actualStatus = RelayStatus.IDLE;
 		
 		DatagramPacket dpOut = null;
-		System.out.println("BIGBOSS address:"+connectedRelayAddress+" Inet:"+connectedRelayInetAddress.toString());
 		try {
 			dpOut = RelayMessageFactory.buildAckConnection(connectedRelayInetAddress, PortConfiguration.RELAY_ELECTION_CLUSTER_HEAD_PORT_IN, MessageCodeConfiguration.TYPERELAY);
 			comClusterHeadManager.sendTo(dpOut);
