@@ -66,6 +66,8 @@ public class RelayAPWNICWindowsController implements RelayWNICController {
 	public void setNewCurrentAP(AccessPointData ap) {
 		this.currentAP = ap;
 	}
+	
+	public void init(){}
 
 	/**
 	 * Metodo per sapere se il nodo è connesso ad un AP

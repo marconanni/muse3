@@ -31,6 +31,8 @@ public class RelayAHWNICMacController implements RelayWNICController {
 		console.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayAHWNICMacController.setRelayAddress(): mi metto ad osservare l'indirizzo IP " + relayAddress);
 	}
 
+	public void init(){}
+	
 	/**Metodo per resettare il relay a cui è collegato
 	 * @param iN interfaccia della scheda wireless
 	 * @throws WNICException

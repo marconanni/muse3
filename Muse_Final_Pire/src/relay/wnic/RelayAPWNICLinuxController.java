@@ -65,6 +65,7 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 		console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia "+interf+" "+((isConnected())?" è connessa al Ap desiderato:"+essidName:"non è connessa al AP desiderato"));
 	}
 
+	public void init(){}
 
 	//METODI PRIVATI
 
