@@ -49,6 +49,8 @@ public class RelayAPWNICMacController implements RelayWNICController {
 		else
 			return -1;
 	}
+	
+	public void init(){}
 
 	/**
 	 * Metodo per ottenere le informazioni relative all'AP a cui l'interfaccia

@@ -30,6 +30,7 @@ public class RelayAHWNICWindowsController implements RelayWNICController {
 		relayAddress = rA;
 		console.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayAHWNICWindowsController.setRelayAddress(): mi metto ad osservare l'indirizzo IP [" + relayAddress+"]");
 	}
+	public void init(){}
 
 	/**Metodo per resettare il relay a cui è collegato
 	 * @param iN interfaccia della scheda wireless
