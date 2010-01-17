@@ -30,12 +30,10 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 	public RelayAPWNICLinuxController(String ethX) throws WNICException{
 		this.interf = ethX;
 		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-		setDebugConsole(new DebugConsole());
-		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
 		refreshStatus();
 		
 		if (!isOn){
-			this.console.debugMessage(DebugConfiguration.DEBUG_ERROR,"La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel modo seguente:\nESSID: "+NetConfiguration.NAME_OF_MANAGED_NETWORK+"\nMODE: Managed\nIp:"+NetConfiguration.RELAY_MANAGED_ADDRESS);
+			if(console!=null) this.console.debugMessage(DebugConfiguration.DEBUG_ERROR,"La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel modo seguente:\nESSID: "+NetConfiguration.NAME_OF_MANAGED_NETWORK+"\nMODE: Managed\nIp:"+NetConfiguration.RELAY_MANAGED_ADDRESS);
 			throw new WNICException("RelayWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");
 		}
 	}
@@ -46,8 +44,7 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 		interf = ethX;
 		essidName = netName;
 		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-		console = new DebugConsole();
-		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
+		
 		
 		refreshStatus();
 		
@@ -55,14 +52,14 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 			throw new WNICException("RelayWNICLinuxController: ERRORE: numero di precedenti RSSI da memorizzare non positivo");		
 
 		if (!isOn){
-			this.console.debugMessage(DebugConfiguration.DEBUG_ERROR,"La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel modo seguente:\nESSID: "+NetConfiguration.NAME_OF_MANAGED_NETWORK+"\nMODE: Managed\nIp:"+NetConfiguration.RELAY_MANAGED_ADDRESS);
+			if(console!=null) this.console.debugMessage(DebugConfiguration.DEBUG_ERROR,"La scheda wireless deve essere accesa e l'interfaccia "+interf+" deve essere configurata nel modo seguente:\nESSID: "+NetConfiguration.NAME_OF_MANAGED_NETWORK+"\nMODE: Managed\nIp:"+NetConfiguration.RELAY_MANAGED_ADDRESS);
 			throw new WNICException("RelayWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");
 		}
 //		if(!isEssidFound()){
 //			this.console.debugMessage(Parameters.DEBUG_ERROR,"La scheda wireless non è associata al seguente ESSID "+essidName);
 //			throw new WNICException("RelayWNICLinuxController:La scheda wireless non è associata al seguente ESSID "+essidName);
 //		}
-		console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia "+interf+" "+((isConnected())?" è connessa al Ap desiderato:"+essidName:"non è connessa al AP desiderato"));
+		if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia "+interf+" "+((isConnected())?" è connessa al Ap desiderato:"+essidName:"non è connessa al AP desiderato"));
 	}
 
 	public void init(){}
@@ -87,7 +84,8 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 					isOn = true;
 					currentAP = null;
 					essidFound = false;
-					if(debug)console.debugMessage(DebugConfiguration.DEBUG_WARNING,"L'interfaccia "+ interf +" ESISTE però è SPENTA!");
+					if(debug)
+						if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_WARNING,"L'interfaccia "+ interf +" ESISTE però è SPENTA!");
 				}
 
 				//On ma non associata alla rete managed
@@ -100,11 +98,12 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 						if(currentAP==null){
 							currentAP = createCurrentAccessPointData(res,res1,interfaceInfo);
 						}
-						if(debug)console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia "+ interf +" è CONNESSA alla rete " + essidName);
+						if(debug)
+							if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia "+ interf +" è CONNESSA alla rete " + essidName);
 					}
 					else {
 						essidFound = false; 
-						console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
+						if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
 						//throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia " +interf + " non è connessa alla rete " + essidName);
 					}
 				
@@ -113,18 +112,19 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 					//res = interfaceInfo.readLine();
 					if(res1.contains("Managed")){
 						modeManaged = true;
-						if(debug)console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia "+ interf +" è settata a MODE Managed");
+						if(debug)
+							if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia "+ interf +" è settata a MODE Managed");
 					}else {
 						modeManaged = false;
-						console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
+						if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" non è connessa alla rete " + essidName);
 						//throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
 					}	
 				}else{
-					console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
+					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
 					throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 				}
 			}else{
-				console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
+				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
 				throw new WNICException("RelayWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non esiste !");
 			}
 			interfaceInfo.close();
