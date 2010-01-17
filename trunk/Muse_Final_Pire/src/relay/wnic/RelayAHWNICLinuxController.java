@@ -37,7 +37,6 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 			line = ifconfigUp.readLine();
 		}catch (IOException e){e.printStackTrace();}
 		
-		System.out.println("Line:["+line+"]");
 		if(line!=null){
 			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR, "Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
 			else System.out.println("Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");

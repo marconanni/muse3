@@ -42,7 +42,6 @@ public class AConnectionManager {
 	
 		try {
 			adHocOutputSocket = new DatagramSocket(localOutputPort,localAddress);
-			System.out.println("Invia messaggi da IP: "+localAddress.toString()+":"+localOutputPort);
 		} catch (SocketException e) {e.printStackTrace();}
 
 		receiverLocalAdHoc = new AConnectionReceiver(observer,localAddress,localInputPort);
@@ -118,7 +117,7 @@ public class AConnectionManager {
 	public void setBcastAddress(InetAddress bcastAddress){this.bcastAddress = bcastAddress;}
 	public InetAddress getBcastAddress(){return bcastAddress;}
 	public void setLocalOutputPort(int localOutputPort) {this.localOutputPort = localOutputPort;}
-	public int getLocalOutputPort() {return localInputPort;}
+	public int getLocalOutputPort() {return localOutputPort;}
 	public void setLocalInputPort(int localInputPort) {this.localInputPort = localInputPort;}
 	public int getLocalInputPort() {return localInputPort;}
 }
