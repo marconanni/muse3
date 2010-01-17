@@ -195,7 +195,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		
 		//Il big boss non comunica col server e quindi non serve un connection Manager col server
 		//Ogni relay di ogni cluster comunica col big boss, ovvero il relay del cluster head
-		if(isRELAY() && isPOSSIBLE_RELAY()){
+		if(isRELAY() || isPOSSIBLE_RELAY()){
 			comClusterHeadManager = RelayConnectionFactory.getClusterHeadElectionConnectionManager(this);
 			comClusterHeadManager.start();
 		}
