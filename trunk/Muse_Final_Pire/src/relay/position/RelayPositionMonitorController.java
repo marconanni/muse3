@@ -45,7 +45,6 @@ public class RelayPositionMonitorController implements Observer {
 			cwnic = WNICFinder.getCurrentWNIC(interf, essidName,0);
 		} catch (OSException e) {new WNICException("RelayPositionMonitorController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
 		console = cwnic.getDebugConsole();
-		enableToMonitor = false;
 		started = false;
 	}
 
@@ -54,10 +53,8 @@ public class RelayPositionMonitorController implements Observer {
 	 * richieste provenienti dal nodo Relay
 	 */
 	public void start(){
-		if(enableToMonitor){
 			rrscm.start();
 			started = true;
-		}
 	}
 	
 	public void stopReceiving(){
