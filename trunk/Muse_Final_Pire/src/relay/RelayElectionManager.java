@@ -273,8 +273,11 @@ public class RelayElectionManager extends Observable implements Observer{
 											relayClusterWNICController.getDebugConsole());
 			
 			
+			relayPositionAPMonitor.start();
+			
 			//Monitoraggio della batteria
 			relayBatteryMonitor = new RelayBatteryMonitor(TimeOutConfiguration.BATTERY_MONITOR_PERIOD,this);
+			
 			
 			//Risponde ai messaggi WHO_IS_RELAY
 			whoIsRelayServer = new WhoIsRelayServer(consoleClusterWifiInterface);
@@ -282,7 +285,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				
 			actualStatus = RelayStatus.IDLE;
 			consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomeBigBossRelay(): stato ["+actualStatus.toString()+"]: APMonitoring e WhoIsRelayServer partiti");
-			monitoring();
+			//monitoring();
 			
 		} catch (WNICException e) {e.printStackTrace();System.exit(2);}
 	}
@@ -399,7 +402,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	}
 	
 	public void monitoring(){
-		relayPositionAPMonitor.start();
+		
 		relayPositionMonitor.start();
 		relayPositionMonitor.startRSSIMonitor();
 		//relayBatteryMonitor.start();
