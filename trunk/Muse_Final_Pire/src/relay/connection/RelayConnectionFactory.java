@@ -13,14 +13,14 @@ public class RelayConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayElectionCM
 	 * @return un istanza di RelayElectionCM*/
 	public static RelayCM getClusterElectionConnectionManager(Observer obser){
-		return new RelayCM("RelayElectionCM Cluster",rpm.getLocalClusterAdHocAddress(),rpm.getLocalClusterAdHocBCASTAddress(),rpm.getPortInClusterAdHocElection(),rpm.getPortOutClusterAdHocElection(),obser);
+		return new RelayCM("RelayElectionCM Cluster",rpm.getLocalClusterAdHocAddress(),rpm.getLocalClusterAdHocBCASTAddress(),rpm.getPortInAdHocElection(),rpm.getPortOutAdHocElection(),obser);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di RelayClusterHeadElectionCM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayElectionCM
 	 * @return un istanza di RelayElectionCM*/
 	public static RelayCM getClusterHeadElectionConnectionManager(Observer obser){
-		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAdHocAddress(),rpm.getLocalClusterHeadAdHocBCASTAddress(),rpm.getPortInClusterHeadAdHocElection(),rpm.getPortOutClusterHeadAdHocElection(),obser);
+		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAdHocAddress(),rpm.getLocalClusterHeadAdHocBCASTAddress(),rpm.getPortInAdHocElection(),rpm.getPortOutAdHocElection(),obser);
 	}
 
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM

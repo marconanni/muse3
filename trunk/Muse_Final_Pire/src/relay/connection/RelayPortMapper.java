@@ -14,13 +14,10 @@ public class RelayPortMapper {
 	private int portInWhoIsRelay;
 	private int portOutWhoIsRelay;
 
+
 	/*porte delle socket per la gestione l'elezione, in ingresso e in uscita */
-	private int portInClusterAdHocElection;
-	private int portOutClusterAdHocElection;
-	
-	/*porte delle socket per la gestione l'elezione, in ingresso e in uscita */
-	private int portInClusterHeadAdHocElection;
-	private int portOutClusterHeadAdHocElection;
+	private int portInAdHocElection;
+	private int portOutAdHocElection;
 
 	/*porte rispettivamente per l'invio periodico dei REQUEST_RSSI e per la ricezione dei NOTIFY_RSSI*/
 	private int portOutRSSI;
@@ -49,10 +46,9 @@ public class RelayPortMapper {
 		portInWhoIsRelay = PortConfiguration.WHO_IS_RELAY_PORT_IN;
 		portOutWhoIsRelay = PortConfiguration.WHO_IS_RELAY_PORT_OUT;
 		
-		portInClusterAdHocElection = PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN;
-		portOutClusterAdHocElection = PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_OUT;
-		portInClusterHeadAdHocElection = PortConfiguration.RELAY_ELECTION_CLUSTER_HEAD_PORT_IN;
-		portOutClusterHeadAdHocElection =PortConfiguration.RELAY_ELECTION_CLUSTER_HEAD_PORT_OUT;
+		portInAdHocElection = PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN;
+		portOutAdHocElection = PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_OUT;
+
 	
 		portInRSSI = PortConfiguration.RSSI_PORT_IN;
 		portOutRSSI = PortConfiguration.RSSI_PORT_OUT;
@@ -74,14 +70,12 @@ public class RelayPortMapper {
 	
 	/**Metodo per ottenere la porta su cui l'ElectionManager del RELAY riceve i messaggi di elezione dalla rete Ad-Hoc
 	 * @return un intero rappresentante la porta di cui sopra*/
-	public int getPortInClusterAdHocElection() {return portInClusterAdHocElection;}
+	public int getPortInAdHocElection() {return portInAdHocElection;}
 
 	/**Metodo per ottenere la porta su cui l'ElectionManager del RELAY invia i messaggi di elezione alla rete Ad-Hoc
 	 * @return un intero rappresentante la porta di cui sopra*/
-	public int getPortOutClusterAdHocElection() {return portOutClusterAdHocElection;}
+	public int getPortOutAdHocElection() {return portOutAdHocElection;}
 	
-	public int getPortInClusterHeadAdHocElection() {return portInClusterHeadAdHocElection;}
-	public int getPortOutClusterHeadAdHocElection() {return portOutClusterHeadAdHocElection;}
 
 	/**Metodo per ottenere la porta su cui il PositioningManager dell'ElectionManager del RELAY attuale 
 	 * riceve i messaggi di NOTIFY_RSSI dai CLIENTs serviti
