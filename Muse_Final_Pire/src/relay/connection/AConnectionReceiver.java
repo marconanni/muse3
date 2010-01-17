@@ -34,7 +34,6 @@ public class AConnectionReceiver extends Observable implements Runnable{
 	 */
 	public AConnectionReceiver(Observer observer, InetAddress localAddress, int localInputPort){
 		
-		System.out.println("A connection reciever");
 		
 		if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 		this.setLocalAddress(localAddress);
