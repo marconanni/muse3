@@ -13,6 +13,7 @@ import debug.DebugConsole;
 
 public class RelayAHWNICLinuxController implements RelayWNICController {
 
+	private boolean debug = false;
 	private boolean isOn = false;
 	private boolean isAssociated =false;
 	private boolean modeAdHoc = false;
@@ -23,78 +24,181 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 
 
 	public RelayAHWNICLinuxController(String ethX, String netName) throws WNICException{
-
-		interf = ethX;
-		essidName = netName;
-		setDebugConsole(new DebugConsole());
-		console.setTitle("RELAY AD-HOC WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
+		setInterfaceName(ethX);
+		setEssidName(netName);
+	}
+	
+	//METODI IMPLEMENTATIVI DI RELAYWNICCONTROLLER
+	@Override
+	public void init()throws WNICException{
+		BufferedReader ifconfigUp = up();
+		String line = null;
+		try{
+			line = ifconfigUp.readLine();
+		}catch (IOException e){e.printStackTrace();}
 		
-		refreshStatus(true);
+		System.out.println("Line:["+line+"]");
+		if(line!=null){
+			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR, "Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
+			else System.out.println("Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
+			throw new WNICException("RelayAHWNICLinuxController ERRORE: Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
+		}else{
+			isOn = true;
+				
+			refreshStatus();
+				if (!isOn || !ismodeAdHoc() || !isEssidFound()){
+					if(console!=null)
+						console.debugMessage(DebugConfiguration.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
+						NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS+
+						"\n\n"+ NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS);
+					throw new WNICException("La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
+						NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS+
+						"\n\n"+ NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS);
+				}else{
+					if(console!=null)
+						console.debugMessage(DebugConfiguration.DEBUG_INFO, "Configurazione scheda WIFI:\nInterfaccia: "+interf+
+						"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK:NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK)+
+						"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS:NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS));
+					else
+						System.out.println("Configurazione scheda WIFI:\nInterfaccia: "+interf+
+								"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK:NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK)+
+								"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS:NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS));
+				}
+				
+		}
+	}
 
-		if (!isOn){
-			this.console.debugMessage(DebugConfiguration.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
-					NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS+
-					"\n\n"+ NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS);
+	/**Metodo per capire se l'interfaccia è accesa o meno
+	 * @return true se l'interfaccia è associata ad una rete, false altrimenti
+	 */
+	@Override
+	public boolean isAssociated() throws WNICException {
+		refreshStatus();
+		return isAssociated;
+	}
+	
+	/**Metodo per sapere se il nodo è connesso ad una rete Ad-Hoc
+	 * @return true se è connesso, false altrimenti
+	 * @throws WNICException
+	 */
+	@Override
+	public boolean isConnected() throws WNICException{
+		refreshStatus();
+		return isAssociated && isOn && essidFound;
+	}
+	
+	/**Metodo per capire se l'interfaccia è accesa o meno
+	 * @return true se l'interfaccia è accesa, false altrimenti
+	 */
+	@Override
+	public boolean isOn() throws WNICException {
+		refreshStatus();
+		return isOn;
+	}
+	
+	/**Metodo per aggiornare l'array di valori memorizzato dentro il <b>currentAP</b> aggiungendone uno appena rilevato
+	 * @throws WNICException
+	 */
+	@Override
+	public int getSignalStrenghtValue() throws WNICException{
+		try {
+			return getActualRSSIValue(interf);
+		}catch (Exception e) {
+			if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR, "Impossibile ottenere il nuovo valore di RSSI");
+			throw new WNICException("RelayAHWNICLinuxController ERRORE: impossibile ottenere il nuovo valore di RSSI");
 		}
 	}
 	
-
+	@Override
+	public AccessPointData getAssociatedAccessPoint()throws WNICException {return null;}
+	
+	@Override
+	public int updateSignalStrenghtValue()throws WNICException {return 0;}
+	
+	@Override
+	public void setDebugConsole(DebugConsole console) {this.console=console;}
+	
+	@Override
+	public DebugConsole getDebugConsole() {return this.console;}
+	
 	//METODI PRIVATI
+	/** Metodo per accendere la scheda WIFI tramite il comando ifconfig up*/
+	private BufferedReader up() throws WNICException{
+		try{
+			Process p= Runtime.getRuntime().exec("/sbin/ifconfig " + getInterfaceName()+ "up");
+			p.waitFor();
+			return new BufferedReader(new InputStreamReader(p.getInputStream()));
+		}catch (Exception e){
+			if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nell'eseguire il comando : /sbin/ifconfig " + getInterfaceName()+ "up");
+			throw new WNICException("RelayAHWNICLinuxController ERRORE: Errore nell'eseguire il comando : /sbin/ifconfig " + getInterfaceName()+ "up");
+		}	
+		
+	}
 
 	/**
 	 * Metodo per rinfrescare lo stato del RelayWNICLinuxController grazie all'essecuzione del comando <code>iwconfig<code>.
 	 * @param interfaceInfo rappresenta in pratica il risultato di una chiamata al comando linux <code> /sbin/iwconfig interface<code>
 	 * @throws WNICException
 	 */
-	private void refreshStatus(boolean debug) throws WNICException{
-
+	private void refreshStatus() throws WNICException{
 		BufferedReader interfaceInfo = getInterfaceInfo(interf);
 		String res,res1 = null;
 		try{
 			if((res = interfaceInfo.readLine())!=null){
 				res1 = interfaceInfo.readLine();
-				//scheda spenta
-				if (res.contains("off/any") || res1.contains("Not-Associated")){
-					isAssociated = false;
-					isOn = false;
-					essidFound = false;
-					if(debug)console.debugMessage(DebugConfiguration.DEBUG_WARNING,"L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
-				}
-
-				//On ma non associata alla rete ad hoc
-				else if (res.contains("IEEE") && !res1.contains("Not-Associated")){
-					isOn = true;
-					isAssociated = true;
-					if(debug)console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
-					if(res.contains(essidName)){
-						essidFound = true;
-						if(debug)console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
-					}else {
-						essidFound = false;
-						console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
-						//throw new WNICException("ClientWNICLinuxController.refreshStatus(): l'interfaccia "+ interf +" non è connessa alla rete " + essidName);
-					}	
-					
-					//controllo il mode della scheda (deve essere Ad-Hoc)
-					//res = interfaceInfo.readLine();
-					if(res1.contains("Ad-Hoc")){
-						modeAdHoc = true;
-						if(debug)console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"] è settata a MODE Ad-Hoc");
-					}else {
-						modeAdHoc = false;
-						console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia ["+ interf +"]  non è connessa alla rete ["+essidName+"]");
-						throw new WNICException("RelayAHWNICLinuxController.refreshStatus(): l'interfaccia ["+ interf +"] non è connessa alla rete ["+essidName+"]");
-					}	
-				}else{
-					console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
-					throw new WNICException("RelayAHWNICLinuxController.refreshStatus(): l'interfaccia ["+ interf +"] non esiste!");
-				}
+				setWifiInfo(res, res1);
 			}else{
-				console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
-				throw new WNICException("RelayAHWNICLinuxController.refreshStatus(): l'interfaccia ["+ interf +"] non esiste!");
+				if(debug){
+					if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
+					else System.out.println("L'interfaccia "+ interf +" NON ESISTE!");
+				}
 			}
 			interfaceInfo.close();
 		}catch (IOException e){e.printStackTrace();}
+	}
+	
+	private void setWifiInfo(String line1, String line2)throws WNICException{
+		//scheda spenta
+		if (line1.contains("off/any") || line2.contains("Not-Associated")){
+			isAssociated = false;
+			essidFound = false;
+			if(debug){
+				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_WARNING,"L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
+				else System.out.println("L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
+			}
+		}
+
+		//On ma non associata alla rete ad hoc
+		else if (line1.contains("IEEE") && !line2.contains("Not-Associated")){
+			isAssociated = true;
+			if(debug){
+				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
+				else System.out.println("L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
+			}
+			if(line1.contains(essidName)){
+				essidFound = true;
+				if(debug){
+					if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
+					else System.out.println("L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
+				}
+			}else {
+				essidFound = false;
+				if(debug){
+					if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
+					else System.out.println("L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
+				}
+			}	
+			
+			//controllo il mode della scheda (deve essere Ad-Hoc)
+			//res = interfaceInfo.readLine();
+			if(line2.contains("Ad-Hoc")) modeAdHoc = true;
+			else modeAdHoc = false;
+		}else{
+			if(debug){
+				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
+				else System.out.println("L'interfaccia "+ interf +" NON ESISTE!");
+			}
+		}
 	}
 
 	/**
@@ -109,7 +213,7 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 			p.waitFor();
 			return new BufferedReader(new InputStreamReader(p.getInputStream()));
 		}catch (Exception e){
-			console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere informazioni dalla scheda wireless");
+			if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere informazioni dalla scheda wireless");
 			throw new WNICException("RelayAHWNICLinuxController ERRORE: Impossibile ottenere informazioni dalla scheda wireless");
 		}	
 	}
@@ -125,123 +229,58 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 	/**Metodo per ottenere il valore di RSSI attuale avvertito nei confronti del Relay attuale tramite il comando <code>iwconfig<code>
 	 * @param line la linea del risultato alla chiamata al comando linux <code>/sbin/iwconfig interface<code>
 	 * @return un int che rappresenta il valore di RSSI attuale (dbm convertito tra 0 e 120)
+	 * @throws IOException 
 	 * @throws InvalidAccessPoint
 	 */
-	private int getActualRSSIValue(String iN) throws WNICException{
+	private int getActualRSSIValue(String iN) throws WNICException, IOException{
 
 		BufferedReader br = getInterfaceInfo(iN); 
-
-		try{
-			String riga = br.readLine();
-			while(riga!=null){
-				StringTokenizer stringToken = new StringTokenizer(riga," \"\t\n\r\f");
-				while(stringToken.hasMoreElements()){
-					String token = stringToken.nextToken();
-					if(token.equals("Signal")){
-						return convertRSSI(Integer.parseInt(stringToken.nextToken().substring(6)));
+		setWifiInfo(br.readLine(), br.readLine());
+		if(isConnected()){
+			try{
+				String riga = br.readLine();
+				while(riga!=null){
+					StringTokenizer stringToken = new StringTokenizer(riga," \"\t\n\r\f");
+					while(stringToken.hasMoreElements()){
+						String token = stringToken.nextToken();
+						if(token.equals("Signal")){
+							return convertRSSI(Integer.parseInt(stringToken.nextToken().substring(6)));
+						}
 					}
+					riga=br.readLine();
 				}
-				riga=br.readLine();
+			}catch (Exception e) {
+				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere il valore RSSI attuale");
+				throw new WNICException("RelayAHWNICLinuxController Impossibile ottenere il valore RSSI attuale");
 			}
-		}catch (Exception e) {
-			console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere il valore RSSI attuale");
-			throw new WNICException("RelayAHWNICLinuxController Impossibile ottenere il valore RSSI attuale");
+			
 		}
 		return -1;
-	}
-
-	//METODI PUBLICI
-	
-	/**Metodo per aggiornare l'array di valori memorizzato dentro il <b>currentAP</b> aggiungendone uno appena rilevato
-	 * @throws WNICException
-	 */
-	public int getSignalStrenghtValue() throws WNICException{
-		//refreshStatus();
-		if(isConnected()){
-			try {
-				return getActualRSSIValue(interf);
-			} 
-			catch (Exception e) {
-				console.debugMessage(DebugConfiguration.DEBUG_ERROR, "Impossibile ottenere il nuovo valore di RSSI");
-				throw new WNICException("RelayAHWNICLinuxController ERRORE: impossibile ottenere il nuovo valore di RSSI");
-			}
-		}
-		else return -1; 
-	}
-
-	/**Metodo per sapere se il nodo è connesso ad una rete Ad-Hoc
-	 * @return true se è connesso, false altrimenti
-	 * @throws WNICException
-	 */
-	public boolean isConnected() throws WNICException{
-		refreshStatus(false);
-		return isAssociated && isOn && essidFound;
-	}
-
-	/**Metodo per capire se l'interfaccia è accesa o meno
-	 * @return true se l'interfaccia è accesa, false altrimenti
-	 */
-	public boolean isOn() throws WNICException {
-		refreshStatus(false);
-		return isOn;
-	}
-
-	/**Metodo per capire se l'interfaccia è accesa o meno
-	 * @return true se l'interfaccia è associata ad una rete, false altrimenti
-	 */
-	public boolean isAssociated() throws WNICException {
-		refreshStatus(false);
-		return isAssociated;
 	}
 	
 	/**Metodo per capire se l'interfaccia è accesa o meno
 	 * @return true se l'interfaccia è associata ad una rete ad-hoc, false altrimenti
 	 */
-	public boolean ismodeAdHoc() throws WNICException {
-		refreshStatus(false);
+	private boolean ismodeAdHoc() throws WNICException {
+		refreshStatus();
 		return modeAdHoc;
-	}
-
-	/**Metodo per ottenere il nome dell'interfaccia
-	 * @return una String che rappresenta il nome dell'interfaccia gestita
-	 */	
-	public String getInterfaceName() {
-		return interf;
-	}
-
-	/**Metodo per ottenere il nome della rete 
-	 * @return una String che rappresenta il nome della rete
-	 */
-	public String getEssidName() {
-		return essidName;
 	}
 
 	/**Metodo per sapere se la rete passata al costruttore è stata rilevata
 	 * @return true se la rete è stata rilevata, false altrimenti
 	 */
-	public boolean isEssidFound() {
+	private boolean isEssidFound() {
 		return essidFound;
 	}
-
-	public void setDebugConsole(DebugConsole console) {
-		this.console=console;
-	}
 	
-	public DebugConsole getDebugConsole() {
-		return this.console;
-	}
 
-
-	@Override
-	public AccessPointData getAssociatedAccessPoint()throws WNICException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public int updateSignalStrenghtValue()throws WNICException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	//METODI PUBLICI
+	
+	/**Metodi getter and setter*/
+	public String getInterfaceName() {return interf;}
+	public void setInterfaceName(String interf) {this.interf=interf;}
+	public String getEssidName() {return essidName;}
+	public void setEssidName(String essidName) {this.essidName=essidName;}
+	public void setDebug(boolean debug){this.debug=debug;}
 }
+	

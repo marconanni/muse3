@@ -1,5 +1,6 @@
 package relay.wnic;
 
+import parameters.ElectionConfiguration;
 import relay.wnic.exception.InvalidAccessPoint;
 import relay.wnic.exception.WNICException;
 import debug.DebugConsole;
@@ -16,17 +17,17 @@ public class RelayAPWNICMacController implements RelayWNICController {
 	private DebugConsole console = null;
 
 
-	public RelayAPWNICMacController(int previous, String ethX)throws WNICException {
+	public RelayAPWNICMacController(String ethX)throws WNICException {
 		this.interf = ethX;
-		this.setNumberOfPreviousRSSI(previous);
+		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
 		this.console = new DebugConsole();
 		console.setTitle("RELAY AP WNIC LINUX CONTROLLER - DEBUG console for interface "+ ethX);
 	}
 
-	public RelayAPWNICMacController(int previous, String ethX,String netName) throws WNICException {
+	public RelayAPWNICMacController(String ethX,String netName) throws WNICException {
 		this.interf = ethX;
 		this.essidName = netName;
-		this.setNumberOfPreviousRSSI(previous);
+		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
 		this.console = new DebugConsole();
 		console.setTitle("RELAY AP WNIC LINUX CONTROLLER - DEBUG console for interface " + ethX);
 	}
