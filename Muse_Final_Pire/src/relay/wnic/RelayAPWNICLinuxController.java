@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.*;
 import debug.DebugConsole;
 import parameters.DebugConfiguration;
+import parameters.ElectionConfiguration;
 import parameters.NetConfiguration;
 
 public class RelayAPWNICLinuxController implements RelayWNICController{
@@ -26,9 +27,9 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 	
 	private boolean debug = false;
 
-	public RelayAPWNICLinuxController(int previous, String ethX) throws WNICException{
+	public RelayAPWNICLinuxController(String ethX) throws WNICException{
 		this.interf = ethX;
-		this.numberOfPreviousRSSI=previous;
+		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
 		setDebugConsole(new DebugConsole());
 		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
 		refreshStatus();
@@ -40,17 +41,17 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 	}
 
 
-	public RelayAPWNICLinuxController(int previous, String ethX, String netName) throws WNICException{		
+	public RelayAPWNICLinuxController(String ethX, String netName) throws WNICException{		
 
 		interf = ethX;
 		essidName = netName;
-		numberOfPreviousRSSI=previous;
+		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
 		console = new DebugConsole();
 		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ethX);
 		
 		refreshStatus();
 		
-		if(previous<=0)
+		if(numberOfPreviousRSSI<=0)
 			throw new WNICException("RelayWNICLinuxController: ERRORE: numero di precedenti RSSI da memorizzare non positivo");		
 
 		if (!isOn){
@@ -512,26 +513,11 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 	}*/
 
 
-	/**Metodo per ottenere il nome della rete 
-	 * @return una String che rappresenta il nome della rete
-	 */
-	public String getEssidName() {
-		return essidName;
-	}
-
-
-	/**Metodo per sapere se la rete passata al costruttore è stata rilevata
-	 * @return true se la rete è stata rilevata, false altrimenti
-	 */
-	public boolean isEssidFound() {
-		return essidFound;
-	}
-	
-	public void setDebugConsole(DebugConsole console){
-		this.console = console;
-	}
-	
-	public DebugConsole getDebugConsole(){
-		return console;
-	}
+	/**Metodi setter and getter*/
+	public String getEssidName() {return essidName;}
+	public boolean isEssidFound() {return essidFound;}	
+	public void setDebugConsole(DebugConsole console){this.console = console;}	
+	public DebugConsole getDebugConsole(){return console;}
+	public void setNumberOfPreviousRSSI(int numberOfPreviousRSSI) {this.numberOfPreviousRSSI = numberOfPreviousRSSI;}
+	public int getNumberOfPreviousRSSI() {return numberOfPreviousRSSI;}
 }
