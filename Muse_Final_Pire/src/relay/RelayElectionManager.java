@@ -185,7 +185,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					1);
 			this.consoleClusterWifiInterface = new DebugConsole();
 			this.consoleClusterWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE);
-			relayClusterWNICController.setDebugConsole(this.consoleClusterHeadWifiInterface);
+			relayClusterWNICController.setDebugConsole(this.consoleClusterWifiInterface);
 			relayClusterWNICController.init();
 			
 		} catch (WNICException e) {System.err.println("ERRORE:"+e.getMessage());System.exit(1);}
