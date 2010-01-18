@@ -34,12 +34,12 @@ import util.Logger;
  *
  */
 public class RelaySessionManager implements Observer{
-	private String status;
-	private int numberOfSession;
-	private Hashtable<String, Proxy> pReferences;
-	private Hashtable<String, int[]> sessionInfo;
+	private String status; // Marco: lo stato attuale del relay
+	private int numberOfSession; // Marco: il numero di sessioni aperte ( il numero di client che sta attualmente servendo)
+	private Hashtable<String, Proxy> pReferences; // Marco: tabella che contiene per ogni sessione ( identificata dall'indirizzo del client) il proxy che la serve
+	private Hashtable<String, int[]> sessionInfo; 
 	private DatagramPacket message;
-	public static final RelaySessionManager INSTANCE = new RelaySessionManager();
+	public static final RelaySessionManager INSTANCE = new RelaySessionManager(); // Marco: il relay è un singleton
 	private boolean imRelay; // Marco:  im'relay: è il primo parametro del file parameters, credo che indichi se il Relay è attualmente attivo o è solo un possibile relay
 	private String clientAddress;
 	//numero di ritrasmissioni del pacchetto REQUEST_SESSION prima di scatenare un elezione d'emergenza
@@ -49,10 +49,10 @@ public class RelaySessionManager implements Observer{
 	private TimeOutSessionRequest toSessionRequest;
 	private TimeOutAckSessionInfo toAckSessionInfo;
 	private TimeOutSessionInfo toSessionInfo;
-	private RelaySessionCM sessionCM;
+	private RelaySessionCM sessionCM; // Marco: è chi si occupa di spedire i messaggi.
 	private RelayMessageReader messageReader;
 	private DebugConsolle consolle;
-	private String relayAddress;
+	private String relayAddress; // Marco: è l'indirizzo sul suale si trova il relay
 	private RelayElectionManager electionManager;
 	
 	/**
@@ -75,14 +75,14 @@ public class RelaySessionManager implements Observer{
 	}
 
 	public static RelaySessionManager getInstance() {
-		return RelaySessionManager.INSTANCE;
+		return RelaySessionManager.INSTANCE; // Marco: come già detto il relay session manager è un singleton.
 	}
 
 
 	/**
 	 * @return the imRelay
 	 */
-	public boolean isImRelay() {
+	public boolean isImRelay() { // Marco: è il metodo che ritorna true se il nodo è attualmente il relay della rete
 		return imRelay;
 	}
 
@@ -91,6 +91,11 @@ public class RelaySessionManager implements Observer{
 	 */
 	
 	public void setImRelay(boolean imRelay) {
+		/*
+		 * // Marco: è il metodo per settare il flag quando il nodo diventa il relay attvio o si disattiva
+		 * un relay disattivo è per forza waiting
+		 * un relay che si attiva va in status idle
+		 */
 		this.imRelay = imRelay;
 		if(this.imRelay)
 		{
@@ -138,8 +143,11 @@ public class RelaySessionManager implements Observer{
 			 * arrivato messaggio di richiesta da parte del client
 			 */
 			
-			// Marco: è arrivata una richiesta da parte di un client ed io sono il relay.
-			
+			/*Marco: è arrivata una richiesta da parte di un client ed io sono il relay.
+			 * creo un nuovo proxy che gestisce lo stream verso il client
+			 * aggiungo il proxy alla tabella dei proxy usando l'indirizzo del client come chiave per la sessione
+			 * ed aumento il numero di sessioni
+			*/
 			
 			if(this.messageReader.getCode() == Parameters.REQUEST_FILE && imRelay)
 			{
@@ -155,16 +163,37 @@ public class RelaySessionManager implements Observer{
 			/**
 			 * gestito l'arrivo della richiesta di passaggio della sessione da parte del nuovo relay appena eletto
 			 */
+			
+			/* Marco:
+			 * manda al nuovo relay i dati relativi a tutte le sessioni aperte rispondendo con il messaggio sessioninfo che non si vede
+			 *  perchè si è incapsulato il tutto in un metodo stratico della classe Relay message factory
+			 *  successivamente cambio lo stato in Attendingack session, ossia il successivo messaggio che il vecchio relay
+			 *  deve ricevere nel protocollo di scambio sessione.
+			 *  
+			 *  Il messaggio SessionInfo contiene per ogni sessione: 
+			 *  	l'indirizzo del client
+			 *  	la porta Z sulla quale il client riceve lo streaming
+			 *  	la porta Y sulla quale il vecchio relay riceve lo streaming dal server
+			 *  	la porta W dalla quale il relay manda lo stream al client
+			 *  	la porta X dalla quale il server manda lo stream al vecchio relay
+			 */
 			if(messageReader.getCode() == Parameters.REQUEST_SESSION && this.status.equals("Active") )
 			{
-				if(toSessionRequest!=null) // viene disattivato il timeout request session: il messaggio è arrivato
+				if(toSessionRequest!=null) // Marco: viene disattivato il timeout request session: il messaggio è arrivato
 					toSessionRequest.cancelTimeOutSessionRequest();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: ricevuto SESSION_REQUEST dal nuovo RELAY");
 				try {
 					if(this.sessionInfo != null || !this.sessionInfo.isEmpty())
 					{
+						/*
+						 * guida ai parametri con del metodo build session info:
+						 * il primo è un numero di sequenza che viene messo sempre a zero in tutte le parti del codice
+						 * session info
+						 */
 						this.message = RelayMessageFactory.buildSessionInfo(0, sessionInfo, InetAddress.getByName(this.maxWnextRelay), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
+						
 					}
+					
 					else{this.message = RelayMessageFactory.buildSessionInfo(0, null, InetAddress.getByName(this.maxWnextRelay), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);}
 
 					this.sessionCM.sendTo(this.message);
