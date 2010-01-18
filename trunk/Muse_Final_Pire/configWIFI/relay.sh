@@ -1,7 +1,15 @@
 #!/bin/bash
+paramAdHocBigBoss ()
+{
+	#RETE ADHOC BIGBOSS
+	CLUSTERHEAD_INTERFACE=wlan0
+	CLUSTERHEAD_ESSID=BIGBOSS
+	CLUSTERHEAD_IP=192.168.30.2
+}
+
 paramAdHocRelay ()
 {
-	#RETE ADHOC RELAY/BIGBOSS
+	#RETE ADHOC RELAY1
 	CLUSTER_INTERFACE=wlan1
 	CLUSTER_ESSID=RELAY1
 	CLUSTER_IP=192.168.10.2
@@ -30,12 +38,23 @@ stopService ()
 	sudo pkill wpa_supplicant
 	sudo pkill dhclient
 }
+connect_cluster_head ()
+{
+	paramAdHocBigBoss
 
+	#ADHOC BIGBOSS
+	sudo ifconfig $CLUSTERHEAD_INTERFACE down
+	sudo iwconfig $CLUSTERHEAD_INTERFACE mode ad-hoc
+	sudo iwconfig $CLUSTERHEAD_INTERFACE essid $CLUSTERHEAD_ESSID
+	sudo iwconfig $CLUSTERHEAD_INTERFACE rate 11M
+	sudo iwconfig $CLUSTERHEAD_INTERFACE key off
+	sudo ifconfig $CLUSTERHEAD_INTERFACE $CLUSTERHEAD_IP netmask 255.255.255.0 up
+}
 connect_cluster ()
 {
 	paramAdHocRelay
 
-	#ADHOC RELAY/BIGBOSS
+	#ADHOC BIGBOSS
 	sudo ifconfig $CLUSTER_INTERFACE down
 	sudo iwconfig $CLUSTER_INTERFACE mode ad-hoc
 	sudo iwconfig $CLUSTER_INTERFACE essid $CLUSTER_ESSID
@@ -91,17 +110,21 @@ while [ $choice -eq 5 ]; do
 	read choice
 	# bash nested if/else
 	if [ $choice -eq 1 ] ; then
+		connect_cluster_head
 		connect_cluster
 	else                   
 	    	if [ $choice -eq 2 ] ; then
+	    		connect_cluster_head
 			connect_cluster
 			connect_home_internet
 	   	else
 	    		if [ $choice -eq 3 ] ; then
+				connect_cluster_head
 				connect_cluster
 				connect_uni_almawifi
 			else
 				if [ $choice -eq 4 ] ; then
+					connect_cluster_head
 					connect_cluster
 					connect_uni_ethernet
 				else
@@ -115,4 +138,5 @@ while [ $choice -eq 5 ]; do
 			fi
 		fi
 	fi
-done
+done 
+
