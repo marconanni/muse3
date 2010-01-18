@@ -336,7 +336,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		
 		DatagramPacket dpOut = null;
 		try {
-			dpOut = RelayMessageFactory.buildAckConnection(connectedRelayInetAddress, PortConfiguration.RELAY_ELECTION_CLUSTER_HEAD_PORT_IN, MessageCodeConfiguration.TYPERELAY);
+			dpOut = RelayMessageFactory.buildAckConnection(connectedRelayInetAddress, PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN, MessageCodeConfiguration.TYPERELAY);
 			comClusterHeadManager.sendTo(dpOut);
 		} catch (IOException e) {consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di ACK_CONNECTION");e.getStackTrace();}
 	
@@ -380,11 +380,15 @@ public class RelayElectionManager extends Observable implements Observer{
 			 */
 			if((relayMessageReader.getCode()==MessageCodeConfiguration.ACK_CONNECTION) && 
 			   (isBIGBOSS())){
-				if(relayMessageReader.getTypeNode()==MessageCodeConfiguration.TYPERELAY)
+				if(relayMessageReader.getTypeNode()==MessageCodeConfiguration.TYPERELAY){
 					active_relays++;
+					notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
+				}else{
+					notifyObservers("NEW_CONNECTED_CLIENT:"+relayMessageReader.getPacketAddess().toString());
+				}
 				monitoring();
 				setChanged();
-				notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
+				
 				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
 			}
 		}
