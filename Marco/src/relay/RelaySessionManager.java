@@ -44,7 +44,7 @@ public class RelaySessionManager implements Observer{
 	private String clientAddress;
 	//numero di ritrasmissioni del pacchetto REQUEST_SESSION prima di scatenare un elezione d'emergenza
 	private int numberOfRetrasmissions = 1;
-	private String maxWnextRelay;
+	private String maxWnextRelay;  // Marco : è l'indirizzo del nuovo relay  se fai refactor cambiagli il nome.
 	private String event;
 	private TimeOutSessionRequest toSessionRequest;
 	private TimeOutAckSessionInfo toAckSessionInfo;
@@ -188,7 +188,9 @@ public class RelaySessionManager implements Observer{
 						/*
 						 * guida ai parametri con del metodo build session info:
 						 * il primo è un numero di sequenza che viene messo sempre a zero in tutte le parti del codice
-						 * session info
+						 * session info dovrebbe contenere per ogni sessione le quattro porte menzionate sopra
+						 * l'indirizzo del nuovo relay (non farti fregare dal nome: non si va a prendere di nuovo il primo della tabella con i pesi derivata dalla ricezione,maxWnextRelay è solo una strnga contennente l'indirizzo del vincitore)
+						 * l'ultimo parametro è la porta sulla il relay resta in ascolto dei messaggi riguardanti la sessione.
 						 */
 						this.message = RelayMessageFactory.buildSessionInfo(0, sessionInfo, InetAddress.getByName(this.maxWnextRelay), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
 						
@@ -196,7 +198,7 @@ public class RelaySessionManager implements Observer{
 					
 					else{this.message = RelayMessageFactory.buildSessionInfo(0, null, InetAddress.getByName(this.maxWnextRelay), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);}
 
-					this.sessionCM.sendTo(this.message);
+					this.sessionCM.sendTo(this.message); //Marco: invio il messaggio preparato
 					this.status = "AttendingAckSession";
 					this.toAckSessionInfo = RelayTimeoutFactory.getTimeOutAckSessionInfo(this, Parameters.TIMEOUT_ACK_SESSION_INFO);
 				} catch (UnknownHostException e) {
@@ -207,16 +209,34 @@ public class RelaySessionManager implements Observer{
 					e.printStackTrace();
 				}
 			}
+			
+			
 			if(messageReader.getCode() == Parameters.ACK_SESSION && this.status.equals("AttendingAckSession"))
+				
+				/*
+				 * il nuovo relay mi ha mandato il messaggio di ACK_SESSION: significa che il nuovo relay che già ottenuto i dati relativi
+				 * alle sessioni: a questo punto del protocollo il vechcio relay dovrebbe mandare il messaggio di redirect al server,
+				 *  ridirigere il flusso sui recovery buffer dei proxy sul nuovo relay
+				 *  Una volta svuotati tutti i buffer di tutti i proxy dovrebbe mandare il messaggio di LEAVE a tutti i client serviti
+				 */
 			{
 				if(this.toAckSessionInfo!=null)
 					toAckSessionInfo.cancelTimeOutAckSessionInfo();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto ACK_SESSION dal nuovo RELAY");
 				// TODO SETTAGGIO SU TUTTI I PROXY DI TUTTE LE PORTE SU CUI TRASMETTERE I FRAME NEI BUFFER LOCALI
+				// Marco: il metyodo change proxy Session invoca il metodo Start handoff di ogni proxy che, in sostanza dovrebbe gestisce
+				// la redirezione del flusso verso il nuovo relay ( per i dettagli guarda i commenti ai metodi).
+				
 				this.changeProxySession(messageReader.getProxyInfo());
 			}
+			
 			if(messageReader.getCode() == Parameters.SESSION_INFO && this.status.equals("RequestingSession"))
 			{
+				
+				/*
+				 * 
+				 */
+				
 				this.toSessionInfo.cancelTimeOutSessionInfo();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
 				this.sessionInfo = messageReader.getSessionInfo();
@@ -467,6 +487,15 @@ public class RelaySessionManager implements Observer{
 	
 	private void changeProxySession(Hashtable sessionEndpoint)
 	{
+		/*Marco:
+		 * le tuple della tabella session Endpoint contengono come chiave l'indirizzo del client ( come id di sessione)
+		 * e come secondo argomento un vettore contenente le quattro porte per lo streaming,
+		 * il primo elemento in particolare è la porta sulla quale il nuovo proxy attende il flusso rtp dal vecchio proxy
+		 * quindi per ogni sessione si invoca il metodo handoff del relativo roxy che, appunto ridirige il flusso sull'indirizzo e sulla
+		 * porta indicata.
+		 * inoltre setta il flag ending per ongi proxy
+		 * 
+		 */
 		String chiave;
 		if(!sessionEndpoint.isEmpty())
 		{
