@@ -56,10 +56,10 @@ public class PortConfiguration {
 	public static final int RELAY_ELECTION_CLUSTER_PORT_OUT = 4006;
 	
 	/** porta per la gestione dei messaggi nei confronti del cluster head (relay<-->bigboss) */
-	public static final int RELAY_ELECTION_CLUSTER_HEAD_PORT_IN = 4007;
+	public static final int RELAY_ELECTION_CLUSTER_HEAD_PORT_IN = 4005;
 		
 	/** porta per la gestionee della elezione sul RELAY, rispettivamente in uscita */
-	public static final int RELAY_ELECTION_CLUSTER_HEAD_PORT_OUT = 4008;
+	public static final int RELAY_ELECTION_CLUSTER_HEAD_PORT_OUT = 4006;
 		
 	/** valori iniziali dei range di porte RTP in ingresso 
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
