@@ -34,7 +34,7 @@ public class WhoIsRelayServer implements Observer {
 	 */
 	public WhoIsRelayServer(DebugConsole console){
 		this.console=console;
-		whoIsRealayManger = RelayConnectionFactory.getWhoIsRelayConnectionManager(this);
+		whoIsRealayManger = RelayConnectionFactory.getWhoIsRelayConnectionManager(this,true);
 	}
 	
 	public void start(){
