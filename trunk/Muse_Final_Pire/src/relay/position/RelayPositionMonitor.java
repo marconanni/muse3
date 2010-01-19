@@ -53,7 +53,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	
 	static{
 		try {
-			BCAST = InetAddress.getByName(NetConfiguration.CLUSTER_BROADCAST_ADDRESS);
+			BCAST = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();} 
 	}
 
