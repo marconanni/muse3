@@ -23,6 +23,7 @@ import relay.messages.RelayMessageFactory;
 import relay.messages.RelayMessageReader;
 import relay.position.RelayPositionAPMonitor;
 import relay.position.RelayPositionMonitor;
+import relay.position.RelayPositionMonitorController;
 import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutSearch;
 import relay.wnic.RelayWNICController;
@@ -40,12 +41,13 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	private RelayStatus actualStatus = null;				//stato attuale del RelayElectionManager
 	
-	private String localRelayAddress = null;				//indirizzo del Relay attuale in forma String
-	private String connectedRelayAddress = null;			//indirizzo attuale del Relay (big boss) a cui è connesso -> solo relay normale
-	private String serverAddress = null;					//indirizzo del server a cui il relay big boss è connesso -> solo relay big boss
-	private InetAddress localRelayInetAddress = null;		//indirizzo del Relay in forma InetAddress
-	private InetAddress connectedRelayInetAddress = null;	//indirizzo del Relay in forma InetAddress
-	private InetAddress serverInetAddress = null;			//indirizzo del Server in forma InetAddress
+	private String localClusterAddress = null;				//indirizzo del Relay attuale in forma String
+	private String localClusterHeadAddress = null;
+	private String connectedClusterHeadAddress = null;		//indirizzo attuale del Relay (big boss) a cui è connesso -> solo relay normale
+	private InetAddress localClusterInetAddress = null;		//indirizzo del Relay in forma InetAddress
+	private InetAddress localClusterHeadInetAddress = null;			//indirizzo del Server in forma InetAddress
+	private InetAddress connectedClusterHeadInetAddress = null;	//indirizzo del Relay in forma InetAddress
+
 	
 	private static RelayElectionManager INSTANCE = null;	//istanza singleton del RelayElectionManager
 	private static boolean BIGBOSS = false;					//boolean che indica che si è il BIGBOSS (connesso al server)
@@ -64,6 +66,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	private RelayWNICController relayClusterHeadWNICController = null;	//il RelayWNICController per ottenere informazioni dalla scheda di rete interfacciata alla rete AdHoc (cluster head)
 	private RelayPositionAPMonitor relayPositionAPMonitor = null;		//il RelayPositionAPMonitor per conoscere la propria posizione nei confronti dell'AP
 	private RelayPositionMonitor relayPositionMonitor = null;			//il RelayPositionMonitor per conoscere la propria posizione nei confronti dei client
+	private RelayPositionMonitorController relayPositionMonitorController = null;
 	private RelayBatteryMonitor relayBatteryMonitor = null;				//il RelayBatteryMonitor per conoscere la situazione della propria batteria
 	private WhoIsRelayServer whoIsRelayServer = null;					//thread che risponde ai messaggi di WHO_IS_RELAY con IM_RELAY
 	
@@ -92,8 +95,8 @@ public class RelayElectionManager extends Observable implements Observer{
 
 	static { 
 		try {
-			BCAST  = InetAddress.getByName(NetConfiguration.CLUSTER_BROADCAST_ADDRESS);
-			BCASTHEAD  = InetAddress.getByName(NetConfiguration.CLUSTER_HEAD_BROADCAST_ADDRESS);
+			BCAST  = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_BROADCAST_ADDRESS);
+			BCASTHEAD  = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
@@ -156,11 +159,11 @@ public class RelayElectionManager extends Observable implements Observer{
 			if((isBIGBOSS())||isPOSSIBLE_BIGBOSS()){
 				
 				relayClusterHeadWNICController = WNICFinder.getCurrentWNIC(
-						NetConfiguration.NAME_OF_MANAGED_WIFI_INTERFACE,
-						NetConfiguration.NAME_OF_MANAGED_NETWORK,
+						NetConfiguration.NAME_OF_RELAY_MANAGED_WIFI_INTERFACE,
+						NetConfiguration.NAME_OF_RELAY_MANAGED_NETWORK,
 						0);
 				this.consoleClusterHeadWifiInterface = new DebugConsole();
-				this.consoleClusterHeadWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_MANAGED_WIFI_INTERFACE);
+				this.consoleClusterHeadWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_MANAGED_WIFI_INTERFACE);
 				relayClusterHeadWNICController.setDebugConsole(this.consoleClusterHeadWifiInterface);
 				relayClusterHeadWNICController.init();
 			}
@@ -170,33 +173,33 @@ public class RelayElectionManager extends Observable implements Observer{
 			//per comunicare col BIGBOSS
 			else{
 				relayClusterHeadWNICController = WNICFinder.getCurrentWNIC(
-					NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_WIFI_INTERFACE,
-					NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK,
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE,
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK,
 					1);
 				this.consoleClusterHeadWifiInterface = new DebugConsole();
-				this.consoleClusterHeadWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_WIFI_INTERFACE);
+				this.consoleClusterHeadWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE);
 				relayClusterHeadWNICController.setDebugConsole(this.consoleClusterHeadWifiInterface);
 				relayClusterHeadWNICController.init();
 			}
 			
 			relayClusterWNICController = WNICFinder.getCurrentWNIC(
-					NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE,
-					NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK,
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE,
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK,
 					1);
 			this.consoleClusterWifiInterface = new DebugConsole();
-			this.consoleClusterWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE);
+			this.consoleClusterWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE);
 			relayClusterWNICController.setDebugConsole(this.consoleClusterWifiInterface);
 			relayClusterWNICController.init();
 			
 		} catch (WNICException e) {System.err.println("ERRORE:"+e.getMessage());System.exit(1);}
 		
-		comClusterManager = RelayConnectionFactory.getClusterElectionConnectionManager(this);
+		comClusterManager = RelayConnectionFactory.getClusterElectionConnectionManager(this,true);
 		comClusterManager.start();
 		
 		//Il big boss non comunica col server e quindi non serve un connection Manager col server
 		//Ogni relay di ogni cluster comunica col big boss, ovvero il relay del cluster head
 		if(isRELAY() || isPOSSIBLE_RELAY()){
-			comClusterHeadManager = RelayConnectionFactory.getClusterHeadElectionConnectionManager(this);
+			comClusterHeadManager = RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true);
 			comClusterHeadManager.start();
 		}
 
@@ -248,8 +251,12 @@ public class RelayElectionManager extends Observable implements Observer{
 	 */
 	private void becomeBigBossRelay(){
 		setNodeType(true, true);
-		localRelayAddress = NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS;
-		memorizeLocalRelayAddress();
+		localClusterAddress = NetConfiguration.RELAY_CLUSTER_ADDRESS;
+		memorizeLocalClusterAddress();
+		localClusterHeadAddress = NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS;
+		memorizelocalClusterHeadAddress();
+		connectedClusterHeadAddress = NetConfiguration.SERVER_ADDRESS;
+		memorizeConnectedClusterHeadAddress();
 
 		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
@@ -305,8 +312,10 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	private void becomRelay(){
 		setNodeType(false,true);
-		localRelayAddress = NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS;
-		memorizeLocalRelayAddress();
+		localClusterAddress = NetConfiguration.RELAY_CLUSTER_ADDRESS;
+		memorizeLocalClusterAddress();
+		localClusterHeadAddress = NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS;
+		memorizeLocalClusterAddress();
 
 		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSearch();
@@ -323,7 +332,12 @@ public class RelayElectionManager extends Observable implements Observer{
 				this,
 				relayClusterWNICController.getDebugConsole());
 		
-	
+		try{
+			//risponde ai messaggi di RSSI_REQUEST prendendo il valore RSSI dalla scheda wifi collegata al cluster head
+			relayPositionMonitorController = new RelayPositionMonitorController(relayClusterHeadWNICController);
+			relayPositionMonitorController.start();
+		}catch(WNICException e){e.getMessage();}
+		
 		//Client -> faccio partire nel momento in cui si collega qualche client...
 		relayBatteryMonitor = new RelayBatteryMonitor(TimeOutConfiguration.BATTERY_MONITOR_PERIOD,this);
 
@@ -336,7 +350,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		
 		DatagramPacket dpOut = null;
 		try {
-			dpOut = RelayMessageFactory.buildAckConnection(connectedRelayInetAddress, PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN, MessageCodeConfiguration.TYPERELAY);
+			dpOut = RelayMessageFactory.buildAckConnection(connectedClusterHeadInetAddress, PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN, MessageCodeConfiguration.TYPERELAY);
 			comClusterHeadManager.sendTo(dpOut);
 		} catch (IOException e) {consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di ACK_CONNECTION");e.getStackTrace();}
 	
@@ -366,11 +380,11 @@ public class RelayElectionManager extends Observable implements Observer{
 					timeoutSearch.cancelTimeOutSearch();
 					timeoutSearch = null;
 				}
-				connectedRelayAddress = relayMessageReader.getActualConnectedRelayAddress();
-				memorizeConnectedRelayAddress();
+				connectedClusterHeadAddress = relayMessageReader.getActualConnectedRelayAddress();
+				memorizeConnectedClusterHeadAddress();
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+relayMessageReader.getActualConnectedRelayAddress());
-				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager: STATO "+actualStatus.toString()+": IM_RELAY arrivato, connectRelayAddress: "+connectedRelayAddress);
+				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager: STATO "+actualStatus.toString()+": IM_RELAY arrivato, connectRelayAddress: "+connectedClusterHeadAddress);
 				if(isRELAY()) becomRelay();
 			}
 			
@@ -380,15 +394,11 @@ public class RelayElectionManager extends Observable implements Observer{
 			 */
 			if((relayMessageReader.getCode()==MessageCodeConfiguration.ACK_CONNECTION) && 
 			   (isBIGBOSS())){
-				if(relayMessageReader.getTypeNode()==MessageCodeConfiguration.TYPERELAY){
+				if(relayMessageReader.getTypeNode()==MessageCodeConfiguration.TYPERELAY)
 					active_relays++;
-					notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
-				}else{
-					notifyObservers("NEW_CONNECTED_CLIENT:"+relayMessageReader.getPacketAddess().toString());
-				}
 				monitoring();
 				setChanged();
-				
+				notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
 				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
 			}
 		}
@@ -415,21 +425,27 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	/**Metodo per memorizzare l'InetAddress relativo all'actualRelayAddress
 	 * che è in forma di String */
-	private void memorizeLocalRelayAddress(){
+	private void memorizeLocalClusterAddress(){
 		try {
-			localRelayInetAddress = InetAddress.getByName(localRelayAddress);
+			localClusterInetAddress = InetAddress.getByName(localClusterAddress);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
 	/**Metodo per memorizzare l'InetAddress relativo all'actualRelayAddress
 	 * che è in forma di String */
-	private void memorizeConnectedRelayAddress(){
+	private void memorizeConnectedClusterHeadAddress(){
 		try {
-			connectedRelayInetAddress = InetAddress.getByName(connectedRelayAddress);
+			connectedClusterHeadInetAddress = InetAddress.getByName(connectedClusterHeadAddress);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
-	
+	/**Metodo per memorizzare l'InetAddress relativo all'actualRelayAddress
+	 * che è in forma di String */
+	private void memorizelocalClusterHeadAddress(){
+		try {
+			localClusterHeadInetAddress = InetAddress.getByName(localClusterHeadAddress);
+		} catch (UnknownHostException e) {e.printStackTrace();}
+	}
 	
 	/**
 	 * Metodi getter e setter
@@ -461,23 +477,24 @@ public class RelayElectionManager extends Observable implements Observer{
 	public void setActualStatus(RelayStatus actualStatus) {this.actualStatus = actualStatus;}
 	public RelayStatus getActualStatus() {return actualStatus;}
 
-	public void setLocalRelayAddress(String localRelayAddress) {this.localRelayAddress = localRelayAddress;}
-	public String getLocalRelayAddress() {return localRelayAddress;}
-
-	public void setConnectedRelayAddress(String connectedRelayAddress) {this.connectedRelayAddress = connectedRelayAddress;}
-	public String getConnectedRelayAddress() {return connectedRelayAddress;}
 	
-	public void setServerAddress(String serverAddress) {this.serverAddress = serverAddress;}
-	public String getServerAddress() {return serverAddress;}
+	public void setLocalClusterAddress(String localClusterAddress) {this.localClusterAddress = localClusterAddress;}
+	public String getLocalClusterAddress() {return localClusterAddress;}
 
-	public void setLocalRelayInetAddress(InetAddress localRelayInetAddress) {this.localRelayInetAddress = localRelayInetAddress;}
-	public InetAddress getLocalRelayInetAddress() {return localRelayInetAddress;}
-
-	public void setConnectedRelayInetAddress(InetAddress connectedRelayInetAddress) {this.connectedRelayInetAddress = connectedRelayInetAddress;}
-	public InetAddress getConnectedRelayInetAddress() {return connectedRelayInetAddress;}
+	public void setConnectedClusterHeadAddress(String connectedClusterHeadAddress) {this.connectedClusterHeadAddress = connectedClusterHeadAddress;}
+	public String getConnectedClusterHeadAddress() {return connectedClusterHeadAddress;}
 	
-	public void setServerInetAddress(InetAddress serverInetAddress) {this.serverInetAddress = serverInetAddress;}
-	public InetAddress getServerInetAddress() {return serverInetAddress;}
+	public void setLocalClusterHeadAddress(String localClusterHeadAddress) {this.localClusterHeadAddress = localClusterHeadAddress;}
+	public String getLocalClusterHeadAddress() {return localClusterHeadAddress;}
+
+	public void setLocalClusterInetAddress(InetAddress localClusterInetAddress) {this.localClusterInetAddress = localClusterInetAddress;}
+	public InetAddress getLocalClusterInetAddress() {return localClusterInetAddress;}
+
+	public void setConnectedClusterHeadInetAddress(InetAddress connectedClusterHeadInetAddress) {this.connectedClusterHeadInetAddress = connectedClusterHeadInetAddress;}
+	public InetAddress getConnectedClusterHeadInetAddress() {return connectedClusterHeadInetAddress;}
+
+	public void setLocalClusterHeadInetAddress(InetAddress localClusterHeadInetAddress) {this.localClusterHeadInetAddress = localClusterHeadInetAddress;}
+	public InetAddress getLocalClusterHeadInetAddress() {return localClusterHeadInetAddress;}
 	
 	public void setRelayMessageReader(RelayMessageReader relayMessageReader){this.relayMessageReader = relayMessageReader;}
 	public RelayMessageReader getRelayMessageReader(){return relayMessageReader;}
