@@ -42,7 +42,7 @@ public class RelaySessionManager implements Observer{
 	public static final RelaySessionManager INSTANCE = new RelaySessionManager(); // Marco: il relay è un singleton
 	private boolean imRelay; // Marco:  im'relay: è il primo parametro del file parameters, credo che indichi se il Relay è attualmente attivo o è solo un possibile relay
 	private String clientAddress;
-	//numero di ritrasmissioni del pacchetto REQUEST_SESSION prima di scatenare un elezione d'emergenza
+	//numero di ritrasmissioni sia per il messaggio REQUEST SESSION SIA PER IL MESSAGGIO SESSION INFO prima di adottare azioni di emergenza
 	private int numberOfRetrasmissions = 1;
 	private String maxWnextRelay;  // Marco : è l'indirizzo del nuovo relay  se fai refactor cambiagli il nome.
 	private String event;
@@ -311,13 +311,18 @@ public class RelaySessionManager implements Observer{
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di RELAY_FOUND, il RELAY attuale è: "+this.relayAddress);
 			}
 			
-			if(this.event.equals("TIMEOUTSESSIONREQUEST") || this.event.equals("TIMEOUTACKSESSIONINFO")) //VECCHIO RELAY
+			if(this.event.equals("TIMEOUTSESSIONREQUEST") || this.event.equals("TIMEOUTACKSESSIONINFO")) //VECCHIO RELAY: il nuovo relay non ha risposto
 			{
 				if(this.event.equals("TIMEOUTSESSIONREQUEST") && status.equals("Active"))
 					consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_REQUEST");
 				if(this.event.equals("TIMEOUTACKSESSIONINFO") && status.equals("AttendingAckSession"))
 					consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_ACK_SESSION_INFO");
 				//TODO DEVO AVVISARE IL RELAYELECTIONMANAGER
+				/*
+				 * Marco: in sostanza, se il nuovo relay non risponde, cerco di nominare il secondo
+				 * classificato alle elezioni
+				 * 
+				 */
 				if(this.electionManager!=null)
 				{
 					electionManager.chooseAnotherRelay();
@@ -328,6 +333,17 @@ public class RelaySessionManager implements Observer{
 			/**
 			 * l'electionmanager mi comunica chi è il relay appena eletto
 			 */
+			/*
+			 *se  io sono il relay attualmente attivo salvo il nome di chi ha vinto nella variabile maxWnextRelay
+			 *		cambio stato indicando che non sono più io il relay di riferimento della rete 
+			 *		e faccio partire il timeout mentre attendo il messaggio di REQUEST SESSION da parte dell'altro relay
+			 *
+			 *se invece non sono il relay attualmente attivo confronto l'indirizzo del vincitore con il mio: se ho vinto
+			 *	cambio il mio stato per indicare che sono il relay attivo, 
+			 *	mando il messaggio di Elecion Request al vecchiorelay 
+			 *	e mi metto in attesa delle informazioni sulle sessioni
+			 *
+			 */
 			if(this.event.contains("NEW_RELAY"))
 			{
 				StringTokenizer st = new StringTokenizer(this.event, ":");
@@ -335,10 +351,10 @@ public class RelaySessionManager implements Observer{
 				String newRelay = st.nextToken();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di NEW_RELAY, il nuovo RELAY è "+newRelay);
 				System.out.println("RELAY_SESSION_MANAGER: Evento di NEW_RELAY, il nuovo RELAY è "+newRelay);
-				if(imRelay)
+				if(imRelay) // Marco: imRelay è true se io sono il relay attualmente attivo nella rete
 				{
 					this.maxWnextRelay = newRelay;
-					this.imRelay = false;
+					this.imRelay = false; // Marco: cambio già il flag: non è un po' presto? io lo avrei fatto dopo aver inviato tutti i messaggi di leave
 					this.toSessionRequest = RelayTimeoutFactory.getTimeOutSessionRequest(this, Parameters.TIMEOUT_SESSION_REQUEST);
 				}
 				else
@@ -346,7 +362,7 @@ public class RelaySessionManager implements Observer{
 					try {
 						if(InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS).getHostAddress().equals(newRelay))
 						{
-							this.imRelay = true;
+							this.imRelay = true; // Marco : cambio già lo stato: non è presto? forse sarebbe meglio aspettare dopo aver mandato il Redirect al server...
 							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
 							this.sessionCM.sendTo(message);
 							this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, Parameters.TIMEOUT_SESSION_INFO);
@@ -384,8 +400,13 @@ public class RelaySessionManager implements Observer{
 				}
 			}
 			
-			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions != 0 && this.status.equals("RequestingSession"))
+			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions != 0 && this.status.equals("RequestingSession")) // Nuovo Realy: è scattato il timout sull'attesa di SessionInfo
 			{
+				/*
+				 * Marco: sono il nuovo relay: è scattato il timeout sulla ricezione del messaggio SessionInfo.
+				 * il parametro numberOf ritrasmissions idica quante volte posso chiedere la ritrasmissione del messaggio Sessioninfo
+				 * fortunatamente qui posso ritrasmetterlo diminuendo il numero di ritrasmissioni rimaste
+				 */
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO");
 				try {
 					this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(this.relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
@@ -400,6 +421,12 @@ public class RelaySessionManager implements Observer{
 			}
 			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions == 0)
 			{
+				/*
+				 * Marco: sono il nuovo relay: è scattato il timeout sulla ricezione del messaggio SessionInfo.
+				 * il parametro numberOf ritrasmissions idica quante volte posso chiedere la ritrasmissione del messaggio Sessioninfo
+				 * sfortunatamente non posso ritrasmetterlo: non mi resta che mandare IN BROADCAST
+				 *  ai client il messaggio di invalidare le sessioni attive, ipotizzo quindi che il vecchio relay non ci sia più
+				 */
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO e numero di ritrasmissioni a 0");
 				this.status = "Waiting";
 				//Invio il messaggio di invalidazione della sessione ai client che conoscono l'identità del nuovo relay ma non si ha modo di recuperare la sessione
