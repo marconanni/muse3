@@ -73,7 +73,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		positiveDisconnectionPrediction = 0;
 		averageValues = new Vector<Double>();
 		addObserver(electionManager);
-		rrcm = RelayConnectionFactory.getRSSIClusterConnectionManager(this);	
+		rrcm = RelayConnectionFactory.getRSSIClusterConnectionManager(this,false);	
 		setDebugConsole(console);
 		setStarted(false);
 	}

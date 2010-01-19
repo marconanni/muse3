@@ -38,12 +38,9 @@ public class RelayPositionMonitorController implements Observer {
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
 	 * @throws WNICException 
 	 */
-	public RelayPositionMonitorController(String interf, String essidName) throws WNICException{
-		rrscm = RelayConnectionFactory.getRSSIClusterHeadConnectionManager(this);
-		
-		try {
-			cwnic = WNICFinder.getCurrentWNIC(interf, essidName,0);
-		} catch (OSException e) {new WNICException("RelayPositionMonitorController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
+	public RelayPositionMonitorController(RelayWNICController cwnic) throws WNICException{
+		rrscm = RelayConnectionFactory.getRSSIClusterHeadConnectionManager(this,true);
+		this.cwnic = cwnic;
 		console = cwnic.getDebugConsole();
 		started = false;
 	}
