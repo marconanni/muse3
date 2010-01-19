@@ -234,8 +234,27 @@ public class RelaySessionManager implements Observer{
 			{
 				
 				/*
-				 * 
+				 * fa parte del nuovo relay: arrivano i dati del messaggio Session Info 
+				 * Marco: composizione della tabella sessionInfo ( ancora non verificato, mi baso sui nomi che vengono assegnati)
+				 * chiave: indirizzo del client
+				 * valore[0]=  porta dalla quale il server eroga lo stream
+				 * valore[1] = porta sulla quale il proxy riceve lo stream
+				 * valore[2] = porta dalla quale il proxy eroga lo steam verso il client
+				 * valore[3] = porta sulla quale il client riceve lo stream dal proxy
+				 * valore[4] = porta di controllo del server
+				 * valore[5] = porta di controllo del relay
+				 * nota hai bisogno di due porte di controllo perchè il proxy sta in mezzo, riceve un flusso dal server e ne eroga uno al client.,
+				 * quindi hai due connessioni rtp e due porte di controllo, visto che c'è una porta di controllo associata ad ogni connessione rtp
 				 */
+				
+				/*
+				 * Marco: successivamente mando il messaggio di ack session al vecchio relay
+				 * sembra che a mandare il messaggio di REDIRECT al server perchè questi dirotti il flusso sul nuovo relay sia 
+				 * ogni nuovo proxy relativamente alla stessa sessione
+				 */
+				 
+				// TODO considera la possibilità di far mandare un unico redirect dal Session Manager anzichè farne mandare tante 
+				 
 				
 				this.toSessionInfo.cancelTimeOutSessionInfo();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
@@ -265,6 +284,12 @@ public class RelaySessionManager implements Observer{
 			this.event = (String)arg;
 			if(this.event.equals("End_Of_Media") && status.equals("Active") && imRelay)
 			{
+				/*
+				 * fine di una canzone 
+				 * tolgo le informazioni relative alla sessione terminata dalle relative tabelle 
+				 * (sia quella sessione- proxy che quella sessione--sessioninfo)
+				 * se non mi restano altre sessioni attive ( le tabelle sono quindi vuote) metto il Relay in stato di Idle
+				 */
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di END_OF_MEDIA da parte di un proxy");
 				proxy = (Proxy)receiver;
 				//rimuovo i riferimenti della sessione all'interno delle relative hashtable 
@@ -438,6 +463,18 @@ public class RelaySessionManager implements Observer{
 	}
 	private String createProxyFromSession(Hashtable sessionInfo)
 	{
+		/*
+		 * Marco: composizione della tabella sessionInfo ( ancora non verificato, mi baso sui nomi che vengono assegnati)
+		 * chiave: indirizzo del client
+		 * valore[0]=  porta dalla quale il server eroga lo stream
+		 * valore[1] = porta sulla quale il proxy riceve lo stream
+		 * valore[2] = porta dalla quale il proxy eroga lo steam verso il client
+		 * valore[3] = porta sulla quale il client riceve lo stream dal proxy
+		 * valore[4] = porta di controllo del server
+		 * valore[5] = porta di controllo del relay
+		 * nota hai bisogno di due porte di controllo perchè il proxy sta in mezzo, riceve un flusso dal server e ne eroga uno al client.,
+		 * quindi hai due connessioni rtp e due porte di controllo, visto che c'è una porta di controllo associata ad ogni connessione rtp
+		 */
 		Proxy proxy;
 		String chiave;
 		String recStreamInports = "";
@@ -471,6 +508,9 @@ public class RelaySessionManager implements Observer{
 					/**
 					 * nel costruttore del proxy è stato inserito il valore di proxy PortStreamOut in 2 punti diversi proprio perchè il vecchio proxy quando avvia
 					 * la trasmissione di recovery verso il nuovo riutilizza la medesima porta.
+					 * Marco: quindi il numero di porta sulla quale il proxy sul nuovo relay riceve il flusso da inserire nel suo recovery buffer è lo stesso
+					 *  numero della porta dalla quale sia il vecchio che il nuovo relay erogano il flusso.
+					 * 
 					 */
 					proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut ,InetAddress.getByName(this.relayAddress), serverCtrlPort, proxyCtrlPort);
 					recStreamInports = recStreamInports+"_"+chiave+"_"+proxy.getRecoveryStreamInPort();

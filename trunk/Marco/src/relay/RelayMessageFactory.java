@@ -28,7 +28,7 @@ public class RelayMessageFactory {
 
 
 	/**
-	 * Pacchetto utilizzato come messaggio di acknoledge
+	 * Pacchetto utilizzato come messaggio di buildNoParamAckResponce
 	 * @param sequenceNumber
 	 * @param addr indirizzo verso il quale inviare il messaggio di ack
 	 * @param port porta di ricezione del megasggio di ack
@@ -100,7 +100,7 @@ public class RelayMessageFactory {
 
 
 	/**
-	 * Pacchetto di richiesta di inizio della trasmissione verso il server
+	 * Pacchetto di richiesta di inizio della trasmissione o ripresa flusso di streaming verso il server
 	 * @param sequenceNumber
 	 * @param addr indirizzo del server
 	 * @param port porta verso la quale inoltrare la richiesta (tale parametro � stato precedentemente trasmesso dal server)
@@ -123,7 +123,7 @@ public class RelayMessageFactory {
 
 
 	/**
-	 * Pacchetto di richiesta di inizio della trasmissione verso il server
+	 * Pacchetto di richiesta di stop della trasmissione verso il server
 	 * @param sequenceNumber
 	 * @param addr indirizzo del server
 	 * @param port porta verso la quale inoltrare la richiesta (tale parametro � stato precedentemente trasmesso dal server)
@@ -258,7 +258,7 @@ public class RelayMessageFactory {
 	}
 
 	/**
-	 * Messaggio di ElectionDone
+	 * Messaggio di buildEmElDetRelay
 	 * @param newRelayAddress
 	 * @param addr
 	 * @param port
@@ -281,7 +281,7 @@ public class RelayMessageFactory {
 
 
 	/**
-	 * Messaggio di ElectionResponse
+	 * Messaggio di buildEmElection
 	 * @param sequenceNumber
 	 * @param addr
 	 * @param port
@@ -324,7 +324,7 @@ public class RelayMessageFactory {
 
 
 	/**
-	 * Messaggio di ElectionDone
+	 * Messaggio di SessionInfo - manda al nuovo relay le caratterisitiche delle connessioni in corso
 	 * @param newRelayAddress
 	 * @param addr
 	 * @param port
@@ -371,7 +371,7 @@ public class RelayMessageFactory {
 	}
 
 	/**
-	 * Messaggio di ElectionDone
+	 * Messaggio di Redirect
 	 * @param newRelayAddress
 	 * @param addr
 	 * @param port
