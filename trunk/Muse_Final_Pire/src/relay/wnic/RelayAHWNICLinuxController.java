@@ -48,20 +48,20 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 				if (!isOn || !ismodeAdHoc() || !isEssidFound()){
 					if(console!=null)
 						console.debugMessage(DebugConfiguration.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
-						NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS+
-						"\n\n"+ NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS);
+						"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK:NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK)+
+						"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_CLUSTER_ADDRESS:NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS));
 					throw new WNICException("La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
-						NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS+
-						"\n\n"+ NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS);
+						"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK:NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK)+
+						"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_CLUSTER_ADDRESS:NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS));
 				}else{
 					if(console!=null)
 						console.debugMessage(DebugConfiguration.DEBUG_INFO, "Configurazione scheda WIFI:\nInterfaccia: "+interf+
-						"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK:NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK)+
-						"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS:NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS));
+						"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK:NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK)+
+						"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_CLUSTER_ADDRESS:NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS));
 					else
 						System.out.println("Configurazione scheda WIFI:\nInterfaccia: "+interf+
-								"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_AD_HOC_CLUSTER_NETWORK:NetConfiguration.NAME_OF_AD_HOC_CLUSTER_HEAD_NETWORK)+
-								"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_AD_HOC_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS:NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS));
+								"\nESSID: "+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK:NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK)+
+								"\nMODE:Ad-Hoc\nIP:"+((interf.compareTo(NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE)==0)?NetConfiguration.RELAY_CLUSTER_ADDRESS:NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS));
 				}
 				
 		}
@@ -188,11 +188,8 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 				else System.out.println("L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
 			}
 		}
-			
-			//controllo il mode della scheda (deve essere Ad-Hoc)
-			//res = interfaceInfo.readLine();
-			if(line2.contains("Ad-Hoc")) modeAdHoc = true;
-			else modeAdHoc = false;
+		if(line2.contains("Ad-Hoc")) modeAdHoc = true;
+		else modeAdHoc = false;
 		
 	}
 
@@ -257,7 +254,6 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 	 * @return true se l'interfaccia è associata ad una rete ad-hoc, false altrimenti
 	 */
 	private boolean ismodeAdHoc() throws WNICException {
-		refreshStatus();
 		return modeAdHoc;
 	}
 
@@ -267,15 +263,12 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 	private boolean isEssidFound() {
 		return essidFound;
 	}
-	
 
-	//METODI PUBLICI
-	
 	/**Metodi getter and setter*/
-	public String getInterfaceName() {return interf;}
-	public void setInterfaceName(String interf) {this.interf=interf;}
-	public String getEssidName() {return essidName;}
-	public void setEssidName(String essidName) {this.essidName=essidName;}
-	public void setDebug(boolean debug){this.debug=debug;}
+	private String getInterfaceName() {return interf;}
+	private void setInterfaceName(String interf) {this.interf=interf;}
+	//private String getEssidName() {return essidName;}
+	private void setEssidName(String essidName) {this.essidName=essidName;}
+	//private void setDebug(boolean debug){this.debug=debug;}
 }
 	
