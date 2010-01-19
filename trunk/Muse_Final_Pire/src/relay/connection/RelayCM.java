@@ -9,8 +9,8 @@ import java.util.Observer;
  */
 public class RelayCM extends AConnectionManager {
 	
-	public RelayCM(String name,InetAddress localAddress,InetAddress bcastAddress, int localInputPort, int localOutputPort, Observer observer){
-		super( localAddress, bcastAddress, localInputPort, localOutputPort, observer);
+	public RelayCM(String name,InetAddress localAddress,InetAddress bcastAddress, int localInputPort, int localOutputPort, Observer observer, boolean bcast){
+		super( localAddress, bcastAddress, localInputPort, localOutputPort, observer, bcast);
 		setNameManager(name);
 	}
 }

@@ -26,6 +26,7 @@ public class AConnectionManager {
 	private InetAddress bcastAddress;
 	private int localOutputPort = -1;
 	private int localInputPort = -1;
+	private boolean bcast = false;
 	
 	/**Metodo per ottenere un AConnectionManager
 	 * @param localAdHocAddress una Stringa che rappresenta l'indirizzo locale sulla rete Ad-Hoc del nodo
@@ -33,10 +34,11 @@ public class AConnectionManager {
 	 * @param localAdHocOutputPort un int che rappresenta la porta di invio dei messaggi sulla rete Ad-Hoc
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
 	 */
-	public AConnectionManager(InetAddress localAddress,InetAddress bcastAddress, int localInputPort, int localOutputPort, Observer observer){
+	public AConnectionManager(InetAddress localAddress,InetAddress bcastAddress, int localInputPort, int localOutputPort, Observer observer, boolean bcast){
 		if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 		this.setLocalAddress(localAddress);
-		this.setBcastAddress(bcastAddress);
+		this.setBcast(bcast);
+		if(bcast)this.setBcastAddress(bcastAddress);
 		this.setLocalOutputPort(localOutputPort);
 		this.setLocalInputPort(localInputPort);
 	
@@ -45,9 +47,9 @@ public class AConnectionManager {
 		} catch (SocketException e) {e.printStackTrace();}
 
 		receiverLocalAdHoc = new AConnectionReceiver(observer,localAddress,localInputPort);
-		receiverBcastAdHoc = new AConnectionReceiver(observer,bcastAddress,localInputPort);
+		if(bcast) receiverBcastAdHoc = new AConnectionReceiver(observer,bcastAddress,localInputPort);
 		receiverLocalAdHocThread = new Thread(receiverLocalAdHoc);
-		receiverBcastAdHocThread = new Thread(receiverBcastAdHoc);
+		if(bcast)receiverBcastAdHocThread = new Thread(receiverBcastAdHoc);
 	}
 
 	/**Metodo per far partire la ricezione dei messaggi dalla rete Ad-Hoc*/
@@ -56,10 +58,11 @@ public class AConnectionManager {
 			receiverLocalAdHocThread.start();
 			started = true;
 		}
-		if(receiverBcastAdHoc!=null){
-			receiverBcastAdHocThread.start();
-			started = true;
-		}
+		if(bcast)
+			if(receiverBcastAdHoc!=null){
+				receiverBcastAdHocThread.start();
+				started = true;
+			}
 	}
 
 	/**Metodo per spedire un DatagramPacket verso un destinatario nella rete Ad-Hoc
@@ -74,25 +77,25 @@ public class AConnectionManager {
 	public void close(){
 		if(adHocOutputSocket != null) adHocOutputSocket.close();
 		if(receiverLocalAdHoc != null) receiverLocalAdHoc.close();
-		if(receiverBcastAdHoc != null) receiverBcastAdHoc.close();
+		if(bcast)if(receiverBcastAdHoc != null) receiverBcastAdHoc.close();
 		receiverLocalAdHoc = null;
 		receiverLocalAdHocThread = null;
-		receiverBcastAdHoc = null;
-		receiverBcastAdHocThread = null;
+		if(bcast)receiverBcastAdHoc = null;
+		if(bcast)receiverBcastAdHocThread = null;
 		adHocOutputSocket = null;
 	}
 
 	/**Metodo per interrompere la ricezione dei messaggi*/
 	public void stopReceiving(){
 		receiverLocalAdHoc.pauseReception();
-		receiverBcastAdHoc.pauseReception();
+		if(bcast)receiverBcastAdHoc.pauseReception();
 		started = false;
 	}
 
 	/**Metodo per riprendere la ricezione dei messaggi*/
 	public void resumeReceiving(){
 		receiverLocalAdHoc.resumeReception();
-		receiverBcastAdHoc.resumeReception();
+		if(bcast)receiverBcastAdHoc.resumeReception();
 		started = true;
 	}
 
@@ -109,9 +112,11 @@ public class AConnectionManager {
 	public void setNameManager(String managerName) {
 		this.managerName = managerName;
 		if(receiverLocalAdHoc != null)receiverLocalAdHoc.setManagerName(this.managerName);
-		if(receiverBcastAdHoc != null)receiverBcastAdHoc.setManagerName(this.managerName);
+		if(bcast)if(receiverBcastAdHoc != null)receiverBcastAdHoc.setManagerName(this.managerName);
 	}
 	
+	public void setBcast(boolean bcast){this.bcast=bcast;}
+	public boolean getBcast(){return bcast;}
 	public void setLocalAddress(InetAddress localAddress){this.localAddress = localAddress;}
 	public InetAddress getLocalAddress(){return localAddress;}
 	public void setBcastAddress(InetAddress bcastAddress){this.bcastAddress = bcastAddress;}
