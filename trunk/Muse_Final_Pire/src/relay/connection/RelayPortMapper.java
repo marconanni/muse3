@@ -54,11 +54,11 @@ public class RelayPortMapper {
 		portOutRSSI = PortConfiguration.RSSI_PORT_OUT;
 
 		try {
-			localClusterAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_AD_HOC_CLUSTER_ADDRESS);
-			localClusterHeadAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_AD_HOC_CLUSTER_HEAD_ADDRESS);
+			localClusterAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+			localClusterHeadAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 			localManagedAddress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS);
-			localClusterAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.CLUSTER_BROADCAST_ADDRESS);
-			localClusterHeadAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.CLUSTER_HEAD_BROADCAST_ADDRESS);
+			localClusterAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_BROADCAST_ADDRESS);
+			localClusterHeadAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
  	
