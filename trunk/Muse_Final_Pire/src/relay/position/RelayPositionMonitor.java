@@ -101,6 +101,13 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		timer.cancel();
 		if(tnRSSI!=null)tnRSSI.cancelTimeOutNotifyRSSI();
 	}
+	
+	public void stop(){
+		timer.cancel();
+		if(tnRSSI!=null)tnRSSI.cancelTimeOutNotifyRSSI();
+		if(rrcm.isStarted())rrcm.stopReceiving();
+		setStarted(false);
+	}
 
 
 	private void mainTask(){
