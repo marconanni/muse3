@@ -15,7 +15,7 @@ public class RelayMain {
 		RelaySessionManager sessionManager = null;
 		RelayElectionManager electionManager = null;
 		sessionManager = RelaySessionManager.getInstance();
-		electionManager = RelayElectionManager.getInstance(type, active, sessionManager);
+		electionManager = RelayElectionManager.getInstance(true, true, sessionManager);
 	//	electionManager.addObserver(sessionManager);
 		sessionManager.setElectionManager(electionManager);
 	}
