@@ -396,10 +396,10 @@ public class RelayElectionManager extends Observable implements Observer{
 			if((relayMessageReader.getCode()==MessageCodeConfiguration.ACK_CONNECTION) && 
 			   (isBIGBOSS())){
 				if(relayMessageReader.getTypeNode()==MessageCodeConfiguration.TYPERELAY)
-					active_relays++;
+					addRelay();
 				else
-					ac
-				monitoringRSSI();
+					addClient();
+				
 				setChanged();
 				notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
 				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
@@ -418,11 +418,34 @@ public class RelayElectionManager extends Observable implements Observer{
 		}
 	}
 	
-	public void monitoringRSSI(){
-		relayPositionMonitor.start();
-		//relayBatteryMonitor.start();
-		actualStatus = RelayStatus.MONITORING;
+	public void startMonitoringRSSI(){
+		if(actualStatus!=RelayStatus.MONITORING){
+			relayPositionMonitor.start();
+			//relayBatteryMonitor.start();
+			actualStatus = RelayStatus.MONITORING;
+		}
+			
 	}
+	public void stopMonitoringRSSI(){
+		relayPositionMonitor.stop();
+		//relayBatteryMonitor.stop();
+		actualStatus = RelayStatus.IDLE;
+	}
+	
+	public void addClient(){active_client++;startMonitoringRSSI();}
+	public void removeClient(){
+		active_client--;
+		if(active_client==0 && active_relays==0) stopMonitoringRSSI();
+	}
+	
+	public void addRelay(){active_relays++;startMonitoringRSSI();}
+	public void removeRelay(){
+		active_relays--;
+		if(active_client==0 && active_relays==0) stopMonitoringRSSI();
+	}
+	
+	
+	
 	
 	/**Metodo per memorizzare l'InetAddress relativo all'actualRelayAddress
 	 * che è in forma di String */
@@ -506,7 +529,6 @@ public class RelayElectionManager extends Observable implements Observer{
 	public void setWhoIsRelayServer(WhoIsRelayServer whoIsRelayServer){this.whoIsRelayServer = whoIsRelayServer;}
 	public WhoIsRelayServer getWhoIsRelayServer(){return whoIsRelayServer;}
 	
-
 	public static void setRELAY(boolean relay) {RELAY = relay;}
 	public static boolean isRELAY() {return RELAY;}
 	public static void setBIGBOSS(boolean bigboss) {BIGBOSS = bigboss;}
@@ -517,6 +539,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	public static boolean isPOSSIBLE_BIGBOSS() {return POSSIBLE_BIGBOSS;}
 	public static void setCLIENT(boolean client) {CLIENT=client;}
 	public static boolean isCLIENT() {return CLIENT;}
+	
 
 	public static void setINSTANCE(RelayElectionManager iNSTANCE) {INSTANCE = iNSTANCE;}
 	public static RelayElectionManager getINSTANCE() {return INSTANCE;}
