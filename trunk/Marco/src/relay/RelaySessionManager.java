@@ -29,12 +29,13 @@ import server.ServerSessionManager;
 import server.StreamingServer;
 import util.Logger;
 
+
 /**
  * @author Leo Di Carlo
  *
  */
 public class RelaySessionManager implements Observer{
-	private String status; // Marco: lo stato attuale del relay
+	private SessionManagerStatus status; // Marco: lo stato attuale del relay
 	private int numberOfSession; // Marco: il numero di sessioni aperte ( il numero di client che sta attualmente servendo)
 	private Hashtable<String, Proxy> pReferences; // Marco: tabella che contiene per ogni sessione ( identificata dall'indirizzo del client) il proxy che la serve
 	private Hashtable<String, int[]> sessionInfo; 
@@ -99,11 +100,11 @@ public class RelaySessionManager implements Observer{
 		this.imRelay = imRelay;
 		if(this.imRelay)
 		{
-			status = "Idle";
+			status = SessionManagerStatus.Idle;
 		}
 		else
 		{
-			status = "Waiting";
+			status = SessionManagerStatus.Waiting;
 		}
 	}
 
@@ -151,7 +152,7 @@ public class RelaySessionManager implements Observer{
 			
 			if(this.messageReader.getCode() == Parameters.REQUEST_FILE && imRelay)
 			{
-				this.status = "Active";
+				this.status = SessionManagerStatus.Active;
 				this.clientAddress = message.getAddress().getHostAddress();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 				proxy = new Proxy(this, true, messageReader.getFilename(), this.clientAddress, messageReader.getPortStreamingClient());
@@ -177,7 +178,7 @@ public class RelaySessionManager implements Observer{
 			 *  	la porta W dalla quale il relay manda lo stream al client
 			 *  	la porta X dalla quale il server manda lo stream al vecchio relay
 			 */
-			if(messageReader.getCode() == Parameters.REQUEST_SESSION && this.status.equals("Active") )
+			if(messageReader.getCode() == Parameters.REQUEST_SESSION && this.status==SessionManagerStatus.Active )
 			{
 				if(toSessionRequest!=null) // Marco: viene disattivato il timeout request session: il messaggio è arrivato
 					toSessionRequest.cancelTimeOutSessionRequest();
@@ -199,7 +200,7 @@ public class RelaySessionManager implements Observer{
 					else{this.message = RelayMessageFactory.buildSessionInfo(0, null, InetAddress.getByName(this.maxWnextRelay), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);}
 
 					this.sessionCM.sendTo(this.message); //Marco: invio il messaggio preparato
-					this.status = "AttendingAckSession";
+					this.status = SessionManagerStatus.AttendingAckSession;
 					this.toAckSessionInfo = RelayTimeoutFactory.getTimeOutAckSessionInfo(this, Parameters.TIMEOUT_ACK_SESSION_INFO);
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
@@ -211,7 +212,7 @@ public class RelaySessionManager implements Observer{
 			}
 			
 			
-			if(messageReader.getCode() == Parameters.ACK_SESSION && this.status.equals("AttendingAckSession"))
+			if(messageReader.getCode() == Parameters.ACK_SESSION && this.status.equals(SessionManagerStatus.AttendingAckSession))
 				
 				/*
 				 * il nuovo relay mi ha mandato il messaggio di ACK_SESSION: significa che il nuovo relay che già ottenuto i dati relativi
@@ -230,7 +231,7 @@ public class RelaySessionManager implements Observer{
 				this.changeProxySession(messageReader.getProxyInfo());
 			}
 			
-			if(messageReader.getCode() == Parameters.SESSION_INFO && this.status.equals("RequestingSession"))
+			if(messageReader.getCode() == Parameters.SESSION_INFO && this.status.equals(SessionManagerStatus.RequestingSession))
 			{
 				
 				/*
@@ -263,7 +264,7 @@ public class RelaySessionManager implements Observer{
 				try {
 					this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
 					this.sessionCM.sendTo(this.message);
-					this.status = "Active";
+					this.status = SessionManagerStatus.Active;
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -282,7 +283,7 @@ public class RelaySessionManager implements Observer{
 		if(arg instanceof String)
 		{
 			this.event = (String)arg;
-			if(this.event.equals("End_Of_Media") && status.equals("Active") && imRelay)
+			if(this.event.equals("End_Of_Media") && status.equals(SessionManagerStatus.Active) && imRelay)
 			{
 				/*
 				 * fine di una canzone 
@@ -297,7 +298,7 @@ public class RelaySessionManager implements Observer{
 				sessionInfo.remove(proxy.getClientAddress());
 				this.numberOfSession--;
 				if(numberOfSession == 0)
-					this.status = "Idle";
+					this.status = SessionManagerStatus.Idle;
 			}
 			
 			/**
@@ -313,9 +314,9 @@ public class RelaySessionManager implements Observer{
 			
 			if(this.event.equals("TIMEOUTSESSIONREQUEST") || this.event.equals("TIMEOUTACKSESSIONINFO")) //VECCHIO RELAY: il nuovo relay non ha risposto
 			{
-				if(this.event.equals("TIMEOUTSESSIONREQUEST") && status.equals("Active"))
+				if(this.event.equals("TIMEOUTSESSIONREQUEST") && status.equals(SessionManagerStatus.Active))
 					consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_REQUEST");
-				if(this.event.equals("TIMEOUTACKSESSIONINFO") && status.equals("AttendingAckSession"))
+				if(this.event.equals("TIMEOUTACKSESSIONINFO") && status.equals(SessionManagerStatus.AttendingAckSession))
 					consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_ACK_SESSION_INFO");
 				//TODO DEVO AVVISARE IL RELAYELECTIONMANAGER
 				/*
@@ -387,12 +388,12 @@ public class RelaySessionManager implements Observer{
 					if(InetAddress.getLocalHost().toString().equals(newRelay))
 					{
 						this.imRelay = true;
-						this.status = "Active";
+						this.status = SessionManagerStatus.Active;
 					}
 					else
 					{
 						this.relayAddress = newRelay;
-						this.status = "Waiting";
+						this.status = SessionManagerStatus.Waiting;
 					}
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
@@ -400,7 +401,7 @@ public class RelaySessionManager implements Observer{
 				}
 			}
 			
-			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions != 0 && this.status.equals("RequestingSession")) // Nuovo Realy: è scattato il timout sull'attesa di SessionInfo
+			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions != 0 && this.status.equals(SessionManagerStatus.RequestingSession)) // Nuovo Realy: è scattato il timout sull'attesa di SessionInfo
 			{
 				/*
 				 * Marco: sono il nuovo relay: è scattato il timeout sulla ricezione del messaggio SessionInfo.
@@ -428,7 +429,7 @@ public class RelaySessionManager implements Observer{
 				 *  ai client il messaggio di invalidare le sessioni attive, ipotizzo quindi che il vecchio relay non ci sia più
 				 */
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO e numero di ritrasmissioni a 0");
-				this.status = "Waiting";
+				this.status = SessionManagerStatus.Waiting;
 				//Invio il messaggio di invalidazione della sessione ai client che conoscono l'identità del nuovo relay ma non si ha modo di recuperare la sessione
 				try {
 					this.message = RelayMessageFactory.buildSessionInvalidation(0, InetAddress.getByName(Parameters.BROADCAST_ADDRESS), Parameters.CLIENT_PORT_SESSION_IN);
@@ -485,7 +486,7 @@ public class RelaySessionManager implements Observer{
 		{
 			numberOfSession--;
 			if(this.numberOfSession == 0)
-				this.status = "Idle";
+				this.status = SessionManagerStatus.Idle;
 		}
 	}
 	private String createProxyFromSession(Hashtable sessionInfo)
@@ -585,3 +586,15 @@ public class RelaySessionManager implements Observer{
 		}
 	}
 }
+
+enum SessionManagerStatus{
+	Idle,  // Stato del relay quando è attivo 8 è il relay di riferimento per la rete, ma non sta attualmente servendo alcun client.
+	Waiting,  // Marco: Stato tipico di un possiblie relay che non è il relay di riferimento. Sta a far niente, pronto a candidarsi se scatta la fase di elezione ( anche se la fase di elezione non si vede nel sessionManager, ma  nell'ElectionManager
+	Active, // Marco: stato del relay quando è attivo e sta erogando dei flussi verso i client.
+	AttendingAckSession, // Marco: un vecchio relay è in questo stato quando ha inviato il messaggio di SessionInfo, contente i dati relativi alle sessioni aperte di cui fare l'handoff ed attende l'ack_ session da parte del nuovo relay, con l'indicazione delle porte dei proxy sul nuovo relay sulle quali ridirigere lo stream 
+	RequestingSession // Marco: stato in cui si trova il nuovo relay dopo aver mandato il messaggio di REQUEST SESSION in attesa del SESSION INFO
+	
+	
+	
+}
+
