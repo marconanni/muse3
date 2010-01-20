@@ -40,6 +40,7 @@ public class AConnectionReceiver extends Observable implements Runnable{
 		this.setLocalInputPort(localInputPort);
 		
 		try {
+			
 			inSocket = new DatagramSocket(localInputPort,localAddress);
 		} catch (SocketException e) {e.printStackTrace();}
 		addObserver(observer);
