@@ -71,6 +71,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	private WhoIsRelayServer whoIsRelayServer = null;					//thread che risponde ai messaggi di WHO_IS_RELAY con IM_RELAY
 	
 	private int active_relays = 0;								//relay secondari collegati al bigboss (solo big boss)
+	private int active_client = 0;								//client collegati al relay - aumenta solo, non si aggiorna
 	
 	//vari Timeout necessari al RelayElectionManager
 	private TimeOutSearch timeoutSearch = null;
@@ -355,7 +356,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		} catch (IOException e) {consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di ACK_CONNECTION");e.getStackTrace();}
 	
 		consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomeRelay(): X -> STATO IDLE: WhoIsRelayServer partito, ACK_CONNECTION spedito");
-		monitoring();
+		//monitoring();
 	}
 
 	
@@ -396,7 +397,9 @@ public class RelayElectionManager extends Observable implements Observer{
 			   (isBIGBOSS())){
 				if(relayMessageReader.getTypeNode()==MessageCodeConfiguration.TYPERELAY)
 					active_relays++;
-				monitoring();
+				else
+					ac
+				monitoringRSSI();
 				setChanged();
 				notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
 				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
@@ -415,10 +418,8 @@ public class RelayElectionManager extends Observable implements Observer{
 		}
 	}
 	
-	public void monitoring(){
-		
+	public void monitoringRSSI(){
 		relayPositionMonitor.start();
-		relayPositionMonitor.startRSSIMonitor();
 		//relayBatteryMonitor.start();
 		actualStatus = RelayStatus.MONITORING;
 	}
