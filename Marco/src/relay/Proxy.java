@@ -37,9 +37,18 @@ import util.Logger;
 
 
 /**
- * @author Leo Di Carlo
+ * @author Leo Di Carlo, Marco Nanni
  *
  */
+
+/*
+ * Marco: la trasmissione dipende dallo stato in cui si trova il proxy, peccato che siano nomi 
+ * incomprensibili e difatto non si capisca in che situazione si trova il proxy, e perchè ci sono tanti modi di 
+ * inziare una trasmissione verso il client. Se ci fosse un po' di documentazione in giro riuscirei a cavarci i piedi, altrimenti
+ * non resta che chiedere a Foschini.
+ */
+
+
 public class Proxy extends Observable implements Observer, BufferFullListener, BufferEmptyListener, ControllerListener{
 
 	//flags
@@ -119,7 +128,6 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private Observer sessionManager;
 	
 	//INTERFACCIA GRAFICA 
-	private ProxyFrame fProxy;
 	
 	/*
 	 * ***************************************************************
@@ -434,18 +442,25 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			else if(msgReader.getCode() == Parameters.START_TX){
 				/*
 				 * MArco:è arrivato un messaggio START_TX da parte del client
-				 * non è l'inzio ex novo della trasmissione, ma la ripresa della trasmissione, prima interrotta perchè il 
-				 * client aveva il buffer pieno.
-				 * riprendo a mandargli i frames
-				 */
-				
+				  come si comporta il proxy dipende dallo stato in cui si trova il proxy, sono che sono molto criptici
+				  * non si capisce che cosa significano e quando si verificano...
+				*/
 				if(this.timeoutSessionInterrupted!=null)
 				{
 					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
 				}
 				if (state == ProxyState.waitingClientAck){
+					
 					/*
-					 * Marco: questo dovrebbe essere 
+					 * 
+					 * Marco: probabilmente questa è la prima volta che mando qualcosa al client, ma non ne sono affatto sicuro
+					 *  questo dovrebbe essere il corpo del metodo:
+					 * cancello il timeout di attesa della ripresa della trasmissione da parte del client ( se per 10 min non arriva niente, forse il client se ne è andato...)
+					 * mando il messaggio di Start TX al server perchè riprenda anche lui la trasmisssione verso di me
+					 * faccio partire un thread pr la ricezione dello stream dal server
+					 * in realtà la trsmissione non inizia subito: preparo tutto e transito nello stato firstreceivingromServer
+					 * ed aspetto che il buffer si riempia: quando il buffer si riempie il proxy riceve l'evento buffer full
+					 * e lì che inizio la trasmissione.
 					 */
 				
 					fProxy.getController().debugMessage(this.state.name());
@@ -455,7 +470,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					
 					//invio il msg StartTX al server
 					
-					
+					// Marco: in pratica dichiaro qui il thread, ed il codice contenuto nell suo metodo run anzichè farlo in un file separato
 					Thread runner = new Thread(){public void run(){try {
 						rtpReceptionMan.initNormalConnection();
 						System.err.print("Apertura ricezione normale in corso...");
@@ -470,9 +485,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}}};
-					runner.start();
+					runner.start(); // Marco: poi qui faccio partire il thread ( e quindi metto in esecuzione il metodo run)
 					
-					initNormalSession();
+					initNormalSession(); // Marco: qui dovrei far partire la trasmissione verso il client.
 					sendStartTXToServer();
 					
 					System.err.println("initNormalSession() FINITO");
@@ -485,6 +500,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					this.state = ProxyState.FirstReceivingromServer;
 										
 				} else if(state == ProxyState.stopToClient){
+					/*
+					 * Marco: qui ho a tutti gli effetti un'altro modo per mandare lo stream, ma cosa sono sti stati?
+					 * lo stato stop to client vuol dire che prima il client ha fermato la trsmissione mandandomi uno stop tx
+					 * e a questo punto dovrei riprenderla
+					 */
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//resetto il TimeOutSessionInterrupted
@@ -523,6 +543,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						state = ProxyState.transmittingToClient;
 						
 					}else{
+						/*
+						 * MArco: qui dovrebbe essere più chiaro: ricevo uno start TX dal client ed ho il recovery buffer 
+						 * riempito con quanto rimasto dal buffer dell vecchio relay. faccio quindi partire un recovery stream
+						 * che dovrebbe consumare prima il recovery buffer e poi il normal buffer.
+						 */
 						
 						//avvio lo stream di recovery verso il client
 					//	startNormalStreamToClient();
@@ -535,6 +560,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					}
 					
 				} else if (state == ProxyState.attemptingToStart && !this.newProxy){
+					/*
+					 * Marco: qui non ci si capisce nulla: sta fa cendo una trasmissione normale e non di recovery, ma il suo stato
+					 * è comunque trasmitting temp buffer?? 
+					 */
+					
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//avvio lo stream di recovery verso il client
@@ -561,6 +591,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				}
 				this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
 			} else if(msgReader.getCode() == Parameters.STOP_TX){
+				
+				/*
+				 * Marco: qui finalemte le cose sono più chiare: arriva uno stop TX dal client,
+				 * sistemo i timeout e metto in pausa lo stream verso il client
+				 * transito nello stato stoptoclient ( che vorrebbe dire che i client mi ha messo in stop)
+				 */
+				
 				if (state == ProxyState.transmittingToClient){
 					if(this.timeoutSessionInterrupted!=null)
 					{
@@ -603,6 +640,18 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 */
 	@Override
 	public synchronized void bufferFullEventOccurred(BufferFullEvent ev) {
+		/*
+		 * il buffer è pieno: al solito a causa degli stati si capice poco, ma proviamo comunque a fare chiarezza
+		 * in tutti c'è l'invio del messaggio STOPTX al server ( come era logico)
+		 * se il client voleva dei frames, ma nn glieli mandavo perchè avevo il buffer vuoto, allora inizio a mandaglili
+		 * se il client mi aveva mandato uno stoptx io sono in pausa, devo solo dire al server di non mandarmi più robaù
+		 * poi ci sono due stati(receiving transmission e attempting to start che non ho capito, e che comunque mandano solo lo STop tx al server
+		 * infine c'è la firstreceivingromserver che dovrebbe essere se è la prima volta che ricevo dal server, e qui è un mistero:
+		 * perchè setto la soglia al buffer? Se mi arriva un'evento di bufferpieno, vuol dire che la soglia c'è già!
+		 * è più chiaro perchè inizio la trasmissione verso il client: siamo all'inizio ed ho aspettato che il buffer si riempisse
+		 * prima di mandare il flusso al client.
+		 *
+		 */
 		if (debug)
 			System.out.println("Proxy: evento:" + ev);
 		
@@ -663,13 +712,31 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	/* (non-Javadoc)
 	 * @see unibo.core.BufferEmptyListener#bufferEmptyEventOccurred(unibo.core.BufferEmptyEvent)
 	 */
+	
+	
+	
 	@Override
 	public void bufferEmptyEventOccurred(BufferEmptyEvent e) {
+		
+		/*
+		 * Marco:Il buffer è vuoto ( penso nel senso di completamente vuoto.)
+		 * nel caso il buffer che si è vuotato è il recovery buffer faccio partire lo streaming sul normal buffer grazie al metodo
+		 *	 	startNormalStreamToClient e passo nello stato transmittig ( di trasmissione normale)
+		 * 
+		 * in tutti i casi mando la richiesta di frames al server con il messaggio STARTTX
+		 * 
+		 * se stavo trasmettendo al client metto a true il flag  request pending in modo da riprendere la trasmissione
+		 * 		quando arriverà qualcosa da mandargli
+		 * 
+		 * se invece ero in chiusura non mi resta che invocare il metodo dispose del'interfaccia grafica a me collegata
+		 * 
+		 */
 		
 		if (debug)
 			System.out.println("Proxy: evento:" + e);
 		//TODO: da rivedere
 		if (e.getSource() == buffer.getRecoveryBuffer()){
+			
 						
 			startNormalStreamToClient();
 			state = ProxyState.transmittingToClient;
@@ -705,6 +772,17 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 */
 	public boolean startHandoff(int portStremInNewProxy, InetAddress newRelayAddr){
 		
+		/*
+		 * Marco: questo metodo effettua la ridirezione del flusso in uscita dal client al nuovo rela.
+		 * fermo lo stream verso il client, gli mando il messaggio di LEAVE, in modo che lui consideri il nuovo relay 
+		 * ( di cui sa già l'indirizzo, visto che ha ricevuto il messaggio di Election Done) coe relay di riferimento
+		 * e chieda a lui i frames quando il suo buffer si sarà svuotato.
+		 * 
+		 * cambio i parametri di porta ed indirizzo del processo rtpSender con quelli del nuovo relay
+		 * 
+		 * infine riprendo la trasmissione che anzichè essere indirizzata verso il client sarà veso il nuovo relay
+		 */
+		
 //		if (state == ProxyState.transmittingToClient || state == ProxyState.stopToClient){		
 		
 			//metto in pausa la trasmissione verso il client
@@ -718,9 +796,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				rtpSender.removeTarget(InetAddress.getByName(clientAddress), clientStreamPort);
 				
 				//dirotto la connessione in out verso il client al new proxy
-				this.clientStreamPort = portStremInNewProxy; 
+				this.clientStreamPort = portStremInNewProxy;  // port stremInNewProxy è la porta sulla quale il nuovo proxy riceve il flusso dal vecchio proxy
 				
-				//aggiungo il nuovo relay cm destinatario inserendo la porta di un proxy creato ad hoc 
+				//aggiungo il nuovo relay cm destinatario inserendo la porta e l'indirizzo del proxy sul nuovo relay
 				rtpSender.addDestination(newRelayAddr, clientStreamPort);
 				
 			} catch (UnknownHostException e) {
@@ -733,7 +811,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				return false;
 			}
 			 
-			//in questo caso il client � il new proxy
+			//in questo caso il client è il new proxy
 			startNormalStreamToClient(); 
 			
 			return true;
@@ -774,9 +852,18 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void initNormalSession(){
 		
 		try {
-			//this.rtpReceptionMan.initNormalConnection();
-
+			/*
+			 * Marco:questo metodo dovrebbe inizializzare una sessione di trasmissione normale , dal normal buffer
+			 */
+			
+			//this.rtpReceptionMan.initNormalConnection(); // Marco: forse è commentato perchè la parte di ricezione è già presente nel metodo update quando arriva una start tx dal client, e quindi 
+			
+			/* Marco: forse è commentato perchè la parte di ricezione dal server è già presente nel metodo update
+			 *  quando arriva una start tx  dal client, e quindi bisogna fare solo la trasmissione verso il client stesso, ma che casino!
+			*/
+			
 		//	rtpMux = new RTPMultiplexer(this.rtpReceptionMan.getNormalTracksFormat());
+			// Marco: rtp mux dovrebbe essere commentato perchè il multiplexer serve solo nella fase di ricovery, non nella trasmissione normale
 			rtpSender = new RTPSenderPS(outStreamPort);
 			rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
 			
@@ -790,6 +877,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 	
 	private void initRecoverySession(int senderPort, InetAddress senderAddress) {
+		
+		/*
+		 * Marco: questa dovrebbe preparare una  trasmissione che sfrutta il recovery buffer
+		 */
 
 		//imposto la porta da cui il server invia lo stream
 		//this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
@@ -823,6 +914,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 
 	
 	private void startNormalStreamToClient(){
+		/*
+		 * Questa funzione dovrebbe far partire lo stream sul normal buffer
+		 */
+		
 		//si occupa anche di attaccare il mux al buffer normale
 		if (muxTh == null || state == ProxyState.receivingRetransmission || state == ProxyState.TransmittingTempBuffer){
 		
@@ -853,6 +948,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 	private void startRecoveryStreamToClient(){
+		/*
+		 * Marco: questa dovrebbe far partire lo stream usando i frames presenti nel recovery buffer
+		 */
+		
 		//si occupa anche di attaccare il mux al buffer normale
 		if (muxThR == null || state == ProxyState.receivingRetransmission || state == ProxyState.TransmittingTempBuffer){
 		
@@ -886,11 +985,20 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 	private void pauseNormalStreamToClient() {
+		/*
+		 * Marco: questa funzione ferma lo stream verso il client, la domanda è : perchè non c'è anche la versione da usare
+		 * nel caso si stiano mando i frames del recovery buffer? 
+		 * 
+		 */
+		
 		muxTh.suspend();
 		System.out.println("Trasmissione Proxy -> Client sospesa");	
 	}
 	
 	private void startRecoveryStreamToClientOLD(){
+		/*
+		 * Marco: vecchia versione, non credo che venga mai usata
+		 */
 		
 		try {
 			/**
@@ -917,6 +1025,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 
 	private void sendForwardReqFileToServer(){
+		/*
+		 * Quando all'inizio il client chiede la lista delle canzoni disponibili sul server, questa funzione passa la richiesta al server
+		 * la domanda è: ma non dovrebbe essere fatto dal session Manager ed il proxy instanziato solo all'atto della trasmissione del flusso?
+		 */
+		
 		try {
 			this.inStreamPort = rtpReceptionMan.getNormalReceivingPort();
 			//Creo un messaggio FORWARD_REQ_FILE e lo invio al server
@@ -942,6 +1055,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	public int getInStreamPort() {
 		return inStreamPort;
 	}
+	
+	//@ TODO commentare i metodi per preparare i messaggi.
 
 	private void sendStartTXToServer(){
 		try {
@@ -1040,6 +1155,26 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}		
 	}
 }
+
+/*
+ * Marco: guida agli stati: è imprecisa, visto che non ho documentazione, anzi potrebbe addirittura esser sbagliata: ma tanto vale provarci!
+ * 
+ * FirstReceivingromServer: qui sono all'inizio della trasmissione: il client mi ha mandato il primo startTX, e io ho fatto lo stesso con
+ * 		il server: devo aspettare che il buffer si riempia prima di iniziare a trasmettere al client
+ * 
+ * stopToClient: il client mi ha mandato uno STOPTX, quindi fermo la trasmissione verso di lui
+ * 
+ * transmittingToClient: è lo stato "normale" sto trasmettendo il flusso al client
+ * 
+ * waitingClientAck: dovrebbe essere lo stato precedente alla prima trasmissione verso il client; solo che è strano, ci vado anche in
+ * 		seguito alla creazione di un proxy di recovery dovuto ad una rielezione. Se così fosse non copisco la transazioe di stati 
+ * 		e la ricezione dei messaggi che mi fanno mandare prima il recovery buffer e poi il normal buffer.
+ * 
+ * STATI NASCOSTI:
+ * c'è inoltre il flag ending che indica che la canzone sta finendo, una volta svuotato il buffer si può chiudere la baracca.
+ * 
+ */
+
 
 /*
  * Carlo: Ho aggiunto uno stato di handoff e uno di ended per indicare che il proxy � stato terminato.
