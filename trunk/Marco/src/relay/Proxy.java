@@ -192,6 +192,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	public int getRecoveryStreamInPort() {
 		return recoveryStreamInPort;
 	}
+	
+	
 
 	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort){
 //	TODO: controllare che le porte siano tutte ben mappate
@@ -226,7 +228,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
 			
 			//imposto la porta di ricezione normale
-			//this.rtpReceptionMan.setNormalReceivingPort(proxyStreamPortIn);
+			//this.rtpReceptionMan.setNormalReceivingPort(proxyStreamPortIn);// Marco: perchè è commentato?
 		} catch (IncompatibleSourceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -235,7 +237,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			e.printStackTrace();
 		}
 		
-		
+		/*
+		 * Questo thread riceve il flusso dal server
+		 * Nota: dentro al metodo intNormalConnection c'è un riferimento statico all'indirizzo del server
+		 * se non arriva niente il thred si blocca, visto che dentro il metodo 
+		 */
 		
 		Thread runner1 = new Thread(){public void run(){try {
 			rtpReceptionMan.initNormalConnection();
@@ -256,7 +262,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.sendRedirectToServer();
 
 		
-		
+		/*
+		 * Ho un'altro thread in ricezione: quello che riceve il flusso dal vecchio relay
+		 */
 		Thread runner2 = new Thread(){public void run(){try {
 			rtpReceptionMan.initRecoveryConnection(outStreamPort, oldProxyAddress);
 			System.err.print("Apertura ricezione recovery in corso...");
@@ -275,7 +283,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 		this.recoveryStreamInPort = rtpReceptionMan.getRecoveryReceivingPort();	
 		//inizializzo la sessione di recovery (quella tra old proxy e new proxy)
-//		this.initRecoverySession(recoverySenderPort, recoverySenderAddress);
+//		this.initRecoverySession(recoverySenderPort, recoverySenderAddress); // Marco: non ci sto capendo niente: perchè è commentata?
 		
 		//inizializzo la sessione normale (quella tra il new proxy e il client)
 		this.initNormalSession();
@@ -370,6 +378,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			}
 			
 			if (msgReader.getCode() == Parameters.ACK_RELAY_FORW && state == ProxyState.waitingServerRes){
+				/*
+				 * Marco: dovrebbe essere l'inizio della trasmissione nel caso il proxy sia stato creato a seguito di una richiesta
+				 * di una canzone da parte di un client e non a seguito di una rielezione.
+				 */
 			
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
@@ -417,13 +429,24 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
 				
-			} else if(msgReader.getCode() == Parameters.START_TX){
+			} 
+			
+			else if(msgReader.getCode() == Parameters.START_TX){
+				/*
+				 * MArco:è arrivato un messaggio START_TX da parte del client
+				 * non è l'inzio ex novo della trasmissione, ma la ripresa della trasmissione, prima interrotta perchè il 
+				 * client aveva il buffer pieno.
+				 * riprendo a mandargli i frames
+				 */
 				
 				if(this.timeoutSessionInterrupted!=null)
 				{
 					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
 				}
 				if (state == ProxyState.waitingClientAck){
+					/*
+					 * Marco: questo dovrebbe essere 
+					 */
 				
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());

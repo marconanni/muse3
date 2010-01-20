@@ -154,7 +154,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		System.out.println("Proxy receiver: attesa ricezione stream...");
 
 		//ricezione dello stream RTP
-		normalDataIn = normalReceiver.receiveData();
+		normalDataIn = normalReceiver.receiveData(); // Marco : suppongo questa receive sia bloccante
 
 		System.out.println("Proxy receiver: datasource ricevuto...");
 
