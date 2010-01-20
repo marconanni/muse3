@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMI verified="false" xmi.version="1.2" timestamp="2009-11-17T13:53:30" xmlns:UML="http://schema.omg.org/spec/UML/1.3" >
+ <XMI.header>
+  <XMI.documentation>
+   <XMI.exporter>umbrello uml modeller http://uml.sf.net</XMI.exporter>
+   <XMI.exporterVersion>1.5.8</XMI.exporterVersion>
+   <XMI.exporterEncoding>UnicodeUTF8</XMI.exporterEncoding>
+  </XMI.documentation>
+  <XMI.metamodel xmi.version="1.3" href="UML.xml" xmi.name="UML" />
+ </XMI.header>
+ <XMI.content>
+  <UML:Model isSpecification="false" isAbstract="false" isLeaf="false" xmi.id="m1" isRoot="false" name="UML Model" >
+   <UML:Namespace.ownedElement>
+    <UML:Stereotype visibility="public" isSpecification="false" namespace="m1" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="folder" name="folder" />
+    <UML:Stereotype visibility="public" isSpecification="false" namespace="m1" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="datatype" name="datatype" />
+    <UML:Model stereotype="folder" visibility="public" isSpecification="false" namespace="m1" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Logical View" name="Logical View" >
+     <UML:Namespace.ownedElement>
+      <UML:Package stereotype="folder" visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Datatypes" name="Datatypes" >
+       <UML:Namespace.ownedElement>
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="MsJo3mIaMBSi" name="int" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="UX18GTAYnAwk" name="char" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="TlptORjkI2ZL" name="bool" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="npw90OrUtqc9" name="float" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Iki5venMNcDl" name="double" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="4wUMz3hmsbtq" name="short" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="xiKqXu0pdguY" name="long" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="IhsfI5PM2tgz" name="unsigned int" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="uLjmvaaqIuhn" name="unsigned short" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="mfcPJUvbAnGS" name="unsigned long" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="rdmtWQqQjZAe" name="string" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="ZlODeJKF7DHv" name="boolean" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Qn8sG6RT7Z6e" name="byte" />
+        <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Ymw5WJGAaYQg" name="String" />
+       </UML:Namespace.ownedElement>
+      </UML:Package>
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="aMdJp1vxCGiv" name="Relay" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="k0Ae6Tf8fQQZ" name="Client" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="E0BeFeOEo2IG" name="Big Boss Relay" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="5Zc0IlOAEqsF" name="Vecchio Relay secondario" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="ZK6AIOtgW8XN" name="Nuovo Relay secondario" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="e02uNwZr24EN" name="new_class" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="rTGmIXZaJi4Y" name="Server" />
+     </UML:Namespace.ownedElement>
+     <XMI.extension xmi.extender="umbrello" >
+      <diagrams>
+       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpackage="1" showstereotype="1" name="Protocollo scambio sessione esistente" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" canvasheight="1273" canvaswidth="972" localid="gQv6qT1iZKTY" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="ghOTvqKZaB30" documentation="" showscope="1" snapgrid="0" showatts="1" type="3" >
+        <widgets>
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="Vecchio Relay" x="295" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="3oBhTZAMNTtv" width="134" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="aMdJp1vxCGiv" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="Nuovo Relay" x="576" decon="0" showstereotype="1" y="55" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="3oBhTZAMNTtv" width="126" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="aMdJp1vxCGiv" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="" x="868" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="wu6Jk0Z4zmXW" width="56" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="k0Ae6Tf8fQQZ" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="" x="89" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="gQv6qT1iZKTY" width="107" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="E0BeFeOEo2IG" height="25" drawasactor="0" />
+         <notewidget width="220" showstereotype="1" x="400" noteType="0" y="164" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="53" linecolor="none" xmi.id="YiP3SH3gbIbS" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Messaggio in Broadcast che indica a tutti qual'è il nuovo relay" />
+         <notewidget width="261" showstereotype="1" x="375" noteType="0" y="258" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="59" linecolor="none" xmi.id="Jk2JK6n9MYvE" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Conferma al vecchio relay che sono disponibile a subentrargli e gli chiedo di inviarmi le sessioni in corso" />
+         <notewidget width="267" showstereotype="1" x="370" noteType="0" y="356" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="195" linecolor="none" xmi.id="rVNuiwZzhhbo" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Per ogni Cliente servito dal vecchio relay manda: &#xa;IP del client( identifica anche la sessione)&#xa;Porta Z dove il client riceve lo streaming&#xa;Porta Y dove il vecchio relay riceve lo stream dal Server&#xa;Porta W dove il vecchio relay manda lo steam al Client&#xa;Porta X da cui il server invia lo stream al vecchio relay" />
+         <notewidget width="264" showstereotype="1" x="371" noteType="0" y="565" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="84" linecolor="none" xmi.id="DhWhrMsfpSLj" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="A questo punto il nuovo relay prepara per ogni sessione i proxy. Ogni proxy ha sia il buffer normale che quello temporaneo per i frames del vecchio relay ed un agente UDP" />
+         <notewidget width="229" showstereotype="1" x="126" noteType="0" y="487" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="161" linecolor="none" xmi.id="e5rxoIsAas6V" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Il messaggio fa sì che il server consideri il suo mittente come new relay, e, per ogni sessione, interrompa il flusso verso il vecchio relay, ridirige la sessione sull'indirizzo del nuovo relay, usando le stesse porte e, in seguito (non è specificato quanto dopo) riprende la trasmissione." />
+         <notewidget width="245" showstereotype="1" x="644" noteType="0" y="778" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="218" linecolor="none" xmi.id="D2Qwuac6cNJz" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Con questo messaggio il relay interrompe lo stream verso il client; Il client sfrutta le informazioni del messaggio ELECTION_DONE per cambiare l'indirizzo del relay dal vecchio al nuovo.riduce la soglia a quella normale : clt_thr. Quando la dimensione del suo buffer scende sotto questa soglia , invia il messaggio TX al nuovo relay, se questo è pronto gli manda il flusso, altrimenti il client aspetta fiducioso." />
+         <notewidget width="252" showstereotype="1" x="377" noteType="0" y="837" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="176" linecolor="none" xmi.id="k2KVZsVpoi6A" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Il vecchio relay prepara gli  Agent UDP relativi ai normal buffers alla spedizione dei frames: per ogni sessione RTP comincia a svuotare il  relativo NORMAL BUFFER estraendo da esso i frames ed inserendoli in pacchetti UDP  indirizzati alla giusta porta di ricezione sul NEW RELAY (conosciuta tramite il contenuto  di ACK_SESSION)." />
+         <notewidget width="243" showstereotype="1" x="482" noteType="0" y="1050" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="149" linecolor="none" xmi.id="hTxUyGE0YhXO" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="il nuovo relay mette i resti del buffer del vecchio relay nel Recovery Buffer e quelli provenienti dal server nel normal buffer. Quando riceve un messaggio TX da parte del client inizia a spedire prima i frames del recovery buffer e poi quelli del normal buffer." />
+        </widgets>
+        <messages>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="360" showstereotype="1" y="590" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="50" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="DqTchwzact7c" height="32" sequencemessagetype="1000" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="gQv6qT1iZKTY" textid="jnAjRSu9wZyI" operation="REDIRECT()" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="120" showstereotype="1" y="674" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="218" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="vMK0yvo9HzwC" height="8" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="125" showstereotype="1" y="655" text=": REDIRECT()" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="86" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="jnAjRSu9wZyI" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="wu6Jk0Z4zmXW" textid="HGIvFqn4ZHjP" operation="LEAVE()" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="764" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="532" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="C4nDNI4qlUEU" height="8" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="368" showstereotype="1" y="745" text=": LEAVE()" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="64" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="HGIvFqn4ZHjP" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="wu6Jk0Z4zmXW" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="1078" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="532" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="TGglWdZAcg4G" height="8" sequencemessagetype="1001" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="gQv6qT1iZKTY" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="120" showstereotype="1" y="1083" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="218" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="zFyFEI8OVNiB" height="8" sequencemessagetype="1001" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="mlxpsBpXLWEm" operation="ELECTION_DONE(ip del nuovo relay)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="124" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="ZWvPLhrjcIAl" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="368" showstereotype="1" y="105" text=": ELECTION_DONE(ip del nuovo relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="234" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="mlxpsBpXLWEm" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" operation="" linewidth="none" seqnum="" xclicked="691" usesdiagramusefillcolor="1" x="640" showstereotype="1" y="1239" widgetaid="3oBhTZAMNTtv" yclicked="142" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="339" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="H4W5d300Mhq5" height="10" sequencemessagetype="1004" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="MlxnlV0gdeuq" operation="REQUEST SESSION()" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="235" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="wcdEjpFboEHb" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="368" showstereotype="1" y="216" text=": REQUEST SESSION()" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="141" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="MlxnlV0gdeuq" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="lTgdJVovXBL6" operation="SESSION_INFO(molto contenuto, vedi note)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="342" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="LnwbOGMM35p3" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="368" showstereotype="1" y="323" text=": SESSION_INFO(molto contenuto, vedi note)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="279" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="lTgdJVovXBL6" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="BaEilXmFs2Ey" operation="ACK SESSION(ip client, porta k verso cui spedire al nuovo relay i frames rimasti)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="711" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="wLl0QZ1B2hoJ" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="368" showstereotype="1" y="692" text=": ACK SESSION(ip client, porta k verso cui spedire al nuovo relay i frames rimasti)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="498" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="BaEilXmFs2Ey" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="KSaY8K3tZvvm" operation="invio residuo dei buffer" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="810" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="iagSY61aF1H2" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="368" showstereotype="1" y="791" text=": invio residuo dei buffer" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="154" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="KSaY8K3tZvvm" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="wu6Jk0Z4zmXW" textid="ZxcFUPsNN6JD" operation="ELECION_ DONE(Ip del nuovo relay)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="363" showstereotype="1" y="150" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="532" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="pMDlQwCcyXrb" height="8" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="368" showstereotype="1" y="131" text=": ELECION_ DONE(Ip del nuovo relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="232" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="ZxcFUPsNN6JD" height="19" />
+         </messagewidget>
+        </messages>
+        <associations/>
+       </diagram>
+       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpackage="1" showstereotype="1" name="nuovo protocollo cambio sessione relay secondario" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" canvasheight="1360" canvaswidth="1098" localid="PlJWFEBmxDTW" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="SMYAwEaVJZ3Y" documentation="" showscope="1" snapgrid="0" showatts="1" type="3" >
+        <widgets>
+         <notewidget width="221" showstereotype="1" x="611" noteType="0" y="186" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="269" linecolor="none" xmi.id="YiP3SH3gbIbS" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Messaggio in Broadcast che indica a tutti qual'è il nuovo relay. Visto che è in broadcast viene visto anche dai client non interessati dalla rielezione ( ad esempio quelli serviti da un'altro relay). Ricordando che ci può essere un solo cambio di relay in corso alla volta, i client non interessati rimangono in ascolto solo di eventuali altri messaggi di ELECTION_DONE, di cui controlleranno l'indirizzo del vecchio relay per capire se il relay che sta andando via è il suo oppure un'altro." />
+         <notewidget width="244" showstereotype="1" x="297" noteType="0" y="364" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="85" linecolor="none" xmi.id="Jk2JK6n9MYvE" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Conferma al vecchio relay che sono disponibile a subentrargli e gli chiedo di inviarmi le sessioni in corso" />
+         <notewidget width="254" showstereotype="1" x="293" noteType="0" y="483" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="194" linecolor="none" xmi.id="rVNuiwZzhhbo" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Per ogni Cliente servito dal vecchio relay manda: &#xa;IP del client( identifica anche la sessione)&#xa;Porta Z dove il client riceve lo streaming&#xa;Porta Y dove il vecchio relay riceve lo stream dal Server&#xa;Porta W dove il vecchio relay manda lo steam al Client&#xa;Porta X da cui il server invia lo stream al vecchio relay" />
+         <notewidget width="254" showstereotype="1" x="294" noteType="0" y="692" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="95" linecolor="none" xmi.id="DhWhrMsfpSLj" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="A questo punto il nuovo relay prepara per ogni sessione i proxy. Ogni proxy ha sia il buffer normale che quello temporaneo per i frames del vecchio relay ed un agente UDP" />
+         <notewidget width="194" showstereotype="1" x="69" noteType="0" y="825" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="189" linecolor="none" xmi.id="e5rxoIsAas6V" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Il messaggio fa sì che il server consideri il suo mittente come new relay, e, per ogni sessione, interrompa il flusso verso il vecchio relay, ridirige la sessione sull'indirizzo del nuovo relay, usando le stesse porte e, in seguito (non è specificato quanto dopo) riprende la trasmissione." />
+         <notewidget width="263" showstereotype="1" x="567" noteType="0" y="925" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="203" linecolor="none" xmi.id="D2Qwuac6cNJz" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Con questo messaggio il relay interrompe lo stream verso il client; Il client sfrutta le informazioni del messaggio ELECTION_DONE per cambiare l'indirizzo del relay dal vecchio al nuovo.riduce la soglia a quella normale : clt_thr. Quando la dimensione del suo buffer scende sotto questa soglia , invia il messaggio TX al nuovo relay, se questo è pronto gli manda il flusso, altrimenti il client aspetta fiducioso." />
+         <notewidget width="256" showstereotype="1" x="295" noteType="0" y="972" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="167" linecolor="none" xmi.id="k2KVZsVpoi6A" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Il vecchio relay prepara gli  Agent UDP relativi ai normal buffers alla spedizione dei frames: per ogni sessione RTP comincia a svuotare il  relativo NORMAL BUFFER estraendo da esso i frames ed inserendoli in pacchetti UDP  indirizzati alla giusta porta di ricezione sul NEW RELAY (conosciuta tramite il contenuto  di ACK_SESSION)." />
+         <notewidget width="246" showstereotype="1" x="460" noteType="0" y="1158" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="152" linecolor="none" xmi.id="hTxUyGE0YhXO" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="il nuovo relay mette i resti del buffer del vecchio relay nel Recovery Buffer e quelli provenienti dal server nel normal buffer. Quando riceve un messaggio TX da parte del client inizia a spedire prima i frames del recovery buffer e poi quelli del normal buffer." />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="" x="8" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="gQv6qT1iZKTY" width="107" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="E0BeFeOEo2IG" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="Nuovo Relay" x="493" decon="0" showstereotype="1" y="55" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="3oBhTZAMNTtv" width="126" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="aMdJp1vxCGiv" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="Vecchio Relay" x="220" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="3oBhTZAMNTtv" width="134" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="aMdJp1vxCGiv" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="" x="811" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="wu6Jk0Z4zmXW" width="56" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="k0Ae6Tf8fQQZ" height="25" drawasactor="0" />
+         <notewidget width="247" showstereotype="1" x="299" noteType="0" y="182" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="124" linecolor="none" xmi.id="YiP3SH3gbIbS" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Messaggio in Broadcast che indica a tutti qual'è il nuovo relay. ogni possibile realy che ha partecipato alla rielezione confronta ip del nuovo relay con il proprio. se è il suo significa che ha vinto lui." />
+         <notewidget width="193" showstereotype="1" x="76" noteType="0" y="152" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="139" linecolor="none" xmi.id="bBvoy9aeB05z" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="con l'election done big boss relay sa quale realy se ne sta andando, dal suo punto di vista, il relay verso il quale dovra interrompere la trasmissione quando arriverà il REDIRECT()" />
+        </widgets>
+        <messages>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="554" showstereotype="1" y="713" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="50" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="DqTchwzact7c" height="32" sequencemessagetype="1000" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="wu6Jk0Z4zmXW" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="557" showstereotype="1" y="1328" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="281" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="TGglWdZAcg4G" height="8" sequencemessagetype="1001" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="gQv6qT1iZKTY" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="62" showstereotype="1" y="1271" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="493" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="zFyFEI8OVNiB" height="8" sequencemessagetype="1001" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="wu6Jk0Z4zmXW" textid="0uFIfqndaYXR" operation="is my relay changing?(ip vecchio relay)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="837" showstereotype="1" y="167" widgetaid="wu6Jk0Z4zmXW" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="50" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="905cbZO4qMR1" height="32" sequencemessagetype="1000" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="842" showstereotype="1" y="148" text=": is my relay changing?(ip vecchio relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="252" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="0uFIfqndaYXR" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="kAWclIDD3LjG" operation="ELECTION_DONE" linewidth="none" seqnum="0" xclicked="449" usesdiagramusefillcolor="1" x="450" showstereotype="1" y="155" widgetaid="3oBhTZAMNTtv" yclicked="155" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="107" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="4iueVRekcFrm" height="10" sequencemessagetype="1004" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="455" showstereotype="1" y="136" text="0: ELECTION_DONE" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="125" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="kAWclIDD3LjG" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="wu6Jk0Z4zmXW" textid="Pgg0tVmbgGEP" operation="ELECTION_DONE" linewidth="none" seqnum="" xclicked="701" usesdiagramusefillcolor="1" x="702" showstereotype="1" y="154" widgetaid="wu6Jk0Z4zmXW" yclicked="154" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="138" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="WTVXNm6PSy4y" height="10" sequencemessagetype="1004" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="707" showstereotype="1" y="135" text=": ELECTION_DONE" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="117" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="Pgg0tVmbgGEP" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" operation="" linewidth="none" seqnum="" xclicked="217" usesdiagramusefillcolor="1" x="218" showstereotype="1" y="1293" widgetaid="3oBhTZAMNTtv" yclicked="302" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="339" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="Il08yP3kHvAn" height="10" sequencemessagetype="1004" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="s3zKWdfgOmbt" operation="REQUEST_SESSION()" linewidth="none" seqnum="1" usesdiagramusefillcolor="1" x="288" showstereotype="1" y="353" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="DfwaggsZofNW" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="293" showstereotype="1" y="334" text="1: REQUEST_SESSION()" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="151" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="s3zKWdfgOmbt" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="VJpsnftnyOOd" operation="SESSION_INFO(molto contenuto, vedere note)" linewidth="none" seqnum="2" usesdiagramusefillcolor="1" x="288" showstereotype="1" y="470" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="8yXewkHqKvUC" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="293" showstereotype="1" y="451" text="2: SESSION_INFO(molto contenuto, vedere note)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="303" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="VJpsnftnyOOd" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="DeqVZIi2bVuN" operation="im the winner?(ip nuovo relay)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="554" showstereotype="1" y="181" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="50" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="4kPde7ym4VO0" height="32" sequencemessagetype="1000" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="559" showstereotype="1" y="162" text=": im the winner?(ip nuovo relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="201" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="DeqVZIi2bVuN" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="gQv6qT1iZKTY" textid="9tEQoeq7hTKr" operation="REDIRECT()" linewidth="none" seqnum="2" usesdiagramusefillcolor="1" x="62" showstereotype="1" y="813" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="493" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="mopuztvMiX0j" height="8" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="67" showstereotype="1" y="794" text="2: REDIRECT()" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="94" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="9tEQoeq7hTKr" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="gQv6qT1iZKTY" textid="o5WvzkLlN9t4" operation="ELECTION DONE" linewidth="none" seqnum="" xclicked="222" usesdiagramusefillcolor="1" x="62" showstereotype="1" y="125" widgetaid="gQv6qT1iZKTY" yclicked="272" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="171" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="g1QToFNn6H7m" height="10" sequencemessagetype="1004" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="67" showstereotype="1" y="106" text=": ELECTION DONE" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="115" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="o5WvzkLlN9t4" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="jgirXlSgeEeo" operation="ACK_SESSION(ip client, porta k verso qui spedire al nuovo realy i frames rimasti)" linewidth="none" seqnum="2" usesdiagramusefillcolor="1" x="288" showstereotype="1" y="872" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="RkKiq7UvdQuL" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="293" showstereotype="1" y="853" text="2: ACK_SESSION(ip client, porta k verso qui spedire al nuovo realy i frames rimasti)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="509" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="jgirXlSgeEeo" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="wu6Jk0Z4zmXW" textid="MxQxLIH3wxuR" operation="LEAVE()" linewidth="none" seqnum="3" usesdiagramusefillcolor="1" x="288" showstereotype="1" y="910" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="281" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="mIxlOwzneHVU" height="8" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="293" showstereotype="1" y="891" text="3: LEAVE()" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="72" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="MxQxLIH3wxuR" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="0BcGe5cZVYvl" operation="invio residuo del buffer" linewidth="none" seqnum="4" usesdiagramusefillcolor="1" x="288" showstereotype="1" y="955" widgetaid="3oBhTZAMNTtv" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="48" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="K7LWl9I263O0" height="20" sequencemessagetype="1001" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="293" showstereotype="1" y="936" text="4: invio residuo del buffer" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="704" width="162" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="0BcGe5cZVYvl" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="3oBhTZAMNTtv" textid="A9enj7Jct8aZ" operation="ELECTION_DONE(ip vecchio relay, ip nuovo relay)" linewidth="none" seqnum="0" xclicked="369" usesdiagramusefillcolor="1" x="288" showstereotype="1" y="109" widgetaid="3oBhTZAMNTtv" yclicked="109" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="187" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="eyvu0zwMxwXZ" height="10" sequencemessagetype="1003" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="293" showstereotype="1" y="90" text="0: ELECTION_DONE(ip vecchio relay, ip nuovo relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="322" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="A9enj7Jct8aZ" height="19" />
+         </messagewidget>
+        </messages>
+        <associations/>
+       </diagram>
+       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpackage="1" showstereotype="1" name="nuovo protocollo scambio di sessione Big Boss Relay" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" canvasheight="1075" canvaswidth="1133" localid="s9RyPl15BYl4" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="Lr09HfHPQtO9" documentation="" showscope="1" snapgrid="0" showatts="1" type="3" >
+        <widgets>
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="" x="21" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="WwXUot98jAF0" width="61" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="rTGmIXZaJi4Y" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="Vecchio Big Boss" x="194" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="nUNDNjNCAdwQ" width="207" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="E0BeFeOEo2IG" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="Nuovo Big Boss" x="482" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="MHr3P63CaOOw" width="199" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="E0BeFeOEo2IG" height="25" drawasactor="0" />
+         <objectwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" usesdiagramusefillcolor="1" instancename="Relay secondario" x="798" decon="0" showstereotype="1" y="48" font="DejaVu Sans,9,-1,0,50,0,1,0,0,0" localid="s9RyPl15BYl4" width="153" isinstance="0" multipleinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="aMdJp1vxCGiv" height="25" drawasactor="0" />
+         <notewidget width="50" showstereotype="1" x="375" noteType="0" y="1001" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="hTxUyGE0YhXO" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="il nuovo relay mette i resti del buffer del vecchio relay nel Recovery Buffer e quelli provenienti dal server nel normal buffer. Quando riceve un messaggio TX da parte del client inizia a spedire prima i frames del recovery buffer e poi quelli del normal buffer." />
+         <notewidget width="50" showstereotype="1" x="253" noteType="0" y="1021" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="D2Qwuac6cNJz" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Con questo messaggio il relay interrompe lo stream verso il client; Il client sfrutta le informazioni del messaggio ELECTION_DONE per cambiare l'indirizzo del relay dal vecchio al nuovo.riduce la soglia a quella normale : clt_thr. Quando la dimensione del suo buffer scende sotto questa soglia , invia il messaggio TX al nuovo relay, se questo è pronto gli manda il flusso, altrimenti il client aspetta fiducioso." />
+         <notewidget width="50" showstereotype="1" x="360" noteType="0" y="904" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="k2KVZsVpoi6A" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Il vecchio relay prepara gli  Agent UDP relativi ai normal buffers alla spedizione dei frames: per ogni sessione RTP comincia a svuotare il  relativo NORMAL BUFFER estraendo da esso i frames ed inserendoli in pacchetti UDP  indirizzati alla giusta porta di ricezione sul NEW RELAY (conosciuta tramite il contenuto  di ACK_SESSION)." />
+         <notewidget width="50" showstereotype="1" x="210" noteType="0" y="842" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="e5rxoIsAas6V" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Il messaggio fa sì che il server consideri il suo mittente come new relay, e, per ogni sessione, interrompa il flusso verso il vecchio relay, ridirige la sessione sull'indirizzo del nuovo relay, usando le stesse porte e, in seguito (non è specificato quanto dopo) riprende la trasmissione." />
+         <notewidget width="50" showstereotype="1" x="228" noteType="0" y="936" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="DhWhrMsfpSLj" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="A questo punto il nuovo relay prepara per ogni sessione i proxy. Ogni proxy ha sia il buffer normale che quello temporaneo per i frames del vecchio relay ed un agente UDP" />
+         <notewidget width="50" showstereotype="1" x="495" noteType="0" y="965" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="rVNuiwZzhhbo" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Per ogni Cliente servito dal vecchio relay manda: &#xa;IP del client( identifica anche la sessione)&#xa;Porta Z dove il client riceve lo streaming&#xa;Porta Y dove il vecchio relay riceve lo stream dal Server&#xa;Porta W dove il vecchio relay manda lo steam al Client&#xa;Porta X da cui il server invia lo stream al vecchio relay" />
+         <notewidget width="50" showstereotype="1" x="588" noteType="0" y="871" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="Jk2JK6n9MYvE" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Conferma al vecchio relay che sono disponibile a subentrargli e gli chiedo di inviarmi le sessioni in corso" />
+         <notewidget width="218" showstereotype="1" x="643" noteType="0" y="196" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="271" linecolor="none" xmi.id="YiP3SH3gbIbS" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Messaggio in Broadcast che indica a tutti qual'è il nuovo relay. Visto che è in broadcast viene visto anche dai client non interessati dalla rielezione ( ad esempio quelli serviti da un'altro relay). Ricordando che ci può essere un solo cambio di relay in corso alla volta, i client non interessati rimangono in ascolto solo di eventuali altri messaggi di ELECTION_DONE, di cui controlleranno l'indirizzo del vecchio relay per capire se il relay che sta andando via è il suo oppure un'altro." />
+         <notewidget width="50" showstereotype="1" x="457" noteType="0" y="886" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="YiP3SH3gbIbS" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="Messaggio in Broadcast che indica a tutti qual'è il nuovo relay. ogni possibile realy che ha partecipato alla rielezione confronta ip del nuovo relay con il proprio. se è il suo significa che ha vinto lui." />
+         <notewidget width="50" showstereotype="1" x="560" noteType="0" y="801" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="bBvoy9aeB05z" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" text="con l'election done big boss relay sa quale realy se ne sta andando, dal suo punto di vista, il relay verso il quale dovra interrompere la trasmissione quando arriverà il REDIRECT()" />
+        </widgets>
+        <messages>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="nUNDNjNCAdwQ" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="51" showstereotype="1" y="724" widgetaid="WwXUot98jAF0" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="254" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="3ejmxNwM3GI6" height="32" sequencemessagetype="1000" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="MHr3P63CaOOw" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="297" showstereotype="1" y="744" widgetaid="nUNDNjNCAdwQ" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="292" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="zCRAJSo1ClO8" height="32" sequencemessagetype="1000" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="s9RyPl15BYl4" operation="" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="581" showstereotype="1" y="772" widgetaid="MHr3P63CaOOw" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="301" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="k74PcOFZYejq" height="32" sequencemessagetype="1000" />
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="nUNDNjNCAdwQ" textid="pmHmdzqTkjf0" operation="ELECTION_DONE(ip vecchio relay, ip nuovo relay)" linewidth="none" seqnum="0" xclicked="434" usesdiagramusefillcolor="1" x="298" showstereotype="1" y="106" widgetaid="nUNDNjNCAdwQ" yclicked="106" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="147" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="Op7ohZUKDMQb" height="10" sequencemessagetype="1003" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="303" showstereotype="1" y="87" text="0: ELECTION_DONE(ip vecchio relay, ip nuovo relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="322" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="pmHmdzqTkjf0" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="WwXUot98jAF0" textid="IylmgUPgHzdq" operation="ELECTION_DONE" linewidth="none" seqnum="0" xclicked="134" usesdiagramusefillcolor="1" x="52" showstereotype="1" y="111" widgetaid="WwXUot98jAF0" yclicked="111" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="93" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="Ex3WANujAfzw" height="10" sequencemessagetype="1004" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="57" showstereotype="1" y="92" text="0: ELECTION_DONE" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="125" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="IylmgUPgHzdq" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="MHr3P63CaOOw" textid="3LCm7sEVYWS9" operation="ELECTION_DONE" linewidth="none" seqnum="0" xclicked="452" usesdiagramusefillcolor="1" x="453" showstereotype="1" y="137" widgetaid="MHr3P63CaOOw" yclicked="137" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="129" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="c1PdXZyQH95G" height="10" sequencemessagetype="1004" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="458" showstereotype="1" y="118" text="0: ELECTION_DONE" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="125" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="3LCm7sEVYWS9" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="s9RyPl15BYl4" textid="p2D69IKBdUxj" operation="ELECTION_DONE" linewidth="none" seqnum="0" xclicked="707" usesdiagramusefillcolor="1" x="708" showstereotype="1" y="138" widgetaid="s9RyPl15BYl4" yclicked="138" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="167" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="KoSRsItSJI4p" height="10" sequencemessagetype="1004" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="713" showstereotype="1" y="119" text="0: ELECTION_DONE" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="125" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="p2D69IKBdUxj" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="MHr3P63CaOOw" textid="MgPPfOzhPKv0" operation="i'm the winner (ip nuovo relay)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="579" showstereotype="1" y="193" widgetaid="MHr3P63CaOOw" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="50" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="2qraXuoO8YFo" height="32" sequencemessagetype="1000" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="584" showstereotype="1" y="174" text=": i'm the winner (ip nuovo relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="202" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="MgPPfOzhPKv0" height="19" />
+         </messagewidget>
+         <messagewidget linecolor="none" usesdiagramfillcolor="1" widgetbid="s9RyPl15BYl4" textid="3DZaQNw6mMk8" operation="is my relay changing?(ip vecchio relay)" linewidth="none" seqnum="" usesdiagramusefillcolor="1" x="872" showstereotype="1" y="216" widgetaid="s9RyPl15BYl4" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" width="50" isinstance="0" usefillcolor="1" fillcolor="none" xmi.id="m79gTmgJbFpT" height="32" sequencemessagetype="1000" >
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="877" showstereotype="1" y="197" text=": is my relay changing?(ip vecchio relay)" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" pretext="" role="705" width="252" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="3DZaQNw6mMk8" height="19" />
+         </messagewidget>
+        </messages>
+        <associations/>
+       </diagram>
+      </diagrams>
+     </XMI.extension>
+    </UML:Model>
+    <UML:Model stereotype="folder" visibility="public" isSpecification="false" namespace="m1" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Use Case View" name="Use Case View" >
+     <UML:Namespace.ownedElement/>
+    </UML:Model>
+    <UML:Model stereotype="folder" visibility="public" isSpecification="false" namespace="m1" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Component View" name="Component View" >
+     <UML:Namespace.ownedElement/>
+    </UML:Model>
+    <UML:Model stereotype="folder" visibility="public" isSpecification="false" namespace="m1" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Deployment View" name="Deployment View" >
+     <UML:Namespace.ownedElement/>
+    </UML:Model>
+    <UML:Model stereotype="folder" visibility="public" isSpecification="false" namespace="m1" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Entity Relationship Model" name="Entity Relationship Model" >
+     <UML:Namespace.ownedElement/>
+    </UML:Model>
+   </UML:Namespace.ownedElement>
+  </UML:Model>
+ </XMI.content>
+ <XMI.extensions xmi.extender="umbrello" >
+  <docsettings viewid="Lr09HfHPQtO9" uniqueid="3DZaQNw6mMk8" documentation="" />
+  <listview>
+   <listitem open="1" type="800" label="Views" >
+    <listitem open="1" type="801" id="Logical View" >
+     <listitem open="0" type="810" id="ghOTvqKZaB30" label="Protocollo scambio sessione esistente" />
+     <listitem open="0" type="810" id="SMYAwEaVJZ3Y" label="nuovo protocollo cambio sessione relay secondario" />
+     <listitem open="0" type="810" id="Lr09HfHPQtO9" label="nuovo protocollo scambio di sessione Big Boss Relay" />
+     <listitem open="1" type="813" id="E0BeFeOEo2IG" />
+     <listitem open="1" type="813" id="k0Ae6Tf8fQQZ" />
+     <listitem open="1" type="813" id="ZK6AIOtgW8XN" />
+     <listitem open="1" type="813" id="aMdJp1vxCGiv" />
+     <listitem open="1" type="813" id="rTGmIXZaJi4Y" />
+     <listitem open="1" type="813" id="5Zc0IlOAEqsF" />
+     <listitem open="1" type="813" id="e02uNwZr24EN" />
+     <listitem open="0" type="830" id="Datatypes" >
+      <listitem open="1" type="829" id="Ymw5WJGAaYQg" />
+      <listitem open="1" type="829" id="TlptORjkI2ZL" />
+      <listitem open="1" type="829" id="ZlODeJKF7DHv" />
+      <listitem open="1" type="829" id="Qn8sG6RT7Z6e" />
+      <listitem open="1" type="829" id="UX18GTAYnAwk" />
+      <listitem open="1" type="829" id="Iki5venMNcDl" />
+      <listitem open="1" type="829" id="npw90OrUtqc9" />
+      <listitem open="1" type="829" id="MsJo3mIaMBSi" />
+      <listitem open="1" type="829" id="xiKqXu0pdguY" />
+      <listitem open="1" type="829" id="4wUMz3hmsbtq" />
+      <listitem open="1" type="829" id="rdmtWQqQjZAe" />
+      <listitem open="1" type="829" id="IhsfI5PM2tgz" />
+      <listitem open="1" type="829" id="mfcPJUvbAnGS" />
+      <listitem open="1" type="829" id="uLjmvaaqIuhn" />
+     </listitem>
+    </listitem>
+    <listitem open="1" type="802" id="Use Case View" />
+    <listitem open="1" type="821" id="Component View" />
+    <listitem open="1" type="827" id="Deployment View" />
+    <listitem open="1" type="836" id="Entity Relationship Model" />
+   </listitem>
+  </listview>
+  <codegeneration>
+   <codegenerator language="Java" >
+    <codedocument package="-1" fileExt=".xml" id="ANTDOC" fileName="build" writeOutCode="false" >
+     <textblocks/>
+     <header>
+      <codecomment tag="" />
+     </header>
+    </codedocument>
+    <classifiercodedocument package="Logical View" fileExt=".java" parent_class="aMdJp1vxCGiv" id="aMdJp1vxCGiv" fileName="Relay" writeOutCode="true" >
+     <textblocks>
+      <codeblockwithcomments tag="packages" text="package Logical View;&amp;#010;" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <codeblockwithcomments tag="imports" writeOutText="false" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <javaclassdeclarationblock tag="ClassDeclBlock" parent_id="aMdJp1vxCGiv" canDelete="false" >
+       <header>
+        <javacodedocumentation tag="" text="Class Relay&amp;#010;" />
+       </header>
+       <textblocks>
+        <hierarchicalcodeblock tag="fieldsDecl" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Fields" />
+         </header>
+         <textblocks/>
+        </hierarchicalcodeblock>
+        <hierarchicalcodeblock tag="methodsBlock" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Methods" />
+         </header>
+         <textblocks>
+          <hierarchicalcodeblock tag="constructorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Constructors" />
+           </header>
+           <textblocks>
+            <codeblockwithcomments tag="emptyconstructor" indentLevel="1" text="public Relay ( ) { }" >
+             <header>
+              <codecomment tag="" indentLevel="1" text="Empty Constructor" />
+             </header>
+            </codeblockwithcomments>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="accessorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Accessor Methods" />
+           </header>
+           <textblocks>
+            <hierarchicalcodeblock tag="staticAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+            <hierarchicalcodeblock tag="regularAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="operationMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Operations" />
+           </header>
+           <textblocks/>
+          </hierarchicalcodeblock>
+         </textblocks>
+        </hierarchicalcodeblock>
+       </textblocks>
+      </javaclassdeclarationblock>
+     </textblocks>
+     <header>
+      <codecomment tag="" />
+     </header>
+     <classfields/>
+    </classifiercodedocument>
+    <classifiercodedocument package="Logical View" fileExt=".java" parent_class="k0Ae6Tf8fQQZ" id="k0Ae6Tf8fQQZ" fileName="Client" writeOutCode="true" >
+     <textblocks>
+      <codeblockwithcomments tag="packages" text="package Logical View;&amp;#010;" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <codeblockwithcomments tag="imports" writeOutText="false" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <javaclassdeclarationblock tag="ClassDeclBlock" parent_id="k0Ae6Tf8fQQZ" canDelete="false" >
+       <header>
+        <javacodedocumentation tag="" text="Class Client&amp;#010;" />
+       </header>
+       <textblocks>
+        <hierarchicalcodeblock tag="fieldsDecl" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Fields" />
+         </header>
+         <textblocks/>
+        </hierarchicalcodeblock>
+        <hierarchicalcodeblock tag="methodsBlock" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Methods" />
+         </header>
+         <textblocks>
+          <hierarchicalcodeblock tag="constructorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Constructors" />
+           </header>
+           <textblocks>
+            <codeblockwithcomments tag="emptyconstructor" indentLevel="1" text="public Client ( ) { }" >
+             <header>
+              <codecomment tag="" indentLevel="1" text="Empty Constructor" />
+             </header>
+            </codeblockwithcomments>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="accessorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Accessor Methods" />
+           </header>
+           <textblocks>
+            <hierarchicalcodeblock tag="staticAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+            <hierarchicalcodeblock tag="regularAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="operationMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Operations" />
+           </header>
+           <textblocks/>
+          </hierarchicalcodeblock>
+         </textblocks>
+        </hierarchicalcodeblock>
+       </textblocks>
+      </javaclassdeclarationblock>
+     </textblocks>
+     <header>
+      <codecomment tag="" />
+     </header>
+     <classfields/>
+    </classifiercodedocument>
+    <classifiercodedocument package="Logical View" fileExt=".java" parent_class="E0BeFeOEo2IG" id="E0BeFeOEo2IG" fileName="Big_Boss_Relay" writeOutCode="true" >
+     <textblocks>
+      <codeblockwithcomments tag="packages" text="package Logical View;&amp;#010;" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <codeblockwithcomments tag="imports" writeOutText="false" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <javaclassdeclarationblock tag="ClassDeclBlock" parent_id="E0BeFeOEo2IG" canDelete="false" >
+       <header>
+        <javacodedocumentation tag="" text="Class Big_Boss_Relay&amp;#010;" />
+       </header>
+       <textblocks>
+        <hierarchicalcodeblock tag="fieldsDecl" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Fields" />
+         </header>
+         <textblocks/>
+        </hierarchicalcodeblock>
+        <hierarchicalcodeblock tag="methodsBlock" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Methods" />
+         </header>
+         <textblocks>
+          <hierarchicalcodeblock tag="constructorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Constructors" />
+           </header>
+           <textblocks>
+            <codeblockwithcomments tag="emptyconstructor" indentLevel="1" text="public Big_Boss_Relay ( ) { }" >
+             <header>
+              <codecomment tag="" indentLevel="1" text="Empty Constructor" />
+             </header>
+            </codeblockwithcomments>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="accessorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Accessor Methods" />
+           </header>
+           <textblocks>
+            <hierarchicalcodeblock tag="staticAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+            <hierarchicalcodeblock tag="regularAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="operationMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Operations" />
+           </header>
+           <textblocks/>
+          </hierarchicalcodeblock>
+         </textblocks>
+        </hierarchicalcodeblock>
+       </textblocks>
+      </javaclassdeclarationblock>
+     </textblocks>
+     <header>
+      <codecomment tag="" />
+     </header>
+     <classfields/>
+    </classifiercodedocument>
+    <classifiercodedocument package="Logical View" fileExt=".java" parent_class="5Zc0IlOAEqsF" id="5Zc0IlOAEqsF" fileName="Vecchio_Relay_secondario" writeOutCode="true" >
+     <textblocks>
+      <codeblockwithcomments tag="packages" text="package Logical View;&amp;#010;" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <codeblockwithcomments tag="imports" writeOutText="false" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <javaclassdeclarationblock tag="ClassDeclBlock" parent_id="5Zc0IlOAEqsF" canDelete="false" >
+       <header>
+        <javacodedocumentation tag="" text="Class Vecchio_Relay_secondario&amp;#010;" />
+       </header>
+       <textblocks>
+        <hierarchicalcodeblock tag="fieldsDecl" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Fields" />
+         </header>
+         <textblocks/>
+        </hierarchicalcodeblock>
+        <hierarchicalcodeblock tag="methodsBlock" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Methods" />
+         </header>
+         <textblocks>
+          <hierarchicalcodeblock tag="constructorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Constructors" />
+           </header>
+           <textblocks>
+            <codeblockwithcomments tag="emptyconstructor" indentLevel="1" text="public Vecchio_Relay_secondario ( ) { }" >
+             <header>
+              <codecomment tag="" indentLevel="1" text="Empty Constructor" />
+             </header>
+            </codeblockwithcomments>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="accessorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Accessor Methods" />
+           </header>
+           <textblocks>
+            <hierarchicalcodeblock tag="staticAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+            <hierarchicalcodeblock tag="regularAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="operationMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Operations" />
+           </header>
+           <textblocks/>
+          </hierarchicalcodeblock>
+         </textblocks>
+        </hierarchicalcodeblock>
+       </textblocks>
+      </javaclassdeclarationblock>
+     </textblocks>
+     <header>
+      <codecomment tag="" />
+     </header>
+     <classfields/>
+    </classifiercodedocument>
+    <classifiercodedocument package="Logical View" fileExt=".java" parent_class="ZK6AIOtgW8XN" id="ZK6AIOtgW8XN" fileName="Nuovo_Relay_secondario" writeOutCode="true" >
+     <textblocks>
+      <codeblockwithcomments tag="packages" text="package Logical View;&amp;#010;" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <codeblockwithcomments tag="imports" writeOutText="false" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <javaclassdeclarationblock tag="ClassDeclBlock" parent_id="ZK6AIOtgW8XN" canDelete="false" >
+       <header>
+        <javacodedocumentation tag="" text="Class Nuovo_Relay_secondario&amp;#010;" />
+       </header>
+       <textblocks>
+        <hierarchicalcodeblock tag="fieldsDecl" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Fields" />
+         </header>
+         <textblocks/>
+        </hierarchicalcodeblock>
+        <hierarchicalcodeblock tag="methodsBlock" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Methods" />
+         </header>
+         <textblocks>
+          <hierarchicalcodeblock tag="constructorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Constructors" />
+           </header>
+           <textblocks>
+            <codeblockwithcomments tag="emptyconstructor" indentLevel="1" text="public Nuovo_Relay_secondario ( ) { }" >
+             <header>
+              <codecomment tag="" indentLevel="1" text="Empty Constructor" />
+             </header>
+            </codeblockwithcomments>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="accessorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Accessor Methods" />
+           </header>
+           <textblocks>
+            <hierarchicalcodeblock tag="staticAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+            <hierarchicalcodeblock tag="regularAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="operationMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Operations" />
+           </header>
+           <textblocks/>
+          </hierarchicalcodeblock>
+         </textblocks>
+        </hierarchicalcodeblock>
+       </textblocks>
+      </javaclassdeclarationblock>
+     </textblocks>
+     <header>
+      <codecomment tag="" />
+     </header>
+     <classfields/>
+    </classifiercodedocument>
+    <classifiercodedocument package="Logical View" fileExt=".java" parent_class="e02uNwZr24EN" id="e02uNwZr24EN" fileName="new_class" writeOutCode="true" >
+     <textblocks>
+      <codeblockwithcomments tag="packages" text="package Logical View;&amp;#010;" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <codeblockwithcomments tag="imports" writeOutText="false" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <javaclassdeclarationblock tag="ClassDeclBlock" parent_id="e02uNwZr24EN" canDelete="false" >
+       <header>
+        <javacodedocumentation tag="" text="Class New_class&amp;#010;" />
+       </header>
+       <textblocks>
+        <hierarchicalcodeblock tag="fieldsDecl" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Fields" />
+         </header>
+         <textblocks/>
+        </hierarchicalcodeblock>
+        <hierarchicalcodeblock tag="methodsBlock" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Methods" />
+         </header>
+         <textblocks>
+          <hierarchicalcodeblock tag="constructorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Constructors" />
+           </header>
+           <textblocks>
+            <codeblockwithcomments tag="emptyconstructor" indentLevel="1" text="public New_class ( ) { }" >
+             <header>
+              <codecomment tag="" indentLevel="1" text="Empty Constructor" />
+             </header>
+            </codeblockwithcomments>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="accessorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Accessor Methods" />
+           </header>
+           <textblocks>
+            <hierarchicalcodeblock tag="staticAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+            <hierarchicalcodeblock tag="regularAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="operationMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Operations" />
+           </header>
+           <textblocks/>
+          </hierarchicalcodeblock>
+         </textblocks>
+        </hierarchicalcodeblock>
+       </textblocks>
+      </javaclassdeclarationblock>
+     </textblocks>
+     <header>
+      <codecomment tag="" />
+     </header>
+     <classfields/>
+    </classifiercodedocument>
+    <classifiercodedocument package="Logical View" fileExt=".java" parent_class="rTGmIXZaJi4Y" id="rTGmIXZaJi4Y" fileName="Server" writeOutCode="true" >
+     <textblocks>
+      <codeblockwithcomments tag="packages" text="package Logical View;&amp;#010;" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <codeblockwithcomments tag="imports" writeOutText="false" >
+       <header>
+        <codecomment tag="" writeOutText="false" />
+       </header>
+      </codeblockwithcomments>
+      <javaclassdeclarationblock tag="ClassDeclBlock" parent_id="rTGmIXZaJi4Y" canDelete="false" >
+       <header>
+        <javacodedocumentation tag="" text="Class Server&amp;#010;" />
+       </header>
+       <textblocks>
+        <hierarchicalcodeblock tag="fieldsDecl" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Fields" />
+         </header>
+         <textblocks/>
+        </hierarchicalcodeblock>
+        <hierarchicalcodeblock tag="methodsBlock" indentLevel="1" canDelete="false" >
+         <header>
+          <codecomment tag="" indentLevel="1" text="Methods" />
+         </header>
+         <textblocks>
+          <hierarchicalcodeblock tag="constructorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Constructors" />
+           </header>
+           <textblocks>
+            <codeblockwithcomments tag="emptyconstructor" indentLevel="1" text="public Server ( ) { }" >
+             <header>
+              <codecomment tag="" indentLevel="1" text="Empty Constructor" />
+             </header>
+            </codeblockwithcomments>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="accessorMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Accessor Methods" />
+           </header>
+           <textblocks>
+            <hierarchicalcodeblock tag="staticAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+            <hierarchicalcodeblock tag="regularAccessorMethods" indentLevel="1" canDelete="false" >
+             <header>
+              <codecomment tag="" writeOutText="false" indentLevel="1" />
+             </header>
+             <textblocks/>
+            </hierarchicalcodeblock>
+           </textblocks>
+          </hierarchicalcodeblock>
+          <hierarchicalcodeblock tag="operationMethods" indentLevel="1" canDelete="false" >
+           <header>
+            <codecomment tag="" indentLevel="1" text="Operations" />
+           </header>
+           <textblocks/>
+          </hierarchicalcodeblock>
+         </textblocks>
+        </hierarchicalcodeblock>
+       </textblocks>
+      </javaclassdeclarationblock>
+     </textblocks>
+     <header>
+      <codecomment tag="" />
+     </header>
+     <classfields/>
+    </classifiercodedocument>
+   </codegenerator>
+  </codegeneration>
+ </XMI.extensions>
+</XMI>
