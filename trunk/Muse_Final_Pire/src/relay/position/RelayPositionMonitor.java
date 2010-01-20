@@ -78,22 +78,11 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		setStarted(false);
 	}
 	
-	/**Metodo per far partire il Thread che sta in ascolto su una determinata porta
-	 * quando gli arriva un messaggio richiama il metodo notify(observer)
-	 * in caso di BigBoss il thread parte immediatamente, ed in caso di relay secondario viene fatto partire nel
-	 * momento s'inizia almeno una sessione RTP
-	 */
-	public void start(){
-		if(!rrcm.isStarted())
-			rrcm.start();
-		setStarted(true);
-	}
-
 	/**Metodo per far partire il Thread periodico che si occupa del reperimento 
 	 * degli RSSI che i Client serviti avvertono nei confronti del nodo Relay per scoprire
 	 * se si sta verificando una disconnessione dai Clients serviti. 
 	 */
-	public void startRSSIMonitor() {
+	public void start(){
 		if(!rrcm.isStarted())
 			rrcm.start();
 		
@@ -102,9 +91,8 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		timer.schedule(new TimerTask(){
 
 			public void run(){ mainTask();} 
-		}, 0L , period );				
+		}, 0L , period );		
 	}
-
 
 	/**Metodo per chiudere il RelayPositionClientsMonitor
 	 */
