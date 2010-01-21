@@ -38,7 +38,7 @@ public class RelaySessionManager implements Observer{
 	private SessionManagerStatus status; // Marco: lo stato attuale del relay
 	private int numberOfSession; // Marco: il numero di sessioni aperte ( il numero di client che sta attualmente servendo)
 	private Hashtable<String, Proxy> pReferences; // Marco: tabella che contiene per ogni sessione ( identificata dall'indirizzo del client) il proxy che la serve
-	private Hashtable<String, int[]> sessionInfo; 
+	private Hashtable<String, int[]> sessionInfo;  
 	private DatagramPacket message;
 	public static final RelaySessionManager INSTANCE = new RelaySessionManager(); // Marco: il relay è un singleton
 	private boolean imRelay; // Marco:  im'relay: è il primo parametro del file parameters, credo che indichi se il Relay è attualmente attivo o è solo un possibile relay
@@ -47,7 +47,7 @@ public class RelaySessionManager implements Observer{
 	private int numberOfRetrasmissions = 1;
 	private String maxWnextRelay;  // Marco : è l'indirizzo del nuovo relay  se fai refactor cambiagli il nome.
 	private String event;
-	private TimeOutSessionRequest toSessionRequest;
+	private TimeOutSessionRequest toSessionRequest;  //Marco: questo qui sono i vari timeout
 	private TimeOutAckSessionInfo toAckSessionInfo;
 	private TimeOutSessionInfo toSessionInfo;
 	private RelaySessionCM sessionCM; // Marco: è chi si occupa di spedire i messaggi.
