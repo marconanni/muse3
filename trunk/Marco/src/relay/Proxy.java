@@ -44,8 +44,8 @@ import util.Logger;
 /*
  * Marco: la trasmissione dipende dallo stato in cui si trova il proxy, peccato che siano nomi 
  * incomprensibili e difatto non si capisca in che situazione si trova il proxy, e perchè ci sono tanti modi di 
- * inziare una trasmissione verso il client. Se ci fosse un po' di documentazione in giro riuscirei a cavarci i piedi, altrimenti
- * non resta che chiedere a Foschini.
+ * inziare una trasmissione verso il client. Se ci fosse un po' di documentazione in giro sarebbe possibile
+ * cavarci i piedi, altrimenti non resta che chiedere a Foschini.
  */
 
 
@@ -126,6 +126,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private RelayMessageReader msgReader;
 
 	private Observer sessionManager;
+	
+	
 	
 	//INTERFACCIA GRAFICA 
 	
