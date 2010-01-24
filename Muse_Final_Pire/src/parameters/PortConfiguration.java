@@ -18,10 +18,10 @@ public class PortConfiguration {
 	
 	//CLIENT
 	/** porta per la gestione della sessione sui CLIENT in ingresso */
-	//public static final int CLIENT_PORT_SESSION_IN = 3000;
+	public static final int CLIENT_PORT_SESSION_IN = 3000;
 	
 	/** porta per la gestione della sessione sui CLIENT in uscita */
-//	public static final int CLIENT_PORT_SESSION_OUT = 3001;
+	public static final int CLIENT_PORT_SESSION_OUT = 3001;
 		
 	/** porta per la gestione della elezione sui CLIENT in ingresso */
 	public static final int CLIENT_PORT_ELECTION_IN = 3002;
