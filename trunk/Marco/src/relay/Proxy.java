@@ -72,7 +72,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String proxyID = "-1";
 	private String filename;
 	private String clientAddress;
-	int initialSupThreshold = (Parameters.PROXY_BUFFER*70)/100;
+	int initialSupThreshold = (Parameters.PROXY_BUFFER*70)/100; // Marco: la soglia di buffer pieno  viene posta al 70%
 	
 	//porte(le porte di ricezione del proxy si trovano dentro l'RTPReceptionManager): 
 	private int clientStreamPort = 0; 	//porta su cui il client riceve lo stream rtp 
