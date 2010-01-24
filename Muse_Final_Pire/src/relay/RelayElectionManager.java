@@ -105,10 +105,10 @@ public class RelayElectionManager extends Observable implements Observer{
 	 * @param imRelay un boolean che indica se il nodo è il Relay attuale o meno.
 	 * @return un riferimento al singleton RelayElectionManager
 	 */
-	public static RelayElectionManager getInstance(boolean imBigBoss, boolean imRelay, RelaySessionManager sessionManager){
+	public static RelayElectionManager getInstance(int type, boolean state, RelaySessionManager sessionManager){
 		if(INSTANCE == null)
 			try {
-				INSTANCE = new RelayElectionManager(imBigBoss, imRelay, sessionManager);
+				INSTANCE = new RelayElectionManager(type, state, sessionManager);
 			} catch (Exception e) {e.printStackTrace();}
 			return INSTANCE;
 	}
@@ -118,16 +118,16 @@ public class RelayElectionManager extends Observable implements Observer{
 	 * @param type true -> BIGBOSS , false ->RELAY
 	 * @param state true -> ACTIVE , false ->POSSIBLE
 	 */
-	private void setNodeType(boolean type, boolean state){
+	private void setNodeType(int type, boolean state){
 		setBIGBOSS(false);
 		setRELAY(false);
 		setPOSSIBLE_BIGBOSS(false);
 		setPOSSIBLE_RELAY(false);
 		setCLIENT(false);
-		if(type && state)setBIGBOSS(true);
-		else if(type && !state) setPOSSIBLE_BIGBOSS(true);
-		else if(!type && state) setRELAY(true);
-		else if(!type && !state) setPOSSIBLE_RELAY(true);
+		if(type==0 && state)setBIGBOSS(true);
+		else if(type==0 && !state) setPOSSIBLE_BIGBOSS(true);
+		else if(type==1 && state) setRELAY(true);
+		else if(type==1 && !state) setPOSSIBLE_RELAY(true);
 		else setCLIENT(true);
 	}
 
@@ -144,7 +144,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	 * @throws Exception
 	 * 
 	 */
-	private RelayElectionManager(boolean type, boolean state, RelaySessionManager sessionManager) throws Exception{
+	private RelayElectionManager(int type, boolean state, RelaySessionManager sessionManager) throws Exception{
 
 		this.actualStatus = RelayStatus.OFF;
 		setNodeType(type, state);
@@ -251,7 +251,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	 * il RelayBatteryMonitor e il WhoIsRelayServer. Poi passa allo stato di MONITORING.
 	 */
 	private void becomeBigBossRelay(){
-		setNodeType(true, true);
+		setNodeType(0, true);
 		localClusterAddress = NetConfiguration.RELAY_CLUSTER_ADDRESS;
 		memorizeLocalClusterAddress();
 		localClusterHeadAddress = NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS;
@@ -312,7 +312,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	}
 	
 	private void becomRelay(){
-		setNodeType(false,true);
+		setNodeType(1,true);
 		localClusterAddress = NetConfiguration.RELAY_CLUSTER_ADDRESS;
 		memorizeLocalClusterAddress();
 		localClusterHeadAddress = NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS;
