@@ -12,6 +12,9 @@ public class NetConfiguration {
 	 */
 	public static final boolean IMRELAY=true;
 	public static final boolean IMBIGBOSS=true;
+	public static final boolean IMPOSSIBLEBIGBOSS = false;
+	public static final boolean IMPOSSIBLERELAY = false;
+	public static final boolean IMCLIENT = false;
 	
 	/*
 	 ********************* CONFIGURAZIONE DELLA RETE *****************************
@@ -25,13 +28,13 @@ public class NetConfiguration {
 	public static final String NAME_OF_RELAY_MANAGED_NETWORK = "ALMAWIFI";				//Nome della rete Managed
 	public static final String NAME_OF_RELAY_MANAGED_WIFI_INTERFACE  = "wlan0";			//Nome dell'interfaccia con cui il Relay si affaccia sulla rete Managed
 	public static final String RELAY_MANAGED_ADDRESS = "192.168.186.230";				//indirizzo IP del RELAY sulla rete Managed (BigBoss)
-	public static final String RELAY_MANAGED_BROADCAST_ADDRESS = "192.168.186.255";
+	public static final String RELAY_MANAGED_BROADCAST_ADDRESS = "192.168.187.255";
 	
 	/** CLUSTER HEAD*/
-	public static final String NAME_OF_RELAY_CLUSTER_HEAD_NETWORK = "BIGBOSS";		//Nome della rete Ad-Hoc (cluster head)
-	public static final String NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE = "wlan1";//Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc (cluster head)
-	public static final String RELAY_CLUSTER_HEAD_ADDRESS = "192.168.30.2";	//indirizzo IP del RELAY nella rete Ad-Hoc di competenza del BigBoss (cluster head)
-	public static final String RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS = "192.168.30.255";	//indirizzo IP di BROADCAST sulla rete Ad-Hoc (cluster head)
+	public static final String NAME_OF_RELAY_CLUSTER_HEAD_NETWORK = "ALMAWIFI";		//Nome della rete Ad-Hoc (cluster head)
+	public static final String NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE = "wlan0";//Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc (cluster head)
+	public static final String RELAY_CLUSTER_HEAD_ADDRESS = "192.168.186.230";	//indirizzo IP del RELAY nella rete Ad-Hoc di competenza del BigBoss (cluster head)
+	public static final String RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS = "192.168.187.255";	//indirizzo IP di BROADCAST sulla rete Ad-Hoc (cluster head)
 	
 	/** CLUSTER */
 	public static final String NAME_OF_RELAY_CLUSTER_NETWORK = "BIGBOSS";			//Nome della rete Ad-Hoc (cluster) 
@@ -40,10 +43,10 @@ public class NetConfiguration {
 	public static final String RELAY_CLUSTER_BROADCAST_ADDRESS = "192.168.30.255"; 		//indirizzo IP di BROADCAST sulla rete Ad-Hoc (cluster)
 	
 	/** CLIENT */
-	public static final String NAME_OF_CLIENT_NETWORK = "RELAY1";
+	public static final String NAME_OF_CLIENT_NETWORK = "lord";
 	public static final String NAME_OF_CLIENT_WIFI_INTERFACE = "wlan0";				//Nome dell'interfaccia con cui il Client si affaccia sulla rete Ad-Hoc
-	public static final String CLIENT_ADDRESS = "192.168.0.4";						//indirizzo IP del CLIENT
-	public static final String CLIENT_BROADCAST_ADDRESS = "192.168.0.255";
+	public static final String CLIENT_ADDRESS = "192.168.2.4";						//indirizzo IP del CLIENT
+	public static final String CLIENT_BROADCAST_ADDRESS = "192.168.2.255";
 	
 	
 
