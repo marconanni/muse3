@@ -6,7 +6,6 @@ import relay.wnic.exception.WNICException;
 public interface RelayWNICController 
 {
 	/**Metodo per initializzare l'interfaccia
-	 * @return true se l'interfaccia è accesa, false altrimenti
 	 */
 	public void init() throws WNICException;
 	
