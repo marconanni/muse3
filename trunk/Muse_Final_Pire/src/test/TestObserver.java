@@ -46,7 +46,7 @@ public class TestObserver implements Observer {
 	
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		System.out.println("update test observer");
+		//System.out.println("update test observer");
 		
 		if(arg1 instanceof DatagramPacket){
 			DatagramPacket dp  = (DatagramPacket)arg1;
