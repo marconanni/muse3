@@ -42,7 +42,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 	private TimeOutFileRequest timeoutFileRequest;
 	private String relayAddress;  //Marco: indirizzo del relay dal quale sta ricevendo lo streaming
 	private String status;
-	private ClientBufferDataPlaying clientPlaying;
+	private ClientBufferDataPlaying clientPlaying; // Marco: credo che sia l'entità che effettivamente si ocupa difare la riproduzione 
 	private ClientPortMapper portMapper;
 	private int myStreamingPort;	//Marco:la porta dalla quale il client riceve lo streaming
 	private int proxyStreamingPort = -1; //Marco: la porta dalla quale il relay eroga lo streaming
