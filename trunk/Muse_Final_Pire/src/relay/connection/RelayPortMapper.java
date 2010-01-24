@@ -23,12 +23,12 @@ public class RelayPortMapper {
 	private int portOutRSSI;
 	private int portInRSSI;
 	
-	private InetAddress localClusterAdHocBCASTAddress = null;		
-	private InetAddress localClusterHeadAdHocBCASTAddress = null;
+	private InetAddress localClusterBCASTAddress = null;		
+	private InetAddress localClusterHeadBCASTAddress = null;
 	
 	/*indirizzi locali per il relay*/
-	private InetAddress localClusterAdHocAddress =null;
-	private InetAddress localClusterHeadAdHocAddress =null;
+	private InetAddress localClusterAddress =null;
+	private InetAddress localClusterHeadAddress =null;
 	private InetAddress localManagedAddress =null;
 	
 	public static final RelayPortMapper INSTANCE = new RelayPortMapper(); 
@@ -54,11 +54,11 @@ public class RelayPortMapper {
 		portOutRSSI = PortConfiguration.RSSI_PORT_OUT;
 
 		try {
-			localClusterAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
-			localClusterHeadAdHocAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
+			localClusterAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+			localClusterHeadAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 			localManagedAddress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS);
-			localClusterAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_BROADCAST_ADDRESS);
-			localClusterHeadAdHocBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS);
+			localClusterBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_BROADCAST_ADDRESS);
+			localClusterHeadBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
  	
@@ -89,10 +89,10 @@ public class RelayPortMapper {
 
 	/**Metodo per ottenere l'indirizzo del nodo locale sulla rete Ad-Hoc
 	 * @return un InetAddress rappresentante l'indirizzo di cui sopra*/
-	public InetAddress getLocalClusterAdHocAddress() {return localClusterAdHocAddress;}
-	public InetAddress getLocalClusterHeadAdHocAddress() {return localClusterHeadAdHocAddress;}
-	public InetAddress getLocalClusterAdHocBCASTAddress() {return localClusterAdHocBCASTAddress;}
-	public InetAddress getLocalClusterHeadAdHocBCASTAddress() {return localClusterHeadAdHocBCASTAddress;}
+	public InetAddress getLocalClusterAddress() {return localClusterAddress;}
+	public InetAddress getLocalClusterHeadAddress() {return localClusterHeadAddress;}
+	public InetAddress getLocalClusterBCASTAddress() {return localClusterBCASTAddress;}
+	public InetAddress getLocalClusterHeadBCASTAddress() {return localClusterHeadBCASTAddress;}
 	
 	/**Metodo per ottenere l'indirizzo del nodo locale sulla rete Managed
 	 * @return un InetAddress rappresentante l'indirizzo di cui sopra*/
