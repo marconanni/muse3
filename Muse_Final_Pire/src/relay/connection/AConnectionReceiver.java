@@ -11,7 +11,8 @@ import java.util.Observer;
 
 /**Classe che permette di ricevere messaggi su una Socket. Ad ogni ricezione, tramite il pattern Observer-Observable,
  * è in grado di avvertire l'Observer passato per parametro al costruttore.
- * @author Luca Campeti
+ * @author Luca Campeti, Dejaco Pire
+ * @version 1.1
  *
  */
 public class AConnectionReceiver extends Observable implements Runnable{
@@ -40,7 +41,7 @@ public class AConnectionReceiver extends Observable implements Runnable{
 		this.setLocalInputPort(localInputPort);
 		
 		try {
-			
+			System.out.println("INSOCKET ON :"+localAddress+":"+localInputPort);
 			inSocket = new DatagramSocket(localInputPort,localAddress);
 		} catch (SocketException e) {e.printStackTrace();}
 		addObserver(observer);
@@ -85,57 +86,29 @@ public class AConnectionReceiver extends Observable implements Runnable{
 		}
 	}
 
-	/**Metodo per chiudere la socket su cui l'AConnectionReceiver riceve i messaggi
-	 */
-	public void close(){
-		if(inSocket != null) inSocket.close();
-	}
+	/**Metodo per chiudere la socket su cui l'AConnectionReceiver riceve i messaggi*/
+	public void close(){if(inSocket != null) inSocket.close();}
 
-	/**Metodo per stoppare la ricezione dei messaggi da parte dell'AConnectionReceiver
-	 */
-	public void pauseReception(){
-		stopped = true;
-	}
+	/**Metodo per stoppare la ricezione dei messaggi da parte dell'AConnectionReceiver*/
+	public void pauseReception(){stopped = true;}
 
-	/**Metodo per riprendere la ricezione dei messaggi da parte dell'AConnectionReceiver
-	 */
+	/**Metodo per riprendere la ricezione dei messaggi da parte dell'AConnectionReceiver*/
 	public void resumeReception(){
 		stopped = false;
 		synchronized (sync) {sync.notifyAll();}
 	}
 
 	/**Metodo per ottenere il nome del Manager che sta utilizzando l'AConnectionReceiver
-	 * @return una String che rappresenta il nome del Manager che sfrutta l'AConnectionReceiver
-	 */
-	public String getManagerName() {
-		return managerName;
-	}
+	 * @return una String che rappresenta il nome del Manager che sfrutta l'AConnectionReceiver*/
+	public String getManagerName() {return managerName;}
 
 	/**Metodo per impostare il nome del Manager che sta utilizzando l'AConnectionReceiver
-	 * @param managerName una String che rappresenta il nome del Manager che sfrutta l'AConnectionReceiver 
-	 */
-	public void setManagerName(String managerName) {
-		this.managerName = managerName;
-	}
-
-
-	public void setLocalAddress(InetAddress localAddress) {
-		this.localAddress = localAddress;
-	}
-
-
-	public InetAddress getLocalAddress() {
-		return localAddress;
-	}
-
-
-	public void setLocalInputPort(int localInputPort) {
-		this.localInputPort = localInputPort;
-	}
-
-
-	public int getLocalInputPort() {
-		return localInputPort;
-	}
+	 * @param managerName una String che rappresenta il nome del Manager che sfrutta l'AConnectionReceiver*/
+	public void setManagerName(String managerName) {this.managerName = managerName;}
+	
+	public void setLocalAddress(InetAddress localAddress) {this.localAddress = localAddress;}
+	public InetAddress getLocalAddress() {return localAddress;}
+	public void setLocalInputPort(int localInputPort) {this.localInputPort = localInputPort;}
+	public int getLocalInputPort() {return localInputPort;}
 
 }

@@ -11,7 +11,8 @@ import java.util.Observer;
 /**Classe che permette di inviare messaggi su una Socket e, contemporaneamente, 
  * è in grado di attendere messaggi su un'altra Socket e gestirli avvertendo 
  * l'Observer passato per parametro al costruttore 
- * @author Luca Campeti (modificato da Pire Dejaco)
+ * @author Luca Campeti, Dejaco Pire
+ * @version 1.1
  */
 public class AConnectionManager {
 
@@ -29,9 +30,11 @@ public class AConnectionManager {
 	private boolean bcast = false;
 	
 	/**Metodo per ottenere un AConnectionManager
-	 * @param localAdHocAddress una Stringa che rappresenta l'indirizzo locale sulla rete Ad-Hoc del nodo
-	 * @param localAdHocInputPort un int che rappresenta la porta di ricezione dei messaggi sulla rete Ad-Hoc
-	 * @param localAdHocOutputPort un int che rappresenta la porta di invio dei messaggi sulla rete Ad-Hoc
+	 * @param localAddress una Stringa che rappresenta l'indirizzo locale del nodo
+	 * @param bcastAddress una Stringa che rappresenta l'indirizzo broadcast riferito all'indirizzo locale
+	 * @param localInputPort un int che rappresenta la porta di ricezione dei messaggi
+	 * @param localOutputPort un int che rappresenta la porta di invio dei messaggi
+	 * @param bcast una variabile booleana che se true è in ascolto anche dei messaggi in broadcast su quella porta
 	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
 	 */
 	public AConnectionManager(InetAddress localAddress,InetAddress bcastAddress, int localInputPort, int localOutputPort, Observer observer, boolean bcast){
