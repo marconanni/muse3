@@ -203,6 +203,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		return recoveryStreamInPort;
 	}
 	
+	/*
+	 * Marco: questo costruttore, invece si prende in carico di costruire un proxy che possa accogliere il flusso da parte del 
+	 * vecchio relay.
+	 */
 	
 
 	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort){

@@ -472,7 +472,7 @@ public class RelayElectionManager extends Observable implements Observer {
 			 * status = Monitoring
 			 * relayAddress = localhost
 			 * imRelay = true 
-			 * invia REQUEST_SESSION 
+
 			 */
 			else if(relayMessageReader.getCode() == Parameters.ELECTION_DONE && 
 					actualStatus == RelayStatus.WAITING_END_NORMAL_ELECTION &&

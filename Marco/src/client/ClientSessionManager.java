@@ -206,9 +206,8 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 			if(eventType.contains("NEW_RELAY"))
 			{
 				/*
-				 * non è esattamente come specificato nel protocollo, tuttavia qui arriva l'indicazione sull'identità del nuovo relay.
 				 * il dato viene salvato nella variabile newrelay, ma non viene ancora sovreascirtto il dato sull'indirizzo del vecchio relay
-				 * nel protocollo studiato all'arrivo dell'ELECTION FONE l'indirizzo del nuovo relay viene solo salvato,
+				 * nel protocollo studiato all'arrivo dell'ELECTION DONE l'indirizzo del nuovo relay viene solo salvato,
 				 * il nuovo relay diventa il relay di riferimento solo quando il client riceve il messaggio LEAVE da parte del
 				 * vecchio relay
 				 */
