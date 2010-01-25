@@ -13,7 +13,8 @@ public class TimeOutConfiguration {
 	
 	/** timeout relativo al messaggio WHO_IS_RELAY */
 	public static final int TIMEOUT_SEARCH = 10000;
-	
+	public static final String TIME_OUT_SEARCH = "TIMEOUTSEARCH";
+		
 	/** timeout relativo all'intera fase di elezione */
 	public static final int TIMEOUT_FAIL_TO_ELECT = 4000;
 	
@@ -22,6 +23,7 @@ public class TimeOutConfiguration {
 		
 	/** timeout relativo all'intera fase di elezione */
 	public static final int TIMEOUT_TO_ELECT = 3000;
+	public static final String TIME_OUT_TO_ELECT = "TIMEOUTTOELECT";
 	
 	/** timeout relativo al messaggio di risposta dei client al messagigo ELECTION_REQUEST */
 	public static final int TIMEOUT_ELECTION_BEACON = 1000;
@@ -52,4 +54,5 @@ public class TimeOutConfiguration {
 	
 	/** timeout relativo al messaggio di NOTIFY_RSSI */
 	public static final int TIMEOUT_NOTIFY_RSSI = 1000;
+	public static final String TIME_OUT_NOTIFY_RSSI = "TIMEOUTNOTIFYRSSI";
 }

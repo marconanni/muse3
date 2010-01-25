@@ -10,7 +10,7 @@ public class NetConfiguration {
 	 * relay principale (collegato col nodo server) -> BIG BOSS	IMRELAY = true && IMBIGBOSS = true
 	 * relay secondario (collegato col nodo BIG BOSS) 			IMRELAY = true && IMBIGBOSS = false
 	 */
-	public static final boolean IMRELAY=true;
+	public static final boolean IMRELAY=false;
 	public static final boolean IMBIGBOSS=false;
 	public static final boolean IMPOSSIBLEBIGBOSS = false;
 	public static final boolean IMPOSSIBLERELAY = false;
