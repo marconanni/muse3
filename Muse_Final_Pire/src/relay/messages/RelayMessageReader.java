@@ -28,7 +28,8 @@ public class RelayMessageReader {
 	private  double RSSI;
 
 	private InetAddress packetAddress;
-	private int active_relays;
+	private int activeRelay;
+	private int activeClient;
 	private int typeNode;
 	
 	
@@ -54,10 +55,14 @@ public class RelayMessageReader {
 		code = Integer.valueOf(st.nextToken());
 
 		if(code==MessageCodeConfiguration.REQUEST_RSSI) actualConnectedRelayAddress = packetAddress.toString();
-		if(code == MessageCodeConfiguration.NOTIFY_RSSI)RSSI = Double.parseDouble(st.nextToken());		
+		if(code == MessageCodeConfiguration.NOTIFY_RSSI){
+			RSSI = Double.parseDouble(st.nextToken());
+			typeNode = Integer.parseInt(st.nextToken());
+			activeClient = Integer.parseInt(st.nextToken());
+		}
 		if(code == MessageCodeConfiguration.IM_RELAY) actualConnectedRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
 		if(code == MessageCodeConfiguration.ACK_CONNECTION) typeNode = Integer.valueOf(st.nextToken());
-		if(code == MessageCodeConfiguration.ELECTION_REQUEST)active_relays =Integer.valueOf(st.nextToken());
+		if(code == MessageCodeConfiguration.ELECTION_REQUEST)activeRelay =Integer.valueOf(st.nextToken());
 	}
 
 	/**Metodo getter
@@ -80,13 +85,15 @@ public class RelayMessageReader {
 	 * @return tipologia del nodo (client, relay attivo o passivo, BigBoss passivo..)*/
 	public int getTypeNode(){return typeNode;}
 	
+	public int getActiveClient(){return activeClient;}
+	
 	/**Metogo getter
 	 * @return indirizzo Ip sorgente del pacchetto*/
 	public InetAddress getPacketAddess(){return packetAddress;}
 		
 	/**Metogo getter
 	 * @return numero di Relay attivi attualmente connessi*/
-	public int getActiveRelays(){return active_relays;}
+	public int getActiveRelay(){return activeRelay;}
 	
 	public  double getW() {return W;}
 }
