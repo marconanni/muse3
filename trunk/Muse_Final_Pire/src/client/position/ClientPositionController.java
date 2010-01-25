@@ -107,7 +107,7 @@ public class ClientPositionController implements Observer{
 					System.out.println("GET RSSI VALUE");
 					RSSIvalue = cwnic.getSignalStrenghtValue();
 					System.out.println("RSSI:"+RSSIvalue);
-					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, PortConfiguration.RSSI_PORT_IN);
+					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPECLIENT,1);
 					sequenceNumber++;
 					System.out.println("Build Message to :"+relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
 					crscm.sendTo(notifyRSSI);
