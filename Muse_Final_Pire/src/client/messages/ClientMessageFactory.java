@@ -170,10 +170,10 @@ public class ClientMessageFactory {
 	 * @return DatagramPacket 
 	 * @throws IOException
 	 */
-	public static DatagramPacket buildNotifyRSSI(int sequenceNumber , int RSSIvalue, InetAddress addr, int port) throws IOException{
+	public static DatagramPacket buildNotifyRSSI(int sequenceNumber , int RSSIvalue, InetAddress addr, int port, int nodeType, int activeClient) throws IOException{
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+MessageCodeConfiguration.NOTIFY_RSSI+"_"+RSSIvalue;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.NOTIFY_RSSI+"_"+RSSIvalue+"_"+nodeType+"_"+activeClient;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
