@@ -21,7 +21,8 @@ import client.position.ClientPositionController;
 import client.timeout.ClientTimeoutFactory;
 import client.timeout.TimeOutFailToElect;
 import client.timeout.TimeOutSearch;
-import client.wnic.exception.WNICException;
+import client.wnic.ClientWNICController;
+import client.wnic.WNICFinder;
 
 import debug.DebugConsole;
 
@@ -51,11 +52,13 @@ public class ClientElectionManager extends Observable implements Observer{
 
 	private boolean stop = false;
 		
-	private ClientCM comManager = null;							//il manaegr per le comunicazioni
+	private ClientCM comManager = null;								//il manaegr per le comunicazioni
+	private ClientWNICController clientWNICController = null;			//il ClientWNICController per ottenere le informazioni dalla schede di rete interfacciata alla rete Ad-Hoc
 	private ClientPositionController clientPositionController = null;	//Ascolta i messaggi di RSSIREQUEST e risponde col proprio valore RSSI rilevato nel confronto del relay a cui è collegato
 	private ClientMessageReader clientMessageReader = null;				//il ClientMessageReader per leggere il contenuto dei messaggi ricevuti
 	private static ClientElectionManager INSTANCE = null;				//istanza singleton del ClientElectionManager
-	private DebugConsole console = null;								//Serve per mostrare i messaggi di debug del CLientElectionManager
+	private DebugConsole consoleElectionManger = null;								//Serve per mostrare i messaggi di debug del CLientElectionManager
+	private DebugConsole consoleWifiInterface = null;
 	//private ClientFrameController frameController = null;				//ClientFrameController assegnabile al ClientElectionManager
 	
 	public enum ClientStatus {OFF,WAITING_WHO_IS_RELAY, IDLE, ACTIVE, WAITING_END_ELECTION,}			//stati in cui si può trovare il ClientElectionManager
@@ -82,16 +85,26 @@ public class ClientElectionManager extends Observable implements Observer{
 		memorizeLocalAddress();
 		comManager = ClientConnectionFactory.getElectionConnectionManager(this,true);
 		comManager.start();
+		consoleElectionManger = new DebugConsole();
+		consoleElectionManger.setTitle("CLIENT ELECTION MANAGER");
 		
 		try {
-			clientPositionController = new ClientPositionController(NetConfiguration.NAME_OF_CLIENT_WIFI_INTERFACE,NetConfiguration.NAME_OF_CLIENT_NETWORK);
-		} catch (WNICException e) {console.debugMessage(DebugConfiguration.DEBUG_ERROR,e.getMessage());stop = true;}
+			consoleWifiInterface = new DebugConsole();
+			consoleWifiInterface.setTitle("WIFI INTERFACE: "+NetConfiguration.NAME_OF_CLIENT_WIFI_INTERFACE);
+			clientWNICController = WNICFinder.getCurrentWNIC(NetConfiguration.NAME_OF_CLIENT_WIFI_INTERFACE, NetConfiguration.NAME_OF_CLIENT_NETWORK);
+			clientWNICController.setDebugConsole(consoleWifiInterface);
+			clientWNICController.init();
+			clientPositionController = new ClientPositionController(clientWNICController);
+		} catch (Exception e){
+			if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_ERROR,e.getMessage());
+			else System.err.println(e.getMessage());
+			stop = true;}
 		
 		if(stop)
-			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" e non può continuare in quanto la scheda di rete non è configurata correttamente");
+			if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" e non può continuare in quanto la scheda di rete non è configurata correttamente");
 			else System.out.println("ClientElectionManager: creato ed entrato in STATO di:"+actualStatus+" e non può continuare in quanto la scheda di rete non è configurata correttamente");
 		else{
-			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: Scheda wireless configurata correttamente ora cerca il relay");
+			if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: Scheda wireless configurata correttamente ora cerca il relay");
 			else System.out.println("ClientElectionManager: Scheda wireless configurata correttamente ora cerca il relay");
 			searchingRelay();
 		}
@@ -120,13 +133,13 @@ public class ClientElectionManager extends Observable implements Observer{
 				comManager.sendTo(dpOut);
 
 			} catch (IOException e) {
-				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");
+				if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");
 				else System.out.println("Errore nel spedire il messaggio di WHO_IS_RELAY");
 				e.getStackTrace();}
 			
 			actualStatus = ClientStatus.WAITING_WHO_IS_RELAY;
 			timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,	TimeOutConfiguration.TIMEOUT_SEARCH);
-			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_WARNING,"ClientElectionManager: stato OFF->WAITING_WHO_IS_RELAY, inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
+			if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_WARNING,"ClientElectionManager: stato OFF->WAITING_WHO_IS_RELAY, inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 			else System.out.println("ClientElectionManager: stato OFF->WAITING_WHO_IS_RELAY, inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 		}
 	}
@@ -144,7 +157,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			try {
 				clientMessageReader.readContent(dpIn);
 			} catch (IOException e) {
-				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientElectionManager : errore durante la lettura del pacchetto election");
+				if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientElectionManager : errore durante la lettura del pacchetto election");
 				else System.out.println("ClientElectionManager : errore durante la lettura del pacchetto election");
 				e.printStackTrace();}
 
@@ -162,7 +175,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				electing = false;
 				firstEM_ELsent = false;
 				
-				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: IM_RELAY arrivato, Stato IDLE e actualRelayAddress: " + connectedRelayAddress+".\nPronto per richiesta file e iniziare streaming RTP.");
+				if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: IM_RELAY arrivato, Stato IDLE e actualRelayAddress: " + connectedRelayAddress+".\nPronto per richiesta file e iniziare streaming RTP.");
 				else System.out.println("ClientElectionManager: IM_RELAY arrivato, Stato IDLE e actualRelayAddress: " + connectedRelayAddress+".\nPronto per richiesta file e iniziare streaming RTP.");
 				
 				if(timeoutSearch != null) {
@@ -176,16 +189,16 @@ public class ClientElectionManager extends Observable implements Observer{
 				
 				DatagramPacket dpOut = null;
 				try {
-					dpOut = ClientMessageFactory.buildAckConnection(connectedRelayInetAddress, PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN,MessageCodeConfiguration.TYPECLIENT);
+					dpOut = ClientMessageFactory.buildAckConnection(connectedRelayInetAddress, PortConfiguration.PORT_ELECTION_IN,MessageCodeConfiguration.TYPECLIENT);
 					comManager.sendTo(dpOut);
 				} catch (IOException e) {
-					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");
+					if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");
 					else System.out.println("ClientElectionManager: ERRORE nel spedire il messaggio di WHO_IS_RELAY");
 					e.getStackTrace();}
 
-				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: client creato e ACK_CONNECTION spedito");
+				if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: client creato e ACK_CONNECTION spedito");
 				else System.out.println("ClientElectionManager: client creato e ACK_CONNECTION spedito");
-				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
+				if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
 				else System.out.println("ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
 				setImServed(true);
 			}
@@ -199,7 +212,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			String event = (String) arg1;
 
 			if((event.equals("TIMEOUTSEARCH")) &&	(actualStatus == ClientStatus.WAITING_WHO_IS_RELAY)){
-				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: stato off:  TIMEOUT_SEARCH scattato, devo ricercare il relay.");
+				if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: stato off:  TIMEOUT_SEARCH scattato, devo ricercare il relay.");
 				else System.out.println("ClientElectionManager: stato off:  TIMEOUT_SEARCH scattato, devo ricercare il relay.");
 				searchingRelay();
 			}
@@ -213,7 +226,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			else if(event.equals("TIMEOUTFAILTOELECT") &&
 					actualStatus == ClientStatus.WAITING_END_ELECTION){
 
-				console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION: TIMEOUT_FAIL_TO_ELECT scattato");
+				consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION: TIMEOUT_FAIL_TO_ELECT scattato");
 
 				imServed = false;
 				clientPositionController.close();
@@ -222,9 +235,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				DatagramPacket dpOut = null;
 
 				try {
-					dpOut = ClientMessageFactory.buildEmElDetClient(indexEM_EL_DET_CLIENT, BCAST, PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN);
-					comManager.sendTo(dpOut);
-					dpOut = ClientMessageFactory.buildEmElDetClient(indexEM_EL_DET_CLIENT, BCAST, PortConfiguration.CLIENT_PORT_ELECTION_IN);
+					dpOut = ClientMessageFactory.buildEmElDetClient(indexEM_EL_DET_CLIENT, BCAST, PortConfiguration.PORT_ELECTION_IN);
 					comManager.sendTo(dpOut);
 					indexEM_EL_DET_CLIENT++;
 				} catch (IOException e) {
@@ -239,7 +250,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				setChanged();
 				notifyObservers("EMERGENCY_ELECTION");
 
-				console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: TIMEOUT_FAIL_TO_ELECT scattato: inviato EM_EL_DET_CLIENT");
+				consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: STATO WAITING_END_ELECTION -> IDLE: TIMEOUT_FAIL_TO_ELECT scattato: inviato EM_EL_DET_CLIENT");
 
 			}
 			/**FINE STATO WAITING_END_ELECTION**/
@@ -251,7 +262,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	 * @param DebugConsole da impostare per il debug
 	 */
 	public void setDebugConsole(DebugConsole console) {
-		this.console = console;
+		this.consoleElectionManger = console;
 	}
 
 	/**Metodo che impone al ClientElectionManager, in opportune condizioni, di mettersi alla ricerca del Relay attuale
@@ -273,13 +284,13 @@ public class ClientElectionManager extends Observable implements Observer{
 				if (connectedRelayAddress != null) {
 					preparePositionController();      //per monitorare RSSI
 					clientPositionController.start();
-					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController AVVIATO monitorando RSSI riferito al seguente indirizzo del relay: "+connectedRelayAddress);
+					if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController AVVIATO monitorando RSSI riferito al seguente indirizzo del relay: "+connectedRelayAddress);
 					else System.out.println("ClientPositionController AVVIATO monitorando RSSI riferito al seguente indirizzo del relay: "+connectedRelayAddress);
 				}
 			}else if(clientPositionController != null) clientPositionController.close();
 		}
 		else{
-			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR, "ClientElectionManager.setImServed(): ERRORE: non posso essere servito se non so chi è il Relay attuale");
+			if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_ERROR, "ClientElectionManager.setImServed(): ERRORE: non posso essere servito se non so chi è il Relay attuale");
 			else System.err.println("ClientElectionManager.setImServed(): ERRORE: non posso essere servito se non so chi è il Relay attuale");
 		}
 	}
@@ -322,7 +333,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	
 	/**Metodi get e set delle rispettive variabili
 	 */
-	public DebugConsole getDebugCondole(){return console;}
+	public DebugConsole getDebugCondole(){return consoleElectionManger;}
 	public boolean isImServed() {return imServed;}
 	public ClientCM getComManager() {return comManager;}
 	public void setComManager(ClientCM comManager) {this.comManager = comManager;}

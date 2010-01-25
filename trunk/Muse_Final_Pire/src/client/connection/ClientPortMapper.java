@@ -34,8 +34,8 @@ public class ClientPortMapper {
 
 	private ClientPortMapper()
 	{
-		portElectionIn = PortConfiguration.CLIENT_PORT_ELECTION_IN;
-		portElectionOut = PortConfiguration.CLIENT_PORT_ELECTION_OUT;
+		portElectionIn = PortConfiguration.PORT_ELECTION_IN;
+		portElectionOut = PortConfiguration.PORT_ELECTION_OUT;
 		portSessionIn = PortConfiguration.CLIENT_PORT_SESSION_IN;
 		portSessionOut = PortConfiguration.CLIENT_PORT_SESSION_OUT;
 		portRSSIOut = PortConfiguration.RSSI_PORT_OUT;

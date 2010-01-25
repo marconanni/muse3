@@ -4,14 +4,15 @@ public class MessageCodeConfiguration {
 	
 	public static final int TYPERELAY = 0;
 	public static final int TYPECLIENT = 1;
+	public static final int TYPERELAYPASSIVE = 2;
 	
-	public static final int WHO_IS_RELAY = 2;
-	public static final int IM_RELAY = 3;
+	public static final int WHO_IS_RELAY = 3;
+	public static final int IM_RELAY = 4;
 	
-	public static final int ACK_CONNECTION = 4;
+	public static final int ACK_CONNECTION = 5;
 
-	public static final int REQUEST_RSSI = 5;
-	public static final int NOTIFY_RSSI = 6;
+	public static final int REQUEST_RSSI = 6;
+	public static final int NOTIFY_RSSI = 7;
 	
 	public static final int ELECTION_REQUEST = 11;			//Messaggio inviato da un relay attualmente attivo che deve essere sostituito
 	public static final int ELECTION_BEACON = 12;			//Messaggio inviato dai client con sessione RTP in corso destinato ai possibili relay sostituti

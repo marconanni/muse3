@@ -20,7 +20,6 @@ public class TimeOutSearch extends Timer {
 
 	public void schedule(final Observer obs, long tV){
 		super.schedule(new TimerTask(){public void run(){obs.update(null,"TIMEOUTSEARCH");cancelTimeOutSearch();}}, tV);
-		System.out.println("TIMEOUTSEARCH_SCHEDULE: SETTATO IL TIMEOUT...");
 	} 
 
 	public void cancelTimeOutSearch(){

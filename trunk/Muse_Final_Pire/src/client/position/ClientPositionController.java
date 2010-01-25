@@ -51,13 +51,10 @@ public class ClientPositionController implements Observer{
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
 	 * @throws WNICException 
 	 */
-	public ClientPositionController(String interf, String essidName) throws WNICException{
+	public ClientPositionController(ClientWNICController cwnic) throws WNICException{
 		crscm = ClientConnectionFactory.getRSSIConnectionManager(this,true);
-		
-		try {
-			cwnic = WNICFinder.getCurrentWNIC(interf, essidName);
-			cwnic.init();
-		} catch (OSException e) {new WNICException("ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
+		this.cwnic=cwnic;
+		console=cwnic.getDebugConsole();
 		enableToMonitor = false;
 		started = false;
 	}

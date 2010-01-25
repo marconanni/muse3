@@ -1,6 +1,25 @@
 package parameters;
 
 public class PortConfiguration {
+	
+	//Porte per gli ELECTION MANAGER
+	/** porta per la gestione della elezione sui CLIENT/RELAY in ingresso */
+	public static final int PORT_ELECTION_IN = 3002;
+	/** porta per la gestione della elezione sui CLIENTRELAY in uscita.
+	 * Attraverso questa porta vengono spediti anche i messaggi WHO_IS_RELAY */
+	public static final int PORT_ELECTION_OUT = 3003;
+	
+	//Porte per i WHO_IS_RELAY
+	/** porta su cui il Thread periodico del Relay Attuale ascolta i messaggi WHO_IS_RELAY
+	 *  e invia subito dopo la risposta IM_RELAY al mittente sulla porta PORT_ELECTION_IN */
+	public static final int WHO_IS_RELAY_PORT_IN= 4000;
+	public static final int WHO_IS_RELAY_PORT_OUT = 4001;
+	
+	//Client && Relay
+	/** porta su cui il CLIENT e RELAY riceve i messaggi di REQUEST_RSSI
+	 *  e la porta da cui invia NOTIFY_RSSI al RELAY corrispondente*/
+	public static final int RSSI_PORT_IN = 3004;
+	public static final int RSSI_PORT_OUT = 3005;
 
 	//SERVER
 	/** porte utilizzate per la gestione della sessione sul SERVER*/
@@ -23,22 +42,14 @@ public class PortConfiguration {
 	/** porta per la gestione della sessione sui CLIENT in uscita */
 	public static final int CLIENT_PORT_SESSION_OUT = 3001;
 		
-	/** porta per la gestione della elezione sui CLIENT in ingresso */
-	public static final int CLIENT_PORT_ELECTION_IN = 3002;
 	
-	/** porta per la gestione della elezione sui CLIENT in uscita.
-	 * Attraverso questa porta  il CLIENT spedisce anche i messaggi
-	 * WHO_IS_RELAY */
-	public static final int CLIENT_PORT_ELECTION_OUT = 3003;
+	
+
 	
 	/** porta per la ricezione del flusso RTP sul CLIENT */
 //	public static final int CLIENT_PORT_RTP_IN = 3006;
 	
-	//RELAY E PROXY
-	/** porta su cui il Thread periodico del Relay Attuale ascolta i messaggi WHO_IS_RELAY
-	 *  e invia subito dopo la risposta IM_RELAY al mittente del WHO_IS_RELAY */
-	public static final int WHO_IS_RELAY_PORT_IN= 4000;
-	public static final int WHO_IS_RELAY_PORT_OUT = 4001;
+
 	
 	/** porta per la gestione della sessione sul RELAY verso la rete ad-hoc in ingresso */
 	//public static final int RELAY_SESSION_AD_HOC_PORT_IN = 4002;
@@ -49,12 +60,6 @@ public class PortConfiguration {
 	/** porta per la gestione della sessione sul RELAY verso il SERVER, in uscita */
 	//public static final int RELAY_SESSION_MANAGED_PORT_OUT = 4004;
 			
-	/** porta per la gestione della elezione sul RELAY, rispettivamente in ingresso */
-	public static final int RELAY_ELECTION_CLUSTER_PORT_IN = 4005;
-		
-	/** porta per la gestionee della elezione sul RELAY, rispettivamente in uscita */
-	public static final int RELAY_ELECTION_CLUSTER_PORT_OUT = 4006;
-	
 		
 	/** valori iniziali dei range di porte RTP in ingresso 
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
@@ -76,9 +81,5 @@ public class PortConfiguration {
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
 	//public static final int PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL = 9000;
 	
-	//Client && Relay
-	/** porta su cui il CLIENT e RELAY riceve i messaggi di REQUEST_RSSI
-	 *  e la porta da cui invia NOTIFY_RSSI al RELAY corrispondente*/
-	public static final int RSSI_PORT_IN = 3004;
-	public static final int RSSI_PORT_OUT = 3005;
+
 }
