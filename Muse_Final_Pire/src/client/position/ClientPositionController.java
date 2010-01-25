@@ -56,8 +56,8 @@ public class ClientPositionController implements Observer{
 		
 		try {
 			cwnic = WNICFinder.getCurrentWNIC(interf, essidName);
+			cwnic.init();
 		} catch (OSException e) {new WNICException("ClientPositionController: Errore nel creare il controller per la scheda wireless ["+e.getMessage()+"]");}
-		console = cwnic.getDebugConsole();
 		enableToMonitor = false;
 		started = false;
 	}
@@ -103,20 +103,27 @@ public class ClientPositionController implements Observer{
 			cmr = new ClientMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);
-				console.debugMessage(DebugConfiguration.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
-				if((cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI)&&(cmr.getAddress().equals(relayAddress))){
+				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
+				else System.out.println("ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
+				System.out.println("CODE: "+cmr.getCode());
+				if(cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI){//&&(cmr.getAddress().equals(relayAddress))){
+					System.out.println("GET RSSI VALUE");
 					RSSIvalue = cwnic.getSignalStrenghtValue();
+					System.out.println("RSSI:"+RSSIvalue);
 					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, PortConfiguration.RSSI_PORT_IN);
 					sequenceNumber++;
+					System.out.println("Build Message to :"+relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
 					crscm.sendTo(notifyRSSI);
-					console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
+					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
+					else System.out.println("ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
 				}else{
-					console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
+					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
+					else System.out.println("ClientPositionController.update(): Faccio niente");
 				
 				}
 			} catch (WNICException e) {
-					console.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
-					new WNICException("ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+					else new WNICException("ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
 				
 			} catch (IOException e) {e.printStackTrace();}
 			cmr = null;
