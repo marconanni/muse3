@@ -70,6 +70,7 @@ public class WhoIsRelayServer implements Observer {
 		
 		if(arg instanceof DatagramPacket){
 			DatagramPacket dp =(DatagramPacket) arg;
+			System.out.println("WHOISRELAYSERVER ricevuto messaggio");
 		// TODO Auto-generated method stub
 			try {
 				rmr = new RelayMessageReader();
