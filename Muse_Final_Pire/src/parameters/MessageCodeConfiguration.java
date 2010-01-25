@@ -42,4 +42,5 @@ public class MessageCodeConfiguration {
 	
 	public static final int SERVER_UNREACHEABLE = 23;
 	public static final int SESSION_INVALIDATION = 24;
+
 }
