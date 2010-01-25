@@ -254,7 +254,7 @@ public class RelaySessionManager implements Observer{
 				 * ogni nuovo proxy relativamente alla stessa sessione
 				 */
 				 
-				// TODO considera la possibilità di far mandare un unico redirect dal Session Manager anzichè farne mandare tante 
+				// TODO considera la possibilità di far mandare un unico redirect dal Session Manager anzichè farne mandare tanti 
 				 
 				
 				this.toSessionInfo.cancelTimeOutSessionInfo();
@@ -345,11 +345,16 @@ public class RelaySessionManager implements Observer{
 			 *	e mi metto in attesa delle informazioni sulle sessioni
 			 *
 			 */
-			if(this.event.contains("NEW_RELAY"))
+			if(this.event.contains("NEW_RELAY")) 
+				/*
+				 * Marco: l'election manager quando c'� un election done scatena un evento che mi fa ricevere la stringa 
+				 * NEW_RELAY:ip del vincitore dell'elezione. Cosa fare dipende dal ruolo che il nodo ha in quel momento:
+				 * vecchio relay, vicitore dell'elezione, o candidato che non ha vinto.
+				 */
 			{
 				StringTokenizer st = new StringTokenizer(this.event, ":");
 				st.nextToken();
-				String newRelay = st.nextToken();
+				String newRelay = st.nextToken(); // Marco: estraggo
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di NEW_RELAY, il nuovo RELAY è "+newRelay);
 				System.out.println("RELAY_SESSION_MANAGER: Evento di NEW_RELAY, il nuovo RELAY è "+newRelay);
 				if(imRelay) // Marco: imRelay è true se io sono il relay attualmente attivo nella rete
@@ -359,15 +364,15 @@ public class RelaySessionManager implements Observer{
 					this.toSessionRequest = RelayTimeoutFactory.getTimeOutSessionRequest(this, Parameters.TIMEOUT_SESSION_REQUEST);
 				}
 				else
-				{
+				{ 
 					try {
-						if(InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS).getHostAddress().equals(newRelay))
+						if(InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS).getHostAddress().equals(newRelay)) // io sono il relay vincitore
 						{
 							this.imRelay = true; // Marco : cambio già lo stato: non è presto? forse sarebbe meglio aspettare dopo aver mandato il Redirect al server...
 							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
 							this.sessionCM.sendTo(message);
 							this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, Parameters.TIMEOUT_SESSION_INFO);
-							this.status = "RequestingSession";
+							this.status = SessionManagerStatus.RequestingSession;
 						}
 					} catch (UnknownHostException e) {
 						// TODO Auto-generated catch block
@@ -376,7 +381,7 @@ public class RelaySessionManager implements Observer{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}
+				}// marco: se sono un semplice nodo che si � candidato, ma non ho vinto non debbo fare nulla
 			}
 			if(this.event.contains("NEW_EM_RELAY"))
 			{
@@ -434,7 +439,7 @@ public class RelaySessionManager implements Observer{
 				try {
 					this.message = RelayMessageFactory.buildSessionInvalidation(0, InetAddress.getByName(Parameters.BROADCAST_ADDRESS), Parameters.CLIENT_PORT_SESSION_IN);
 					this.sessionCM.sendTo(this.message);
-					this.status = "Active";
+					this.status = SessionManagerStatus.Active;
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -443,6 +448,17 @@ public class RelaySessionManager implements Observer{
 					e.printStackTrace();
 				}
 			}
+			
+			if(this.event.equals("ELECTION_REQUEST_RECEIVED"))// Marco aggiungi condizione sono il relay secondario e non il big boss
+			{
+				/*
+				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo � un relay secondario
+				 * servito dal big boss.
+				 * Qui il relay secondario deve ingrandire i buffer (alzando la soglia superiore) dei propri proxy, analogamente
+				 * a quello che fanno i clients.
+				 */
+			}
+			
 		}
 		/**
 		 * il proxy dopo aver creato la sessione ha il compito di avvertire il sessionmanager
@@ -533,7 +549,7 @@ public class RelaySessionManager implements Observer{
 					proxyCtrlPort = values[5];
 				}
 				try {
-					/**
+					/*
 					 * nel costruttore del proxy è stato inserito il valore di proxy PortStreamOut in 2 punti diversi proprio perchè il vecchio proxy quando avvia
 					 * la trasmissione di recovery verso il nuovo riutilizza la medesima porta.
 					 * Marco: quindi il numero di porta sulla quale il proxy sul nuovo relay riceve il flusso da inserire nel suo recovery buffer è lo stesso
