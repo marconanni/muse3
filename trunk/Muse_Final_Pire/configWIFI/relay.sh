@@ -2,17 +2,17 @@
 paramAdHocBigBoss ()
 {
 	#RETE ADHOC BIGBOSS
-	CLUSTERHEAD_INTERFACE=wlan0
+	CLUSTERHEAD_INTERFACE=wlan1
 	CLUSTERHEAD_ESSID=BIGBOSS
-	CLUSTERHEAD_IP=192.168.30.2
+	CLUSTERHEAD_IP=192.168.30.3
 }
 
 paramAdHocRelay ()
 {
-	#RETE ADHOC RELAY1
-	CLUSTER_INTERFACE=wlan1
+	#RETE ADHOC RELAY2
+	CLUSTER_INTERFACE=ath0
 	CLUSTER_ESSID=RELAY1
-	CLUSTER_IP=192.168.10.2
+	CLUSTER_IP=192.168.5.3
 }
 
 paramInternetHome ()
@@ -43,11 +43,10 @@ connect_cluster_head ()
 	paramAdHocBigBoss
 
 	#ADHOC BIGBOSS
+	echo "cluster head"
 	sudo ifconfig $CLUSTERHEAD_INTERFACE down
 	sudo iwconfig $CLUSTERHEAD_INTERFACE mode ad-hoc
 	sudo iwconfig $CLUSTERHEAD_INTERFACE essid $CLUSTERHEAD_ESSID
-	sudo iwconfig $CLUSTERHEAD_INTERFACE rate 11M
-	sudo iwconfig $CLUSTERHEAD_INTERFACE key off
 	sudo ifconfig $CLUSTERHEAD_INTERFACE $CLUSTERHEAD_IP netmask 255.255.255.0 up
 }
 connect_cluster ()
@@ -55,11 +54,12 @@ connect_cluster ()
 	paramAdHocRelay
 
 	#ADHOC BIGBOSS
+	sudo modprobe -r ath_pci
+	sudo modprobe ath_pci autocreate=adhoc
 	sudo ifconfig $CLUSTER_INTERFACE down
 	sudo iwconfig $CLUSTER_INTERFACE mode ad-hoc
 	sudo iwconfig $CLUSTER_INTERFACE essid $CLUSTER_ESSID
 	sudo iwconfig $CLUSTER_INTERFACE rate 11M
-	sudo iwconfig $CLUSTER_INTERFACE key off
 	sudo ifconfig $CLUSTER_INTERFACE $CLUSTER_IP netmask 255.255.255.0 up
 }
 
@@ -124,9 +124,10 @@ while [ $choice -eq 5 ]; do
 				connect_uni_almawifi
 			else
 				if [ $choice -eq 4 ] ; then
+					connect_uni_ethernet
 					connect_cluster_head
 					connect_cluster
-					connect_uni_ethernet
+					
 				else
 					echo "1. normal"
 	 				echo "2. home with internet"
