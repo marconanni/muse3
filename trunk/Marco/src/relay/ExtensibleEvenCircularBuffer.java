@@ -12,30 +12,34 @@ import com.sun.media.ExtBuffer;
 
 
 /*
- * Classe che implementa le funzionalità del buffer del relay nella versione multihop di muse
- * in particolare ha la capacità di estendere la capacità del buffer quando entra in modalità
- * recovery ( flag normal mode =false). Se non è specificata la soglia superiore  del buffer in modalità
+ * Classe che implementa le funzionalitï¿½ del buffer del relay nella versione multihop di muse
+ * in particolare ha la capacitï¿½ di estendere la capacitï¿½ del buffer quando entra in modalitï¿½
+ * recovery ( flag normal mode =false). Se non ï¿½ specificata la soglia superiore  del buffer in modalitï¿½
  * recovery questa viene posta pari al doppio di quella normale
  * 
  */
 
 
 public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer {
-	private int sogliaSuperioreRecovery; // soglia oltre alla quale , in modalità recovery viene lanciato 
+	private int sogliaSuperioreElection; // soglia oltre alla quale , in modalitï¿½ recovery viene lanciato 
 											//l'evento di bufferFull
-	 private int sogliaSuperioreNormal;		 // soglia oltre alla quale , in modalità normale viene lanciato 
+	 private int sogliaSuperioreNormal;		 // soglia oltre alla quale , in modalitï¿½ normale viene lanciato 
 											//l'evento di bufferFull
 	 
 
 	
-	public void setSogliaSuperioreRecovery(int sogliaSuperioreRecovery) {
-		this.sogliaSuperioreRecovery = sogliaSuperioreRecovery;
+	
+
+
+
+	public void setSogliaSuperioreElection(int sogliaSuperioreElection) {
+		this.sogliaSuperioreElection = sogliaSuperioreElection;
 	}
 
 
 
-	public int getSogliaSuperioreRecovery() {
-		return sogliaSuperioreRecovery;
+	public int getSogliaSuperioreElection() {
+		return sogliaSuperioreElection;
 	}
 
 
@@ -53,44 +57,44 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 
 
 	/**
-	 * In questa versione del costruttore il valore della soglia superiore in modalità recovery
-	 * è posto pari al doppio della sogli superiore in funzionamento normale 
-	 * @param numFrames = è la dimensione totale del buffer
-	 * @param sogliaInferiore = è la soglia sotto la quale viene lanciato l'evento di bufferEmpty
-	 * @param sogliaSuperiore = è la soglia sopra la quale, in funzionamento normale, viene lanciato 
+	 * In questa versione del costruttore il valore della soglia superiore in modalitï¿½ Election
+	 * ï¿½ posto pari al doppio della sogli superiore in funzionamento normale 
+	 * @param numFrames = ï¿½ la dimensione totale del buffer
+	 * @param sogliaInferiore = ï¿½ la soglia sotto la quale viene lanciato l'evento di bufferEmpty
+	 * @param sogliaSuperiore = ï¿½ la soglia sopra la quale, in funzionamento normale, viene lanciato 
 	 * l'evento di bufferfull.
 	 * 
 	 */
 	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperiore){
 		super(numFrames,view,sogliaInferiore, sogliaSuperiore);
-		this.setSogliaSuperioreRecovery(sogliaSuperiore*2);
+		this.setSogliaSuperioreElection(sogliaSuperiore*2);
 		
 	}
 	
 	/**
-	 * In questa versione del costruttore il valore della soglia superiore in modalità recovery
-	 * è settabile tramite l'apposito parametro sogliaSuperioreRecovery
-	 * @param numFrames = è la dimensione totale del buffer
-	 * @param sogliaInferiore = è la soglia sotto la quale viene lanciato l'evento di bufferEmpty
-	 * @param sogliaSuperiorenNormal = è la soglia sopra la quale, in funzionamento normale, viene lanciato 
+	 * In questa versione del costruttore il valore della soglia superiore in modalitï¿½ Election
+	 * ï¿½ settabile tramite l'apposito parametro sogliaSuperioreElection
+	 * @param numFrames = ï¿½ la dimensione totale del buffer
+	 * @param sogliaInferiore = ï¿½ la soglia sotto la quale viene lanciato l'evento di bufferEmpty
+	 * @param sogliaSuperiorenNormal = ï¿½ la soglia sopra la quale, in funzionamento normale, viene lanciato 
 	 * l'evento di bufferfull.
-	 * @param sogliaSuperioreRecovery = è la soglia oltre la quale viene lanciato l'eventodi 
-	 * bufferFull quando il buffer è in modalità recovery
+	 * @param sogliaSuperioreElection = ï¿½ la soglia oltre la quale viene lanciato l'eventodi 
+	 * bufferFull quando il buffer ï¿½ in modalitï¿½ Election
 	 * 
 	 */
-	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperioreNormal, int sogliaSuperioreRecovery){
+	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperioreNormal, int sogliaSuperioreElection){
 		super(numFrames,view,sogliaInferiore, sogliaSuperioreNormal);
-		this.setSogliaSuperioreRecovery(sogliaSuperioreRecovery);
+		this.setSogliaSuperioreElection(sogliaSuperioreElection);
 		
 	}
 
 
 	/**
-	 * Metodo che, imposta la modalità di funzionamento del buffer ( ed in particolare la
+	 * Metodo che, imposta la modalitï¿½ di funzionamento del buffer ( ed in particolare la
 	 * soglia superiore del buffer)
-	 * @param normalMode se true la soglia oltre la quale verrà lanciato l'evento di bufferFull sara 
-	 * quella di funzionamento normale (sogliaSuperioreNormal); se false (modaltità recovery) tale soglia
-	 * sarà impostata a sogliaSuperioreRecovery
+	 * @param normalMode se true la soglia oltre la quale verrï¿½ lanciato l'evento di bufferFull sara 
+	 * quella di funzionamento normale (sogliaSuperioreNormal); se false (modaltitï¿½ Election) tale soglia
+	 * sarï¿½ impostata a sogliaSuperioreElection
 	 */
 
 	@Override
@@ -99,7 +103,7 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 		if(normalMode== true)
 			super.setSogliaSuperiore(sogliaSuperioreNormal);
 		else
-			super.setSogliaSuperiore(sogliaSuperioreRecovery);
+			super.setSogliaSuperiore(getSogliaSuperioreElection());
 		
 	}
 	
