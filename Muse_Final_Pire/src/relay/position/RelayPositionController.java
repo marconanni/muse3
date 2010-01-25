@@ -20,7 +20,7 @@ import relay.wnic.exception.WNICException;
 
 import debug.DebugConsole;
 
-public class RelayPositionMonitorController implements Observer {
+public class RelayPositionController implements Observer {
 	private DatagramPacket notifyRSSI = null;
 	private boolean enableToMonitor;
 	private boolean started;
@@ -38,7 +38,7 @@ public class RelayPositionMonitorController implements Observer {
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
 	 * @throws WNICException 
 	 */
-	public RelayPositionMonitorController(RelayWNICController cwnic) throws WNICException{
+	public RelayPositionController(RelayWNICController cwnic) throws WNICException{
 		rrscm = RelayConnectionFactory.getRSSIClusterHeadConnectionManager(this,true);
 		this.cwnic = cwnic;
 		console = cwnic.getDebugConsole();

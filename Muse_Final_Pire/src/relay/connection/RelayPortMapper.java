@@ -46,8 +46,8 @@ public class RelayPortMapper {
 		portInWhoIsRelay = PortConfiguration.WHO_IS_RELAY_PORT_IN;
 		portOutWhoIsRelay = PortConfiguration.WHO_IS_RELAY_PORT_OUT;
 		
-		portInAdHocElection = PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_IN;
-		portOutAdHocElection = PortConfiguration.RELAY_ELECTION_CLUSTER_PORT_OUT;
+		portInAdHocElection = PortConfiguration.PORT_ELECTION_IN;
+		portOutAdHocElection = PortConfiguration.PORT_ELECTION_OUT;
 
 	
 		portInRSSI = PortConfiguration.RSSI_PORT_IN;
