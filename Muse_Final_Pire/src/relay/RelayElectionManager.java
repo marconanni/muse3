@@ -404,6 +404,17 @@ public class RelayElectionManager extends Observable implements Observer{
 				notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
 				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
 			}
+			/*
+			 * Conferma da parte di un nodo della connessione al Big Boss
+			 */
+			if((relayMessageReader.getCode()==MessageCodeConfiguration.ACK_CONNECTION) && 
+			   (isRELAY())){
+					addClient();
+				
+				setChanged();
+				notifyObservers("NEW_CONNECTED_RELAY:"+relayMessageReader.getPacketAddess().toString());
+				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager: nuovo relay secondario connesso -> ip :"+relayMessageReader.getPacketAddess().toString());
+			}
 		}
 		
 		if(arg1 instanceof String){
