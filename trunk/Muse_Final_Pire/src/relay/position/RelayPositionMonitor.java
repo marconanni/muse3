@@ -24,7 +24,7 @@ import relay.connection.RelayConnectionFactory;
 import relay.messages.RelayMessageFactory;
 import relay.messages.RelayMessageReader;
 import relay.timeout.RelayTimeoutFactory;
-import relay.timeout.TimeOutNotifyRSSI;
+import relay.timeout.TimeOutSingleWithMessage;
 import relay.wnic.exception.InvalidParameter;
 
 /**Classe che rappresenta un oggetto in grado di prevedere un possibile allontanamento del nodo Relay
@@ -37,7 +37,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 
 	private int positiveDisconnectionPrediction;
 	private RelayMessageReader rmr = null;
-	private TimeOutNotifyRSSI tnRSSI = null;
+	private TimeOutSingleWithMessage tnRSSI = null;
 	private Timer timer = null;
 	private static InetAddress BCAST = null;
 	private Vector<Double> averageValues = null;
@@ -99,12 +99,12 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	public void close(){
 		rrcm.close();
 		timer.cancel();
-		if(tnRSSI!=null)tnRSSI.cancelTimeOutNotifyRSSI();
+		if(tnRSSI!=null)tnRSSI.cancelTimeOutSingleWithMessage();
 	}
 	
 	public void stop(){
 		timer.cancel();
-		if(tnRSSI!=null)tnRSSI.cancelTimeOutNotifyRSSI();
+		if(tnRSSI!=null)tnRSSI.cancelTimeOutSingleWithMessage();
 		if(rrcm.isStarted())rrcm.stopReceiving();
 		setStarted(false);
 	}
@@ -119,7 +119,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 			sumOfRSSI = 0;
 			rrcm.sendTo(dp);	
 			seqNum++;
-			tnRSSI = RelayTimeoutFactory.getTimeOutNotifyRSSI(this,TimeOutConfiguration.TIMEOUT_NOTIFY_RSSI);
+			tnRSSI = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_NOTIFY_RSSI, TimeOutConfiguration.TIME_OUT_NOTIFY_RSSI);
 			console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionCOntroller: spedito RSSI Request a tutti e TIMEOUT_NOTIFY_RSSI attivato");
 		} catch (Exception e) {e.printStackTrace();}
 	}
@@ -135,11 +135,17 @@ public class RelayPositionMonitor extends Observable implements Observer {
 
 			if(rmr.getCode() == MessageCodeConfiguration.NOTIFY_RSSI){
 				double RSSIValue = rmr.getRSSI();
-				console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI:"+ ((DatagramPacket)arg1).getAddress()+" : "+rmr.getRSSI());
+				int activeClient = rmr.getActiveClient();
+				if(rmr.getTypeNode()==MessageCodeConfiguration.TYPERELAY)
+					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI da un RELAY attivo IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
+					else System.out.println("RelayPositionController: ricevuto nuovo valore RSSI da un RELAY attivo IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
+				if(rmr.getTypeNode() ==MessageCodeConfiguration.TYPECLIENT)
+					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI da un CLIENT IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
+					else System.out.println("RelayPositionController: ricevuto nuovo valore RSSI da un CLIENT IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
 
 				if(RSSIValue < ElectionConfiguration.VALID_RSSI_THRS && RSSIValue > 0 && RSSIValue != Double.NaN){
-					sumOfRSSI = sumOfRSSI + RSSIValue;
-					numberOfValideRSSI++;
+					sumOfRSSI = sumOfRSSI + (RSSIValue*activeClient);
+					numberOfValideRSSI+=activeClient;
 				}	
 			}
 			rmr = null;

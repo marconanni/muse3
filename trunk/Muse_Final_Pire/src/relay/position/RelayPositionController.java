@@ -9,13 +9,12 @@ import parameters.DebugConfiguration;
 import parameters.MessageCodeConfiguration;
 import parameters.PortConfiguration;
 
+import relay.RelayElectionManager;
 import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
 import relay.messages.RelayMessageFactory;
 import relay.messages.RelayMessageReader;
 import relay.wnic.RelayWNICController;
-import relay.wnic.WNICFinder;
-import relay.wnic.exception.OSException;
 import relay.wnic.exception.WNICException;
 
 import debug.DebugConsole;
@@ -31,6 +30,7 @@ public class RelayPositionController implements Observer {
 	private static int sequenceNumber = 0;
 
 	private RelayMessageReader cmr = null;
+	private RelayElectionManager electionManger = null;
 	private DebugConsole console = null;
 	
 	/**Metodo per ottenere un ClientPositionController
@@ -38,8 +38,9 @@ public class RelayPositionController implements Observer {
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
 	 * @throws WNICException 
 	 */
-	public RelayPositionController(RelayWNICController cwnic) throws WNICException{
+	public RelayPositionController(RelayWNICController cwnic, RelayElectionManager electionManager) throws WNICException{
 		rrscm = RelayConnectionFactory.getRSSIClusterHeadConnectionManager(this,true);
+		this.electionManger = electionManager;
 		this.cwnic = cwnic;
 		console = cwnic.getDebugConsole();
 		started = false;
@@ -87,7 +88,7 @@ public class RelayPositionController implements Observer {
 				console.debugMessage(DebugConfiguration.DEBUG_WARNING, "RelayPositionMonitorController: ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
 				if((cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI)){
 					RSSIvalue = cwnic.getSignalStrenghtValue();
-					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue,((DatagramPacket)arg1).getAddress(), PortConfiguration.RSSI_PORT_IN);
+					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue,((DatagramPacket)arg1).getAddress(), PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPERELAY, electionManger.getActiveClient());
 					sequenceNumber++;
 					rrscm.sendTo(notifyRSSI);
 					console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionMonitorController(): Inviato RSSI: "+ RSSIvalue +" a: " + ((DatagramPacket)arg1).getAddress()+":"+PortConfiguration.RSSI_PORT_IN);
