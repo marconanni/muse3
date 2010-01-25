@@ -18,7 +18,7 @@ import parameters.MessageCodeConfiguration;
  * @version 1.1
  */
 public class ClientMessageReader {
-	private boolean debug = false;
+	private boolean debug = true;
 
 	
 	private  String message = ""; 				//Stringa contenente il messaggio
@@ -29,8 +29,7 @@ public class ClientMessageReader {
 	private  String actualRelayAddress = null;	//indirizzo del relay attuale
 	private  String newRelayAddress = null;
 	private String relayAddressBacon = null;
-	private InetAddress messageAddress = null;
-
+	private InetAddress packetAddress = null;
 	public ClientMessageReader(){}
 	
 	/**
@@ -40,7 +39,7 @@ public class ClientMessageReader {
 	 * @throws IOException
 	 */
 	public synchronized void readContent(DatagramPacket dp) throws IOException {
-		messageAddress = dp.getAddress();
+		packetAddress = dp.getAddress();
 		ByteArrayInputStream biStream = new ByteArrayInputStream(dp.getData(), 0, dp.getLength());
 		DataInputStream diStream = new DataInputStream(biStream);
 		message = diStream.readUTF();
@@ -66,7 +65,12 @@ public class ClientMessageReader {
 			c = st.nextToken(); 
 			relayControlPort = Integer.parseInt(c);
 		}
-		if (code == MessageCodeConfiguration.IM_RELAY)actualRelayAddress = st.nextToken();
+		if(code==MessageCodeConfiguration.REQUEST_RSSI){
+			System.out.println("Request RSSI");
+			actualRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
+		}
+		//if(code == MessageCodeConfiguration.NOTIFY_RSSI)RSSI = Double.parseDouble(st.nextToken());		
+		if (code == MessageCodeConfiguration.IM_RELAY)actualRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
 		if (code == MessageCodeConfiguration.ELECTION_BEACON)relayAddressBacon = st.nextToken();
 		if (code == MessageCodeConfiguration.ELECTION_DONE)newRelayAddress = st.nextToken();
 	}
@@ -74,7 +78,7 @@ public class ClientMessageReader {
 	public  String getActualRelayAddress() {return actualRelayAddress;}
 	public  String getNewRelayAddress() {return newRelayAddress;}
 	public  int getSequenceNumber() {return sequenceNumber;}
-	public InetAddress getAddress(){return messageAddress;}
+	public String getAddress(){return actualRelayAddress;}
 	public  int getCode() {return code;}
 	public  int getRelaySendingPort() {return relaySendingPort;}
 	public  int getRelayControlPort() {	return relayControlPort;}

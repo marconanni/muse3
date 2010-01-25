@@ -113,6 +113,7 @@ public class ClientElectionManager extends Observable implements Observer{
 		//se non sono in elezione oppure so che è cominciata un elezione di emergenza
 		if (!electing || (electing && firstEM_ELsent && !imServed)) {
 			DatagramPacket dpOut = null;
+			System.out.println("Invio who_is relay a "+BCAST+":"+PortConfiguration.WHO_IS_RELAY_PORT_IN);
 		
 			try {
 				dpOut = ClientMessageFactory.buildWhoIsRelay(BCAST,	PortConfiguration.WHO_IS_RELAY_PORT_IN);
@@ -154,6 +155,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			 */
 			if((clientMessageReader.getCode() == MessageCodeConfiguration.IM_RELAY) && (actualStatus == ClientStatus.WAITING_WHO_IS_RELAY)){
 
+				if(clientMessageReader.getActualRelayAddress()==null)searchingRelay();
 				actualStatus = ClientStatus.IDLE;
 				setConnectedRelayAddress(clientMessageReader.getActualRelayAddress());
 				memorizeConnectedRelayAddress();
