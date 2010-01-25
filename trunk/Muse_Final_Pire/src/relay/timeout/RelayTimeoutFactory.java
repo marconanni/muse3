@@ -12,15 +12,9 @@ import java.util.Observer;
 public class RelayTimeoutFactory {
 
 	
-	public static TimeOutSearch getTimeOutSearch(Observer obs, long timeoutValue){
-		TimeOutSearch timer = TimeOutSearch.getInstance();
-	    timer.schedule(obs, timeoutValue);
-	    return timer;
-	}
-	
-	public static TimeOutNotifyRSSI getTimeOutNotifyRSSI(Observer obs, long timeoutValue){
-		TimeOutNotifyRSSI timer = TimeOutNotifyRSSI.getInstance();
-	    timer.schedule(obs, timeoutValue);
+	public static TimeOutSingleWithMessage getSingeTimeOutWithMessage(Observer obs, long timeoutValue, String message){
+		TimeOutSingleWithMessage timer = TimeOutSingleWithMessage.getInstance();
+	    timer.schedule(obs, timeoutValue, message);
 	    return timer;
 	}
 	
