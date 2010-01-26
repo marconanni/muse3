@@ -1084,7 +1084,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	private void sendRedirectToServer(){
 		try {
-			//Creo un messaggio START_TX e lo invio al server
+			//Creo un messaggio REDIRECT e lo invio al server
 			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0, InetAddress.getByName(Parameters.SERVER_ADDRESS), Parameters.SERVER_SESSION_PORT_IN);
 			proxyCM.sendToServer(redirect);
 			//this.serverStopped = false;

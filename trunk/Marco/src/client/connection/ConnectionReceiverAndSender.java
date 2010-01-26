@@ -1,140 +1,132 @@
-package server.connection;
+package client.connection;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
 
-/**Classe che permette di ricevere messaggi su una Socket. Ad ogni ricezione, tramite il pattern Observer-Observable,
- * è in grado di avvertire l'Observer passato per parametro al costruttore.
+/**Classe che fornisce un oggeto che è in grado di inviare un messaggio 
+ * solo dopo averne ricevuto uno sempre sulla stessa Socket
  * @author Luca Campeti
  *
  */
+public class ConnectionReceiverAndSender extends Observable implements Runnable{
 
-/*
- *Marco:
- * Questa classe è diversa dal AconnectionReceiver fatto da pire per il Relay, in particolare il costruttore
- * accetta l'indirizzo come stringa e non come InetAddress, e forse non c'è la ricezione raffinata della versione di Pire
- *  per ora teniamo questa, al max modificheremo poi...
- */
-public class AConnectionReceiver extends Observable implements Runnable{
-
-	private DatagramSocket inSocket = null;
+	private DatagramSocket inOutSocket = null;
 	private DatagramPacket dataIn = null;
+	private DatagramPacket dataOut = null;
 	private byte[] buffer = null;
+	
+	protected String managerName = "ConnectionReceiverAndSender";
 
 	private Object sync = new Object();
-	private boolean stopped = false;
-	protected String managerName = "AConnectionReceiver";
-	
+
 	private String localAddress = null;
 	private int localInputPort = -1;
-	
-	/**Metodo per ottenere un AConnectionReceiver
-	 * @param observer l'Observer che deve essere avvertito alla ricezione di un messaggio
-	 * @param localAddress l'indirizzo locale del nodo
-	 * @param localInputPort la porta tramite cui ricevere i messaggi
+
+	/**Metodo per ottenere un ConnectionReceiverAndSender 
+	 * @param observer l'Observer che deve essere avvertito alla ricezione di ogni messaggio
+	 * @param localAddress una Stringa che rappresenta l'indirizzo locale del nodo
+	 * @param localInputPort un int che rappresenta la porta tramite cui ricevere i messaggi
 	 */
-	public AConnectionReceiver(Observer observer, String localAddress, int localInputPort){
+	public ConnectionReceiverAndSender(Observer observer, String localAddress, int localInputPort){
 		
 		if(localAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 		
 		this.localAddress = localAddress;
 		this.localInputPort = localInputPort;
-		
+
 		try {
-			inSocket = new DatagramSocket(localInputPort);
-		} catch (SocketException e) {
+			inOutSocket = new DatagramSocket(localInputPort);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		addObserver(observer);
 	}
 
-	
 	public void run(){
 		buffer = new byte[256];
 
 		while(true){
 
-			if(stopped){
-				synchronized (sync) {
-					try {
-						//System.out.println(managerName+" : ricezione inibita");
-						sync.wait();
-						//System.out.println(managerName+" : ricezione riabilitata");
-						if(dataIn != null) {
-							setChanged();
-							notifyObservers(dataIn);
-						}
-						
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-
-			//System.out.println(managerName+": attesa messaggio da parte di: "+ localAddress + " porta: " + localInputPort);
+			//System.out.println(managerName+" : attesa messaggio da parte di " + localAddress + " porta: " +localInputPort);
 			dataIn = new DatagramPacket(buffer, buffer.length);
 
 			try {
-				inSocket.receive(dataIn);
-				System.out.println(managerName+": ricevuto messaggio da : " +dataIn.getAddress().getHostAddress() + " porta: " +dataIn.getPort());
+				inOutSocket.receive(dataIn);
+				System.out.println(managerName+" : ricevuto messaggio da : " + dataIn.getAddress().getHostAddress()+" porta: "+dataIn.getPort());
 				/*
 				if(dataIn.getAddress().getHostAddress().equals(localAddress)){
 					System.out.println(managerName+" IGNORATO");
 					continue;
 				}
-				*/		
+				*/
 			}
 			catch (IOException e) {
-				System.out.println(managerName+": " + e.getMessage());
+				System.out.println(managerName+" : " + e.getMessage());
 				break;
 			}
 
-			if(stopped) continue;
-			
 			setChanged();
 			notifyObservers(dataIn);
-			dataIn=null;
+
+
+			if(dataOut == null){
+				synchronized (sync) {
+					try {
+						sync.wait();
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+				}	
+			}
+
+			try {
+				inOutSocket.send(dataOut);
+				System.out.println(managerName+".sendToAdHoc() : messaggio inviato a: " +dataOut.getAddress().getHostAddress() + " porta: " +dataOut.getPort() );
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			dataIn = null;
+			dataOut=null;
 		}
 	}
 
-	/**Metodo per chiudere la Socket su cui l'AConnectionReceiver riceve i messaggi
+	
+	/**Metodo per chiudere il ConnectionReceiverAndSender
 	 */
 	public void close(){
-		if(inSocket != null) inSocket.close();
+		if(inOutSocket != null) inOutSocket.close();
 	}
 
-	/**Metodo per stoppare la ricezione dei messaggi da parte dell'AConnectionReceiver
+	
+	/**Metodo per inviare un Datagramma a un destinatario nella rete Ad-Hoc
+	 * @param notifyRSSI il DatagramPacket da inviare
 	 */
-	public void pauseReception(){
-		stopped = true;
-	}
-
-	/**Metodo per riprendere la ricezione dei messaggi da parte dell'AConnectionReceiver
-	 */
-	public void resumeReception(){
-		stopped = false;
+	public void sendTo(DatagramPacket notifyRSSI){
+		dataOut = notifyRSSI;
 		synchronized (sync) {
 			sync.notifyAll();
 		}
 	}
 
-	/**Metodo per ottenere il nome del Manager che sta utilizzando l'AConnectionReceiver
-	 * @return una String che rappresenta il nome del Manager che sfrutta l'AConnectionReceiver
+	
+	/**Metodo per ottenere il nome del Manager che sta utilizzando il ConnectionReceiverAndSender
+	 * @return una Stringa che rappresenta il nome del Manager che sta utilizzando il ConnectionReceiverAndSender
 	 */
 	public String getManagerName() {
 		return managerName;
 	}
 
-	/**Metodo per impostare il nome del Manager che sta utilizzando l'AConnectionReceiver
-	 * @param managerName una String che rappresenta il nome del Manager che sfrutta l'AConnectionReceiver 
+	/**Metodo per impostare il nome del Manager che sta utilizzando il ConnectionReceiverAndSender
+	 * @param managerName una String che rappresenta il nome del Manager che sta utilizzando il ConnectionReceiverAndSender
 	 */
 	public void setManagerName(String managerName) {
 		this.managerName = managerName;

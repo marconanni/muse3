@@ -20,7 +20,8 @@ public class ServerConnectionFactory {
 	 * @return un istanza di ServerCM
 	 */
 	public static ServerCM getSessionConnectionManager(Observer obser){
-		return new ServerCM(spm.getLocalHostAddress().getHostAddress(),Parameters.SERVER_SESSION_PORT_IN,obser);
+		// nel costruttore di ServerCM uso l'indirizzo come stringa, mentre  il Port Mapper me lo da come indirizzo INET
+		return new ServerCM(spm.getLocalHostAddress().getHostAddress(),Parameters.SERVER_SESSION_PORT_IN,obser); 
 	}
 	
 	/**Metoto statico per ottenere un'istanza di StreamingServerCM
