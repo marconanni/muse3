@@ -100,7 +100,7 @@ public class ServerPortMapper {
 	 */
 	public InetAddress getLocalHostAddress(){
 		try {
-			return InetAddress.getLocalHost();
+			return InetAddress.getByName(Parameters.SERVER_ADDRESS);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

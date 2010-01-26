@@ -50,7 +50,7 @@ public class RelaySessionManager implements Observer{
 	private TimeOutSessionRequest toSessionRequest;  //Marco: questo qui sono i vari timeout
 	private TimeOutAckSessionInfo toAckSessionInfo;
 	private TimeOutSessionInfo toSessionInfo;
-	private RelaySessionCM sessionCM; // Marco: è chi si occupa di spedire i messaggi.
+	private RelaySessionCM sessionCM; // Marco: è chi si occupa di spedire  e ricevere i messaggi.
 	private RelayMessageReader messageReader;
 	private DebugConsolle consolle;
 	private String relayAddress; // Marco: è l'indirizzo sul suale si trova il relay
@@ -73,6 +73,7 @@ public class RelaySessionManager implements Observer{
 		this.sessionCM.start();
 		this.consolle = new DebugConsolle();
 		this.consolle.setTitle("RELAY SESSION MANAGER DEBUG CONSOLLE");
+		
 	}
 
 	public static RelaySessionManager getInstance() {
@@ -347,7 +348,7 @@ public class RelaySessionManager implements Observer{
 			 */
 			if(this.event.contains("NEW_RELAY")) 
 				/*
-				 * Marco: l'election manager quando c'� un election done scatena un evento che mi fa ricevere la stringa 
+				 * Marco: l'election manager quando c'� un election done scatena un evento che mi fa ricevere la stringa 
 				 * NEW_RELAY:ip del vincitore dell'elezione. Cosa fare dipende dal ruolo che il nodo ha in quel momento:
 				 * vecchio relay, vicitore dell'elezione, o candidato che non ha vinto.
 				 */
@@ -369,7 +370,7 @@ public class RelaySessionManager implements Observer{
 						if(InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS).getHostAddress().equals(newRelay)) // io sono il relay vincitore
 						{
 							this.imRelay = true; // Marco : cambio già lo stato: non è presto? forse sarebbe meglio aspettare dopo aver mandato il Redirect al server...
-							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
+							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN); // Marco: qui relayAdress è l'indirizzo del vecchio relay
 							this.sessionCM.sendTo(message);
 							this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, Parameters.TIMEOUT_SESSION_INFO);
 							this.status = SessionManagerStatus.RequestingSession;
@@ -381,7 +382,7 @@ public class RelaySessionManager implements Observer{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}// marco: se sono un semplice nodo che si � candidato, ma non ho vinto non debbo fare nulla
+				}// marco: se sono un semplice nodo che si � candidato, ma non ho vinto non debbo fare nulla
 			}
 			if(this.event.contains("NEW_EM_RELAY"))
 			{
@@ -452,7 +453,7 @@ public class RelaySessionManager implements Observer{
 			if(this.event.equals("ELECTION_REQUEST_RECEIVED"))// Marco aggiungi condizione sono il relay secondario e non il big boss
 			{
 				/*
-				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo � un relay secondario
+				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo � un relay secondario
 				 * servito dal big boss.
 				 * Qui il relay secondario deve ingrandire i buffer (alzando la soglia superiore) dei propri proxy, analogamente
 				 * a quello che fanno i clients.
