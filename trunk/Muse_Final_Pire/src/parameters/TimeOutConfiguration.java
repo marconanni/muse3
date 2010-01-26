@@ -17,9 +17,11 @@ public class TimeOutConfiguration {
 		
 	/** timeout relativo all'intera fase di elezione */
 	public static final int TIMEOUT_FAIL_TO_ELECT = 4000;
+	public static final String TIME_OUT_FAIL_TO_ELECT = "TIMEOUTFAILTOELECT";
 	
 	/** timeout relativo al messaggio FILE_REQ */
 	public static final int TIMEOUT_FILE_REQUEST = 35000;
+	public static final String TIME_OUT_FILE_REQUEST = "TIMEOUTFILEREQUEST";
 		
 	/** timeout relativo all'intera fase di elezione */
 	public static final int TIMEOUT_TO_ELECT = 3000;
@@ -27,6 +29,7 @@ public class TimeOutConfiguration {
 	
 	/** timeout relativo al messaggio di risposta dei client al messagigo ELECTION_REQUEST */
 	public static final int TIMEOUT_ELECTION_BEACON = 1000;
+	public static final String TIME_OUT_ELECTION_BEACON = "TIMEOUTELECTIONBEACON";
 	
 	/** timeout relativo alla prima fase del protocollo di emergenza */
 	public static final int TIMEOUT_CLIENT_DETECTION = 2000;

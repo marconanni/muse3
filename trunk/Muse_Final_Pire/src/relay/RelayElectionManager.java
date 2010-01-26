@@ -74,14 +74,22 @@ public class RelayElectionManager extends Observable implements Observer{
 	private int activeRelay = 0;			//relay secondari collegati al bigboss (solo big boss)
 	private int activeClient = 0;			//client collegati al relay - aumenta solo, non si aggiorna
 
+	//parametri per il protocollo di elezione
 	private Vector<Couple> possibleRelay = null;	//Vector da riempire con le Couple relative agli ELECTION_RESPONSE ricevuti dal Relay uscente
 	private double W = -1;							//peso del nodo
 	private double maxW = -1;						//massimo peso rilevato
 	private boolean electing = false;				//boolean che indica se si è in stato di elezione o meno
+	private boolean electinHead = false;			//boolean che indica se si è coinvolti in un elezione (elezioni di un nuovo big boss, nel relay secondario attivo viene settato a true)
+	private boolean firstELECTION_DONE_SEND = false;
+	private int indexELECTION_BEACON = 0;
+	private int client_visibity = 0;
+	private int relay_visibility = 0;
 	
 	//vari Timeout necessari al RelayElectionManager
 	private TimeOutSingleWithMessage timeoutSearch = null;
-	private TimeOutSingleWithMessage timeoutToElect = null;
+	private TimeOutSingleWithMessage timeoutToElect = null;				//serve al nodo che deve essere sostituito scaduto il quale determina il nodo che lo sostituisce
+	private TimeOutSingleWithMessage timeoutElectionBeacon = null;		//serve al nodo possibile sosituto in caso di elezione
+	private TimeOutSingleWithMessage timeoutFailToElect = null;
 //	private TimeOutFailToElect timeoutFailToElect = null;
 //	private TimeOutElectionBeacon timeoutElectionBeacon = null;
 	//private TimeOutClientDetection timeoutClientDetection = null;
@@ -461,6 +469,86 @@ public class RelayElectionManager extends Observable implements Observer{
 				}
 				
 			}
+
+			else if((relayMessageReader.getCode() == MessageCodeConfiguration.ELECTION_REQUEST) && 
+					(!dpIn.getAddress().getHostAddress().equals(NetConfiguration.RELAY_CLUSTER_ADDRESS))){
+
+//				if(timeoutSearch != null){
+//					timeoutSearch.cancelTimeOutSingleWithMessage();
+//					timeoutSearch = null;
+//				}
+				//rielezione nuovo nodo relay BigBoss/Relay secondario e sono un nodo possibile sostituto
+				if((isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY())&& (actualStatus==RelayStatus.IDLE)){
+					try {
+						
+						if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager STATO:"+actualStatus+" ELECTION_REQUEST arrivato, sostituto BIGBOSS, AP/BigBoss visibility:"+relayClusterHeadWNICController.isConnected());
+						else System.out.println("RelayElectionManager STATO:"+actualStatus+" ELECTION_REQUEST arrivato, sostituto BIGBOSS, AP/BigBoss visibility:"+relayClusterHeadWNICController.isConnected());
+							
+						firstELECTION_DONE_SEND = false;
+						if(possibleRelay != null){
+							possibleRelay.clear();
+							possibleRelay = null;
+						}
+						
+						setConnectedClusterHeadAddress(null);
+						setConnectedClusterHeadInetAddress(null);
+						electing = true;
+						client_visibity = 0;
+						relay_visibility = 0;
+						W = -1;
+						
+						//ap Visibility == true
+						if(relayClusterHeadWNICController.isConnected()){
+
+							timeoutElectionBeacon = RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_ELECTION_BEACON, TimeOutConfiguration.TIME_OUT_ELECTION_BEACON);
+							timeoutFailToElect = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT, TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT);
+
+							actualStatus  = RelayStatus.WAITING_BEACON;
+							
+							if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager STATO:"+actualStatus+" Ap/BigBoss Visibility == true, TIMEOUT_ELECTION_BEACON, TIMEOUT_FAIL_TO_ELECT partiti");
+							else System.out.println("RelayElectionManager STATO:"+actualStatus+" Ap/BigBoss Visibility == true, TIMEOUT_ELECTION_BEACON, TIMEOUT_FAIL_TO_ELECT partiti");
+						} 			
+
+					} catch (WNICException e) {
+						e.printStackTrace();
+					}
+					
+					setChanged();
+					notifyObservers("ELECTION_REQUEST_RECEIVED");
+				}
+				//Nodo BIGBOSS ATTIVO: vengo iformato che è in corso una elezione di un relay secondario
+				else if(isBIGBOSS() && actualStatus==RelayStatus.MONITORING){
+					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager STATO:"+actualStatus+" relay secondario IP:"+relayMessageReader.getPacketAddess()+" è in fase di elezione");
+					else System.out.println("RelayElectionManager STATO:"+actualStatus+" relay secondario IP:"+relayMessageReader.getPacketAddess()+" è in fase di elezione");
+				}
+				
+				//Nodo RELAY SECONDARIO ATTIVO: viene eletto un nuovo BigBoss
+				else if(isRELAY() && actualStatus == RelayStatus.MONITORING){
+					electinHead = true;
+					
+					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager STATO:"+actualStatus+" ELECTION_REQUEST arrivato da IP:"+relayMessageReader.getPacketAddess());
+					else System.out.println("RelayElectionManager STATO:"+actualStatus+" ELECTION_REQUEST arrivato da IP:"+relayMessageReader.getPacketAddess());
+				
+					//mando il messaggio di ELECTION_BEACON_RELAY ai possibili nodi sostituti		
+					DatagramPacket dpOut = null;
+
+						try {
+							//Messaggio destinato ai possibili sostituti
+							dpOut = RelayMessageFactory.buildElectioBeaconRelay(0, BCAST,PortConfiguration.PORT_ELECTION_IN, activeClient);
+							comClusterHeadManager.sendTo(dpOut);
+						
+						} catch (IOException e){e.printStackTrace();}
+
+						timeoutFailToElect = RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT);
+						actualStatus = RelayStatus.WAITING_END_NORMAL_ELECTION;
+					
+						if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager STATO:"+actualStatus+" ELECTION_BEACON_RELAY inviato e start TIMEOUT_FAIL_TO_ELECT");
+						else System.out.println("RelayElectionManager STATO:"+actualStatus+" ELECTION_BEACON_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
+					}
+					
+					
+				}
+					
 		}
 		
 		if(arg1 instanceof String){

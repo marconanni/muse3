@@ -78,9 +78,9 @@ public class ClientMessageReader {
 	public  String getActualRelayAddress() {return actualRelayAddress;}
 	public  String getNewRelayAddress() {return newRelayAddress;}
 	public  int getSequenceNumber() {return sequenceNumber;}
-	public String getAddress(){return actualRelayAddress;}
 	public  int getCode() {return code;}
 	public  int getRelaySendingPort() {return relaySendingPort;}
 	public  int getRelayControlPort() {	return relayControlPort;}
 	public String getRelayAddressBacon(){return relayAddressBacon;}
+	public InetAddress getPacketAddress(){return packetAddress;}
 }
