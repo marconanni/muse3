@@ -16,7 +16,7 @@ public class MessageCodeConfiguration {
 	
 	public static final int ELECTION_REQUEST = 11;			//Messaggio inviato da un relay attualmente attivo che deve essere sostituito
 	public static final int ELECTION_BEACON = 12;			//Messaggio inviato dai client con sessione RTP in corso destinato ai possibili relay sostituti
-	public static final int ELECTION_RELAY_BEACON = 13;
+	public static final int ELECTION_BEACON_RELAY = 13;
 	public static final int ELECTION_RESPONSE = 14;
 	public static final int ELECTION_DONE = 16;				//Messagio inviato dal nuovo relay appena eletto
 	

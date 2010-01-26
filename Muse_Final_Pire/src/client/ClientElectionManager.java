@@ -19,8 +19,7 @@ import client.messages.ClientMessageFactory;
 import client.messages.ClientMessageReader;
 import client.position.ClientPositionController;
 import client.timeout.ClientTimeoutFactory;
-import client.timeout.TimeOutFailToElect;
-import client.timeout.TimeOutSearch;
+import client.timeout.TimeOutSingleWithMessage;
 import client.wnic.ClientWNICController;
 import client.wnic.WNICFinder;
 
@@ -47,9 +46,8 @@ public class ClientElectionManager extends Observable implements Observer{
 	private int indexEM_EL_DET_CLIENT = 0;					//indici dei messaggi inviati
 	private int indexELECTION_BEACON = 0;
 	
-	private TimeOutSearch timeoutSearch = null;				//vari Timeout necessari al ClientElectionManager
-	private TimeOutFailToElect timeoutFailToElect = null;
-
+	private TimeOutSingleWithMessage timeoutSearch = null;				//vari Timeout necessari al ClientElectionManager
+	private TimeOutSingleWithMessage timeoutFailToElect = null;	
 	private boolean stop = false;
 		
 	private ClientCM comManager = null;								//il manaegr per le comunicazioni
@@ -138,7 +136,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				e.getStackTrace();}
 			
 			actualStatus = ClientStatus.WAITING_WHO_IS_RELAY;
-			timeoutSearch = ClientTimeoutFactory.getTimeOutSearch(this,	TimeOutConfiguration.TIMEOUT_SEARCH);
+			timeoutSearch = ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_SEARCH,TimeOutConfiguration.TIME_OUT_SEARCH);
 			if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_WARNING,"ClientElectionManager: stato OFF->WAITING_WHO_IS_RELAY, inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 			else System.out.println("ClientElectionManager: stato OFF->WAITING_WHO_IS_RELAY, inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 		}
@@ -179,7 +177,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				else System.out.println("ClientElectionManager: IM_RELAY arrivato, Stato IDLE e actualRelayAddress: " + connectedRelayAddress+".\nPronto per richiesta file e iniziare streaming RTP.");
 				
 				if(timeoutSearch != null) {
-					timeoutSearch.cancelTimeOutSearch();
+					timeoutSearch.cancelTimeOutSingleWithMessage();
 					timeoutSearch = null;
 				}
 
@@ -201,6 +199,88 @@ public class ClientElectionManager extends Observable implements Observer{
 				if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
 				else System.out.println("ClientElectionManager: Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
 				setImServed(true);
+			}
+			
+			else if(clientMessageReader.getCode() == MessageCodeConfiguration.ELECTION_REQUEST){ 
+					
+				if(timeoutSearch != null){
+					timeoutSearch.cancelTimeOutSingleWithMessage();
+					timeoutSearch = null;
+				}
+				
+				electing = true;
+				setConnectedRelayAddress(null);
+				setConnectedRelayInetAddress(null);
+				
+				if(actualStatus == ClientStatus.ACTIVE){
+				
+					if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_WARNING,"ClientElectionManager STATO:"+actualStatus+" ELECTION_REQUEST arrivato e ho una sessione RTP in corso.");
+					else System.out.println("ClientElectionManager STATO:"+actualStatus+" ELECTION_REQUEST arrivato e ho una sessione RTP in corso.");
+				
+					//ulteriore controllo ma per forza deve essere true altrimenti lo stato sarebbe IDLE
+					if (imServed) {
+
+						DatagramPacket dpOut = null;
+
+						try {
+							//Messaggio destinato ai possibili sostituti
+							dpOut = ClientMessageFactory.buildElectioBeaconRelay(indexELECTION_BEACON, BCAST,PortConfiguration.PORT_ELECTION_IN,1);
+							comManager.sendTo(dpOut);
+							//Messaggio destinati ai client coinvolti nella elezione
+							dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST, PortConfiguration.PORT_ELECTION_IN);
+							comManager.sendTo(dpOut);
+							
+							indexELECTION_BEACON++;
+						} catch (IOException e){e.printStackTrace();}
+
+						timeoutFailToElect = ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT);
+						actualStatus = ClientStatus.WAITING_END_ELECTION;
+					
+						if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager STATO:"+actualStatus+" ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
+						else System.out.println("ClientElectionManager STATO:"+actualStatus+" ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
+					}
+
+					setChanged();
+					notifyObservers("RECIEVED_ELECTION_REQUEST");
+				}
+			}
+			
+			else if((clientMessageReader.getCode()==MessageCodeConfiguration.ELECTION_BEACON) &&
+					!(clientMessageReader.getPacketAddress().equals(getLocalInetAddress()))){
+				
+				if(timeoutSearch != null){
+					timeoutSearch.cancelTimeOutSingleWithMessage();
+					timeoutSearch = null;
+				}
+				
+				electing = true;
+				setConnectedRelayAddress(null);
+				setConnectedRelayInetAddress(null);
+				
+				if((indexELECTION_BEACON==0) && (actualStatus==ClientStatus.ACTIVE)){
+					if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_WARNING,"ClientElectionManager STATO:"+actualStatus+" arrivato ELECTION_BACON e index = "+indexELECTION_BEACON);
+					else System.out.println("ClientElectionManager STATO:"+actualStatus+" arrivato ELECTION_BACON e index = "+indexELECTION_BEACON);
+					
+					DatagramPacket dpOut = null;
+
+					try {
+						//Messaggio destinato ai possibili sostituti
+						dpOut = ClientMessageFactory.buildElectioBeaconRelay(indexELECTION_BEACON, BCAST,PortConfiguration.PORT_ELECTION_IN,1);
+						comManager.sendTo(dpOut);
+						//Messaggio destinati ai client coinvolti nella elezione
+						dpOut = ClientMessageFactory.buildElectioBeacon(indexELECTION_BEACON, BCAST, PortConfiguration.PORT_ELECTION_IN);
+						comManager.sendTo(dpOut);
+						
+						indexELECTION_BEACON++;
+					} catch (IOException e){e.printStackTrace();}
+
+					timeoutFailToElect = ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT);
+					actualStatus = ClientStatus.WAITING_END_ELECTION;
+				
+					if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager STATO:"+actualStatus+" ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
+					else System.out.println("ClientElectionManager STATO:"+actualStatus+" ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
+				}
+				
 			}
 		}
 			
@@ -284,10 +364,15 @@ public class ClientElectionManager extends Observable implements Observer{
 				if (connectedRelayAddress != null) {
 					preparePositionController();      //per monitorare RSSI
 					clientPositionController.start();
+					actualStatus = ClientStatus.ACTIVE;
 					if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController AVVIATO monitorando RSSI riferito al seguente indirizzo del relay: "+connectedRelayAddress);
 					else System.out.println("ClientPositionController AVVIATO monitorando RSSI riferito al seguente indirizzo del relay: "+connectedRelayAddress);
 				}
-			}else if(clientPositionController != null) clientPositionController.close();
+			}else{
+				if(clientPositionController != null) clientPositionController.close();
+				actualStatus = ClientStatus.IDLE;
+			}
+			
 		}
 		else{
 			if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_ERROR, "ClientElectionManager.setImServed(): ERRORE: non posso essere servito se non so chi è il Relay attuale");
@@ -361,10 +446,6 @@ public class ClientElectionManager extends Observable implements Observer{
 	public void setClientPositionController(ClientPositionController clientPositionController) {this.clientPositionController = clientPositionController;}
 	public ClientMessageReader getClientMessageReader() {return clientMessageReader;}
 	public void setClientMessageReader(ClientMessageReader clientMessageReader) {this.clientMessageReader = clientMessageReader;}
-	public TimeOutSearch getTimeoutSearch() {return timeoutSearch;}
-	public void setTimeoutSearch(TimeOutSearch timeoutSearch) {this.timeoutSearch = timeoutSearch;}
-	public TimeOutFailToElect getTimeoutFailToElect() {return timeoutFailToElect;}
-	public void setTimeoutFailToElect(TimeOutFailToElect timeoutFailToElect) {this.timeoutFailToElect = timeoutFailToElect;}
 	public int getIndexEM_EL_DET_CLIENT() {return indexEM_EL_DET_CLIENT;}
 	public void setIndexEM_EL_DET_CLIENT(int indexEM_EL_DET_CLIENT) {this.indexEM_EL_DET_CLIENT = indexEM_EL_DET_CLIENT;}
 	public int getIndexELECTION_BEACON() {return indexELECTION_BEACON;}
