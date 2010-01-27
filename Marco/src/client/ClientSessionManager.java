@@ -25,8 +25,8 @@ import client.gui.ClientFrameController;
 import client.timeout.ClientTimeoutFactory;
 import client.timeout.TimeOutFileRequest;
 import client.timeout.TimeOutSearch;
-import client.connection.ClientConnectionFactory;
-import client.connection.ClientSessionCM;
+import client.connection.*;
+
 /**
  * @author Leo Di Carlo
  *
@@ -35,7 +35,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 
 	private ClientFrameController frameController;
 	private String filename;  //Marco: il nome del file della canzone da ascoltare
-	private ClientSessionCM sessionCM; //Marco: classe che serve per mandare e ricevere messaggi: in particolare quando riceve messaggi avverte il client session manager chiamando il metodo update ( secondo la modalità tipica del patter observer - Hollywood model)
+	private ClientCM sessionCM; //Marco: classe che serve per mandare e ricevere messaggi: in particolare quando riceve messaggi avverte il client session manager chiamando il metodo update ( secondo la modalità tipica del patter observer - Hollywood model)
 	private DatagramPacket msg;
 	private String eventType;
 	private TimeOutSearch timeoutSearch;
@@ -71,7 +71,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 	}
 
 	public ClientSessionManager(){
-		this.sessionCM = ClientConnectionFactory.getSessionConnectionManager(this); //Marco: crea  il manager che manda e riceve messaggi
+		this.sessionCM = ClientConnectionFactory.getSessionConnectionManager(this,false); //Marco: crea  il manager che manda e riceve messaggi
 		this.sessionCM.start(); //Marco: e lo fa partire
 		this.status = "Idle";
 		this.myStreamingPort = Parameters.CLIENT_PORT_RTP_IN; //Marco: legge dal file di configurazione la prota sulla quale ricevere lo streaming
