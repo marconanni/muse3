@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import parameters.NetConfiguration;
+import parameters.Parameters;
 import parameters.PortConfiguration;
 
 
@@ -34,17 +35,17 @@ public class ClientPortMapper {
 
 	private ClientPortMapper()
 	{
-		portElectionIn = PortConfiguration.PORT_ELECTION_IN;
-		portElectionOut = PortConfiguration.PORT_ELECTION_OUT;
-		portSessionIn = PortConfiguration.CLIENT_PORT_SESSION_IN;
-		portSessionOut = PortConfiguration.CLIENT_PORT_SESSION_OUT;
-		portRSSIOut = PortConfiguration.RSSI_PORT_OUT;
-		portRSSIIn = PortConfiguration.RSSI_PORT_IN;
+		portElectionIn = Parameters.CLIENT_PORT_ELECTION_IN;
+		//portElectionOut = PortConfiguration.PORT_ELECTION_OUT;
+		portSessionIn = Parameters.CLIENT_PORT_SESSION_IN;
+		portSessionOut = Parameters.CLIENT_PORT_SESSION_OUT;
+		//portRSSIOut = PortConfiguration.RSSI_PORT_OUT;
+		//portRSSIIn = PortConfiguration.RSSI_PORT_IN;
 		//portRTPIn = PortConfiguration.CLIENT_PORT_RTP_IN;
 		
 		try {
-			localAddress = InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS);
-			localBCASTAddress = InetAddress.getByName(NetConfiguration.CLIENT_BROADCAST_ADDRESS);
+			localAddress = InetAddress.getByName(Parameters.CLIENT_ADDRESS);
+			//localBCASTAddress = InetAddress.getByName(NetConfiguration.CLIENT_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 
