@@ -3,9 +3,9 @@ package client.connection;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import parameters.NetConfiguration;
+//import parameters.NetConfiguration;
 import parameters.Parameters;
-import parameters.PortConfiguration;
+//import parameters.PortConfiguration;
 
 
 public class ClientPortMapper {

@@ -18,8 +18,8 @@ import javax.media.NoDataSourceException;
 import debug.DebugConsolle;
 
 import parameters.Parameters;
+import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
-import relay.connection.RelaySessionCM;
 import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutAckSessionInfo;
 import relay.timeout.TimeOutSessionInfo;
@@ -50,7 +50,7 @@ public class RelaySessionManager implements Observer{
 	private TimeOutSessionRequest toSessionRequest;  //Marco: questo qui sono i vari timeout
 	private TimeOutAckSessionInfo toAckSessionInfo;
 	private TimeOutSessionInfo toSessionInfo;
-	private RelaySessionCM sessionCM; // Marco: è chi si occupa di spedire  e ricevere i messaggi.
+	private RelayCM sessionCM; // Marco: è chi si occupa di spedire  e ricevere i messaggi.
 	private RelayMessageReader messageReader;
 	private DebugConsolle consolle;
 	private String relayAddress; // Marco: è l'indirizzo sul suale si trova il relay

@@ -1,13 +1,25 @@
 package test;
 
-public class MainTestClient {
+
+public class MainTestClient   {
+
+	
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		AppoggioClient appoggio = new AppoggioClient();
+		
+		
+		
+		
 
 	}
+
+	
+
+	
+	
 
 }

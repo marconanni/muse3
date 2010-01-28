@@ -5,7 +5,7 @@ import java.util.Observer;
 
 /**
  * @author Luca Campeti
- *
+ * Vecchia Classe non più usata, soppiantata da Client CM
  */
 public class ClientSessionCM extends AConnectionManager {
 	
