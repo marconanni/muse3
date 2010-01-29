@@ -44,9 +44,9 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	private RelayStatus actualStatus = null;				//stato attuale del RelayElectionManager
 	
-	private String localClusterAddress = null;				//indirizzo del Relay attuale in forma String
-	private String localClusterHeadAddress = null;
-	private String connectedClusterHeadAddress = null;		//indirizzo attuale del Relay (big boss) a cui è connesso -> solo relay normale
+	private String localClusterAddress = null;				//indirizzo locale (interfacciato sul CLUSTER)
+	private String localClusterHeadAddress = null;			//indirizzo locale (interfacciato sul CLUSTER HEAD)
+	private String connectedClusterHeadAddress = null;		//indirizzo del nodo (CLUSTER HEAD) a cui si è connessi es. Relay connesso BigBos (indirizzo big boss)
 	private InetAddress localClusterInetAddress = null;		//indirizzo del Relay in forma InetAddress
 	private InetAddress localClusterHeadInetAddress = null;			//indirizzo del Server in forma InetAddress
 	private InetAddress connectedClusterHeadInetAddress = null;	//indirizzo del Relay in forma InetAddress
@@ -104,6 +104,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	public enum RelayStatus {					//stati in cui si può trovare il RelayElectionManager
 		OFF,
 		WAITING_WHO_IS_RELAY,
+		WAITING_WHO_IS_HEAD_NODE,
 		IDLE,
 		MONITORING,
 		WAITING_BEACON,
@@ -321,12 +322,14 @@ public class RelayElectionManager extends Observable implements Observer{
 		} catch (WNICException e) {e.printStackTrace();System.exit(2);}
 	}
 	
-	private void becomRelay(){
+	private void becomRelay(int state){
 		setNodeType(1,true);
-		localClusterAddress = NetConfiguration.RELAY_CLUSTER_ADDRESS;
-		memorizeLocalClusterAddress();
-		localClusterHeadAddress = NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS;
-		memorizeLocalClusterAddress();
+		if(state==0){
+			localClusterAddress = NetConfiguration.RELAY_CLUSTER_ADDRESS;
+			memorizeLocalClusterAddress();
+			localClusterHeadAddress = NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS;
+			memorizeLocalClusterAddress();
+		}
 
 		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSingleWithMessage();
@@ -357,7 +360,8 @@ public class RelayElectionManager extends Observable implements Observer{
 		whoIsRelayServer.start();
 		//relayBatteryMonitor.start();
 	
-		actualStatus = RelayStatus.IDLE;
+		if(state==0)actualStatus = RelayStatus.IDLE;
+		if(state==1)actualStatus = RelayStatus.MONITORING;
 		
 		DatagramPacket dpOut = null;
 		try {
@@ -365,7 +369,8 @@ public class RelayElectionManager extends Observable implements Observer{
 			comClusterHeadManager.sendTo(dpOut);
 		} catch (IOException e) {consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di ACK_CONNECTION");e.getStackTrace();}
 	
-		consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomeRelay(): X -> STATO IDLE: WhoIsRelayServer partito, ACK_CONNECTION spedito");
+		if(state==0)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomeRelay(): X -> STATO IDLE: WhoIsRelayServer partito, ACK_CONNECTION spedito");
+		if(state==1)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomeRelay(): ho sostituito il vecchio relay");
 		//monitoring();
 	}
 	
@@ -375,19 +380,13 @@ public class RelayElectionManager extends Observable implements Observer{
 		memorizeLocalClusterAddress();
 		localClusterHeadAddress = NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS;
 		memorizeLocalClusterAddress();
+		memorizeConnectedClusterHeadAddress();
 
 		//Azzero tutti i timeout
 		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSingleWithMessage();
 	
 		actualStatus = RelayStatus.IDLE;
-		
-		DatagramPacket dpOut = null;
-		try {
-			dpOut = RelayMessageFactory.buildAckConnection(connectedClusterHeadInetAddress, PortConfiguration.PORT_ELECTION_IN, MessageCodeConfiguration.TYPERELAYPASSIVE);
-			comClusterHeadManager.sendTo(dpOut);
-		} catch (IOException e) {consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di ACK_CONNECTION");e.getStackTrace();}
-	
-		consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomePossibleRelay(): X -> STATO "+actualStatus+" ACK_CONNECTION spedito");
+		consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomePossibleRelay(): X -> STATO "+actualStatus);
 	}
 	
 	/**Metodo che consente al relay di trovare il Big Boss, ovvero il relay del cluster head.
@@ -416,6 +415,19 @@ public class RelayElectionManager extends Observable implements Observer{
 		consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 	}
 	
+	/**Metodo che consente ad un nodo possibile relay di trovare relay attivo all'interno del CLUSTER in cui si trova.
+	 */
+	private void searchingHeadNode(InetAddress dest){
+		DatagramPacket dpOut = null;
+		try {
+			dpOut = RelayMessageFactory.buildWhoIsHeadNode(dest,PortConfiguration.PORT_ELECTION_IN);
+			comClusterManager.sendTo(dpOut);
+		} catch (IOException e) {consoleClusterWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
+		timeoutSearch = RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_SEARCH,TimeOutConfiguration.TIME_OUT_SEARCH);
+		actualStatus=RelayStatus.WAITING_WHO_IS_HEAD_NODE;
+		consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_HEAD_NODE e start del TIMEOUT_SEARCH");
+	}
+	
 	
 
 	
@@ -440,14 +452,44 @@ public class RelayElectionManager extends Observable implements Observer{
 					timeoutSearch.cancelTimeOutSingleWithMessage();
 					timeoutSearch = null;
 				}
-				connectedClusterHeadAddress = relayMessageReader.getPacketAddess().getHostAddress();
-				memorizeConnectedClusterHeadAddress();
-				setChanged();
-				notifyObservers("RELAY_FOUND:"+getConnectedClusterHeadAddress());
-				if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager: STATO "+actualStatus.toString()+": IM_RELAY arrivato, connectRelayAddress: "+getConnectedClusterHeadAddress());
-				else System.out.println("RelayElectionManager: STATO "+actualStatus.toString()+": IM_RELAY arrivato, connectRelayAddress: "+getConnectedClusterHeadAddress());
-				if(isRELAY()) becomRelay();
-				if(isPOSSIBLE_RELAY()|| isPOSSIBLE_BIGBOSS())becomePossibleRelay();
+				if(isRELAY()){
+					connectedClusterHeadAddress = relayMessageReader.getPacketAddess().getHostAddress();
+					memorizeConnectedClusterHeadAddress();
+					setChanged();
+					notifyObservers("RELAY_FOUND:"+getConnectedClusterHeadAddress());
+				
+					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager: STATO "+actualStatus.toString()+": IM_RELAY arrivato, connectRelayAddress: "+getConnectedClusterHeadAddress());
+				
+					else System.out.println("RelayElectionManager: STATO "+actualStatus.toString()+": IM_RELAY arrivato, connectRelayAddress: "+getConnectedClusterHeadAddress());
+					becomRelay(0);
+				}
+				else if(isPOSSIBLE_RELAY()|| isPOSSIBLE_BIGBOSS()){
+					searchingHeadNode(relayMessageReader.getPacketAddess());
+				}
+			}
+			
+			else if(relayMessageReader.getCode()==MessageCodeConfiguration.WHO_IS_HEAD_NODE){
+				
+				if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager:  arrivato WHO_IS_HEAD_NODE da"+relayMessageReader.getPacketAddess());
+				System.out.println("RelayElectionManager:  arrivato WHO_IS_HEAD_NODE da"+relayMessageReader.getPacketAddess());
+				
+				DatagramPacket dpOut = null;
+				try {
+					dpOut = RelayMessageFactory.buildHeadNodeIs(relayMessageReader.getPacketAddess(),PortConfiguration.PORT_ELECTION_IN, getConnectedClusterHeadAddress());
+					comClusterManager.sendTo(dpOut);
+				} catch (IOException e) {consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di HEAD_NODE_IS");e.getStackTrace();}
+				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager: inviato HEAD_NODE_IS_"+getConnectedClusterHeadAddress());
+			}
+			
+			else if((relayMessageReader.getCode()==MessageCodeConfiguration.HEAD_NODE_IS) &&
+					(actualStatus == RelayStatus.WAITING_WHO_IS_HEAD_NODE)){
+				if(timeoutSearch != null) {
+					timeoutSearch.cancelTimeOutSingleWithMessage();
+					timeoutSearch = null;
+				}
+				
+				setConnectedClusterHeadAddress(relayMessageReader.getHeadNodeAddress());
+				becomePossibleRelay();
 			}
 			
 	
@@ -580,39 +622,68 @@ public class RelayElectionManager extends Observable implements Observer{
 			
 			else if((relayMessageReader.getCode() == MessageCodeConfiguration.ELECTION_DONE) && 
 					(actualStatus == RelayStatus.WAITING_END_NORMAL_ELECTION)){
+				if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager STATO:"+actualStatus+" ELECTION_DONE arrivato: nuovo Relay: "+relayMessageReader.getNewRelayAddress()+"!="+localClusterAddress);
+				else System.out.println("RelayElectionManager STATO:"+actualStatus+" ELECTION_DONE arrivato: nuovo Relay: "+relayMessageReader.getNewRelayAddress()+"!="+localClusterAddress);
 				
 				if(timeoutFailToElect != null){
 					timeoutFailToElect.cancelTimeOutSingleWithMessage();
 					timeoutFailToElect = null;
 				}
+				
+				if(isRELAY()){
+					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"Nodo corrente è un relay secondario attivo ed è stato appena eletto un nuovo BIGBOSS");
+					else System.out.println("Nodo corrente è un relay secondario attivo ed è stato appena eletto un nuovo BIGBOSS");
+					
+					setConnectedClusterHeadAddress(relayMessageReader.getNewRelayAddress());
+					memorizeConnectedClusterHeadAddress();
+					
+					if(activeClient>0)actualStatus = RelayStatus.MONITORING;
+					else actualStatus=RelayStatus.IDLE;
+					
+					setChanged();
+					notifyObservers("NEW_RELAY:"+connectedClusterHeadAddress);
+					
+					/**** MANCA LA PARTE CHE LI DEVO DIRE AI POSSIBILI NODI SOSTITUTI**/
+					
+					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager STATO:"+actualStatus+" nuovo Relay BigBoss salvato correttamente"); 
+					else System.out.println("RelayElectionManager STATO:"+actualStatus+" nuovo Relay BigBoss salvato correttamente"); 
+					
+				}
+				else if(isPOSSIBLE_RELAY()){
+					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"Nodo corrente è un possibile sostituto relay ed è stato appena eletto un nuovo Relay secondario, controllo se è questo nodo");
+					else System.out.println("Nodo corrente è un possibile sostituto relay ed è stato appena eletto un nuovo Relay secondario, controllo se è questo il nodo eletto");
+					
+					try {
+						if(sameAddress(InetAddress.getByName(relayMessageReader.getNewRelayAddress()))){
+							becomRelay(1);
+							
+							/** QUI DEVO ANCORA MANDARE CONFERMA DELLA SOSTITUZIONE **/
+						}
+						else{
+							setNodeType(1, false);
+							//** devo memorizzare il nuovo relay**/
+						}
+					} catch (UnknownHostException e) {e.printStackTrace();}
 						
-				//Non è lui il nodo eletto
-				if(!sameAddress(InetAddress.getByName(relayMessageReader.getNewRelayAddress()))){
-					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayElectionManager STATO:"+actualStatus+" ELECTION_DONE arrivato: nuovo Relay: "+relayMessageReader.getNewRelayAddress()+"!="+localClusterAddress);
-					else System.out.println("RelayElectionManager STATO:"+actualStatus+" ELECTION_DONE arrivato: nuovo Relay: "+relayMessageReader.getNewRelayAddress()+"!="+localClusterAddress);
+				}
+								
+				else if(isPOSSIBLE_RELAY()){
+					if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO,"Nodo corrente è un possibile sostituto del Big Boss ed è appena stato rieletto un nuovo BigBoss, controllo se è questo nodo");
+					else System.out.println("Nodo corrente è un possibile sostituto del Big Boss ed è appena stato rieletto un nuovo BigBoss, controllo se è questo nodo");
 					
-					
-				actualRelayAddress = relayMessageReader.getNewRelayAddress();
-				memorizeRelayAddress();
-				
-				imRelay = false;
-				electing = false;
-				W = -1;
-				counter_clients = 0;
-				
-				actualStatus = RelayStatus.IDLE;
-				
-				setChanged();
-				notifyObservers("NEW_RELAY:"+actualRelayAddress);
-				
-				//RIPROPAGAZIONE UNA TANTUM DELL'ELECTION_DONE
-				comManager.sendTo(prepareRepropagation(dpIn));
-				debugPrint("RelayElectionManager: STATO WAITING_END_NORMAL_ELECTION: ELECTION_DONE ripropagato verso indirizzo: " +
-						dpIn.getAddress().getHostAddress() + " porta: " +dpIn.getPort());
-
-				debugPrint("RelayElectionManager: STATO WAITING_END_NORMAL_ELECTION -> IDLE: " +
-						"ELECTION_DONE arrivato && " + relayMessageReader.getNewRelayAddress()+
-						" != " + Parameters.RELAY_AD_HOC_ADDRESS);
+					try {
+						if(sameAddress(InetAddress.getByName(relayMessageReader.getNewRelayAddress()))){
+							becomeBigBossRelay();
+							
+							/** QUI DEVO ANCORA MANDARE CONFERMA DELLA SOSTITUZIONE **/
+						}
+						else{
+							setNodeType(0, false);
+							//PROPAGAZIONE
+							//** devo memorizzare il nuovo relay**/
+						}
+					} catch (UnknownHostException e) {e.printStackTrace();}
+				}
 			}
 					
 		}
@@ -623,6 +694,15 @@ public class RelayElectionManager extends Observable implements Observer{
 			
 			/*[TIMEOUT_SEARCH scattato] --> SearchingRelay*/
 			if(event.equals("TIMEOUTSEARCH") &&	actualStatus == RelayStatus.WAITING_WHO_IS_RELAY){
+				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager: STATO OFF: TIMEOUT_SEARCH scattato");
+				if(isRELAY())
+					searchingRelayClusterHead();
+				else if(isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY())
+					searchingRelayCluster();
+			}
+			
+			/*[TIMEOUT_SEARCH scattato] --> SearchingRelay*/
+			else if(event.equals("TIMEOUTSEARCH") &&	actualStatus == RelayStatus.WAITING_WHO_IS_HEAD_NODE){
 				consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager: STATO OFF: TIMEOUT_SEARCH scattato");
 				if(isRELAY())
 					searchingRelayClusterHead();

@@ -53,6 +53,26 @@ public class RelayMessageFactory {
 		byte[] data = boStream.toByteArray();
 		return new DatagramPacket(data, data.length, address, port);
 	}
+	
+	static public DatagramPacket buildWhoIsHeadNode(InetAddress address, int port) throws IOException {
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = 0+"_"+MessageCodeConfiguration.WHO_IS_HEAD_NODE;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+		return new DatagramPacket(data, data.length, address, port);
+	}
+	
+	static public DatagramPacket buildHeadNodeIs(InetAddress address, int port, String headNode) throws IOException {
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = 0+"_"+MessageCodeConfiguration.HEAD_NODE_IS+"_"+headNode;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+		return new DatagramPacket(data, data.length, address, port);
+	}
 
 	/**
 	 * Messaggio di IM_REALY, risposta da parte o di un nodo relay attivo o da parte del BigBoss
