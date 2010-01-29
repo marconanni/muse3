@@ -71,7 +71,7 @@ public class ClientMessageReader {
 		}
 		//if(code == MessageCodeConfiguration.NOTIFY_RSSI)RSSI = Double.parseDouble(st.nextToken());		
 		if (code == MessageCodeConfiguration.IM_RELAY)actualRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
-		if (code == MessageCodeConfiguration.ELECTION_BEACON)relayAddressBacon = st.nextToken();
+		//if (code == MessageCodeConfiguration.ELECTION_BEACON)relayAddressBacon = st.nextToken();
 		if (code == MessageCodeConfiguration.ELECTION_DONE)newRelayAddress = st.nextToken();
 	}
 

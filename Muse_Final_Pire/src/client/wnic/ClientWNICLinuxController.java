@@ -203,14 +203,6 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		}	
 	}
 	
-	private int convertRSSI(int dBm){
-		if(dBm<-100)
-			return 0;
-		if(dBm>20)
-			return 120;
-		return dBm+100;
-	}
-
 	/**Metodo per ottenere il valore di RSSI attuale avvertito nei confronti del Relay attuale tramite il comando <code>iwconfig<code>
 	 * @param line la linea del risultato alla chiamata al comando linux <code>/sbin/iwconfig interface<code>
 	 * @return un int che rappresenta il valore di RSSI attuale (dbm convertito tra 0 e 120)
@@ -220,26 +212,24 @@ public class ClientWNICLinuxController implements ClientWNICController{
 
 		BufferedReader br = getInterfaceInfo(iN); 
 		setWifiInfo(br.readLine(), br.readLine());
+		String riga = null;
+		int res = -1;
 		if(isConnected()){
+			do{riga = br.readLine();}
+			while(!riga.contains("Signal") && riga !=null);
+			br.close();
+			StringTokenizer stringToken = new StringTokenizer(riga);
+			String token = null;
+			do token = stringToken.nextToken("=-");
+			while(stringToken.hasMoreTokens() && !token.contains("dBm"));
 			try{
-				String riga = br.readLine();
-				while(riga!=null){
-					StringTokenizer stringToken = new StringTokenizer(riga," \"\t\n\r\f");
-					while(stringToken.hasMoreElements()){
-						String token = stringToken.nextToken();
-						if(token.equals("Signal")){
-							return convertRSSI(Integer.parseInt(stringToken.nextToken().substring(6)));
-						}
-					}
-					riga=br.readLine();
-				}
-			}catch (Exception e) {
+				res = Integer.parseInt(token.substring(0,3).trim());
+			}catch(NumberFormatException ee){
 				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere il valore RSSI attuale");
 				throw new WNICException("ClientWNICLinuxController Impossibile ottenere il valore RSSI attuale");
 			}
-			
 		}
-		return -1;
+		return res;
 	}
 
 	/**Metodo per capire se l'interfaccia è accesa o meno
