@@ -62,8 +62,8 @@ public class TestObserver implements Observer {
 		}
 		else if(arg1 instanceof String){
 			System.out.println("RICEVUTO MESSAGGIO: " + (String)arg1);
-			if(arg0 instanceof RelayBatteryMonitor)
-				((RelayBatteryMonitor)arg0).close();
+//			if(arg0 instanceof RelayBatteryMonitor)
+//				((RelayBatteryMonitor)arg0).close();
 		}
 	}
 }

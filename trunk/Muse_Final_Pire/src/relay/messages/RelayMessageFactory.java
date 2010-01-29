@@ -183,7 +183,26 @@ public class RelayMessageFactory {
 
 		return new DatagramPacket(data, data.length, addr, port);
 
-	}	
+	}
+	
+	/**
+	 * Messaggio di ElectionDone
+	 * @param newRelayAddress
+	 * @param addr
+	 * @param port
+	 * @return
+	 * @throws IOException
+	 */
+	static public DatagramPacket buildElectionDone(int sequenceNumber, String newRelayAddress,InetAddress addr, int port) throws IOException {
+		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		DataOutputStream doStream = new DataOutputStream(boStream);
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_DONE+"_"+newRelayAddress;
+		doStream.writeUTF(content);
+		doStream.flush();
+		byte[] data = boStream.toByteArray();
+		return new DatagramPacket(data, data.length, addr, port);
+
+	}
 
 	/**
 	 * Messaggio di ElectionDone
@@ -228,24 +247,7 @@ public class RelayMessageFactory {
 	}	
 }
 
-/**
- * Messaggio di ElectionDone
- * @param newRelayAddress
- * @param addr
- * @param port
- * @return
- * @throws IOException
- */
-/*static public DatagramPacket buildElectionBigBossDone(int sequenceNumber, String newRelayAddress,InetAddress addr, int port) throws IOException {
-	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-	DataOutputStream doStream = new DataOutputStream(boStream);
-	String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_BIGBOSS_DONE+"_"+newRelayAddress;
-	doStream.writeUTF(content);
-	doStream.flush();
-	byte[] data = boStream.toByteArray();
-	return new DatagramPacket(data, data.length, addr, port);
 
-}*/
 
 /**
  * Messaggio di WHO_IS_BIGBOSS spedito dai nodi realy attivi quando entrano a fare parte della rete MANET

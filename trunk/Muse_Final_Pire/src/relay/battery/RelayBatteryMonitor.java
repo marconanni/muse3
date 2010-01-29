@@ -67,6 +67,9 @@ public class RelayBatteryMonitor extends Observable {
 			if(batteryLevel <= ElectionConfiguration.BATTERY_LOW_THRS){
 				setChanged();
 				notifyObservers("DISCONNECTION_WARNING");
+			}else{
+				setChanged();
+				notifyObservers("Batteria :"+batteryLevel);
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
