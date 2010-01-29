@@ -23,7 +23,8 @@ public class RelayMessageReader {
 	
 	//Ulteriodi parametri che dipendono dai vari messaggi
 	private  double W;
-	private  String actualConnectedRelayAddress = null;
+	//private  String actualConnectedRelayAddress = null;
+	private String newRelayAddress;
 
 	private  double RSSI;
 
@@ -54,15 +55,18 @@ public class RelayMessageReader {
 		index = Integer.valueOf(st.nextToken());
 		code = Integer.valueOf(st.nextToken());
 
-		if(code==MessageCodeConfiguration.REQUEST_RSSI) actualConnectedRelayAddress = packetAddress.toString();
+		//if(code==MessageCodeConfiguration.REQUEST_RSSI) actualConnectedRelayAddress = packetAddress.toString();
 		if(code == MessageCodeConfiguration.NOTIFY_RSSI){
 			RSSI = Double.parseDouble(st.nextToken());
 			typeNode = Integer.parseInt(st.nextToken());
 			activeClient = Integer.parseInt(st.nextToken());
 		}
-		if(code == MessageCodeConfiguration.IM_RELAY) actualConnectedRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
+		//if(code == MessageCodeConfiguration.IM_RELAY) 
 		if(code == MessageCodeConfiguration.ACK_CONNECTION) typeNode = Integer.valueOf(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_REQUEST)activeRelay =Integer.valueOf(st.nextToken());
+		if(code == MessageCodeConfiguration.ELECTION_BEACON_RELAY)activeClient = Integer.valueOf(st.nextToken());
+		if(code == MessageCodeConfiguration.ELECTION_RESPONSE)W = Double.parseDouble(st.nextToken());
+		if(code == MessageCodeConfiguration.ELECTION_DONE)newRelayAddress = st.nextToken();
 	}
 
 	/**Metodo getter
@@ -75,7 +79,7 @@ public class RelayMessageReader {
 	
 	/**Metogo getter
 	 * @return indirizzo Ip in forma di stringa del nodo (relay o big boss attivo) a cui si è collegati*/
-	public String getActualConnectedRelayAddress(){return actualConnectedRelayAddress;}
+	//public String getActualConnectedRelayAddress(){return actualConnectedRelayAddress;}
 	
 	/**Metogo getter
 	 * @return valore RSSI attuale*/
@@ -96,6 +100,8 @@ public class RelayMessageReader {
 	public int getActiveRelay(){return activeRelay;}
 	
 	public  double getW() {return W;}
+	
+	public String getNewRelayAddress(){return newRelayAddress;}
 }
 
 
