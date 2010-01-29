@@ -25,6 +25,7 @@ public class RelayMessageReader {
 	private  double W;
 	//private  String actualConnectedRelayAddress = null;
 	private String newRelayAddress;
+	private String headNodeAddress;
 
 	private  double RSSI;
 
@@ -67,6 +68,7 @@ public class RelayMessageReader {
 		if(code == MessageCodeConfiguration.ELECTION_BEACON_RELAY)activeClient = Integer.valueOf(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_RESPONSE)W = Double.parseDouble(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_DONE)newRelayAddress = st.nextToken();
+		if(code == MessageCodeConfiguration.HEAD_NODE_IS) headNodeAddress = st.nextToken();
 	}
 
 	/**Metodo getter
@@ -102,6 +104,7 @@ public class RelayMessageReader {
 	public  double getW() {return W;}
 	
 	public String getNewRelayAddress(){return newRelayAddress;}
+	public String getHeadNodeAddress(){ return headNodeAddress;}
 }
 
 
