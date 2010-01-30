@@ -102,17 +102,13 @@ public class ClientPositionController implements Observer{
 				cmr.readContent((DatagramPacket)arg1);
 				if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_WARNING, "ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
 				else System.out.println("ClientPositionController.update(): ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
-				System.out.println("CODE: "+cmr.getCode());
 				if(cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI){//&&(cmr.getAddress().equals(relayAddress))){
-					System.out.println("GET RSSI VALUE");
 					RSSIvalue = cwnic.getSignalStrenghtValue();
-					System.out.println("RSSI:"+RSSIvalue);
-					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, relayAddress, PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPECLIENT,1);
+					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, cmr.getPacketAddress(), PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPECLIENT,1);
 					sequenceNumber++;
-					System.out.println("Build Message to :"+relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
 					crscm.sendTo(notifyRSSI);
 					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
-					else System.out.println("ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + relayAddress+":"+PortConfiguration.RSSI_PORT_IN);
+					else System.out.println("ClientPositionController.update(): Inviato RSSI: "+ RSSIvalue +" a: " + cmr.getPacketAddress().toString()+":"+PortConfiguration.RSSI_PORT_IN);
 				}else{
 					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
 					else System.out.println("ClientPositionController.update(): Faccio niente");
