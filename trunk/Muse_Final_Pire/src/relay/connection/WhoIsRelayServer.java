@@ -26,13 +26,15 @@ public class WhoIsRelayServer implements Observer {
 	private RelayCM whoIsRealayManger = null;
 	private RelayMessageReader rmr = null;
 	private DebugConsole console = null;
+	private String headNodeAddress = null;
 
 
 	/**Metodo per ottenere un WhoIsRelayServer
 	 * @param localAddress l'indirizzo locale del nodo
 	 * @param localInOutPort la porta tramite cui ricevere i messaggi
 	 */
-	public WhoIsRelayServer(DebugConsole console){
+	public WhoIsRelayServer(DebugConsole console, String headNodeAddress){
+		this.headNodeAddress=headNodeAddress;
 		this.console=console;
 		whoIsRealayManger = RelayConnectionFactory.getWhoIsRelayConnectionManager(this,true);
 	}
@@ -63,6 +65,9 @@ public class WhoIsRelayServer implements Observer {
 	public void setManagerName(String managerName) {
 		this.whoIsRealayManger.setNameManager(managerName);
 	}
+	
+	public void setHeadNodeAddress(String headNodeAddress){this.headNodeAddress=headNodeAddress;}
+	public String getHeadNodeAddress(){return this.headNodeAddress;}
 
 
 	@Override
@@ -81,7 +86,7 @@ public class WhoIsRelayServer implements Observer {
 					InetAddress remoteAddress = dp.getAddress();
 					int remotePort = dp.getPort();
 					console.debugMessage(DebugConfiguration.DEBUG_INFO, this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_RELAY da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
-					dp = RelayMessageFactory.buildImRelay(remoteAddress,PortConfiguration.PORT_ELECTION_IN);
+					dp = RelayMessageFactory.buildImRelay(remoteAddress,PortConfiguration.PORT_ELECTION_IN, getHeadNodeAddress());
 		
 					this.whoIsRealayManger.sendTo(dp);
 					//System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_RELAY inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);
