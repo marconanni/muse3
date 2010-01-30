@@ -93,7 +93,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	//vari Timeout necessari al RelayElectionManager
 	private TimeOutSingleWithMessage timeoutSearch = null;
-	private TimeOutSingleWithMessage timeoutToElect = null;				//serve al nodo che deve essere sostituito scaduto il quale determina il nodo che lo sostituisce
+	private TimeOutSingleWithMessage timeout_ToElect = null;				//serve al nodo che deve essere sostituito scaduto il quale determina il nodo che lo sostituisce
 	private TimeOutSingleWithMessage timeoutElectionBeacon = null;		//serve al nodo possibile sosituto in caso di elezione
 	private TimeOutSingleWithMessage timeoutFailToElect = null;
 //	private TimeOutFailToElect timeoutFailToElect = null;
@@ -287,12 +287,10 @@ public class RelayElectionManager extends Observable implements Observer{
 		memorizeConnectedClusterHeadAddress();
 
 		//Azzero tutti i timeout
-		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSingleWithMessage();
-		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutSingleWithMessage();
-		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutSingleWithMessage();
-		if(timeoutToElect!=null)timeoutToElect.cancelTimeOutSingleWithMessage();
-//		if(timeoutClientDetection != null) timeoutClientDetection.cancelTimeOutClientDetection();
-//		if(timeoutEmElection != null) timeoutEmElection.cancelTimeOutEmElection();
+		cancelTimeoutSearch();
+		cancelTimeoutToElect();
+		cancelTimeoutElectionBeacon();
+		cancelTimeoutFailToElect();
 
 		try {
 			//Monitoraggio RSSI nei confronti del server
@@ -350,10 +348,10 @@ public class RelayElectionManager extends Observable implements Observer{
 		}
 
 		//Azzero tutti i timeout
-		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSingleWithMessage();
-		if(timeoutFailToElect != null) timeoutFailToElect.cancelTimeOutSingleWithMessage();
-		if(timeoutElectionBeacon != null) timeoutElectionBeacon.cancelTimeOutSingleWithMessage();
-		if(timeoutToElect!=null)timeoutToElect.cancelTimeOutSingleWithMessage();
+		cancelTimeoutSearch();
+		cancelTimeoutToElect();
+		cancelTimeoutElectionBeacon();
+		cancelTimeoutFailToElect();
 		
 		//Monitoraggio RSSI client
 		relayPositionMonitor = new RelayPositionMonitor(
@@ -410,7 +408,8 @@ public class RelayElectionManager extends Observable implements Observer{
 		memorizeConnectedClusterHeadAddress();
 
 		//Azzero tutti i timeout
-		if(timeoutSearch != null) timeoutSearch.cancelTimeOutSingleWithMessage();
+		cancelTimeoutSearch();
+		
 	
 		actualStatus = RelayStatus.IDLE;
 		if(consoleElectionManager!=null)consoleElectionManager.debugMessage(DebugConfiguration.DEBUG_INFO, "RelayElectionManager.becomePossibleRelay(): X -> STATO "+actualStatus);
@@ -425,7 +424,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			dpOut = RelayMessageFactory.buildWhoIsRelay(BCASTHEAD,PortConfiguration.WHO_IS_RELAY_PORT_IN);
 			comClusterHeadManager.sendTo(dpOut);
 		} catch (IOException e) {consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
-		timeoutSearch = RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_SEARCH,TimeOutConfiguration.TIME_OUT_SEARCH);
+		setTimeoutSearch(RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_SEARCH,TimeOutConfiguration.TIME_OUT_SEARCH));
 		actualStatus=RelayStatus.WAITING_WHO_IS_RELAY;
 		if(consoleClusterHeadWifiInterface!=null)consoleClusterHeadWifiInterface.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 		else System.out.println("RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
@@ -439,7 +438,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			dpOut = RelayMessageFactory.buildWhoIsRelay(BCAST,PortConfiguration.WHO_IS_RELAY_PORT_IN);
 			comClusterManager.sendTo(dpOut);
 		} catch (IOException e) {consoleClusterWifiInterface.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di WHO_IS_RELAY");e.getStackTrace();}
-		timeoutSearch = RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_SEARCH,TimeOutConfiguration.TIME_OUT_SEARCH);
+		setTimeoutSearch(RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_SEARCH,TimeOutConfiguration.TIME_OUT_SEARCH));
 		actualStatus=RelayStatus.WAITING_WHO_IS_RELAY;
 		if(consoleClusterWifiInterface!=null)consoleClusterWifiInterface.debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
 		else System.out.println("RelayElectionManager: stato ["+actualStatus.toString()+"], inviato WHO_IS_RELAY e start del TIMEOUT_SEARCH");
@@ -463,10 +462,6 @@ public class RelayElectionManager extends Observable implements Observer{
 			 */
 			if((relayMessageReader.getCode() == MessageCodeConfiguration.IM_RELAY) && 
 			   (actualStatus == RelayStatus.WAITING_WHO_IS_RELAY)){
-				if(timeoutSearch != null) {
-					timeoutSearch.cancelTimeOutSingleWithMessage();
-					timeoutSearch = null;
-				}
 				if(isRELAY()){
 					setConnectedClusterHeadAddress(relayMessageReader.getPacketAddess().getHostAddress());
 					
@@ -960,8 +955,40 @@ public class RelayElectionManager extends Observable implements Observer{
 	public int getActiveClient(){ return activeClient;}
 	public int getActiveRelay(){ return activeRelay;}
 	
+	//timeout
+	private void setTimeoutSearch (TimeOutSingleWithMessage timeoutSearch){this.timeoutSearch = timeoutSearch;}
+	private TimeOutSingleWithMessage getTimeoutSearch(){return timeoutSearch;}
+	private void cancelTimeoutSearch(){
+		if(getTimeoutSearch()!=null){
+			getTimeoutSearch().cancelTimeOutSingleWithMessage();
+			setTimeoutSearch(null);
+		}
+	}
 	
-
-
-
+	private void setTimeoutToElect (TimeOutSingleWithMessage timeoutToElect){this.timeoutToElect = timeoutToElect;}
+	private TimeOutSingleWithMessage getTimeoutToElect(){return timeoutToElect;}
+	private void cancelTimeoutToElect(){
+		if(getTimeoutToElect()!=null){
+			getTimeoutToElect().cancelTimeOutSingleWithMessage();
+			setTimeoutToElect(null);
+		}
+	}
+	
+	private void setTimeoutElectionBeacon (TimeOutSingleWithMessage timeoutElectionBeacon){this.timeoutElectionBeacon = timeoutElectionBeacon;}
+	private TimeOutSingleWithMessage getTimeoutElectionBeacon(){return timeoutElectionBeacon;}
+	private void cancelTimeoutElectionBeacon(){
+		if(getTimeoutElectionBeacon()!=null){
+			getTimeoutElectionBeacon().cancelTimeOutSingleWithMessage();
+			setTimeoutElectionBeacon(null);
+		}
+	}
+	
+	private void setTimeoutFailToElect (TimeOutSingleWithMessage timeoutFailToElect){this.timeoutFailToElect = timeoutFailToElect;}
+	private TimeOutSingleWithMessage getTimeoutFailToElect(){return timeoutFailToElect;}
+	private void cancelTimeoutFailToElect(){
+		if(getTimeoutFailToElect()!=null){
+			getTimeoutFailToElect().cancelTimeOutSingleWithMessage();
+			setTimeoutFailToElect(null);
+		}
+	}
 }
