@@ -62,13 +62,12 @@ public class RelayMessageReader {
 			typeNode = Integer.parseInt(st.nextToken());
 			activeClient = Integer.parseInt(st.nextToken());
 		}
-		//if(code == MessageCodeConfiguration.IM_RELAY) 
+		if(code == MessageCodeConfiguration.IM_RELAY) headNodeAddress = st.nextToken();
 		if(code == MessageCodeConfiguration.ACK_CONNECTION) typeNode = Integer.valueOf(st.nextToken());
-		if(code == MessageCodeConfiguration.ELECTION_REQUEST)activeRelay =Integer.valueOf(st.nextToken());
+		//if(code == MessageCodeConfiguration.ELECTION_REQUEST)activeRelay =Integer.valueOf(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_BEACON_RELAY)activeClient = Integer.valueOf(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_RESPONSE)W = Double.parseDouble(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_DONE)newRelayAddress = st.nextToken();
-		if(code == MessageCodeConfiguration.HEAD_NODE_IS) headNodeAddress = st.nextToken();
 	}
 
 	/**Metodo getter
