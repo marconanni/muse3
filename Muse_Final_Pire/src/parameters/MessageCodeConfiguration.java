@@ -8,8 +8,6 @@ public class MessageCodeConfiguration {
 	
 	public static final int WHO_IS_RELAY = 3;
 	public static final int IM_RELAY = 4;
-	public static final int WHO_IS_HEAD_NODE = 5;
-	public static final int HEAD_NODE_IS = 6;
 	
 	public static final int ACK_CONNECTION = 7;
 
