@@ -23,11 +23,11 @@ public class ElectionConfiguration {
 	
 	/** Soglia superata la quale si considera molto probabile il presentarsi di una disconnessione
 	 *  dai Clients che il Relay attuale sta servendo. */
-	public static final double CLIENTS_DISCONNECTION_THRS = 66;
+	public static final double CLIENTS_DISCONNECTION_THRS = 58;
 	
 	/** Numero massimo di riscontri positivi per la disconnessione dai Clients serviti raggiunto 
 	 *  il quale tale disconnessione è considerata come certa */
-	public static final double NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION = 3;
+	public static final double NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION =4;
 	
 	/*
 	 *************** PARAMETRI PER IL CALCOLO DEL PESO W **********************
