@@ -312,7 +312,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			
 			//Monitoraggio della batteria
 			relayBatteryMonitor = new RelayBatteryMonitor(TimeOutConfiguration.BATTERY_MONITOR_PERIOD,this);
-			relayBatteryMonitor.start();
+			//relayBatteryMonitor.start();
 			
 			
 			//Risponde ai messaggi WHO_IS_RELAY
@@ -765,6 +765,9 @@ public class RelayElectionManager extends Observable implements Observer{
 				maxW = -1;				
 
 				actualStatus = RelayStatus.IDLE;
+				setPOSSIBLE_BIGBOSS(true);
+				setConnectedClusterHeadAddress(getBestSubstituteRelayAddress());
+				memorizeConnectedClusterHeadAddress();
 			}
 		}
 	}
