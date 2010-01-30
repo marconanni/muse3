@@ -3,6 +3,8 @@ package client.connection;
 import java.net.InetAddress;
 import java.util.Observer;
 
+import relay.connection.AConnectionManager;
+
 /**
  * @author Luca Campeti, Dejaco Pire
  * @version 1.1

@@ -274,13 +274,24 @@ public class ClientElectionManager extends Observable implements Observer{
 						indexELECTION_BEACON++;
 					} catch (IOException e){e.printStackTrace();}
 
-					timeoutFailToElect = ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT);
+					this.timeoutFailToElect = ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT);
 					actualStatus = ClientStatus.WAITING_END_ELECTION;
 				
 					if(consoleElectionManger!=null)consoleElectionManger.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientElectionManager STATO:"+actualStatus+" ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
 					else System.out.println("ClientElectionManager STATO:"+actualStatus+" ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
 				}
 				
+			}
+			else if((clientMessageReader.getCode()==MessageCodeConfiguration.ELECTION_DONE)&&
+					actualStatus==ClientStatus.WAITING_END_ELECTION){
+				
+				setConnectedRelayAddress(clientMessageReader.getNewRelayAddress());
+				memorizeConnectedRelayAddress();
+				
+				this.timeoutFailToElect.cancelTimeOutSingleWithMessage();
+				this.timeoutFailToElect=null;
+				
+				actualStatus= ClientStatus.ACTIVE;
 			}
 		}
 			
