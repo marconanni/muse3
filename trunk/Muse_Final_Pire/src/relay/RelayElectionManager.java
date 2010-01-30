@@ -306,6 +306,7 @@ public class RelayElectionManager extends Observable implements Observer{
 											this,
 											relayClusterWNICController.getDebugConsole());
 			
+			if(state==1)relayPositionMonitor.start();
 			
 			relayPositionAPMonitor.start();
 			
@@ -324,7 +325,6 @@ public class RelayElectionManager extends Observable implements Observer{
 			}
 			else if(state==1){
 				actualStatus=RelayStatus.MONITORING;
-				startMonitoringRSSI();
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"RelayElectionManager STATO:"+actualStatus+" RSSIMonitoring partiti, WhoIsRelay partiti, BIGBOSS sostituito");
 			}
 			
@@ -394,7 +394,8 @@ public class RelayElectionManager extends Observable implements Observer{
 	}
 	
 	private void becomePossibleRelay(){
-		setNodeType(1,false);
+		if(isPOSSIBLE_BIGBOSS())setNodeType(0,false);
+		if(isPOSSIBLE_RELAY())setNodeType(1,false);
 		setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 		memorizeLocalClusterAddress();
 		setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
@@ -464,7 +465,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					becomRelay(0);
 				}
 				else if(isPOSSIBLE_RELAY()|| isPOSSIBLE_BIGBOSS()){
-					setConnectedClusterHeadAddress(relayMessageReader.getHeadNodeAddress());
+					setConnectedClusterHeadAddress(relayMessageReader.getPacketAddess().getHostAddress());
 					
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"RelayElectionManager STATO:"+actualStatus+" IM_RELAY arrivato clusterRelay:"+relayMessageReader.getPacketAddess()+" clusterHead:"+getConnectedClusterHeadAddress());
 					becomePossibleRelay();
@@ -611,7 +612,8 @@ public class RelayElectionManager extends Observable implements Observer{
 										
 					try {
 						if(sameAddress(InetAddress.getByName(relayMessageReader.getNewRelayAddress()))){
-							becomRelay(1);
+							debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "RelayElectionManager ... DIVENTO BIGBOSS..");
+							becomeBigBossRelay(1);
 							
 							/** QUI DEVO ANCORA MANDARE CONFERMA DELLA SOSTITUZIONE **/
 						}
@@ -623,7 +625,7 @@ public class RelayElectionManager extends Observable implements Observer{
 						
 				}
 								
-				else if(isPOSSIBLE_RELAY()){
+				else if(isPOSSIBLE_BIGBOSS()){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un possibile sostituto del Big Boss ed è appena stato rieletto un nuovo BigBoss, controllo se è questo nodo");
 										
 					try {
@@ -769,14 +771,14 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	public void startMonitoringRSSI(){
 		if(actualStatus!=RelayStatus.MONITORING){
-			relayPositionMonitor.start();
+			this.relayPositionMonitor.start();
 			//relayBatteryMonitor.start();
 			actualStatus = RelayStatus.MONITORING;
 		}
 			
 	}
 	public void stopMonitoringRSSI(){
-		relayPositionMonitor.stop();
+		this.relayPositionMonitor.stop();
 		//relayBatteryMonitor.stop();
 		actualStatus = RelayStatus.IDLE;
 	}
@@ -806,8 +808,9 @@ public class RelayElectionManager extends Observable implements Observer{
 	}
 	
 	private boolean sameAddress(InetAddress adr){
-		if(adr.equals(localClusterHeadAddress))	return true;
-		if(adr.equals(localClusterHeadInetAddress))	return true;
+		
+		if(adr.equals(getLocalClusterInetAddress())) return true;
+		if(adr.equals(getLocalClusterHeadInetAddress()))	return true;
 		else return false;
 	}
 		
