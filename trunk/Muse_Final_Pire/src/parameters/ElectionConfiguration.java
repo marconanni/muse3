@@ -23,7 +23,7 @@ public class ElectionConfiguration {
 	
 	/** Soglia superata la quale si considera molto probabile il presentarsi di una disconnessione
 	 *  dai Clients che il Relay attuale sta servendo. */
-	public static final double CLIENTS_DISCONNECTION_THRS = 58;
+	public static final double CLIENTS_DISCONNECTION_THRS = 40;
 	
 	/** Numero massimo di riscontri positivi per la disconnessione dai Clients serviti raggiunto 
 	 *  il quale tale disconnessione è considerata come certa */
@@ -46,7 +46,7 @@ public class ElectionConfiguration {
 	public static final int NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL = 5;
 		
 	/** Numero di campioni da memorizzare nella classe AccessPointData affinchè il Grey Model possa effettuare la previsione */
-	public static final int NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL = 5;
+	public static final int NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL = 10;
 	
 	/**Caratterizzazione numerica della capacità in bpms dell'interfaccia WIFI connessa alla rete Ad-Hoc
 	 */
