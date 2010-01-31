@@ -513,7 +513,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				if((isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY())&& (getActualStatus()==RelayStatus.IDLE)){
 					try {
 						
-						if(isPOSSIBLE_BIGBOSS())debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+" ELECTION_REQUEST arrivato, sostituto BIGBOSS, AP visibility:"+getRelayClusterHeadWNICController().isConnected());
+						if(isPOSSIBLE_BIGBOSS())debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+" ELECTION_REQUEST arrivato da:"+getRelayMessageReader().getPacketAddess()+", sostituto BIGBOSS, AP visibility:"+getRelayClusterHeadWNICController().isConnected());
 						if(isPOSSIBLE_RELAY())debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+" ELECTION_REQUEST arrivato, sostituto Relay secondario, BIGBOSS CLUSTER visibility:"+getRelayClusterHeadWNICController().isConnected());							
 						
 						setElecting(true);
