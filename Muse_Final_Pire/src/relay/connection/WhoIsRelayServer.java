@@ -86,7 +86,7 @@ public class WhoIsRelayServer implements Observer {
 					InetAddress remoteAddress = dp.getAddress();
 					int remotePort = dp.getPort();
 					console.debugMessage(DebugConfiguration.DEBUG_INFO, this.whoIsRealayManger.getManagerName()+": ricevuto WHO_IS_RELAY da: "+remoteAddress.getHostAddress()+ " dalla porta: " +remotePort);
-					dp = RelayMessageFactory.buildImRelay(remoteAddress,PortConfiguration.PORT_ELECTION_IN, getHeadNodeAddress());
+					dp = RelayMessageFactory.buildImRelay(remoteAddress,PortConfiguration.PORT_ELECTION_IN);
 		
 					this.whoIsRealayManger.sendTo(dp);
 					//System.out.println( this.whoIsRealayManger.getManagerName()+":  messaggio IM_RELAY inviato a: "	+ remoteAddress.getHostAddress() + " alla porta: "+ remotePort);

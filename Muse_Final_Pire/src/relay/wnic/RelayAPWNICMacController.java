@@ -20,7 +20,6 @@ public class RelayAPWNICMacController implements RelayWNICController {
 	public RelayAPWNICMacController(String ethX)throws WNICException {
 		this.interf = ethX;
 		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-		this.console = new DebugConsole();
 		console.setTitle("RELAY AP WNIC LINUX CONTROLLER - DEBUG console for interface "+ ethX);
 	}
 
@@ -28,7 +27,6 @@ public class RelayAPWNICMacController implements RelayWNICController {
 		this.interf = ethX;
 		this.essidName = netName;
 		this.setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-		this.console = new DebugConsole();
 		console.setTitle("RELAY AP WNIC LINUX CONTROLLER - DEBUG console for interface " + ethX);
 	}
 

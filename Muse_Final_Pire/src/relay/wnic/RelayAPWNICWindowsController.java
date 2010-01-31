@@ -20,7 +20,6 @@ public class RelayAPWNICWindowsController implements RelayWNICController {
 	public RelayAPWNICWindowsController(String ethX)throws WNICException {
 		interf = ethX;
 		setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-		console = new DebugConsole();
 		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ ethX);
 	}
 
@@ -28,7 +27,6 @@ public class RelayAPWNICWindowsController implements RelayWNICController {
 		interf = ethX;
 		essidName = netName;
 		setNumberOfPreviousRSSI(ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL);
-		console = new DebugConsole();
 		console.setTitle("RELAY WNIC LINUX CONTROLLER - DEBUG console for interface "+ ethX);
 	}
 
