@@ -62,10 +62,10 @@ public class RelayMessageFactory {
 	 * @return DatagramPacket da inviare
 	 * @throws IOException
 	 */
-	static public DatagramPacket buildImRelay(InetAddress address, int port, String headNodeAddress) throws IOException {
+	static public DatagramPacket buildImRelay(InetAddress address, int port) throws IOException {
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = 0+"_"+MessageCodeConfiguration.IM_RELAY+"_"+headNodeAddress;
+		String content = 0+"_"+MessageCodeConfiguration.IM_RELAY;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -193,10 +193,10 @@ public class RelayMessageFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	static public DatagramPacket buildElectionDone(int sequenceNumber, String newRelayAddress,InetAddress addr, int port) throws IOException {
+	static public DatagramPacket buildElectionDone(int sequenceNumber,String oldRelay, String newRelayAddress, String nodeHeadAddress, InetAddress addr, int port) throws IOException {
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_DONE+"_"+newRelayAddress;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_DONE+"_"+oldRelay+"_"+newRelayAddress+"_"+nodeHeadAddress;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();

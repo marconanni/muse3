@@ -1,5 +1,6 @@
 package relay.position;
 
+import parameters.ElectionConfiguration;
 import relay.wnic.exception.InvalidParameter;
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
@@ -44,9 +45,9 @@ public class GreyModel implements RSSIFilter
 		predictedTime=realValues.length;
 	
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-		if(realValues.length<=NUMBER_OF_RSSI){
-			return realValues[realValues.length-1];
-		}
+//		if(realValues.length<NUMBER_OF_RSSI){
+//			return realValues[realValues.length-1];
+//		}
 		
 		try
 		{
@@ -102,6 +103,7 @@ public class GreyModel implements RSSIFilter
 		}
 		catch(Exception e)
 		{
+			System.out.println(e.getMessage());
 			return realValues[realValues.length-1];
 		}
 	}
