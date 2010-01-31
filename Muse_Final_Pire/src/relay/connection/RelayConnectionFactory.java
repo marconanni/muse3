@@ -22,6 +22,10 @@ public class RelayConnectionFactory {
 	public static RelayCM getClusterHeadElectionConnectionManager(Observer obser,boolean bcast){
 		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAddress(),rpm.getLocalClusterHeadBCASTAddress(),rpm.getPortInAdHocElection(),rpm.getPortOutAdHocElection(),obser, bcast);
 	}
+	
+	public static RelayCM getClusterHeadElectionConnectionManagerBIGBISS(Observer obser, boolean bcast){
+		return new RelayCM("RelayElectionCM Cluster Head Server", rpm.getLocalManagedAddress(), rpm.getLocalManagedBCASTAddress(), rpm.getPortInAdHocElection(), rpm.getPortOutAdHocElection(), obser,bcast);
+	}
 
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM

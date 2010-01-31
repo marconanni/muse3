@@ -3,6 +3,8 @@ package relay.connection;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.omg.PortableInterceptor.INACTIVE;
+
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
 
@@ -25,6 +27,7 @@ public class RelayPortMapper {
 	
 	private InetAddress localClusterBCASTAddress = null;		
 	private InetAddress localClusterHeadBCASTAddress = null;
+	private InetAddress localManagedBCASTAdress = null;
 	
 	/*indirizzi locali per il relay*/
 	private InetAddress localClusterAddress =null;
@@ -59,6 +62,7 @@ public class RelayPortMapper {
 			localManagedAddress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS);
 			localClusterBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_BROADCAST_ADDRESS);
 			localClusterHeadBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS);
+			localManagedBCASTAdress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
  	
@@ -97,6 +101,7 @@ public class RelayPortMapper {
 	/**Metodo per ottenere l'indirizzo del nodo locale sulla rete Managed
 	 * @return un InetAddress rappresentante l'indirizzo di cui sopra*/
 	public InetAddress getLocalManagedAddress() {return localManagedAddress;}
+	public InetAddress getLocalManagedBCASTAddress(){return localManagedBCASTAdress;}
 
 }
 
