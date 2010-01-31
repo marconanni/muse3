@@ -31,13 +31,15 @@ public class DebugConsole {
 	/**
 	 * Costruttore
 	 * */
-	public DebugConsole(){
-		setText(new Pane());
-		frame= new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setContentPane(new JScrollPane(getText()));
-		frame.setSize(600, 400);
-		frame.setVisible(true);
+	public DebugConsole(String title){
+		this.title=title;
+		this.setText(new Pane());
+		this.frame= new JFrame();
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame.setContentPane(new JScrollPane(getText()));
+		this.frame.setSize(800, 400);
+		this.frame.setVisible(true);
+		this.frame.setTitle(title);
 	}
 	/**
 	 * Metodo per la visualizzazione dei messaggi di debug
