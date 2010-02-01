@@ -1,5 +1,6 @@
 package test;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.Observable;
 import java.util.Observer;
@@ -31,17 +32,22 @@ public class AppoggioClient implements Observer {
 	public void update(Observable arg, Object event) {
 
 		if (event instanceof DatagramPacket){
+			try {
+				messageReader.readContent((DatagramPacket)event);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.err.println("CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
+				consolle.debugMessage(2,"CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
+				e.printStackTrace();
 			if(messageReader.getCode()== MessageCodeConfiguration.ACK_CLIENT_REQ)
-				System.out.println( "Arrivato messaggio di AckClientREq");
+				System.out.println( "Arrivato messaggio di AckClientREq");	
 			
 			
-			
-			
-			
+					}
+		
+		
+		
 		}
-		
-		
-		
-	}
 
+	}
 }

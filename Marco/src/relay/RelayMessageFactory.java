@@ -21,7 +21,8 @@ import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import parameters.Parameters;
+import parameters.MessageCodeConfiguration;
+
 
 
 public class RelayMessageFactory {
@@ -39,7 +40,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.ACK;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ACK;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -65,7 +66,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.FORWARD_REQ_FILE+"_"+clientAddr+"_"+filename+"_"+controlProxyPort+"_"+proxyStreamingInPort;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_FILE+"_"+clientAddr+"_"+filename+"_"+controlProxyPort+"_"+proxyStreamingInPort;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -88,7 +89,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.ACK_CLIENT_REQ+"_"+proxyOutStreaming+"_"+proxyCtrl;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ACK_CLIENT_REQ+"_"+proxyOutStreaming+"_"+proxyCtrl;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -111,7 +112,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.START_TX;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.START_TX;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -134,7 +135,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.STOP_TX;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.STOP_TX;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -160,7 +161,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = 0+"_"+Parameters.WHO_IS_RELAY;
+		String content = 0+"_"+MessageCodeConfiguration.WHO_IS_RELAY;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -182,7 +183,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = 0+"_"+Parameters.IM_RELAY+"_"+relayAddress;
+		String content = 0+"_"+MessageCodeConfiguration.IM_RELAY+"_"+relayAddress;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -204,7 +205,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = 0+"_"+Parameters.ELECTION_REQUEST;
+		String content = 0+"_"+MessageCodeConfiguration.ELECTION_REQUEST;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -226,7 +227,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.ELECTION_RESPONSE+"_"+W;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_RESPONSE+"_"+W;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -248,7 +249,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.ELECTION_DONE+"_"+newRelayAddress;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_DONE+"_"+newRelayAddress;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -269,7 +270,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.EM_EL_DET_RELAY;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.EM_EL_DET_RELAY;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -292,7 +293,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.EM_ELECTION+"_"+W;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.EM_ELECTION+"_"+W;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -313,7 +314,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.REQUEST_SESSION;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_SESSION;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -339,7 +340,7 @@ public class RelayMessageFactory {
 		}
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.SESSION_INFO+session;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.SESSION_INFO+session;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -361,7 +362,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.ACK_SESSION+proxyInfo;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ACK_SESSION+proxyInfo;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -382,7 +383,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.REDIRECT;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.REDIRECT;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -404,7 +405,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.LEAVE;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.LEAVE;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -426,7 +427,7 @@ public class RelayMessageFactory {
 
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.REQUEST_RSSI;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_RSSI;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -451,7 +452,7 @@ public class RelayMessageFactory {
 	static public DatagramPacket buildServerUnreacheable(int sequenceNumber, InetAddress clientAddr, int port) throws IOException{
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.SERVER_UNREACHEABLE;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.SERVER_UNREACHEABLE;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
@@ -472,7 +473,7 @@ public class RelayMessageFactory {
 	static public DatagramPacket buildSessionInvalidation(int sequenceNumber, InetAddress clientAddr, int port) throws IOException{
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+Parameters.SESSION_INVALIDATION;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.SESSION_INVALIDATION;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();

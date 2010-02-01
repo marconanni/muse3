@@ -13,7 +13,12 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import parameters.BufferConfiguration;
+import parameters.MessageCodeConfiguration;
+import parameters.NetConfiguration;
 import parameters.Parameters;
+import parameters.PortConfiguration;
+import parameters.TimeOutConfiguration;
 
 import unibo.core.BufferEmptyEvent;
 import unibo.core.BufferEmptyListener;
@@ -74,7 +79,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 		this.sessionCM = ClientConnectionFactory.getSessionConnectionManager(this,false); //Marco: crea  il manager che manda e riceve messaggi
 		this.sessionCM.start(); //Marco: e lo fa partire
 		this.status = "Idle";
-		this.myStreamingPort = Parameters.CLIENT_PORT_RTP_IN; //Marco: legge dal file di configurazione la prota sulla quale ricevere lo streaming
+		this.myStreamingPort = PortConfiguration.CLIENT_PORT_RTP_IN; //Marco: legge dal file di configurazione la prota sulla quale ricevere lo streaming
 	}
 
 	public static ClientSessionManager getInstance() {
@@ -90,7 +95,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 	 */
 	@Override
 	public synchronized void update(Observable arg, Object event) { //Marco: è il metodo chiamato da clientSessionCM quando arriva un messaggio
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		this.messageReader = new ClientMessageReader();
 		if(event instanceof String)
 		{
@@ -122,7 +127,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 //				try {
 //					Thread.sleep(2000);
 //				} catch (InterruptedException e1) {
-//					// TODO Auto-generated catch block
+//					// Auto-generated catch block
 //					e1.printStackTrace();
 //				}
 //				if(this.clientPlaying != null)this.clientPlaying.startPlaying();
@@ -132,10 +137,10 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 						this.msg = ClientMessageFactory.buildStopTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
 				sessionCM.sendTo(msg);
 				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -151,10 +156,10 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 						this.msg = ClientMessageFactory.buildStopTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
 					sessionCM.sendTo(msg);
 				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -172,10 +177,10 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 						this.msg = ClientMessageFactory.buildStartTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
 					sessionCM.sendTo(msg);
 				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -190,7 +195,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 				 * 
 				 */
 			{
-				this.clientPlaying.setThdOnBuffer(Parameters.BUFFER_THS_START_TX + ((Parameters.CLIENT_BUFFER/2)%2 == 0 ? Parameters.CLIENT_BUFFER/2:Parameters.CLIENT_BUFFER/2+1), false);
+				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
 			}
 			
 			
@@ -239,10 +244,10 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 					this.status = "WaitingForResponse";
 					this.timeoutFileRequest = ClientTimeoutFactory.getTimeOutFileRequest(this, Parameters.TIMEOUT_FILE_REQUEST);
 				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -275,12 +280,12 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 			try {
 				messageReader.readContent(this.msg);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				System.err.println("CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				Logger.write("CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				e.printStackTrace();
 			}
-			if(messageReader.getCode() == Parameters.SERVER_UNREACHEABLE && status.equals("WaitingForResponse"))
+			if(messageReader.getCode() == MessageCodeConfiguration.SERVER_UNREACHEABLE && status.equals("WaitingForResponse"))
 			{
 				/*
 				 * scopro che il server dal quale aspetto una risposta non è raggiungibile, annullo il timeout e
@@ -289,7 +294,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 				if(this.timeoutFileRequest != null)this.timeoutFileRequest.cancelTimeOutFileRequest();
 				this.frameController.debugMessage("CLIENT SESSION MESSAGE: SERVER IRRAGGIUNGIBILE");
 			}
-			if(messageReader.getCode() == Parameters.ACK_CLIENT_REQ && status.equals("WaitingForResponse"))
+			if(messageReader.getCode() == MessageCodeConfiguration.ACK_CLIENT_REQ && status.equals("WaitingForResponse"))
 				/*
 				 * arriva la risposta alla richiesta della canzone, 
 				 * recupero i dati sulle porte utilizzate dal proxy sul relay
@@ -301,10 +306,10 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 				this.proxyStreamingPort = messageReader.getRelaySendingPort();
 				this.proxyCtrlPort = messageReader.getRelayControlPort();
 				try {
-					this.clientPlaying = new ClientBufferDataPlaying(this.proxyStreamingPort, this.myStreamingPort, InetAddress.getByName(relayAddress), Parameters.CLIENT_BUFFER, Parameters.TTW, this, this.frameController);
+					this.clientPlaying = new ClientBufferDataPlaying(this.proxyStreamingPort, this.myStreamingPort, InetAddress.getByName(relayAddress), BufferConfiguration.CLIENT_BUFFER, TimeOutConfiguration.TTW, this, this.frameController);
 					String[] data = new String[7];
-					data[0] = InetAddress.getByName(Parameters.CLIENT_ADDRESS).getHostAddress();
-					data[1] = String.valueOf(Parameters.CLIENT_PORT_SESSION_IN);
+					data[0] = InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS).getHostAddress();
+					data[1] = String.valueOf(PortConfiguration.CLIENT_PORT_SESSION_IN);
 					data[2] = String.valueOf(this.myStreamingPort);
 					data[3] = this.relayAddress;
 					data[4] = String.valueOf(this.proxyCtrlPort);
@@ -327,15 +332,15 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 						if(this.electionManager!=null)
 							this.electionManager.setImServed(true);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			if(messageReader.getCode() == Parameters.LEAVE)
+			if(messageReader.getCode() == MessageCodeConfiguration.LEAVE)
 				/*
 				 * cambio indirizzo del realy di riferimeno ( lo diventa il nuovo relay)
 				 * imposto le dimensioni e la modalità del buffer su funzionamento normale
@@ -344,7 +349,7 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 			{
 				this.relayAddress =this.newrelay;
 				this.frameController.setNewRelayIP(this.relayAddress);
-				this.clientPlaying.setThdOnBuffer(Parameters.BUFFER_THS_START_TX, true);
+				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
 				this.clientPlaying.redirectSource(this.relayAddress);
 			}
 
@@ -367,15 +372,15 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 			
 			System.out.println("relayAddress: " + this.relayAddress);
 			try {
-				this.msg = ClientMessageFactory.buildRequestFile(0, this.filename, this.myStreamingPort, InetAddress.getByName(this.relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
+				this.msg = ClientMessageFactory.buildRequestFile(0, this.filename, this.myStreamingPort, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 				sessionCM.sendTo(msg);
 				this.status = "WaitingForResponse";
-				this.timeoutFileRequest = ClientTimeoutFactory.getTimeOutFileRequest(this, Parameters.TIMEOUT_FILE_REQUEST);
+				this.timeoutFileRequest = ClientTimeoutFactory.getTimeOutFileRequest(this, TimeOutConfiguration.TIMEOUT_FILE_REQUEST);
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

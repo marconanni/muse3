@@ -38,7 +38,7 @@ public class MainTestRelay implements Observer {
 	public  void inviaMsg(){
 		try {
 			
-			DatagramPacket message = RelayMessageFactory.buildAckClientReq(0, Parameters.CLIENT_PORT_SESSION_IN, InetAddress.getByName(Parameters.CLIENT_ADDRESS)	, 50	, 25);
+			DatagramPacket message = RelayMessageFactory.buildAckClientReq(0, PortConfiguration.CLIENT_PORT_SESSION_IN, InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS)	, 50	, 25);
 			consolle.debugMessage(0, "Preparato messaggio");
 			CM.sendTo(message);
 			System.out.println("inviato messaggio");
