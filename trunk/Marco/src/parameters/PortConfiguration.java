@@ -23,7 +23,7 @@ public class PortConfiguration {
 
 	//SERVER
 	/** porte utilizzate per la gestione della sessione sul SERVER*/
-//	public static final int SERVER_SESSION_PORT_IN = 2001;
+	public static final int SERVER_SESSION_PORT_IN = 2001;
 	
 	/** valori iniziali dei range di porte di controllo ingresso-uscita 
 	 *  assegnabili ad uno STREAMING SERVER creato per gestire una sessione RTP
@@ -37,28 +37,28 @@ public class PortConfiguration {
 	
 	//CLIENT
 	/** porta per la gestione della sessione sui CLIENT in ingresso */
-	public static final int CLIENT_PORT_SESSION_IN = 3000;
+	public static final int CLIENT_PORT_SESSION_IN = 15000;
 	
 	/** porta per la gestione della sessione sui CLIENT in uscita */
-	public static final int CLIENT_PORT_SESSION_OUT = 3001;
+	public static final int CLIENT_PORT_SESSION_OUT = 15001;
 		
 	
 	
 
 	
 	/** porta per la ricezione del flusso RTP sul CLIENT */
-//	public static final int CLIENT_PORT_RTP_IN = 3006;
+	public static final int CLIENT_PORT_RTP_IN = 3006;
 	
 
 	
 	/** porta per la gestione della sessione sul RELAY verso la rete ad-hoc in ingresso */
-	//public static final int RELAY_SESSION_AD_HOC_PORT_IN = 4002;
+	public static final int RELAY_SESSION_AD_HOC_PORT_IN = 4002;
 	
 	/** porta per la gestione della sessione sul RELAY verso la rete ad-hoc in uscita */
-	//public static final int RELAY_SESSION_AD_HOC_PORT_OUT = 4003;
+	public static final int RELAY_SESSION_AD_HOC_PORT_OUT = 4003;
 		
 	/** porta per la gestione della sessione sul RELAY verso il SERVER, in uscita */
-	//public static final int RELAY_SESSION_MANAGED_PORT_OUT = 4004;
+	public static final int RELAY_SESSION_MANAGED_PORT_OUT = 4004;
 			
 		
 	/** valori iniziali dei range di porte RTP in ingresso 

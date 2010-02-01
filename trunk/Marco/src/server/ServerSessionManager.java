@@ -14,6 +14,7 @@ import javax.media.NoDataSourceException;
 
 import debug.DebugConsolle;
 
+import parameters.MessageCodeConfiguration;
 import parameters.Parameters;
 import util.Logger;
 import server.connection.ServerConnectionFactory;
@@ -58,7 +59,7 @@ public class ServerSessionManager implements Observer{
 	 */
 	@Override
 	public void update(Observable receiver, Object arg) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		StreamingServer sS;
 		if(arg instanceof DatagramPacket)
 		{
@@ -66,13 +67,13 @@ public class ServerSessionManager implements Observer{
 			try {
 				ServerMessageReader.readContent(this.message);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				System.err.println("SERVER_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				Logger.write("SERVER_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				consolle.debugMessage("SERVER_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				e.printStackTrace();
 			}
-			if(ServerMessageReader.getCode() == Parameters.FORWARD_REQ_FILE)	//Marco: arriva una richiesta di un nuovo file, bisogna aprire un nuovo canale di streaming 
+			if(ServerMessageReader.getCode() == MessageCodeConfiguration.FORWARD_REQ_FILE)	//Marco: arriva una richiesta di un nuovo file, bisogna aprire un nuovo canale di streaming 
 			{
 				consolle.debugMessage("SERVER_SESSION_MANAGER: Arrivato un FORWARD_REQ_FILE");
 				try {
@@ -80,17 +81,17 @@ public class ServerSessionManager implements Observer{
 					ssReferences.put(ServerMessageReader.getClientAddress(), sS); // Marco: inserisce lo Streaming server nella tabella usando come chiave l'indirizzo del client
 					numberOfSession++; // Marco: aumenta di uno il numero delle sessioni attualmente aprete
 				} catch (NoDataSourceException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 					Logger.write("STREAMING_SERVER(COSTRUTTORE): Errore nel DataSource creato...");
 					this.consolle.debugMessage("STREAMING_SERVER(COSTRUTTORE): Errore nel DataSource creato...");
 
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			if(ServerMessageReader.getCode() == Parameters.REDIRECT)
+			if(ServerMessageReader.getCode() == MessageCodeConfiguration.REDIRECT)
 				/*
 				           ricevuto il REDIRECT, CONSIDERA IL MITTENTE DEL MESSAGGIO (ottenuto dal
 
