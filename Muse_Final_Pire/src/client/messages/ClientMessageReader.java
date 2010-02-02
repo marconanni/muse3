@@ -18,7 +18,7 @@ import parameters.MessageCodeConfiguration;
  * @version 1.1
  */
 public class ClientMessageReader {
-	private boolean debug = true;
+	private boolean debug = false;
 
 	
 	private  String message = ""; 				//Stringa contenente il messaggio
@@ -26,9 +26,10 @@ public class ClientMessageReader {
 	private  int code = 0;						//Codice messaggio
 	private  int relaySendingPort;				//porta da cui il relay invia lo streaming
 	private  int relayControlPort;				//porta su cui il relay ascolta le richieste
-	private  String newRelayAddress = null;
-	private String oldRelayAddress = null;
-	private String headNodeAddress = null;
+	private String newRelayLocalClusterAddress;
+	private String oldRelayLocalClusterAddress;
+	private String oldRelayLocalClusterHeadAddress;
+	private String headNodeAddress;
 	private String relayAddressBacon = null;
 	private InetAddress packetAddress = null;
 	public ClientMessageReader(){}
@@ -69,15 +70,18 @@ public class ClientMessageReader {
 		//if(code == MessageCodeConfiguration.NOTIFY_RSSI)RSSI = Double.parseDouble(st.nextToken());		
 		//if (code == MessageCodeConfiguration.ELECTION_BEACON)relayAddressBacon = st.nextToken();
 		if (code == MessageCodeConfiguration.ELECTION_DONE){
-			oldRelayAddress = st.nextToken();
-			newRelayAddress = st.nextToken();
+			
+			newRelayLocalClusterAddress = st.nextToken();
+			oldRelayLocalClusterAddress = st.nextToken();
+			oldRelayLocalClusterHeadAddress = st.nextToken();
 			headNodeAddress = st.nextToken();
 		}
 	}
 
-	public String getOldRelayAddress(){return oldRelayAddress;}
-	public String getHeadNodeAddress(){return headNodeAddress;}
-	public  String getNewRelayAddress() {return newRelayAddress;}
+	 public String getNewRelayLocalClusterAddress(){return newRelayLocalClusterAddress;}
+		public String getHeadNodeAddress(){ return headNodeAddress;}
+		public String getOldRelayLocalClusterAddress(){return oldRelayLocalClusterAddress;}
+		public String getOldRelayLocalClusterHeadAddress(){return oldRelayLocalClusterHeadAddress;}
 	public  int getSequenceNumber() {return sequenceNumber;}
 	public  int getCode() {return code;}
 	public  int getRelaySendingPort() {return relaySendingPort;}

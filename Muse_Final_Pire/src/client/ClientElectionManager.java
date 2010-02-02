@@ -190,7 +190,7 @@ public class ClientElectionManager extends Observable implements Observer{
 				
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": Simulo sessione RTP e attivo servizio PositionControlling settando ImServ a true");
 				//PARTE CHE DEVE RICHIAMARE LA SESSION MANAGER
-				setImServed(true);
+				setServed(true);
 			}
 			
 			/** ELECTION_REQUEST
@@ -205,8 +205,9 @@ public class ClientElectionManager extends Observable implements Observer{
 				
 				if(getActualStatus() == ClientStatus.ACTIVE){
 					
-					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": ELECTION_REQUEST arrivato e ho una sessione RTP in corso.");
+					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": ELECTION_REQUEST arrivato e ho una sessione RTP in corso. isImServed()="+isImServed());
 				
+					
 					//ulteriore controllo ma per forza deve essere true altrimenti lo stato sarebbe IDLE
 					if (isImServed()) {
 
@@ -279,7 +280,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					(getActualStatus()==ClientStatus.WAITING_END_ELECTION || getActualStatus()==ClientStatus.IDLE) &&
 					(!isFirstELECTION_DONE())){
 				
-				setConnectedRelayAddress(getClientMessageReader().getNewRelayAddress());
+				setConnectedRelayAddress(getClientMessageReader().getNewRelayLocalClusterAddress());
 				memorizeConnectedRelayAddress();
 				
 				if(getActualStatus()==ClientStatus.WAITING_END_ELECTION){
@@ -364,7 +365,6 @@ public class ClientElectionManager extends Observable implements Observer{
 	}
 	
 	public void clearElection(){
-		setImServed(false);
 		setConnectedRelayAddress(null);
 		setConnectedRelayInetAddress(null);
 		setFirstELECTION_DONE(false);
@@ -382,7 +382,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	/**Metodo che consente di avvertire il ClientElectionManager che è in atto una sessione RTP o che ne è stata conclusa una
 	 * @param imServed un boolean che a true indica che c'è una sessione RTP in corso, a false indica che non c'è (più) sessione RTP in corso
 	 */
-	public synchronized void setImServed(boolean imS) {
+	public synchronized void setServed(boolean imS) {
 
 		//entro solo se non sono in fase di rielezione uno dei due deve essere false
 		if(!isElecting() || !imS ){
@@ -450,7 +450,6 @@ public class ClientElectionManager extends Observable implements Observer{
 	public DebugConsole getConsoleWifiInterface(){return consoleWifiInterface;}
 
 	
-	public boolean isImServed() {return imServed;}
 	
 	public ClientCM getComManager() {return comManager;}
 	public void setComManager(ClientCM comManager) {this.comManager = comManager;}
@@ -472,6 +471,11 @@ public class ClientElectionManager extends Observable implements Observer{
 	
 	private boolean isElecting() {return electing;}
 	private void setElecting(boolean electing) {this.electing = electing;}
+	
+	private boolean isImServed() {return imServed;}
+	private void setImServed(boolean imServed) {
+		System.out.println("Set IMSERVED = "+imServed);
+		this.imServed = imServed;}
 	
 	private void clearIndexEM_DET_CLIENT(){this.indexEM_EL_DET_CLIENT=0;}
 	private void addIndexEM_EL_DET_CLIENT(int indexEM_EL_DET_CLIENT) {this.indexEM_EL_DET_CLIENT+= indexEM_EL_DET_CLIENT;}
