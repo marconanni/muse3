@@ -356,24 +356,28 @@ public class RelayElectionManager extends Observable implements Observer{
 		cancelTimeoutFailToElect();
 		try{
 			//Monitoraggio RSSI client
-			setRelayPositionMonitor(new RelayPositionMonitor(
-				ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
-				TimeOutConfiguration.POSITION_CLIENTS_MONITOR_PERIOD,
-				this,
-				getRelayClusterWNICController().getDebugConsole()));
+			if(getRelayPositionMonitor()==null){
+				setRelayPositionMonitor(new RelayPositionMonitor(
+					ElectionConfiguration.NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL,
+					TimeOutConfiguration.POSITION_CLIENTS_MONITOR_PERIOD,
+					this,
+					getRelayClusterWNICController().getDebugConsole()));
+			}
 		
-		
-			if(state==1)getRelayPositionMonitor().start();
 			//risponde ai messaggi di RSSI_REQUEST prendendo il valore RSSI dalla scheda wifi collegata al cluster head
-			setRelayPositionController(new RelayPositionController(getRelayClusterHeadWNICController(),this));
+			if(getRelayPositionController()==null){
+				setRelayPositionController(new RelayPositionController(getRelayClusterHeadWNICController(),this));
+			}
 			getRelayPositionController().start();
 		
 		
 			//Client -> faccio partire nel momento in cui si collega qualche client...
-			setRelayBatteryMonitor(new RelayBatteryMonitor(TimeOutConfiguration.BATTERY_MONITOR_PERIOD,this));
+			if(getRelayBatteryMonitor()==null)
+				setRelayBatteryMonitor(new RelayBatteryMonitor(TimeOutConfiguration.BATTERY_MONITOR_PERIOD,this));
 			//getRelayBatteryMonitor().start();
 			
-			setWhoIsRelayServer(new WhoIsRelayServer(getConsoleClusterWifiInterface(),getConnectedClusterHeadAddress()));
+			if(getWhoIsRelayServer()==null)
+				setWhoIsRelayServer(new WhoIsRelayServer(getConsoleClusterWifiInterface(),getConnectedClusterHeadAddress()));
 			getWhoIsRelayServer().start();
 				
 			if(state==0)setActualStatus(RelayStatus.IDLE);
@@ -724,9 +728,14 @@ public class RelayElectionManager extends Observable implements Observer{
 				setW(-1);
 
 				if(getWhoIsRelayServer()!=null)getWhoIsRelayServer().close();
+				setWhoIsRelayServer(null);
 				if(getRelayPositionAPMonitor()!=null)getRelayPositionAPMonitor().close();
+				setRelayPositionAPMonitor(null);
 				if(getRelayPositionMonitor()!=null)getRelayPositionMonitor().close();
-				//if(getRelayBatteryMonitor()!=null)getRelayBatteryMonitor().close();
+				setRelayPositionMonitor(null);
+				if(getRelayPositionController()!=null)getRelayPositionController().close();
+				setRelayPositionController(null);
+				//if(getRelayBatteryMonitor()!=null)ggetRelayBatteryMonitor().close();
 
 				setPossibleRelay(new Vector<Couple>());
 
