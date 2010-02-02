@@ -88,7 +88,7 @@ public class RelayPositionController implements Observer {
 				console.debugMessage(DebugConfiguration.DEBUG_WARNING, "RelayPositionMonitorController: ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
 				if((cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI)){
 					RSSIvalue = cwnic.getSignalStrenghtValue();
-					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue,((DatagramPacket)arg1).getAddress(), PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPERELAY, electionManger.getActiveClient());
+					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue,((DatagramPacket)arg1).getAddress(), PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPERELAY, (electionManger.getActiveClient()==0||electionManger.getActiveClient()==0)?0:electionManger.getActiveClient());
 					sequenceNumber++;
 					rrscm.sendTo(notifyRSSI);
 					console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionMonitorController(): Inviato RSSI: "+ RSSIvalue +" a: " + ((DatagramPacket)arg1).getAddress()+":"+PortConfiguration.RSSI_PORT_IN);
