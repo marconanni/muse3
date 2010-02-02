@@ -521,6 +521,9 @@ public class RelayElectionManager extends Observable implements Observer{
 					(!getFirstELECTION_REQUEST())){
 					setFirstELECTION_REQUEST(true);
 					setFfirstELECTION_DONE(false);
+					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_REQUEST arrivato.");
+					
+					
 
 				//rielezione nuovo nodo relay BigBoss/Relay secondario e sono un nodo possibile sostituto
 				//un nodo possibile sostituti sta in ascolto solo dei messaggi broadcast emessi sulla rete (CLUSTER) in cui ne fa parte
@@ -558,8 +561,8 @@ public class RelayElectionManager extends Observable implements Observer{
 				else if((isBIGBOSS()) && 
 						(getActualStatus()==RelayStatus.MONITORING)){
 					removeRelay();
-					setFfirstELECTION_DONE(false);
-					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": relay secondario IP:"+getRelayMessageReader().getPacketAddess()+" è in cerca di un suo sostituto. removeRelay()");
+	
+				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": relay secondario IP:"+getRelayMessageReader().getPacketAddess()+" è in cerca di un suo sostituto. removeRelay()");
 					//QUI DEVO INFORMARE IL SESSION MANAGER
 				}
 				
