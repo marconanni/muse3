@@ -22,6 +22,7 @@ public class AConnectionManager {
 	private Thread receiverBcastAdHocThread = null;
 	private DatagramSocket adHocOutputSocket = null;
 	private boolean started = false;
+	private boolean stoped = false;
 	protected String managerName = "AConnectionManager";
 	private InetAddress localAddress;
 	private InetAddress bcastAddress;
@@ -53,19 +54,24 @@ public class AConnectionManager {
 		if(bcast) receiverBcastAdHoc = new AConnectionReceiver(observer,bcastAddress,localInputPort);
 		receiverLocalAdHocThread = new Thread(receiverLocalAdHoc);
 		if(bcast)receiverBcastAdHocThread = new Thread(receiverBcastAdHoc);
+		setStarted(false);
+		setStoped(false);
 	}
 
 	/**Metodo per far partire la ricezione dei messaggi dalla rete Ad-Hoc*/
 	public void start(){
-		if(receiverLocalAdHoc!=null){
-			receiverLocalAdHocThread.start();
-			started = true;
-		}
-		if(bcast)
-			if(receiverBcastAdHoc!=null){
-				receiverBcastAdHocThread.start();
-				started = true;
+		if(stoped)resumeReceiving();
+		else{
+			if(receiverLocalAdHocThread!=null){
+				receiverLocalAdHocThread.start();
 			}
+			if(bcast){
+				if(receiverBcastAdHocThread!=null){
+					receiverBcastAdHocThread.start();
+				}
+			}
+			setStarted(true);
+		}
 	}
 
 	/**Metodo per spedire un DatagramPacket verso un destinatario nella rete Ad-Hoc
@@ -86,25 +92,31 @@ public class AConnectionManager {
 		if(bcast)receiverBcastAdHoc = null;
 		if(bcast)receiverBcastAdHocThread = null;
 		adHocOutputSocket = null;
+		setStarted(false);
+		setStoped(false);
 	}
 
 	/**Metodo per interrompere la ricezione dei messaggi*/
 	public void stopReceiving(){
 		receiverLocalAdHoc.pauseReception();
 		if(bcast)receiverBcastAdHoc.pauseReception();
-		started = false;
+		setStoped(true);
 	}
 
 	/**Metodo per riprendere la ricezione dei messaggi*/
 	public void resumeReceiving(){
 		receiverLocalAdHoc.resumeReception();
 		if(bcast)receiverBcastAdHoc.resumeReception();
-		started = true;
+		setStoped(false);
 	}
 
 	/**Metodo per sapere se il AConnectionManager è partito
 	 * @return true se la ricezione dei messaggi AConnectionManager, false altrimenti*/
 	public boolean isStarted(){return started;}
+	public void setStarted(boolean started){this.started=started;}
+	
+	public boolean isStoped(){return stoped;}
+	public void setStoped(boolean stoped){this.stoped=stoped;}
 	
 	/**Metodo per ottenere il nome del Manager che sta utilizzando l'AConnectionManager
 	 * @return una String che rappresenta il nome del Manager che sta utilizzando l'AConnectionManager*/
