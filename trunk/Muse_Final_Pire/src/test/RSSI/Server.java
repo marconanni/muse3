@@ -10,18 +10,28 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Observer;
 import java.util.Scanner;
 
+import debug.DebugConsole;
+
+import relay.position.RelayPositionMonitor;
 import sun.awt.image.BytePackedRaster;
+import test.TestObserver;
 
 class Server{
 	
 	public static void main(String args[]){
-		Scanner inFromUser = new Scanner(System.in);
+		TestObserver obs = new TestObserver();
+		DebugConsole console = new DebugConsole("GERICOM");
+		
+		RelayPositionMonitor monitor = new RelayPositionMonitor(10,2000,obs,console);
+		monitor.start();
+		
 		int port = 12345;
 		InetAddress localAddress=null;
 		try {
-			localAddress = InetAddress.getByName("192.168.5.2");
+			localAddress = InetAddress.getByName("192.168.30.2");
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,7 +66,7 @@ class Server{
     int countblocks = 0;
     int countbytes = 0;
     byte[] buf = new byte[1024];
-    DatagramPacket packet = new DatagramPacket(buf, buf.length, port);
+    DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
     try {
 		while ((numbytes = inbinary.read(buf,0,1024)) >= 0)
@@ -68,6 +78,7 @@ class Server{
 			server.send(packet);
 			countblocks++;          // keep statistics on file size
 			countbytes += numbytes;
+			System.out.println("SEND byte:"+countbytes);
 			//outbinary.write(buf,0,numbytes); // write buffer to socket
 		}
 		server.receive(packet);
