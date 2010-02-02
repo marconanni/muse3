@@ -49,6 +49,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	private double sumOfRSSI;
 	private int numberOfValideRSSI;
 	private boolean started;
+	private boolean stopped;
 	private DebugConsole console = null;
 	
 	static{
@@ -76,6 +77,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		rrcm = RelayConnectionFactory.getRSSIClusterConnectionManager(this,false);	
 		setDebugConsole(console);
 		setStarted(false);
+		
 	}
 	
 	/**Metodo per far partire il Thread periodico che si occupa del reperimento 
@@ -83,10 +85,13 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	 * se si sta verificando una disconnessione dai Clients serviti. 
 	 */
 	public void start(){
-		if(!rrcm.isStarted())
+		if(!rrcm.isStarted()){
 			rrcm.start();
-		
-		setStarted(true);
+			setStarted(true);
+		}else if(rrcm.isStoped()){
+			rrcm.resumeReceiving();
+			setStopped(false);
+		}
 		timer = new Timer();
 		timer.schedule(new TimerTask(){
 
@@ -100,13 +105,15 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		rrcm.close();
 		timer.cancel();
 		if(tnRSSI!=null)tnRSSI.cancelTimeOutSingleWithMessage();
+		setStarted(false);
+		setStopped(false);
 	}
 	
 	public void stop(){
 		timer.cancel();
 		if(tnRSSI!=null)tnRSSI.cancelTimeOutSingleWithMessage();
 		if(rrcm.isStarted())rrcm.stopReceiving();
-		setStarted(false);
+		setStopped(true);
 	}
 
 
@@ -223,6 +230,15 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	public boolean isStarted() {
 		return started;
 	}
+	
+	public void setStopped(boolean stopped) {
+		this.stopped = stopped;
+	}
+	
+	public boolean isStopped() {
+		return stopped;
+	}
+	
 	
 	public void setDebugConsole(DebugConsole console){this.console = console;}
 	public DebugConsole getDebugConsole(){return console;}
