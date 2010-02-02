@@ -628,14 +628,14 @@ public class RelayElectionManager extends Observable implements Observer{
 					(!getFirstELECTION_DONE())){
 				setFfirstELECTION_DONE(true);
 				setFirstELECTION_REQUEST(false);
-				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_DONE arrivato: nuovo Relay: "+getRelayMessageReader().getNewRelayAddress());
+				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_DONE arrivato: nuovo Relay: "+getRelayMessageReader().getNewRelayLocalClusterAddress());
 							
 				cancelTimeoutFailToElect();
 				
 				if(isRELAY()){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un relay secondario attivo ed è stato appena eletto un nuovo BIGBOSS, lo memorizzo.");
 										
-					setConnectedClusterHeadAddress(getRelayMessageReader().getNewRelayAddress());
+					setConnectedClusterHeadAddress(getRelayMessageReader().getNewRelayLocalClusterAddress());
 					memorizeConnectedClusterHeadAddress();
 					
 					setElectingHead(false);
@@ -643,8 +643,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					if(getActiveClient()>0)setActualStatus(RelayStatus.MONITORING);
 					else setActualStatus(RelayStatus.IDLE);
 					
-					setChanged();
-					notifyObservers("NEW_RELAY:"+connectedClusterHeadAddress);
+					
 					
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO, "Stato."+getActualStatus()+" nuovo Relay BigBoss salvato correttamente"); 
 										
@@ -653,7 +652,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un possibile sostituto BIGBOSS/RELAY ATTIVO, controllo se è questo nodo eletto");
 										
 					try {
-						if(sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayAddress()))){
+						if(sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayLocalClusterAddress()))){
 							setElecting(false);
 							setConnectedClusterHeadAddress(getRelayMessageReader().getHeadNodeAddress());
 							if(isPOSSIBLE_RELAY()){
@@ -681,6 +680,9 @@ public class RelayElectionManager extends Observable implements Observer{
 					} catch (UnknownHostException e) {e.printStackTrace();}
 						
 				}
+				
+				setChanged();
+				notifyObservers("NEW_RELAY:"+getRelayMessageReader().getNewRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+":"+getRelayMessageReader().getHeadNodeAddress());
 					
 				//propagazione del messaggio ELECTION_DONE
 				getComClusterManager().sendTo(prepareRepropagationCluster(dpIn));
@@ -694,8 +696,10 @@ public class RelayElectionManager extends Observable implements Observer{
 					(isBIGBOSS())&&
 					(!getFirstELECTION_DONE())){
 				try {
-					if(!sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayAddress())))
-					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRelayAddress()+"\nnuovo relay:"+getRelayMessageReader().getNewRelayAddress()+"\nnodo cluster head:"+getRelayMessageReader().getHeadNodeAddress());
+					if(!sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayLocalClusterAddress())))
+						setChanged();
+					notifyObservers("NEW_RELAY:"+getRelayMessageReader().getNewRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+":"+getRelayMessageReader().getHeadNodeAddress());
+					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+"\nnuovo relay manderà un messaggio di ACK_CONNECTION");
 					setFfirstELECTION_DONE(true);
 				} catch (UnknownHostException e) {e.printStackTrace();}
 			
@@ -806,17 +810,18 @@ public class RelayElectionManager extends Observable implements Observer{
 
 					try {
 						//invio ai Relay
-						dpOut = RelayMessageFactory.buildElectionDone(	0, getLocalClusterAddress(),getBestSubstituteRelayAddress(),getConnectedClusterHeadAddress(),BCAST, PortConfiguration.PORT_ELECTION_IN);
+						dpOut = RelayMessageFactory.buildElectionDone(	0, getBestSubstituteRelayAddress(),getLocalClusterAddress(),getLocalClusterHeadAddress(),getConnectedClusterHeadAddress(),BCAST, PortConfiguration.PORT_ELECTION_IN);
 						getComClusterManager().sendTo(dpOut);
 						
-						dpOut = RelayMessageFactory.buildElectionDone(	0, getLocalClusterAddress(),getBestSubstituteRelayAddress(),getConnectedClusterHeadAddress(),BCASTHEAD, PortConfiguration.PORT_ELECTION_IN);
+						dpOut = RelayMessageFactory.buildElectionDone(	0, getBestSubstituteRelayAddress(),getLocalClusterAddress(),getLocalClusterHeadAddress(),getConnectedClusterHeadAddress(),BCAST, PortConfiguration.PORT_ELECTION_IN);
 						getComClusterHeadManager().sendTo(dpOut);
 						//firstELECTION_DONEsent = true;
 					} catch (IOException e) {e.printStackTrace();}
 
 					//faccio sapere al SESSIONMANAGER chi ho appena eletto
+					
 					setChanged();
-					notifyObservers("NEW_RELAY:" + bestSubstituteRelayAddress);
+					notifyObservers("NEW_RELAY:" + getBestSubstituteRelayAddress()+":"+getLocalClusterAddress()+":"+getLocalClusterHeadAddress()+":"+getConnectedClusterHeadAddress());
 					
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "RelayElectionManager STATO:"+actualStatus+" ELECTION_DONE + "+bestSubstituteRelayAddress+" inviato e passo allo stato di IDLE");
 				}

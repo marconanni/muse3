@@ -24,9 +24,10 @@ public class RelayMessageReader {
 	//Ulteriodi parametri che dipendono dai vari messaggi
 	private  double W;
 	//private  String actualConnectedRelayAddress = null;
-	private String newRelayAddress;
+	private String newRelayLocalClusterAddress;
+	private String oldRelayLocalClusterAddress;
+	private String oldRelayLocalClusterHeadAddress;
 	private String headNodeAddress;
-	private String oldRelayAddress;
 
 	private  double RSSI;
 
@@ -67,8 +68,9 @@ public class RelayMessageReader {
 		if(code == MessageCodeConfiguration.ELECTION_BEACON_RELAY)activeClient = Integer.valueOf(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_RESPONSE)W = Double.parseDouble(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_DONE){
-			oldRelayAddress = st.nextToken();
-			newRelayAddress = st.nextToken();
+			newRelayLocalClusterAddress = st.nextToken();
+			oldRelayLocalClusterAddress = st.nextToken();
+			oldRelayLocalClusterHeadAddress = st.nextToken();
 			headNodeAddress = st.nextToken();
 		}
 	}
@@ -105,9 +107,11 @@ public class RelayMessageReader {
 	
 	public  double getW() {return W;}
 	
-	public String getNewRelayAddress(){return newRelayAddress;}
+	public String getNewRelayLocalClusterAddress(){return newRelayLocalClusterAddress;}
 	public String getHeadNodeAddress(){ return headNodeAddress;}
-	public String getOldRelayAddress(){return oldRelayAddress;}
+	public String getOldRelayLocalClusterAddress(){return oldRelayLocalClusterAddress;}
+	public String getOldRelayLocalClusterHeadAddress(){return oldRelayLocalClusterHeadAddress;}
+	
 }
 
 
