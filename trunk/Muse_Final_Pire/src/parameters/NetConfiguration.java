@@ -21,16 +21,16 @@ public class NetConfiguration {
 	 * 
 	 * */	
 	/** SERVER e BIGBOSS*/
-	public static final String SERVER_ADDRESS = "192.168.186.230";					//indirizzo IP del SERVE
+	public static final String SERVER_ADDRESS = "192.168.2.1";					//indirizzo IP del SERVE
 	public static final String NAME_OF_SERVER_INTERFACE = "eth0";					//Nome dell'interfaccia con cui il Server si affaccia sulla rete Managed (cablato all'AP) 
 	
 	//nel caso di big boss questi parametri sono uguali ai parametri del cluster head
-	public static final String NAME_OF_RELAY_MANAGED_NETWORK = "ALMAWIFI";				//Nome della rete Managed
+	public static final String NAME_OF_RELAY_MANAGED_NETWORK = "lord";				//Nome della rete Managed
 	public static final String NAME_OF_RELAY_MANAGED_WIFI_INTERFACE  = "wlan0";			//Nome dell'interfaccia con cui il Relay si affaccia sulla rete Managed
-//	public static final String RELAY_MANAGED_ADDRESS = "192.168.2.4";
-//	public static final String RELAY_MANAGED_BROADCAST_ADDRESS = "192.168.2.255";
-	public static final String RELAY_MANAGED_ADDRESS = "192.168.186.230";				//indirizzo IP del RELAY sulla rete Managed (BigBoss)
-	public static final String RELAY_MANAGED_BROADCAST_ADDRESS = "192.168.187.255";
+	public static final String RELAY_MANAGED_ADDRESS = "192.168.2.4";
+	public static final String RELAY_MANAGED_BROADCAST_ADDRESS = "192.168.2.255";
+//	public static final String RELAY_MANAGED_ADDRESS = "192.168.186.230";				//indirizzo IP del RELAY sulla rete Managed (BigBoss)
+//	public static final String RELAY_MANAGED_BROADCAST_ADDRESS = "192.168.187.255";
 	
 	/** CLUSTER HEAD*/
 	public static final String NAME_OF_RELAY_CLUSTER_HEAD_NETWORK = "BIGBOSS";		//Nome della rete Ad-Hoc (cluster head)
