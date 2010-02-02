@@ -3,6 +3,7 @@
  */
 package client;
 
+import parameters.NetConfiguration;
 import debug.DebugConsole;
 
 /**
@@ -20,13 +21,12 @@ public class ClientController {
 	public ClientController(){//ClientFrame frame){
 		//if(frame.getController() != null)
 		//frameController = frame.getController();
-		this.console = new DebugConsole();
-		this.console.setTitle("CLientElectionManager debug console");
 		//this.sessionManager = ClientSessionManager.getInstance();
 		//this.sessionManager.setDebugConsole(this.console);
 		//this.sessionManager.setFrameController(frameController);
 		this.electionManager = ClientElectionManager.getINSTANCE();
-		this.electionManager.setDebugConsole(console);
+		this.electionManager.setConsoleElectionManager(new DebugConsole("CLIENT ELECTION MANAGER"));
+		this.electionManager.setConsoleWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_CLIENT_WIFI_INTERFACE));
 		this.electionManager.init();
 		//this.electionManager.setDebugConsole(this.console);
 		
