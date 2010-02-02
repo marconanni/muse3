@@ -807,10 +807,15 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	public void startMonitoringRSSI(){
 		if(getActualStatus()!=RelayStatus.MONITORING){
-			getRelayPositionMonitor().start();
+			
 			//relayBatteryMonitor.start();
 			setActualStatus(RelayStatus.MONITORING);
 		}
+		if(getRelayPositionMonitor().isStopped()){
+			getRelayPositionMonitor().start();
+		}
+		if(!getRelayPositionMonitor().isStarted())
+			getRelayPositionMonitor().start();
 			
 	}
 	public void stopMonitoringRSSI(){
