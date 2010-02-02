@@ -87,7 +87,11 @@ public class AConnectionReceiver extends Observable implements Runnable{
 	}
 
 	/**Metodo per chiudere la socket su cui l'AConnectionReceiver riceve i messaggi*/
-	public void close(){if(inSocket != null) inSocket.close();}
+	public void close(){
+		if(inSocket != null){
+			System.out.println("socket CLOSE:"+inSocket.getLocalSocketAddress().toString()+":"+inSocket.getLocalPort());
+		inSocket.close();}
+	}
 
 	/**Metodo per stoppare la ricezione dei messaggi da parte dell'AConnectionReceiver*/
 	public void pauseReception(){stopped = true;}
