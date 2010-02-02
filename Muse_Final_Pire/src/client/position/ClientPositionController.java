@@ -34,7 +34,6 @@ import debug.DebugConsole;
 public class ClientPositionController implements Observer{
 
 	private DatagramPacket notifyRSSI = null;
-	private boolean enableToMonitor;
 	private boolean started;
 
 	private ClientCM  crscm = null ;
@@ -55,7 +54,6 @@ public class ClientPositionController implements Observer{
 		crscm = ClientConnectionFactory.getRSSIConnectionManager(this,true);
 		this.cwnic=cwnic;
 		console=cwnic.getDebugConsole();
-		enableToMonitor = false;
 		started = false;
 	}
 
@@ -64,7 +62,7 @@ public class ClientPositionController implements Observer{
 	 * richieste provenienti dal nodo Relay
 	 */
 	public void start(){
-		if(enableToMonitor){
+		if(!started){
 			crscm.start();
 			started = true;
 		}
@@ -72,15 +70,12 @@ public class ClientPositionController implements Observer{
 	
 	public void stopReceiving(){
 		crscm.stopReceiving();
-		enableToMonitor = false;
 		started = false;
 	}
 	
 	public void resumeReceiving(){
-		if(enableToMonitor){
-			crscm.resumeReceiving();
-			started = true;
-		}
+		crscm.resumeReceiving();
+		started = true;
 	}
 
 	/**Metodo per chiudere il ClientPositionController
@@ -125,17 +120,6 @@ public class ClientPositionController implements Observer{
 
 	public ClientWNICController getClientWNICController(){
 		return this.cwnic;
-	}
-	
-	/**Metodo per impostare l'osservazione dei valori di RSSI nei 
-	 * confronti dell'indirizzo del Relay
-	 * @param rA una String che rappresenta l'indirizzo del Relay
-	 */
-	public void setRelayAddress(String rA) {
-		try {
-			relayAddress = InetAddress.getByName(rA);
-			enableToMonitor = true;
-		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
 	
 	/**Server per visualizzare i messagi di debug

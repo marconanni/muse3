@@ -26,8 +26,9 @@ public class ClientMessageReader {
 	private  int code = 0;						//Codice messaggio
 	private  int relaySendingPort;				//porta da cui il relay invia lo streaming
 	private  int relayControlPort;				//porta su cui il relay ascolta le richieste
-	private  String actualRelayAddress = null;	//indirizzo del relay attuale
 	private  String newRelayAddress = null;
+	private String oldRelayAddress = null;
+	private String headNodeAddress = null;
 	private String relayAddressBacon = null;
 	private InetAddress packetAddress = null;
 	public ClientMessageReader(){}
@@ -65,17 +66,17 @@ public class ClientMessageReader {
 			c = st.nextToken(); 
 			relayControlPort = Integer.parseInt(c);
 		}
-		if(code==MessageCodeConfiguration.REQUEST_RSSI){
-			System.out.println("Request RSSI");
-			actualRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
-		}
 		//if(code == MessageCodeConfiguration.NOTIFY_RSSI)RSSI = Double.parseDouble(st.nextToken());		
-		if (code == MessageCodeConfiguration.IM_RELAY)actualRelayAddress = (packetAddress.toString()).substring(1,(packetAddress.toString()).length());
 		//if (code == MessageCodeConfiguration.ELECTION_BEACON)relayAddressBacon = st.nextToken();
-		if (code == MessageCodeConfiguration.ELECTION_DONE)newRelayAddress = st.nextToken();
+		if (code == MessageCodeConfiguration.ELECTION_DONE){
+			oldRelayAddress = st.nextToken();
+			newRelayAddress = st.nextToken();
+			headNodeAddress = st.nextToken();
+		}
 	}
 
-	public  String getActualRelayAddress() {return actualRelayAddress;}
+	public String getOldRelayAddress(){return oldRelayAddress;}
+	public String getHeadNodeAddress(){return headNodeAddress;}
 	public  String getNewRelayAddress() {return newRelayAddress;}
 	public  int getSequenceNumber() {return sequenceNumber;}
 	public  int getCode() {return code;}
