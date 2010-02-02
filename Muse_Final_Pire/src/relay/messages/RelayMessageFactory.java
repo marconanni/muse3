@@ -193,10 +193,10 @@ public class RelayMessageFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	static public DatagramPacket buildElectionDone(int sequenceNumber,String oldRelay, String newRelayAddress, String nodeHeadAddress, InetAddress addr, int port) throws IOException {
+	static public DatagramPacket buildElectionDone(int sequenceNumber,String newRelayLocalClusterAddress, String oldRelayLocalClusterAddress, String oldRelayLocalClusterHeadAddress, String nodeHeadAddress, InetAddress addr, int port) throws IOException {
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_DONE+"_"+oldRelay+"_"+newRelayAddress+"_"+nodeHeadAddress;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_DONE+"_"+newRelayLocalClusterAddress+"_"+oldRelayLocalClusterAddress+"_"+oldRelayLocalClusterHeadAddress+"_"+nodeHeadAddress;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
