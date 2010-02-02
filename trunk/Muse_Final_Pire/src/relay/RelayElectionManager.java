@@ -677,7 +677,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					(!getFirstELECTION_DONE())){
 				try {
 					if(!sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayAddress())))
-					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRElay()+"\nnuovo relay:"+getRelayMessageReader().getNewRelayAddress()+"\nnodo cluster head:"+getRelayMessageReader().getHeadNodeAddress());
+					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRelayAddress()+"\nnuovo relay:"+getRelayMessageReader().getNewRelayAddress()+"\nnodo cluster head:"+getRelayMessageReader().getHeadNodeAddress());
 					setFfirstELECTION_DONE(true);
 				} catch (UnknownHostException e) {e.printStackTrace();}
 			
