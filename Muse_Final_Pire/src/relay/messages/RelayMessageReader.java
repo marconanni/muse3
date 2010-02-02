@@ -52,7 +52,6 @@ public class RelayMessageReader {
 	 private void readMessage(){
 		index = 0;
 		code = 0;
-		
 		StringTokenizer st = new StringTokenizer(message, "_");
 		index = Integer.valueOf(st.nextToken());
 		code = Integer.valueOf(st.nextToken());
