@@ -11,15 +11,31 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
+import client.position.ClientPositionController;
+import client.wnic.ClientWNICLinuxController;
+import client.wnic.exception.WNICException;
+
 public class Client {
 		
 		public static void main(String args[]){
+			ClientWNICLinuxController cwnic;
+			try {
+				cwnic = new ClientWNICLinuxController("eth1","BIGBOSS");
+				cwnic.init();
+				ClientPositionController position = new ClientPositionController(cwnic);
+				position.start();
+			} catch (WNICException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			
 			int port = 12345;
 			InetAddress localAddress=null;
 			InetAddress remoteAddress = null;
 			try {
-				localAddress = InetAddress.getByName("192.168.5.2");
-				remoteAddress = InetAddress.getByName("192.168.5.2");
+				localAddress = InetAddress.getByName("192.168.30.7");
+				remoteAddress = InetAddress.getByName("192.168.30.2");
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -47,21 +63,24 @@ public class Client {
 	    int countblocks = 0;
 	    int countbytes = 0;
 	    byte[] buf = new byte[1024];
-	    DatagramPacket packet = new DatagramPacket(buf, buf.length, port);
+	    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+	    byte[] buffer = {1};
 
 	    try {
-			while (Byte.toString(buf[0]).compareTo("E")==0 && Byte.toString(buf[1]).compareTo("N")==0 && Byte.toString(buf[0]).compareTo("D")==0)
+			while (!(Byte.toString(buf[0]).compareTo("E")==0 && Byte.toString(buf[1]).compareTo("N")==0 && Byte.toString(buf[0]).compareTo("D")==0))
 			{
 				// receive packet from client, telling it to send the video file
-				packet = new DatagramPacket(buf, buf.length, remoteAddress, port);
+				
+				packet = new DatagramPacket(buffer, buffer.length, remoteAddress, port);
 				server.send(packet);
 				
-				packet = new DatagramPacket(buf, buf.length, port);
+				packet = new DatagramPacket(buf, buf.length);
 				server.receive(packet);
 				numbytes = buf.length;
+				countbytes +=numbytes;
+				System.out.println("Receive byte:"+countbytes);
 				
 				countblocks++;          // keep statistics on file size
-				countbytes += numbytes;
 				//outbinary.write(buf,0,numbytes); // write buffer to socket
 			}
 			} catch (IOException e) {
