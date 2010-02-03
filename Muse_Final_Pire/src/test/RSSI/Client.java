@@ -18,35 +18,34 @@ import client.wnic.exception.WNICException;
 
 public class Client {
 	
-	private static String name = "Acer";
-	private static boolean BIDIREZIONE = false;
+	private static String name = "DELL";
+	private static boolean BIDIREZIONE = true;
 	private static int BUFFER_SIZE = 1024;
+	private static int TIMEOUT_RECEIVE = 1000;
+	private static int PORT_IN_OUT = 12345;
+	
 	private static boolean RSSI_CONTROLLER = true;
 	private static int PORT_RSSI_IN = 3000;
 	private static int PORT_RSSI_OUT = 3001;
-	private static int PORT_IN_OUT = 12345;
-	private static int TIMEOUT_RECEIVE = 1000;
-	
+		
 	private static String NETWORK_ESSID = "BIGBOSS";
-	private static String WIFI_INTERFACE = "eht1";
-	private static String LOCAL_ADDRESS = "192.168.30.2";
+	private static String WIFI_INTERFACE = "wlan1";
+	private static String LOCAL_ADDRESS = "192.168.30.3";
 	private static String DESTINATION_ADDRESS = "192.168.30.2";
+	private static String BCAST = "192.168.30.255";
 		
 		public static void main(String args[]){
 			TestObserver obs = new TestObserver();
 
 			if(RSSI_CONTROLLER){
-				try{
-					ClientCM crmc;
-					try {
-						crmc = new ClientCM("ClientCM_"+name, InetAddress.getByName(LOCAL_ADDRESS),null,PORT_RSSI_IN,PORT_RSSI_OUT,obs,false);
-				
+				try {
+					//crmc = new ClientCM("ClientCM_"+name, InetAddress.getByName(LOCAL_ADDRESS),InetAddress.getByName(BCAST),PORT_RSSI_IN,PORT_RSSI_OUT,obs,true);
+
 					ClientWNICLinuxController cwnic = new ClientWNICLinuxController(WIFI_INTERFACE,NETWORK_ESSID);
 					cwnic.init();
-					ClientPositionController position = new ClientPositionController(cwnic,crmc);
+					ClientPositionController position = new ClientPositionController(cwnic,null);
 					position.start();
 				} catch (WNICException e1) {e1.printStackTrace();}
-				} catch (UnknownHostException e2) {e2.printStackTrace();}
 			}
 
 
@@ -77,12 +76,15 @@ public class Client {
 		    }
 	
 		    try {
-				while (!stop);
+				while (true)
 				{
 					lose = false;
 					startTime = System.currentTimeMillis();
-					packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(DESTINATION_ADDRESS), PORT_IN_OUT);
-					server.send(packet);
+					if(BIDIREZIONE){
+						//System.out.println("Pacchetto spedito");
+						packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(DESTINATION_ADDRESS), PORT_IN_OUT);
+						server.send(packet);
+					}
 					
 					packet = new DatagramPacket(buf, buf.length);
 					try{
@@ -96,11 +98,12 @@ public class Client {
 						numbytes = buf.length;
 						countbytes +=numbytes;
 						countblocks++;          // keep statistics on file size
-						rate = (numbytes*8)/((endTime-startTime)/1000);
-						System.out.println("RATE:"+rate);
+						
+						//System.out.println("RATE:"+rate);
 						if(countbytes%(BUFFER_SIZE*BUFFER_SIZE)==0){
+							//rate = (numbytes*8)/((endTime-startTime)/1000);
 							MB++;
-						 System.out.println("SEND "+countblocks+" blocks = "+MB+" Mb");
+							System.out.println("Receive "+countblocks+" blocks = "+MB+" Mb");
 						}
 						if(packet.getData().length!=BUFFER_SIZE)stop = true;
 					}
