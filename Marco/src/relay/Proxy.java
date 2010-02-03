@@ -183,6 +183,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			// Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		// E' il relay che "rimpalla la richiesta del file al serve
 
 		sendForwardReqFileToServer();
 		

@@ -183,7 +183,54 @@ public class Session {
 		this.proxyStreamingCtrlPort = sessionInfo[5];
 	}
 	
+	/**
+	 * Costruttore che non inizializza le porte, le imposta a -1, successivamente andranno
+	 * impostate o singolaremente o tutte insieme tramite il metodo setSessionInfo
+	 * 
+	 * 
+	 * @param id l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param proxy  riferimento al Proxy che gestisce lo streaming
+	 * @param relaySecondario Una stringa che contiene l’indirizzo dell’eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
+	 */
+	public Session(String id, Proxy proxy, String relaySecondario) 
+	{
+		super();
+		this.id = id;
+		this.proxy = proxy;
+		this.relaySecondario = relaySecondario;
+		this.senderStreamPort = -1;
+		this.inStreamPort = -1;
+		this.outStreamPort = -1;
+		this.receiverStreamPort = -1;
+		this.streamingServerCtrlPort = -1;
+		this.proxyStreamingCtrlPort = -1;
+	}
 	
+	
+	/**
+	 * Costruttore che non inizializza le porte, le imposta a -1 successivamente andranno
+	 * impostate o singolaremente o tutte insieme tramite il metodo setSessionInfo
+	 * 
+	 * 
+	 * @param id l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param proxy  riferimento al Proxy che gestisce lo streaming
+	 */
+	public Session(String id, Proxy proxy) 
+	{
+		super();
+		this.id = id;
+		this.proxy = proxy;
+		this.relaySecondario = null;
+		this.senderStreamPort = -1;
+		this.inStreamPort = -1;
+		this.outStreamPort = -1;
+		this.receiverStreamPort = -1;
+		this.streamingServerCtrlPort = -1;
+		this.proxyStreamingCtrlPort = -1;
+	}
+	
+	
+	///// TODO MEDTODI AGGIUNTIVI
 	/**
 	 * 
 	 * @return true se il flusso di questa sessione viene diretto verso un relay secondario che poi lo manderà al client

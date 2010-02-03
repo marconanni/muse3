@@ -40,7 +40,7 @@ public class RelayMessageReader {
 	private  String actualRelayAddress = null;
 	
 	
-	private  Hashtable<String, int[]> sessionInfo;
+	private  Hashtable<String, Session> sessions;
 	private  Hashtable<String, int[]> proxyInfo;
 	private  String filename;
 	private  int portStreamingClient;
@@ -97,7 +97,7 @@ public class RelayMessageReader {
 		{
 			getHashTable(st);
 		}
-		if(code == Parameters.ACK_SESSION)
+		if(code == Parameters.ACK_SESSION) // TODO da rivedere: ha senso nel messaggio di Ack session inviare il tutto il  sessions, proxy escluso?
 		{
 			getHashTable(st);
 		}
@@ -193,15 +193,26 @@ public class RelayMessageReader {
 		return sixthParam;
 	}
 
+	/**
+	 * Metodo che da una stringona che rappresenta una tabella estrae la tabella stessa
+	 * ovviamente la tabella estratta dipende da quale messaggio si sta analizzando.
+	 * @param elements la stringona arrivata per messaggio "wrappata" in un string tokenizer
+	 * @return la tabella sessions (ip del cliente, Sessione), se il messaggio è un SESSION_INFO
+	 * la tabella proxyInfo(ip cliente, porta del proxy sul nuovo relay sulla quale ridirigere il flusso)
+	 * ,se il messaggio è ACK_SESSION
+	 */
+	
 	private  Hashtable getHashTable(StringTokenizer elements)
 	{
 
 		if(code == Parameters.SESSION_INFO)
 		{
-			sessionInfo = new Hashtable();
+			sessions = new Hashtable<String,Session>();
 			while(elements.hasMoreElements())
 			{
+				// estraggo l'indirizzo del cliente
 				String clientAddress = elements.nextToken();
+				// estraggo le porte
 				int[] sessionPorts = new int[6];
 				sessionPorts[0] = Integer.parseInt(elements.nextToken());
 				sessionPorts[1] = Integer.parseInt(elements.nextToken());
@@ -209,9 +220,16 @@ public class RelayMessageReader {
 				sessionPorts[3] = Integer.parseInt(elements.nextToken());
 				sessionPorts[4] = Integer.parseInt(elements.nextToken());
 				sessionPorts[5] = Integer.parseInt(elements.nextToken());
-				sessionInfo.put(clientAddress, sessionPorts);
+				// estraggo l'indirizzo del relay secondario; se non c'è
+				// nella stringona trovo "null" e devo metterlo a null
+				String relaySecondario = elements.nextToken();
+				if (relaySecondario.equals("null"))
+					relaySecondario=null;
+				// Creo la sessione senza tuttavia indicare il proxy; andrà settato dopo dal SessionManager
+				Session session = new Session(clientAddress,null,relaySecondario,sessionPorts);
+				sessions.put(clientAddress, session);
 			}
-			return sessionInfo;
+			return sessions;
 		}
 		if(code == Parameters.ACK_SESSION)
 		{
@@ -282,8 +300,8 @@ public class RelayMessageReader {
 		return RSSI;
 	}
 
-	public  Hashtable<String, int[]> getSessionInfo() {
-		return sessionInfo;
+	public  Hashtable<String, Session> getSessions() {
+		return sessions;
 	}
 
 	public  double getW() {

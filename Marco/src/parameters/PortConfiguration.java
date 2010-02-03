@@ -37,10 +37,10 @@ public class PortConfiguration {
 	
 	//CLIENT
 	/** porta per la gestione della sessione sui CLIENT in ingresso */
-	public static final int CLIENT_PORT_SESSION_IN = 15000;
+	public static final int CLIENT_PORT_SESSION_IN = 5000;
 	
 	/** porta per la gestione della sessione sui CLIENT in uscita */
-	public static final int CLIENT_PORT_SESSION_OUT = 15001;
+	public static final int CLIENT_PORT_SESSION_OUT = 5001;
 		
 	
 	
@@ -63,23 +63,23 @@ public class PortConfiguration {
 		
 	/** valori iniziali dei range di porte RTP in ingresso 
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
-	//public static final int PROXY_INITIAL_PORT_IN_RTP = 5000;
+	public static final int PROXY_INITIAL_PORT_IN_RTP = 5000;
 	
 	/** valori iniziali dei range di porte RTP in uscita 
 	 * assegnabili ad un PROXY creato per gestire una sessione RTP */
-	//public static final int PROXY_INITIAL_PORT_OUT_RTP = 6000;
+	public static final int PROXY_INITIAL_PORT_OUT_RTP = 6000;
 		
 	/** valori iniziali dei range di porte di controllo in ingresso dalla rete ad-hoc
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
-	//public static final int PROXY_INITIAL_AD_HOC_PORT_IN_CONTROL = 7000;
+	public static final int PROXY_INITIAL_AD_HOC_PORT_IN_CONTROL = 7000;
 	
 	/** valori iniziali dei range di porte di controllo in uscita dalla rete ad-hoc 
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
-	//public static final int PROXY_INITIAL_AD_HOC_PORT_OUT_CONTROL = 8000;
+	public static final int PROXY_INITIAL_AD_HOC_PORT_OUT_CONTROL = 8000;
 	
 	/** valori iniziali dei range di porte di controllo in ingresso/uscita sulla rete managed 
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
-	//public static final int PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL = 9000;
+	public static final int PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL = 9000;
 	
 
 }
