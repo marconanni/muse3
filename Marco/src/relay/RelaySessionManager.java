@@ -39,6 +39,9 @@ public class RelaySessionManager implements Observer{
 	private int numberOfSession; // Marco: il numero di sessioni aperte ( il numero di client che sta attualmente servendo)
 	private Hashtable<String, Session> sessions; // tablella che contiene le info sulle sessioni: la chiave ï¿½ l'Ip del cliente finale che ascolta la musica ( anche se mediato da un relay secondario) - per maggiori info guardare la classe Session
 	/*
+	 * nota: nei commenti si parla di indirizzo inferiore per indicare l'indirizzo che un relay ha sul suo cluster (LocalClusterAddress)
+	 * 		e di indirizzo superiore per indicare l'indirizzo che un relay ha nel cluster di chi gli eroga il flusso ( big boss se relay, server se big boss)-> ClusterHeadAddress
+	 * 
 	 * Marco: composizione della tabella sessionInfo ( ancora non verificato, mi baso sui nomi che vengono assegnati)
 	 * chiave: indirizzo del client
 	 * valore[0]=  porta dalla quale il server eroga lo stream
@@ -55,16 +58,17 @@ public class RelaySessionManager implements Observer{
 	private boolean imRelay; // Marco:  im'relay: Ã¨ il primo parametro del file parameters, credo che indichi se il Relay Ã¨ attualmente attivo o Ã¨ solo un possibile relay
 	private String clientAddress; //Marco: variabile di appoggio che si usa per capire chi ha mandato un certo messaggio
 	private String relayAddress; // Marco: Ã¨ l'indirizzo locale al cluster dell'attuale relay;
+	private String maxWnextRelay;  // Marco : Ã¨ l'indirizzo del nuovo relay sul cluster 
 	private String oldRelayLocalClusterAddress; // Ã¨ l'indirizzo del vecchio relay all'interno del suo cluster.
 	private String oldRelayClusterHeadAddress; // Ã¨ l'indirizzo sulla rete superiore ( cluster del big boss / rete managed) dell'attuale relay
 	private String connectedClusterHeadAddress; // Ã¨ l'indirizzo di chi sta erogando il flusso al vecchio relay (big boss/server)
 	
-	private String maxWnextRelay;  // Marco : Ã¨ l'indirizzo del nuovo relay sul cluster 
+	
 	//numero di ritrasmissioni sia per il messaggio REQUEST SESSION SIA PER IL MESSAGGIO SESSION INFO prima di adottare azioni di emergenza
 	private int numberOfRetrasmissions = 1;
 	
 	private String event;
-	private TimeOutSessionRequest toSessionRequest;  //Marco: questo qui sono i vari timeout
+	private TimeOutSessionRequest toSessionRequest;  //Marco: questi qui sono i vari timeout
 	private TimeOutAckSessionInfo toAckSessionInfo;
 	private TimeOutSessionInfo toSessionInfo;
 	private RelayCM sessionCM; // Marco: Ã¨ chi si occupa di spedire  e ricevere i messaggi.
@@ -383,26 +387,51 @@ public class RelaySessionManager implements Observer{
 			/**
 			 * l'electionmanager mi comunica chi Ã¨ il relay appena eletto
 			 */
-			/*
+			/* Nella vecchia versione era così
 			 *se  io sono il relay attualmente attivo salvo il nome di chi ha vinto nella variabile maxWnextRelay
 			 *		cambio stato indicando che non sono piÃ¹ io il relay di riferimento della rete 
 			 *		e faccio partire il timeout mentre attendo il messaggio di REQUEST SESSION da parte dell'altro relay
 			 *
 			 *se invece non sono il relay attualmente attivo confronto l'indirizzo del vincitore con il mio: se ho vinto
 			 *	cambio il mio stato per indicare che sono il relay attivo, 
-			 *	mando il messaggio di Elecion Request al vecchiorelay 
+			 *	mando il messaggio di Session Request al vecchiorelay 
 			 *	e mi metto in attesa delle informazioni sulle sessioni
 			 *
 			 */
-			
+			// ******E' UN GRAN CASINO! RIPENSA TUTTO CON CALMA!*****//
 			// TODO "NEW_RELAY " l'elctionManager mi comunica chi ha vinto l'elezione
 			if(this.event.contains("NEW_RELAY")) 
 				/*
+				 * NOTA: indirizzo inferiore = indirizzo all'interno del cluster"inferiore"
+				 * 		indirizzo superiore = indirizzo all'interno del cluster "superiore"
+				 * 
 				 * Marco: l'election manager quando c'ï¿½ un election done scatena un evento che mi fa ricevere la stringa 
 				 * NEW_RELAY:ip del vincitore dell'elezione:ip del vecchio relay sul suo cluster:ip del vecchio relay sul cluster superiore:ip del nodo che eroga ilflusso al vecchio relay( e che lo erogherÃ² anche al nuovo)
 				 * 
 				 * Cosa fare dipende dal ruolo che il nodo ha in quel momento:
 				 * vecchio relay, vicitore dell'elezione, relay secondario che  o candidato che non ha vinto.
+				 * 
+				 * In ogni modo devo aggiornare le variabili.
+				 * 
+				 * Se l'idirizzo del vecchio relay è uguale al suo ( è il vecchio relay)
+				 * si mette in attesa del request session da parte del nuovo relay
+				 * 
+				 * registra nella variabile maxWnexRelay l'idirizzo locale del suo successore 
+				 * 
+				 * Se il nodo è un non è attivo controlla l'indirizzo del vincitore
+					Se è pari al suo indirizzo sul cluster locale
+					. Manda al vecchio relay il messaggio di 
+						Request Session
+						
+					Se è un relay secondario e l'indirizzo del cluster locale del vincitore è uguale a quello del nodo 
+					da cui riceveva il flusso ( è stato rieletto il Big Boss)
+						
+						Il relay si comporta “da client”: informa tutti I suoi proxy dell'avvenuta rielezione affinchè questi salvino 
+						l'indirizzo del nuovo bigBoss, per poi considerarlo come nuova fonte di flusso quando il proxy sul vecchio relay 
+						che mandava il flusso invierà il messaggio di leave.
+					
+					Altrimenti ( sono un relay inattivo e non ho vinto) 
+					aggiorno gli indirizzi e basta...
 				 * 
 				 * 
 				 */
@@ -412,33 +441,63 @@ public class RelaySessionManager implements Observer{
 				String newRelay = st.nextToken(); // Marco: estraggo l'indirizzo del nuovo relay
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di NEW_RELAY, il nuovo RELAY Ã¨ "+newRelay);
 				System.out.println("RELAY_SESSION_MANAGER: Evento di NEW_RELAY, il nuovo RELAY Ã¨ "+newRelay);
-				if(imRelay) // Marco: imRelay Ã¨ true se io sono il relay attualmente attivo nella rete
-				{
-					this.maxWnextRelay = newRelay;
-					this.imRelay = false; // Marco: cambio giÃ  il flag: non Ã¨ un po' presto? io lo avrei fatto dopo aver inviato tutti i messaggi di leave
-					this.toSessionRequest = RelayTimeoutFactory.getTimeOutSessionRequest(this, TimeOutConfiguration.TIMEOUT_SESSION_REQUEST);
+				// TODO aggiungi le scritte di debug sull'acquisizione dei nuovi campi
+				 // estaggo l'indirizzo di chi eroga il flusso al vecchio relay.
+				String vecchioRelay = st.nextToken();
+				String indsupVecchioRelay = st.nextToken();
+				
+				String indFornitoreFlussiVecchioRelay=st.nextToken();
+				
+				
+				// è stato rieletto il big boss, devo avvertire i Proxy.
+				if(this.connectedClusterHeadAddress.equals(vecchioRelay)){
+					// posso già permettermi di sostituire il riferimento al big boss perchè 
+					// so che ci può essere una sola rielezione in corso alla volta, si interagirebbe con il 
+					// big bosso solo se nel caso di una rielezione di questo proxy secondario, che
+					// però non può aver luogo prima che la rielezione del big boss sia finita.
+					this.connectedClusterHeadAddress=newRelay;
+					
+					
+					
 				}
-				else
-				{ 
-					try {
-						
-						if(electionManager.getLocalClusterAddress().equals(newRelay)) // io sono il relay vincitore
-						{
+					
+				else{
+					// il nodo è il vecchio relay
+					
+					if (this.getLocalClusterAddress().equals(oldRelayLocalClusterAddress)){
+						this.maxWnextRelay = newRelay;
+						this.imRelay = false; // Marco: cambio giÃ  il flag: non Ã¨ un po' presto? io lo avrei fatto dopo aver inviato tutti i messaggi di leave
+						this.toSessionRequest = RelayTimeoutFactory.getTimeOutSessionRequest(this, TimeOutConfiguration.TIMEOUT_SESSION_REQUEST);
+	
+					}
+					else{
+						// il nodo è il vincitore!
+						if(this.getLocalClusterAddress().equals(newRelay)){
 							this.imRelay = true; // Marco : cambio giÃ  lo stato: non Ã¨ presto? forse sarebbe meglio aspettare dopo aver mandato il Redirect al server...
-							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN); // Marco: qui relayAdress Ã¨ l'indirizzo del vecchio relay
+							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN); // Marco: qui relayAdress Ã¨ l'indirizzo del vecchio relay
 							this.sessionCM.sendTo(message);
 							this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO);
 							this.status = SessionManagerStatus.RequestingSession;
+							this.oldRelayLocalClusterAddress=vecchioRelay;
+							this.oldRelayClusterHeadAddress=indsupVecchioRelay;
+							this.connectedClusterHeadAddress=indFornitoreFlussiVecchioRelay;
 						}
-					} catch (UnknownHostException e) {
-						
-						e.printStackTrace();
-					} catch (IOException e) {
-						
-						e.printStackTrace();
+						else{
+							// in questo caso ci finisco se sono un relay che non ha vinto e se non sono un relay secondario con dei flussi
+							// attivi provenienti dal vecchio big boss, mi limito a registrare i dati della rielezione, ma non li userò neanche
+							this.relayAddress= newRelay;
+							this.oldRelayClusterHeadAddress= vecchioRelay;
+							this.oldRelayClusterHeadAddress= indsupVecchioRelay;
+							this.connectedClusterHeadAddress=indFornitoreFlussiVecchioRelay;
+							
+						}
 					}
-				}// marco: se sono un semplice nodo che si ï¿½ candidato, ma non ho vinto non debbo fare nulla
-			}
+				}
+				
+				
+
+			
+			} // Fine evento new Relay
 			
 			// TODO nuovo relay eletto tramite elezione di emergenza
 			if(this.event.contains("NEW_EM_RELAY"))
@@ -733,7 +792,7 @@ public String getLocalClusterHeadAddress(){
  * @return l'indirizzo in stringa del big boss se il relay ï¿½ un relay secondario, o l'indirizzo del server se ï¿½ il big boss
  */
 public String getConnectedClusterHeadAddress(){
-	return electionManager.getConnectedClusterHeadAddress();
+	return this.getConnectedClusterHeadAddress();
 }
 
 /**
@@ -759,7 +818,7 @@ public InetAddress getLocalClusterHeadInetAddress(){
  * @return l'indirizzo in forma INET del big boss se il relay ï¿½ un relay secondario, o l'indirizzo del server se ï¿½ il big boss
  */
 public InetAddress getConnectedClusterHeadInetAddress(){
-	return electionManager.getConnectedClusterHeadInetAddress();
+	return InetAddress.getByName(this.connectedClusterHeadAddress);
 }
 
 /**
@@ -798,8 +857,7 @@ enum SessionManagerStatus{
 	Waiting,  // Marco: Stato tipico di un possiblie relay che non Ã¨ il relay di riferimento. Sta a far niente, pronto a candidarsi se scatta la fase di elezione ( anche se la fase di elezione non si vede nel sessionManager, ma  nell'ElectionManager
 	Active, // Marco: stato del relay quando Ã¨ attivo e sta erogando dei flussi verso i client.
 	AttendingAckSession, // Marco: un vecchio relay Ã¨ in questo stato quando ha inviato il messaggio di SessionInfo, contente i dati relativi alle sessioni aperte di cui fare l'handoff ed attende l'ack_ session da parte del nuovo relay, con l'indicazione delle porte dei proxy sul nuovo relay sulle quali ridirigere lo stream 
-	RequestingSession // Marco: stato in cui si trova il nuovo relay dopo aver mandato il messaggio di REQUEST SESSION in attesa del SESSION INFO
-	
+	RequestingSession, // Marco: stato in cui si trova il nuovo relay dopo aver mandato il messaggio di REQUEST SESSION in attesa del SESSION INFO
 	
 	
 }
