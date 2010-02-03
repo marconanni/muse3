@@ -53,10 +53,16 @@ public class RelaySessionManager implements Observer{
 	private DatagramPacket message;
 	public static final RelaySessionManager INSTANCE = new RelaySessionManager(); // Marco: il relay è un singleton
 	private boolean imRelay; // Marco:  im'relay: è il primo parametro del file parameters, credo che indichi se il Relay è attualmente attivo o è solo un possibile relay
-	private String clientAddress;
+	private String clientAddress; //Marco: variabile di appoggio che si usa per capire chi ha mandato un certo messaggio
+	private String relayAddress; // Marco: è l'indirizzo locale al cluster dell'attuale relay;
+	private String oldRelayLocalClusterAddress; // è l'indirizzo del vecchio relay all'interno del suo cluster.
+	private String oldRelayClusterHeadAddress; // è l'indirizzo sulla rete superiore ( cluster del big boss / rete managed) dell'attuale relay
+	private String connectedClusterHeadAddress; // è l'indirizzo di chi sta erogando il flusso al vecchio relay (big boss/server)
+	
+	private String maxWnextRelay;  // Marco : è l'indirizzo del nuovo relay sul cluster 
 	//numero di ritrasmissioni sia per il messaggio REQUEST SESSION SIA PER IL MESSAGGIO SESSION INFO prima di adottare azioni di emergenza
 	private int numberOfRetrasmissions = 1;
-	private String maxWnextRelay;  // Marco : è l'indirizzo del nuovo relay  se fai refactor cambiagli il nome.
+	
 	private String event;
 	private TimeOutSessionRequest toSessionRequest;  //Marco: questo qui sono i vari timeout
 	private TimeOutAckSessionInfo toAckSessionInfo;
@@ -64,7 +70,7 @@ public class RelaySessionManager implements Observer{
 	private RelayCM sessionCM; // Marco: è chi si occupa di spedire  e ricevere i messaggi.
 	private RelayMessageReader messageReader;
 	private DebugConsolle consolle;
-	private String relayAddress; // Marco: è l'indirizzo sul suale si trova il relay
+	
 	private RelayElectionManager electionManager;
 	
 	/**
@@ -393,11 +399,12 @@ public class RelaySessionManager implements Observer{
 			if(this.event.contains("NEW_RELAY")) 
 				/*
 				 * Marco: l'election manager quando c'� un election done scatena un evento che mi fa ricevere la stringa 
-				 * NEW_RELAY:ip del vincitore dell'elezione,ip del vecchio relay, ip del nodo superiore
-				 * Cosa fare dipende dal ruolo che il nodo ha in quel momento:
-				 * vecchio relay, vicitore dell'elezione, o candidato che non ha vinto.
+				 * NEW_RELAY:ip del vincitore dell'elezione:ip del vecchio relay sul suo cluster:ip del vecchio relay sul cluster superiore:ip del nodo che eroga ilflusso al vecchio relay( e che lo erogherò anche al nuovo)
 				 * 
-				 * l'evento di 
+				 * Cosa fare dipende dal ruolo che il nodo ha in quel momento:
+				 * vecchio relay, vicitore dell'elezione, relay secondario che  o candidato che non ha vinto.
+				 * 
+				 * 
 				 */
 			{
 				StringTokenizer st = new StringTokenizer(this.event, ":");
@@ -414,7 +421,7 @@ public class RelaySessionManager implements Observer{
 				else
 				{ 
 					try {
-						// @ TODO  non riesco a capire cosa che errore sia: il metodo c'� e allora perch� fa storie?
+						
 						if(electionManager.getLocalClusterAddress().equals(newRelay)) // io sono il relay vincitore
 						{
 							this.imRelay = true; // Marco : cambio già lo stato: non è presto? forse sarebbe meglio aspettare dopo aver mandato il Redirect al server...
