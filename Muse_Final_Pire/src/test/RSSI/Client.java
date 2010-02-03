@@ -1,95 +1,114 @@
 package test.RSSI;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Scanner;
 
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+
+import test.TestObserver;
+
+import client.connection.ClientCM;
 import client.position.ClientPositionController;
 import client.wnic.ClientWNICLinuxController;
 import client.wnic.exception.WNICException;
 
 public class Client {
+	
+	private static String name = "Acer";
+	private static boolean BIDIREZIONE = false;
+	private static int BUFFER_SIZE = 1024;
+	private static boolean RSSI_CONTROLLER = true;
+	private static int PORT_RSSI_IN = 3000;
+	private static int PORT_RSSI_OUT = 3001;
+	private static int PORT_IN_OUT = 12345;
+	private static int TIMEOUT_RECEIVE = 1000;
+	
+	private static String NETWORK_ESSID = "BIGBOSS";
+	private static String WIFI_INTERFACE = "eht1";
+	private static String LOCAL_ADDRESS = "192.168.30.2";
+	private static String DESTINATION_ADDRESS = "192.168.30.2";
 		
 		public static void main(String args[]){
-			ClientWNICLinuxController cwnic;
-			try {
-				cwnic = new ClientWNICLinuxController("eth1","BIGBOSS");
-				cwnic.init();
-				ClientPositionController position = new ClientPositionController(cwnic);
-				position.start();
-			} catch (WNICException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			TestObserver obs = new TestObserver();
+
+			if(RSSI_CONTROLLER){
+				try{
+					ClientCM crmc;
+					try {
+						crmc = new ClientCM("ClientCM_"+name, InetAddress.getByName(LOCAL_ADDRESS),null,PORT_RSSI_IN,PORT_RSSI_OUT,obs,false);
+				
+					ClientWNICLinuxController cwnic = new ClientWNICLinuxController(WIFI_INTERFACE,NETWORK_ESSID);
+					cwnic.init();
+					ClientPositionController position = new ClientPositionController(cwnic,crmc);
+					position.start();
+				} catch (WNICException e1) {e1.printStackTrace();}
+				} catch (UnknownHostException e2) {e2.printStackTrace();}
 			}
-			
-			
-			int port = 12345;
-			InetAddress localAddress=null;
-			InetAddress remoteAddress = null;
-			try {
-				localAddress = InetAddress.getByName("192.168.30.7");
-				remoteAddress = InetAddress.getByName("192.168.30.2");
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+
 			DatagramSocket server=null;
 			try {
-				server = new DatagramSocket(port,localAddress);
-			} catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			// Read name of file supplied by client (must be a line of text):
-
-//			Scanner in = new Scanner(new DataInputStream(server.getInputStream()));
-		//	String filename = in.nextLine();
-			//DatagramSocket request = server.accept();
+				try {
+					server = new DatagramSocket(PORT_IN_OUT,InetAddress.getByName(LOCAL_ADDRESS));
+				} catch (SocketException e) {e.printStackTrace();}
+			} catch (UnknownHostException e6) {e6.printStackTrace();}
 
 
-	// Create buffer, then we're ready to go:
-	// Puts file into binary form
-	// Outputs the binary form
-	  //  BufferedOutputStream outbinary = new BufferedOutputStream(request.getOutputStream());
-
-	    int numbytes;
-	    int countblocks = 0;
-	    int countbytes = 0;
-	    byte[] buf = new byte[1024];
-	    DatagramPacket packet = new DatagramPacket(buf, buf.length);
-	    byte[] buffer = {1};
-
-	    try {
-			while (!(Byte.toString(buf[0]).compareTo("E")==0 && Byte.toString(buf[1]).compareTo("N")==0 && Byte.toString(buf[0]).compareTo("D")==0))
-			{
-				// receive packet from client, telling it to send the video file
-				
-				packet = new DatagramPacket(buffer, buffer.length, remoteAddress, port);
-				server.send(packet);
-				
-				packet = new DatagramPacket(buf, buf.length);
-				server.receive(packet);
-				numbytes = buf.length;
-				countbytes +=numbytes;
-				System.out.println("Receive byte:"+countbytes);
-				
-				countblocks++;          // keep statistics on file size
-				//outbinary.write(buf,0,numbytes); // write buffer to socket
-			}
-			} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			boolean stop = false;
+			boolean lose = false;
+			long startTime = 0;
+			long endTime = 0;
+		    int numbytes;
+		    int MB = 0;
+		    int countblocks = 0;
+		    int countbytes = 0;
+		    double rate = 0;
+		    byte[] buf = new byte[BUFFER_SIZE];
+		    DatagramPacket packet =null;
+		    if(BIDIREZIONE){
+		    	for(int i = 0; i<BUFFER_SIZE; i++) buf[i]=(byte)i;
+		    	try {
+					server.setSoTimeout(TIMEOUT_RECEIVE);
+				} catch (SocketException e) {e.printStackTrace();}
+		    }
+	
+		    try {
+				while (!stop);
+				{
+					lose = false;
+					startTime = System.currentTimeMillis();
+					packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(DESTINATION_ADDRESS), PORT_IN_OUT);
+					server.send(packet);
+					
+					packet = new DatagramPacket(buf, buf.length);
+					try{
+						server.receive(packet);
+					}catch(SocketTimeoutException a){
+						System.out.println("Pacchetto perso.");
+						lose = true;
+					}
+					endTime = System.currentTimeMillis();
+					if(!lose){
+						numbytes = buf.length;
+						countbytes +=numbytes;
+						countblocks++;          // keep statistics on file size
+						rate = (numbytes*8)/((endTime-startTime)/1000);
+						System.out.println("RATE:"+rate);
+						if(countbytes%(BUFFER_SIZE*BUFFER_SIZE)==0){
+							MB++;
+						 System.out.println("SEND "+countblocks+" blocks = "+MB+" Mb");
+						}
+						if(packet.getData().length!=BUFFER_SIZE)stop = true;
+					}
+				}
+			} catch (IOException e) {e.printStackTrace();}
+			
+		   // outbinary.flush(); // FLUSH THE BUFFER
+		    server.close(); // done with the socket
+		    System.out.println(countblocks + " were read; " + countbytes + " bytes");
 		}
-		
-	   // outbinary.flush(); // FLUSH THE BUFFER
-	    server.close(); // done with the socket
-	    System.out.println(countblocks + " were read; " + countbytes + " bytes");
-	}
 }
