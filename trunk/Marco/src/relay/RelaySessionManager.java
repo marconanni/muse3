@@ -37,9 +37,7 @@ import util.Logger;
 public class RelaySessionManager implements Observer{
 	private SessionManagerStatus status; // Marco: lo stato attuale del relay
 	private int numberOfSession; // Marco: il numero di sessioni aperte ( il numero di client che sta attualmente servendo)
-	// Da Eliminare private Hashtable<String, Proxy> pReferences; // Marco: tabella che contiene per ogni sessione ( identificata dall'indirizzo del client) il proxy che la serve
-	private Hashtable<String, Session> sessions; // tablella che contiene le info sulle sessioni: la chiave � l'Ip del cliente finale che ascolta la musica ( anche se mediato da un relay secondario) - per maggiori info guardare la classe Session
-	// Da eliminare  private Hashtable<String, int[]> sessionInfo; // la tabella sessionInfo contiene le informazioni relative a TUTTE le sessioni ( sia quelle verso i raley, che quelle verso il client.
+	private Hashtable<String, Session> sessions; // tablella che contiene le info sulle sessioni: la chiave � l'Ip del cliente finale che ascolta la musica ( anche se mediato da un relay secondario) - per maggiori info guardare la classe Session
 	/*
 	 * Marco: composizione della tabella sessionInfo ( ancora non verificato, mi baso sui nomi che vengono assegnati)
 	 * chiave: indirizzo del client
@@ -81,8 +79,6 @@ public class RelaySessionManager implements Observer{
 	{
 		this.numberOfSession = 0;
 		this.sessions= new Hashtable<String, Session>();
-//	da eliminare	pReferences = new Hashtable();
-//	da eliminare	sessionInfo = new Hashtable();
 		this.sessionCM = RelayConnectionFactory.getSessionConnectionManager(this);
 		this.messageReader = new RelayMessageReader();
 		this.sessionCM.start();
@@ -160,22 +156,29 @@ public class RelaySessionManager implements Observer{
 			 * arrivato messaggio di richiesta da parte del client
 			 */
 			
-			/*Marco: è arrivata una richiesta da parte di un client ed io sono il relay.
+			/*Marco: è arrivata una richiesta da parte di un client ed io sono un relay secondario.
 			 * creo un nuovo proxy che gestisce lo stream verso il client
-			 * aggiungo il proxy alla tabella dei proxy usando l'indirizzo del client come chiave per la sessione
-			 * ed aumento il numero di sessioni
+			 * creo una nuova sessione che metto nella tabella delle sessioni con come indice l'indirizzo del client
+			 * NOTA: la sessione � "incompleta" gli indirizzi delle porte ( settate dal costruttore a -1) verranno
+			 * specificati dall'evento lanciato dal proxy quando quiesti ricever� il messaggio di ack request
+			 * dal server/bigboss
 			*/
 			
-			if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_FILE && imRelay)
+			// TODO REQUEST_FILE && this.isRelay()
+			
+			if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_FILE && this.isRelay())
 			{
 				this.status = SessionManagerStatus.Active;
 				this.clientAddress = message.getAddress().getHostAddress();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 				proxy = new Proxy(this, true, messageReader.getFilename(), this.clientAddress, messageReader.getPortStreamingClient());
+				Session sessione= new Session(this.clientAddress,proxy);
 
-				pReferences.put(this.clientAddress, proxy);
+				sessions.put(this.clientAddress, sessione);
 				this.numberOfSession++;
 			}
+			
+			// TODO arrivo request session dal nuovo relay
 
 			/**
 			 * gestito l'arrivo della richiesta di passaggio della sessione da parte del nuovo relay appena eletto
@@ -189,30 +192,28 @@ public class RelaySessionManager implements Observer{
 			 *  
 			 *  Il messaggio SessionInfo contiene per ogni sessione: 
 			 *  	l'indirizzo del client
-			 *  	la porta Z sulla quale il client riceve lo streaming
-			 *  	la porta Y sulla quale il vecchio relay riceve lo streaming dal server
-			 *  	la porta W dalla quale il relay manda lo stream al client
-			 *  	la porta X dalla quale il server manda lo stream al vecchio relay
+			 *  	le porte di streaming ( per maggiori informazioni vedi la classe Session)
+			 *  	l'eventuale indirizzo del relay secondario
+			 *  
 			 */
+			
+			
+			
 			if(messageReader.getCode() == MessageCodeConfiguration.REQUEST_SESSION && this.status==SessionManagerStatus.Active )
 			{
 				if(toSessionRequest!=null) // Marco: viene disattivato il timeout request session: il messaggio è arrivato
 					toSessionRequest.cancelTimeOutSessionRequest();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: ricevuto SESSION_REQUEST dal nuovo RELAY");
 				try {
-					if(this.sessionInfo != null || !this.sessionInfo.isEmpty())
+					if(this.sessions != null || !this.sessions.isEmpty())
 					{
-						/*
-						 * guida ai parametri con del metodo build session info:
-						 * il primo è un numero di sequenza che viene messo sempre a zero in tutte le parti del codice
-						 * session info dovrebbe contenere per ogni sessione le quattro porte menzionate sopra
-						 * l'indirizzo del nuovo relay (non farti fregare dal nome: non si va a prendere di nuovo il primo della tabella con i pesi derivata dalla ricezione,maxWnextRelay è solo una strnga contennente l'indirizzo del vincitore)
-						 * l'ultimo parametro è la porta sulla il relay resta in ascolto dei messaggi riguardanti la sessione.
-						 */
-						this.message = RelayMessageFactory.buildSessionInfo(0, sessionInfo, InetAddress.getByName(this.maxWnextRelay), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+						
+						
+						
+						this.message = RelayMessageFactory.buildSessionInfo(0, sessions, InetAddress.getByName(this.maxWnextRelay), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 						
 					}
-					
+					// se sessions � vuoto passo come parametro null: build sessioninfo creer� un pacchetto senza le indicazioni delle sessioni
 					else{this.message = RelayMessageFactory.buildSessionInfo(0, null, InetAddress.getByName(this.maxWnextRelay), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);}
 
 					this.sessionCM.sendTo(this.message); //Marco: invio il messaggio preparato
@@ -227,14 +228,14 @@ public class RelaySessionManager implements Observer{
 				}
 			}
 			
-			
+			// TODO arrivo ACK_SESSION dal nuovo relay
 			if(messageReader.getCode() == MessageCodeConfiguration.ACK_SESSION && this.status.equals(SessionManagerStatus.AttendingAckSession))
 				
 				/*
 				 * il nuovo relay mi ha mandato il messaggio di ACK_SESSION: significa che il nuovo relay che già ottenuto i dati relativi
-				 * alle sessioni: a questo punto del protocollo il vechcio relay dovrebbe mandare il messaggio di redirect al server,
-				 *  ridirigere il flusso sui recovery buffer dei proxy sul nuovo relay
-				 *  Una volta svuotati tutti i buffer di tutti i proxy dovrebbe mandare il messaggio di LEAVE a tutti i client serviti
+				 * alle sessioni: 
+				 *  ridirigono il flusso sui recovery buffer dei proxy sul nuovo relay
+				 *  Una volta svuotati tutti i buffer di tutti i proxy questi  mandano il messaggio di LEAVE a tutti i client serviti
 				 */
 			{
 				if(this.toAckSessionInfo!=null)
@@ -242,10 +243,13 @@ public class RelaySessionManager implements Observer{
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto ACK_SESSION dal nuovo RELAY");
 				// Marco: il metyodo change proxy Session invoca il metodo Start handoff di ogni proxy che, in sostanza dovrebbe gestisce
 				// la redirezione del flusso verso il nuovo relay ( per i dettagli guarda i commenti ai metodi).
+				// il metodo getProxyInfo restituisce una tabella che ha per ogni chiave ( l'ip del client) la porta sulla
+				//quale ridirigere il flusso.
 				
-				this.changeProxySession(messageReader.getProxyInfo());
+				this.changeProxySession(messageReader.getProxyInfo()); 
 			}
 			
+			// TODO arrivo messaggio SESSION_INFO da parte del vecchio relay
 			if(messageReader.getCode() == MessageCodeConfiguration.SESSION_INFO && this.status.equals(SessionManagerStatus.RequestingSession))
 			{
 				
@@ -261,6 +265,9 @@ public class RelaySessionManager implements Observer{
 				 * valore[5] = porta di controllo del relay
 				 * nota hai bisogno di due porte di controllo perchè il proxy sta in mezzo, riceve un flusso dal server e ne eroga uno al client.,
 				 * quindi hai due connessioni rtp e due porte di controllo, visto che c'è una porta di controllo associata ad ogni connessione rtp
+				 *  sfruttando il metodo createProxyfromSession creo i nuovi proxy dai dati del messaggio SessionInfo 
+				 *  
+				 *
 				 */
 				
 				/*
@@ -269,13 +276,12 @@ public class RelaySessionManager implements Observer{
 				 * ogni nuovo proxy relativamente alla stessa sessione
 				 */
 				 
-				// TODO considera la possibilità di far mandare un unico redirect dal Session Manager anzichè farne mandare tanti 
-				 
+				
 				
 				this.toSessionInfo.cancelTimeOutSessionInfo();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
-				this.sessionInfo = messageReader.getSessionInfo();
-				String proxyInfo = this.createProxyFromSession(sessionInfo);
+				this.sessions = messageReader.getSessions(); // attualmente per� non ci sono i proxy
+				String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte sulle quali ridirigere le varie sessioni
 				try {
 					this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 					this.sessionCM.sendTo(this.message);
@@ -298,19 +304,38 @@ public class RelaySessionManager implements Observer{
 		if(arg instanceof String)
 		{
 			this.event = (String)arg;
+			
+			// TODO "end of media" un proxy mi comunica che ha finito
 			if(this.event.equals("End_Of_Media") && status.equals(SessionManagerStatus.Active) && imRelay)
 			{
 				/*
-				 * fine di una canzone 
+				 * fine di una canzone  
 				 * tolgo le informazioni relative alla sessione terminata dalle relative tabelle 
 				 * (sia quella sessione- proxy che quella sessione--sessioninfo)
 				 * se non mi restano altre sessioni attive ( le tabelle sono quindi vuote) metto il Relay in stato di Idle
 				 */
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di END_OF_MEDIA da parte di un proxy");
-				proxy = (Proxy)receiver;
+				proxy = (Proxy)receiver; // l'evento mi � comunicato dal proxy, tramite il receiver ottengo un riferimento a lui.
+				/*
+				 *
 				//rimuovo i riferimenti della sessione all'interno delle relative hashtable 
-				pReferences.remove(proxy.getClientAddress());
-				sessionInfo.remove(proxy.getClientAddress());
+				// c'� una sola sessione per ogni proxy. trovo la sesione corrispondente al proxy e l'elimino
+				 * a differenza della versione precendenet non posso usare il ClientAddress del proxy: potrebbe
+				 * anche essere l'indirizzo del relay secondario al quale eroga lo streaming: 
+				 * un proxy difatti non sa se sta erogando il flusso ad un client o ad un relay secondario
+				 * 
+				*/
+				Enumeration<String> keys = sessions.keys();
+				while(keys.hasMoreElements()){
+					String chiave = keys.nextElement();
+					Session sessione = sessions.get(chiave);
+					if ( sessione.getProxy().equals(proxy)){
+						sessions.remove(chiave);
+						// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
+						// per stare dalla parte dei bottoni lascio tutto cos�.
+					}
+				}
+				
 				this.numberOfSession--;
 				if(numberOfSession == 0)
 					this.status = SessionManagerStatus.Idle;
@@ -319,6 +344,8 @@ public class RelaySessionManager implements Observer{
 			/**
 			 * l'electionmanager mi ha comunica chi è il relay attuale a seguito di un messaggio di WHO_IS_RELAY
 			 */
+			
+			// TODO "relay found" l'election manager comunica chi � il relay attuale
 			if(this.event.contains("RELAY_FOUND"))
 			{
 				StringTokenizer st = new StringTokenizer(this.event, ":");
@@ -327,6 +354,7 @@ public class RelaySessionManager implements Observer{
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di RELAY_FOUND, il RELAY attuale è: "+this.relayAddress);
 			}
 			
+			//TODO il nuovo relay non ha risposto, ne provo ad eleggere un altro
 			if(this.event.equals("TIMEOUTSESSIONREQUEST") || this.event.equals("TIMEOUTACKSESSIONINFO")) //VECCHIO RELAY: il nuovo relay non ha risposto
 			{
 				if(this.event.equals("TIMEOUTSESSIONREQUEST") && status.equals(SessionManagerStatus.Active))
@@ -360,11 +388,16 @@ public class RelaySessionManager implements Observer{
 			 *	e mi metto in attesa delle informazioni sulle sessioni
 			 *
 			 */
+			
+			// TODO "NEW_RELAY " l'elctionManager mi comunica chi ha vinto l'elezione
 			if(this.event.contains("NEW_RELAY")) 
 				/*
 				 * Marco: l'election manager quando c'� un election done scatena un evento che mi fa ricevere la stringa 
-				 * NEW_RELAY:ip del vincitore dell'elezione. Cosa fare dipende dal ruolo che il nodo ha in quel momento:
+				 * NEW_RELAY:ip del vincitore dell'elezione,ip del vecchio relay, ip del nodo superiore
+				 * Cosa fare dipende dal ruolo che il nodo ha in quel momento:
 				 * vecchio relay, vicitore dell'elezione, o candidato che non ha vinto.
+				 * 
+				 * l'evento di 
 				 */
 			{
 				StringTokenizer st = new StringTokenizer(this.event, ":");
@@ -381,7 +414,7 @@ public class RelaySessionManager implements Observer{
 				else
 				{ 
 					try {
-						// @ TODO  non riesco a capire cosa che errore sia: il metodo c'� e allora perch� fa storie?
+						// @ TODO  non riesco a capire cosa che errore sia: il metodo c'� e allora perch� fa storie?
 						if(electionManager.getLocalClusterAddress().equals(newRelay)) // io sono il relay vincitore
 						{
 							this.imRelay = true; // Marco : cambio già lo stato: non è presto? forse sarebbe meglio aspettare dopo aver mandato il Redirect al server...
@@ -399,6 +432,8 @@ public class RelaySessionManager implements Observer{
 					}
 				}// marco: se sono un semplice nodo che si � candidato, ma non ho vinto non debbo fare nulla
 			}
+			
+			// TODO nuovo relay eletto tramite elezione di emergenza
 			if(this.event.contains("NEW_EM_RELAY"))
 			{
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di NEW_EM_RELAY");
@@ -422,6 +457,8 @@ public class RelaySessionManager implements Observer{
 				}
 			}
 			
+			// TODO scattato il timeout su SessionInfo , ma posso ancora provare a ritrasmettere
+			
 			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions != 0 && this.status.equals(SessionManagerStatus.RequestingSession)) // Nuovo Realy: è scattato il timout sull'attesa di SessionInfo
 			{
 				/*
@@ -441,6 +478,8 @@ public class RelaySessionManager implements Observer{
 				}
 
 			}
+			
+			// TODO scattato il timeut sul sessioninfo e non ho pi� ritrasmissioni; invalido tutto
 			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions == 0)
 			{
 				/*
@@ -464,7 +503,7 @@ public class RelaySessionManager implements Observer{
 					e.printStackTrace();
 				}
 			}
-			
+			// TODO ELECTION_REQUEST_RECEIVED si inizia la fase di rielezione
 			if(this.event.equals("ELECTION_REQUEST_RECEIVED"))// Marco aggiungi condizione sono il relay secondario e non il big boss
 			{
 				/*
@@ -476,12 +515,23 @@ public class RelaySessionManager implements Observer{
 			}
 			
 		}
+		
+		// TODO il proxy, dopo aver creato la sessione comunica al sessionManager le porte che usa
 		/**
 		 * il proxy dopo aver creato la sessione ha il compito di avvertire il sessionmanager
 		 * ++++++++++++++++++++++++++EVENTO SOLLEVATO DAI PROXY++++++++++++++++++++++++++++++
 		 */
 		if(arg instanceof int[])
 		{
+			
+			/*
+			 * Il proxy creato ex-novo, comunca al sessionManager le porte che
+			 * usa. Il session Manager inserisce le porte nella tabella session.
+			 * trovo il record grazie al fatto che c'� un'unico proxy per sessione;
+			 * non posso usare l'indirizzo del client come si poteva fare nella vecchia versione
+			 * perch� il proxy pu� erogare anche ad un relay secondario, e quindi 
+			 * posso avere pi� proxy con lo stesso client address
+			 */
 			//CONTROLLARE SE il seguente cast è giusto altrimenti si cambia...
 			System.out.println("Il Proxy mi ha notificato i parametri di sessione...");
 			
@@ -492,7 +542,20 @@ public class RelaySessionManager implements Observer{
 			System.err.println("RelaySessionManager- Porta di Stream del Client IN: " +sessionPorts[3]);
 			System.err.println("RelaySessionManager- Porta di Stream del Server control: " +sessionPorts[4]);
 			System.err.println("RelaySessionManager- Porta di Stream del Proxy control: " +sessionPorts[5]);
-			this.sessionInfo.put(((Proxy)receiver).getClientAddress(), sessionPorts);
+			Enumeration<String> keys = sessions.keys();
+			while(keys.hasMoreElements()){
+				String chiave = keys.nextElement();
+				Session sessione = sessions.get(chiave);
+				if ( sessione.getProxy().equals(proxy)){
+					sessione.setSessionInfo(sessionPorts);
+					// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
+					// per stare dalla parte dei bottoni lascio tutto cos�.
+					// ps ho controllato effettivamente va bene, l'equals è true solo se si tratta della 
+					// stessa istanza del proxy
+				}
+			}
+			
+			
 			System.out.println("AGGIUNTO IL RIFERIMENTO IN SESSION_INFO");
 		}
 	}
@@ -521,11 +584,21 @@ public class RelaySessionManager implements Observer{
 				this.status = SessionManagerStatus.Idle;
 		}
 	}
-	private String createProxyFromSession(Hashtable sessionInfo)
+	
+	/**
+	 * Crea i proxy dalla tabella di sessioni ottenuta dal messaggio di Sessioninfo e restituisce,
+	 * per ogni sessione le porte di recovery sulle quali il vecchio relay deve ridirigere il flusso,
+	 * inoltre riempie i campi proxy delle sessioni presenti nella tabella con i proxy appena creati
+	 * @param sessions � una tabella che contiene i dati come tabella di Session, la chiave � l'indirizzo del client
+	 * 
+	 * @return una stringona che contiene per ogni sessione l'indirizzo ip del client ( la chiave della sessione) e la porta di recovery del 
+	 * proxy che gestisce quella sessione
+	 * es (192.168.1.1_5000_162.168.1.2_6000)
+	 */
+	private String createProxyFromSession(Hashtable sessions) // TODO Da sistemare: l'oggetto � in realty un session, e non pi� un vettore di interi
 	{
 		/*
-		 * Marco: composizione della tabella sessionInfo ( ancora non verificato, mi baso sui nomi che vengono assegnati)
-		 * chiave: indirizzo del client
+		 * Marco: composizione della tabella sessionInfo (
 		 * valore[0]=  porta dalla quale il server eroga lo stream
 		 * valore[1] = porta sulla quale il proxy riceve lo stream
 		 * valore[2] = porta dalla quale il proxy eroga lo steam verso il client
@@ -544,13 +617,14 @@ public class RelaySessionManager implements Observer{
 		int clientPortStreamIn = 0;
 		int serverCtrlPort = 0;
 		int proxyCtrlPort = 0;
-		if(!sessionInfo.isEmpty())
+		if(!sessions.isEmpty())
 		{
-			Enumeration keys = sessionInfo.keys();
+			Enumeration keys = sessions.keys();
 			while(keys.hasMoreElements())
 			{
 				chiave = keys.nextElement().toString();
-				int[] values =(int[]) sessionInfo.get(chiave);
+				Session session = (Session)sessions.get(chiave);
+				int[] values =session.getSessionInfo();
 				if(values.length == 6)
 				{
 					serverPortStreamOut = values[0];
@@ -570,27 +644,36 @@ public class RelaySessionManager implements Observer{
 					 * la trasmissione di recovery verso il nuovo riutilizza la medesima porta.
 					 * Marco: quindi il numero di porta sulla quale il proxy sul nuovo relay riceve il flusso da inserire nel suo recovery buffer è lo stesso
 					 *  numero della porta dalla quale sia il vecchio che il nuovo relay erogano il flusso.
-					 * 
+					 * creo il proxy e  metto l'istanza nella sessione
 					 */
 					proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut ,InetAddress.getByName(this.relayAddress), serverCtrlPort, proxyCtrlPort);
+					session.setProxy(proxy);
 					recStreamInports = recStreamInports+"_"+chiave+"_"+proxy.getRecoveryStreamInPort();
 				} catch (UnknownHostException e) {
 					
 					e.printStackTrace();
 				}
-			}	
+			}// fine while	
 		}
 	//	recStreamInports.replaceFirst("_", "");
 	//	recStreamInports = recStreamInports.substring(arg0, arg1)
 		return recStreamInports;
 	}
 	
+	/**
+	 * 
+	 * Metodo che permette di ridirigere il flusso verso il nuovo relay.
+	 * 
+	 * @param sessionEndpoint tabella contenente, per ogni sessione la porta del proxy sul nuovo relay sulla quale ridirigere
+	 * il flusso
+	 */
+	
 	private void changeProxySession(Hashtable sessionEndpoint)
 	{
 		/*Marco:
 		 * le tuple della tabella session Endpoint contengono come chiave l'indirizzo del client ( come id di sessione)
-		 * e come secondo argomento un vettore contenente le quattro porte per lo streaming,
-		 * il primo elemento in particolare è la porta sulla quale il nuovo proxy attende il flusso rtp dal vecchio proxy
+		 * e come secondo argomento un vettore di interi con un solo elemento:
+		 *  la porta sulla quale il nuovo proxy attende il flusso rtp dal vecchio proxy
 		 * quindi per ogni sessione si invoca il metodo handoff del relativo roxy che, appunto ridirige il flusso sull'indirizzo e sulla
 		 * porta indicata.
 		 * inoltre setta il flag ending per ongi proxy
@@ -599,7 +682,7 @@ public class RelaySessionManager implements Observer{
 		String chiave;
 		if(!sessionEndpoint.isEmpty())
 		{
-			if(!pReferences.isEmpty())
+			if(!sessions.isEmpty())
 			{
 				Enumeration keys = sessionEndpoint.keys();
 				while(keys.hasMoreElements())
@@ -607,8 +690,9 @@ public class RelaySessionManager implements Observer{
 					chiave = keys.nextElement().toString();
 					int[] values =(int[]) sessionEndpoint.get(chiave);
 					try {
-						pReferences.get(chiave).startHandoff(values[0], InetAddress.getByName(this.maxWnextRelay));
-						pReferences.get(chiave).setEnding(true);
+						Proxy proxy = sessions.get(chiave).getProxy();
+						proxy.startHandoff(values[0], InetAddress.getByName(this.maxWnextRelay));
+						proxy.setEnding(true);
 					} catch (UnknownHostException e) {
 						
 						e.printStackTrace();
@@ -639,7 +723,7 @@ public String getLocalClusterHeadAddress(){
 
 /**
  * 
- * @return l'indirizzo in stringa del big boss se il relay � un relay secondario, o l'indirizzo del server se � il big boss
+ * @return l'indirizzo in stringa del big boss se il relay � un relay secondario, o l'indirizzo del server se � il big boss
  */
 public String getConnectedClusterHeadAddress(){
 	return electionManager.getConnectedClusterHeadAddress();
@@ -665,14 +749,30 @@ public InetAddress getLocalClusterHeadInetAddress(){
 
 /**
  * 
- * @return l'indirizzo in forma INET del big boss se il relay � un relay secondario, o l'indirizzo del server se � il big boss
+ * @return l'indirizzo in forma INET del big boss se il relay � un relay secondario, o l'indirizzo del server se � il big boss
  */
 public InetAddress getConnectedClusterHeadInetAddress(){
 	return electionManager.getConnectedClusterHeadInetAddress();
 }
 
+/**
+ * 
+ * @return true se il nodo è un relay secondario.
+ */
 
+public boolean isRelay(){
+	return electionManager.isRELAY();
+	
+}
 
+/**
+ * 
+ * @return true se il nodo è il big boss attuale
+ */
+
+public boolean isBigBoss(){
+	return electionManager.isBIGBOSS();
+}
 
 
 
