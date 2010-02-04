@@ -336,15 +336,15 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 	 * @return un BufferedReader che rappresenta il risultato della chiamata al Sistema Operativo 
 	 * @throws WNICException
 	 */
-	private BufferedReader getVisibleAccessPointInfo(String iN) throws WNICException{
-		try{
-			Process p= Runtime.getRuntime().exec("/sbin/iwlist " + iN + " scan");
-			p.waitFor();
-			return new BufferedReader(new InputStreamReader(p.getInputStream()));
-		}catch (Exception e){
-			throw new WNICException("ERRORE: impossibile ottenere informazioni dalla scheda wireless");
-		}	
-	}
+//	private BufferedReader getVisibleAccessPointInfo(String iN) throws WNICException{
+//		try{
+//			Process p= Runtime.getRuntime().exec("/sbin/iwlist " + iN + " scan");
+//			p.waitFor();
+//			return new BufferedReader(new InputStreamReader(p.getInputStream()));
+//		}catch (Exception e){
+//			throw new WNICException("ERRORE: impossibile ottenere informazioni dalla scheda wireless");
+//		}	
+//	}
 
 	/**
 	 * ATTUALMENTE NON FUNZIONA CORRETTAMENTE Metodo per eseguire i comandi linux necessari per connettersi ad un certo AP (alla <i>essid</i> da esso esposta)
@@ -444,60 +444,60 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 
 	//METODI PUBBLICI
 	
-	private void setNewCurrentAP(AccessPointData ap){this.currentAP=ap;}
-	
-	/**Metodo per ottenere una lista degli AccessPointData visibili dall'interfaccia in esame. Quando il nodo è connesso al
-	 * currentAP esso risulta essere l'unico elemento della lista
-	 * @return un Vector di AccessPointData rappresentante la lista di cui sopra
-	 * @throws WNICException
-	 * @throws InvalidAccessPoint
-	 */
-	private Vector<AccessPointData> getVisibleAccessPoints()	throws WNICException, InvalidAccessPoint {
-
-		refreshStatus();
-
-		Vector<AccessPointData> vect = new Vector<AccessPointData>();
-		if(isAssociated && isOn && essidFound) {
-			vect.add(currentAP); 
-			return vect;
-		}
-
-		String line = null;
-		String mac = null;
-		String essidName =null;
-		String mode = null;
-		double firstRSSI = -1;
-		StringTokenizer st = null;
-		BufferedReader br = getVisibleAccessPointInfo(interf);
-		try {
-			while((line = br.readLine())!=null){
-				if(line.contains("Cell")){
-					mac = extractMacAddress(line, 18);
-					for(int i=0;i<3;i++){
-						do{
-						line = br.readLine();
-						}while((!line.contains("Signal"))&&(!line.contains("ESSID"))&&(!line.contains("Mode"))&&(line!=null));
-						if(line.contains("Signal"))
-							firstRSSI = (double)extractRSSIValue(line);
-						else if(line.contains("ESSID")){
-							st =new StringTokenizer(line,"\"");
-							st.nextToken();
-							essidName = st.nextToken();
-						}else if(line.contains("Mode")){
-							st =new StringTokenizer(line,":");
-							st.nextToken();
-							mode = st.nextToken();
-						}
-					}
-					vect.add(new AccessPointData(essidName,mac,mode,firstRSSI,numberOfPreviousRSSI));
-				}
-			}
-			br.close();
-		} catch (IOException e) {e.printStackTrace();} 
-		catch (InvalidParameter e) {e.printStackTrace();}
-
-		return (vect.size()==0)?null:vect;
-	}
+//	private void setNewCurrentAP(AccessPointData ap){this.currentAP=ap;}
+//	
+//	/**Metodo per ottenere una lista degli AccessPointData visibili dall'interfaccia in esame. Quando il nodo è connesso al
+//	 * currentAP esso risulta essere l'unico elemento della lista
+//	 * @return un Vector di AccessPointData rappresentante la lista di cui sopra
+//	 * @throws WNICException
+//	 * @throws InvalidAccessPoint
+//	 */
+//	private Vector<AccessPointData> getVisibleAccessPoints()	throws WNICException, InvalidAccessPoint {
+//
+//		refreshStatus();
+//
+//		Vector<AccessPointData> vect = new Vector<AccessPointData>();
+//		if(isAssociated && isOn && essidFound) {
+//			vect.add(currentAP); 
+//			return vect;
+//		}
+//
+//		String line = null;
+//		String mac = null;
+//		String essidName =null;
+//		String mode = null;
+//		double firstRSSI = -1;
+//		StringTokenizer st = null;
+//		BufferedReader br = getVisibleAccessPointInfo(interf);
+//		try {
+//			while((line = br.readLine())!=null){
+//				if(line.contains("Cell")){
+//					mac = extractMacAddress(line, 18);
+//					for(int i=0;i<3;i++){
+//						do{
+//						line = br.readLine();
+//						}while((!line.contains("Signal"))&&(!line.contains("ESSID"))&&(!line.contains("Mode"))&&(line!=null));
+//						if(line.contains("Signal"))
+//							firstRSSI = (double)extractRSSIValue(line);
+//						else if(line.contains("ESSID")){
+//							st =new StringTokenizer(line,"\"");
+//							st.nextToken();
+//							essidName = st.nextToken();
+//						}else if(line.contains("Mode")){
+//							st =new StringTokenizer(line,":");
+//							st.nextToken();
+//							mode = st.nextToken();
+//						}
+//					}
+//					vect.add(new AccessPointData(essidName,mac,mode,firstRSSI,numberOfPreviousRSSI));
+//				}
+//			}
+//			br.close();
+//		} catch (IOException e) {e.printStackTrace();} 
+//		catch (InvalidParameter e) {e.printStackTrace();}
+//
+//		return (vect.size()==0)?null:vect;
+//	}
 
 	/**<b>ATTUALMENTE NON FUNZIONA DEL TUTTO CORRETTAMENTE</b> Metodo per connettere il nodo all'AP 
 	 * il cui identificativo (il nome della rete da esso retta) è passato per parametro

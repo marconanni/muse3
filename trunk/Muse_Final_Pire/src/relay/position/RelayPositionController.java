@@ -33,6 +33,8 @@ public class RelayPositionController implements Observer {
 	private RelayElectionManager electionManger = null;
 	private DebugConsole console = null;
 	
+	private boolean debug = false;
+	
 	/**Metodo per ottenere un ClientPositionController
 	 * @param interf una String che rappresenta l'interfaccia di rete da gestire
 	 * @param essidName una String che rappresenta la rete a cui l'interfaccia è connessa
@@ -42,7 +44,7 @@ public class RelayPositionController implements Observer {
 		rrscm = RelayConnectionFactory.getRSSIClusterHeadConnectionManager(this,true);
 		this.electionManger = electionManager;
 		this.cwnic = cwnic;
-		console = cwnic.getDebugConsole();
+		setDebugConsole(cwnic.getDebugConsole());
 		started = false;
 	}
 
@@ -85,20 +87,17 @@ public class RelayPositionController implements Observer {
 			cmr = new RelayMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);
-				console.debugMessage(DebugConfiguration.DEBUG_WARNING, "RelayPositionMonitorController: ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
+				if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_WARNING, "RelayPositionMonitorController: ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
 				if((cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI)){
 					RSSIvalue = cwnic.getSignalStrenghtValue();
 					notifyRSSI = RelayMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue,((DatagramPacket)arg1).getAddress(), PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPERELAY, (electionManger.getActiveClient()==0||electionManger.getActiveClient()==0)?0:electionManger.getActiveClient());
 					sequenceNumber++;
 					rrscm.sendTo(notifyRSSI);
-					console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionMonitorController(): Inviato RSSI: "+ RSSIvalue +" a: " + ((DatagramPacket)arg1).getAddress()+":"+PortConfiguration.RSSI_PORT_IN);
-				}else{
-					console.debugMessage(DebugConfiguration.DEBUG_INFO,"ClientPositionController.update(): Faccio niente");
-				
+					if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionMonitorController(): Inviato RSSI: "+ RSSIvalue +" a: " + ((DatagramPacket)arg1).getAddress()+":"+PortConfiguration.RSSI_PORT_IN);
 				}
 			} catch (WNICException e) {
-					console.debugMessage(DebugConfiguration.DEBUG_ERROR,"ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
-					new WNICException("ClientPositionController.update(): Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"RelayPositionMonitorController: Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
+					new WNICException("RelayPositionMonitorController: Impossibile o leggere il il pacchetto RSSI REQUEST o mandare il valore RSSI al relay");
 				
 			} catch (IOException e) {e.printStackTrace();}
 			cmr = null;
@@ -112,4 +111,16 @@ public class RelayPositionController implements Observer {
 	/**Server per visualizzare i messagi di debug
 	 */
 	public void setDebugConsole(DebugConsole console) {this.console=console;}
+	public DebugConsole getDebugConsole(){return console;}
+	public void setDebug(boolean db){this.debug = db;}
+	
+	private void debug(DebugConsole console,int type, String message){
+		if(console!=null)console.debugMessage(type, message);
+		else{
+			if(type==DebugConfiguration.DEBUG_INFO|| type ==DebugConfiguration.DEBUG_WARNING)
+				System.out.println(message);
+			if(type==DebugConfiguration.DEBUG_ERROR)
+				System.err.println(message);
+		}
+	}
 }

@@ -12,6 +12,8 @@ import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import debug.DebugConsole;
+
 import parameters.DebugConfiguration;
 import parameters.ElectionConfiguration;
 
@@ -32,6 +34,8 @@ public class RelayPositionAPMonitor extends Observable {
 	private Timer timer = null;
 	private boolean started;
 	private String tmp;
+	private DebugConsole console = null;
+	private boolean debug= false;
 
 
 	/**Metodo per ottenere un RelayPositionAPMonitor
@@ -52,9 +56,8 @@ public class RelayPositionAPMonitor extends Observable {
 		addObserver(electionManager);
 		currAP=null;
 		started = false;
-		rwc.getDebugConsole().debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: CICLO DI CONTROLLO CONNESSIONE AP ogni " + period + " ms");
-		//rwc.getDebugConsole().debugMessage(Parameters.DEBUG_INFO,"RelayPositionAPMonitor: AP corrente a cui si è connessi "  +currAP.getAccessPointName());
-		
+		setDebugConsole(rwc.getDebugConsole());
+		debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: CICLO DI CONTROLLO CONNESSIONE AP ogni " + period + " ms");
 	}
 
 
@@ -92,40 +95,56 @@ public class RelayPositionAPMonitor extends Observable {
 
 			if(currAP!=null){
 				double actualRSSI = (double)rwc.updateSignalStrenghtValue();
-				rwc.getDebugConsole().debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: AP: "  +currAP.getAccessPointName() + " - RSSI: " + actualRSSI);
+				if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: AP: "  +currAP.getAccessPointName() + " - RSSI: " + actualRSSI);
 
 				double [] a = currAP.getLastSignalStrenghtValues();
-				tmp="[";
-				for(int i = 0; i<a.length;i++)
-					tmp+=a[i]+",";
-				tmp+="]";
 				filter =new GreyModel(a);
 				prevision = filter.predictRSSI();
-				tmp +=" PREVISIONE:"+prevision				;
-				rwc.getDebugConsole().debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: "+tmp);
+				if(debug){
+					tmp="[";
+					for(int i = 0; i<a.length;i++)
+						tmp+=a[i]+",";
+					tmp+="]";
+					tmp +=" PREVISIONE:"+prevision;
+					debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: "+tmp);
+				}
 				
 				if(prevision >= ElectionConfiguration.AP_DISCONNECTION_THRS){
 					positiveDisconnectionPrediction++;
-					rwc.getDebugConsole().debugMessage(DebugConfiguration.DEBUG_WARNING,"RelayPositionAPMonitor: RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE ("+positiveDisconnectionPrediction+" su"+ElectionConfiguration.NUMBER_OF_AP_DISCONNECTION_DETECTION+")");
+					debug(getDebugConsole(), DebugConfiguration.DEBUG_WARNING,"RelayPositionAPMonitor: RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE ("+positiveDisconnectionPrediction+" su"+ElectionConfiguration.NUMBER_OF_AP_DISCONNECTION_DETECTION+")");
 
 					if(positiveDisconnectionPrediction == ElectionConfiguration.NUMBER_OF_AP_DISCONNECTION_DETECTION){
-						rwc.getDebugConsole().debugMessage(DebugConfiguration.DEBUG_ERROR,"RelayPositionAPMonitor: DISCONNESSIONE RILEVATA COME SICURA. AVVERTO!!!!");
+						debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"RelayPositionAPMonitor: DISCONNESSIONE RILEVATA COME SICURA. AVVERTO!!!!");
 						setChanged();
 						notifyObservers("DISCONNECTION_WARNING");
 					}
 				}
 				else{
 					positiveDisconnectionPrediction=0;				
-					//rwc.getDebugConsole().debugMessage(Parameters.DEBUG_INFO,"RelayPositionAPMonitor : RSSI PREVISTO NON SUPERA SOGLIA DI DISCONNESSIONE.");
 				}	
 			}
 			else{
-				rwc.getDebugConsole().debugMessage(DebugConfiguration.DEBUG_ERROR,"RelayPositionAPMonitor: Nessun AP rilevato all'istante : " + new Date(System.currentTimeMillis()).toString());
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"RelayPositionAPMonitor: Nessun AP rilevato all'istante : " + new Date(System.currentTimeMillis()).toString());
 			}
 		}catch (Exception e) {e.printStackTrace();}
 	}
 	
 	public boolean isStarted(){return started;}
+	
+	public void setDebug(boolean db){this.debug = db;}
+	
+	public void setDebugConsole(DebugConsole console){this.console = console;}
+	public DebugConsole getDebugConsole(){return console;}
+	
+	private void debug(DebugConsole console,int type, String message){
+		if(console!=null)console.debugMessage(type, message);
+		else{
+			if(type==DebugConfiguration.DEBUG_INFO|| type ==DebugConfiguration.DEBUG_WARNING)
+				System.out.println(message);
+			if(type==DebugConfiguration.DEBUG_ERROR)
+				System.err.println(message);
+		}
+	}
 }
 
 

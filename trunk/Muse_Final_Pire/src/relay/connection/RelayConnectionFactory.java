@@ -13,18 +13,18 @@ public class RelayConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayElectionCM
 	 * @return un istanza di RelayElectionCM*/
 	public static RelayCM getClusterElectionConnectionManager(Observer obser, boolean bcast){
-		return new RelayCM("RelayElectionCM Cluster",rpm.getLocalClusterAddress(),rpm.getLocalClusterBCASTAddress(),rpm.getPortInAdHocElection(),rpm.getPortOutAdHocElection(),obser, bcast);
+		return new RelayCM("RelayElectionCM Cluster",rpm.getLocalClusterAddress(),rpm.getLocalClusterBCASTAddress(),rpm.getPortElectionIN(),rpm.getPortElectionOUT(),obser, bcast);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di RelayClusterHeadElectionCM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayElectionCM
 	 * @return un istanza di RelayElectionCM*/
 	public static RelayCM getClusterHeadElectionConnectionManager(Observer obser,boolean bcast){
-		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAddress(),rpm.getLocalClusterHeadBCASTAddress(),rpm.getPortInAdHocElection(),rpm.getPortOutAdHocElection(),obser, bcast);
+		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAddress(),rpm.getLocalClusterHeadBCASTAddress(),rpm.getPortElectionIN(),rpm.getPortElectionOUT(),obser, bcast);
 	}
 	
 	public static RelayCM getClusterHeadElectionConnectionManagerBIGBISS(Observer obser, boolean bcast){
-		return new RelayCM("RelayElectionCM Cluster Head Server", rpm.getLocalManagedAddress(), rpm.getLocalManagedBCASTAddress(), rpm.getPortInAdHocElection(), rpm.getPortOutAdHocElection(), obser,bcast);
+		return new RelayCM("RelayElectionCM Cluster Head Server", rpm.getLocalManagedAddress(), rpm.getLocalManagedBCASTAddress(), rpm.getPortElectionIN(), rpm.getPortElectionOUT(), obser,bcast);
 	}
 
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
