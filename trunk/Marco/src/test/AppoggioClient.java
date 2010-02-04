@@ -33,17 +33,25 @@ public class AppoggioClient implements Observer {
 
 		if (event instanceof DatagramPacket){
 			try {
+				messageReader= new ClientMessageReader();
 				messageReader.readContent((DatagramPacket)event);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				System.err.println("CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				consolle.debugMessage(2,"CLIENT_SESSION_MANAGER: Errore nella lettura del Datagramma");
 				e.printStackTrace();
-			if(messageReader.getCode()== MessageCodeConfiguration.ACK_CLIENT_REQ)
-				System.out.println( "Arrivato messaggio di AckClientREq");	
+			}
+			if(messageReader.getCode()== MessageCodeConfiguration.REDIRECT){
+				System.out.println( "Arrivato messaggio di Redirect");	
+				consolle.debugMessage(2, "Arrivato messaggio di redirect");
+			}
 			
+			else {
+				String stringa = event.toString();
+				consolle.debugMessage(2, "arrivato messaggio sconosciuto "+stringa);
+			}
 			
-					}
+					
 		
 		
 		
