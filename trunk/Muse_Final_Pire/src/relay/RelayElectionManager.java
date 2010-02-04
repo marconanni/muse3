@@ -84,9 +84,6 @@ public class RelayElectionManager extends Observable implements Observer{
 	private boolean electingHead = false;			//boolean che indica se si è coinvolti in un elezione (elezioni di un nuovo big boss, nel relay secondario attivo viene settato a true)
 	private boolean firstELECTION_DONE = false;
 	private boolean firstELECTION_REQUEST = false;
-	private int indexELECTION_BEACON = 0;
-	private int indexELECTION_RESPONSE = 0;
-	private int indexELECTION_DONE = 0;
 	private int client_visibity = 0;
 	private String bestSubstituteRelayAddress = null;
 	private InetAddress bestSubstituteRelayInetAddress = null;
@@ -104,7 +101,6 @@ public class RelayElectionManager extends Observable implements Observer{
 	public enum RelayStatus {					//stati in cui si può trovare il RelayElectionManager
 		OFF,
 		WAITING_WHO_IS_RELAY,
-		WAITING_WHO_IS_HEAD_NODE,
 		IDLE,
 		MONITORING,
 		WAITING_BEACON,
@@ -281,7 +277,9 @@ public class RelayElectionManager extends Observable implements Observer{
 	 */
 	private void becomeBigBossRelay(int state){
 		setNodeType(0, true);
+		setFirstELECTION_REQUEST(false);
 		if(state==0){
+			setFirstELECTION_DONE(false);
 			setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 			memorizeLocalClusterAddress();
 			setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
@@ -339,9 +337,10 @@ public class RelayElectionManager extends Observable implements Observer{
 	 * fa partire il RelayPositionController (servizio che risponde ai messggi RSSI_REQUEST),
 	 * il RelayBatteryMonitor, WhoIsRelayServer. Poi passa allo stato di IDLE/MONITORING. */
 	private void becomRelay(int state){
-		System.out.println("BECOME RELAY "+state);
 		setNodeType(1,true);
+		setFirstELECTION_REQUEST(false);
 		if(state==0){
+			setFirstELECTION_DONE(false);
 			setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 			memorizeLocalClusterAddress();
 			setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
@@ -392,7 +391,6 @@ public class RelayElectionManager extends Observable implements Observer{
 		}catch(WNICException e){e.printStackTrace();System.exit(2);}
 		
 		//MANDO ACK al BIGBOSS per notificare che mi sono collegato a lui
-		System.out.println("Mando ACK a"+getConnectedClusterHeadAddress());
 		DatagramPacket dpOut = null;
 		try {
 			dpOut = RelayMessageFactory.buildAckConnection(getConnectedClusterHeadInetAddress(), PortConfiguration.PORT_ELECTION_IN, MessageCodeConfiguration.TYPERELAY);
@@ -412,6 +410,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	private void becomePossibleRelay(){
 		if(isPOSSIBLE_BIGBOSS())setNodeType(0,false);
 		if(isPOSSIBLE_RELAY())setNodeType(1,false);
+		setFirstELECTION_REQUEST(false);
 		
 		setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 		memorizeLocalClusterAddress();
@@ -520,10 +519,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					(!sameAddress(getRelayMessageReader().getPacketAddess())) &&
 					(!getFirstELECTION_REQUEST())){
 					setFirstELECTION_REQUEST(true);
-					setFfirstELECTION_DONE(false);
-					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_REQUEST arrivato.");
-					
-					
+					setFirstELECTION_DONE(false);
 
 				//rielezione nuovo nodo relay BigBoss/Relay secondario e sono un nodo possibile sostituto
 				//un nodo possibile sostituti sta in ascolto solo dei messaggi broadcast emessi sulla rete (CLUSTER) in cui ne fa parte
@@ -561,8 +557,9 @@ public class RelayElectionManager extends Observable implements Observer{
 				else if((isBIGBOSS()) && 
 						(getActualStatus()==RelayStatus.MONITORING)){
 					removeRelay();
-	
-				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": relay secondario IP:"+getRelayMessageReader().getPacketAddess()+" è in cerca di un suo sostituto. removeRelay()");
+					setFirstELECTION_REQUEST(true);
+					setFirstELECTION_DONE(false);
+					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": relay secondario IP:"+getRelayMessageReader().getPacketAddess()+" è in cerca di un suo sostituto. removeRelay()");
 					//QUI DEVO INFORMARE IL SESSION MANAGER
 				}
 				
@@ -572,6 +569,8 @@ public class RelayElectionManager extends Observable implements Observer{
 					setElectingHead(true);
 					setConnectedClusterHeadAddress(null);
 					setConnectedClusterHeadInetAddress(null);
+					setFirstELECTION_REQUEST(true);
+					setFirstELECTION_DONE(false);
 				
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": ELECTION_REQUEST arrivato da (BIGBOSS) IP:"+getRelayMessageReader().getPacketAddess());
 					
@@ -629,7 +628,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					(getActualStatus() == RelayStatus.WAITING_END_NORMAL_ELECTION) &&
 					(!sameAddress(getRelayMessageReader().getPacketAddess())) &&
 					(!getFirstELECTION_DONE())){
-				setFfirstELECTION_DONE(true);
+				setFirstELECTION_DONE(true);
 				setFirstELECTION_REQUEST(false);
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_DONE arrivato: nuovo Relay: "+getRelayMessageReader().getNewRelayLocalClusterAddress());
 							
@@ -653,10 +652,9 @@ public class RelayElectionManager extends Observable implements Observer{
 				}
 				else if(isPOSSIBLE_RELAY()|| isPOSSIBLE_BIGBOSS()){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un possibile sostituto BIGBOSS/RELAY ATTIVO, controllo se è questo nodo eletto");
-										
+					setElecting(false);
 					try {
 						if(sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayLocalClusterAddress()))){
-							setElecting(false);
 							setConnectedClusterHeadAddress(getRelayMessageReader().getHeadNodeAddress());
 							if(isPOSSIBLE_RELAY()){
 								debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "Stato."+getActualStatus()+": ... DIVENTO RELAY ATTIVO..");
@@ -669,7 +667,6 @@ public class RelayElectionManager extends Observable implements Observer{
 							/** la conferma lo manda il SESSION_MANAGER con il messaggio di REQUEST_SESSION**/
 						}
 						else{
-							setElecting(false);
 							setActualStatus(RelayStatus.IDLE);
 							if(isPOSSIBLE_RELAY()){
 								setNodeType(1, false);
@@ -690,10 +687,10 @@ public class RelayElectionManager extends Observable implements Observer{
 				//propagazione del messaggio ELECTION_DONE
 				getComClusterManager().sendTo(prepareRepropagationCluster(dpIn));
 				//Se si tratta di una elezione a livello cluster faccio partire una propagazione al livello cluster head per essere sicuro che gli arriva il messaggio al bigboss
-				if(isRELAY()||isPOSSIBLE_RELAY())
+				if(isRELAY()||isPOSSIBLE_RELAY()){
 					getComClusterHeadManager().sendTo(prepareRepropagationClusterHead(dpIn));
-				System.out.println("Propagazione cluster head");
-				debug(getConsoleClusterWifiInterface(),DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": Propagazione messaggio ELECTION_DONE inviato....");
+					debug(getConsoleClusterWifiInterface(),DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": Propagazione messaggio ELECTION_DONE inviato....");
+				}
 			}
 			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_DONE) && 
 					(isBIGBOSS())&&
@@ -703,7 +700,7 @@ public class RelayElectionManager extends Observable implements Observer{
 						setChanged();
 					notifyObservers("NEW_RELAY:"+getRelayMessageReader().getNewRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+":"+getRelayMessageReader().getHeadNodeAddress());
 					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+"\nnuovo relay manderà un messaggio di ACK_CONNECTION");
-					setFfirstELECTION_DONE(true);
+					setFirstELECTION_DONE(true);
 				} catch (UnknownHostException e) {e.printStackTrace();}
 			
 			}
@@ -816,7 +813,7 @@ public class RelayElectionManager extends Observable implements Observer{
 						dpOut = RelayMessageFactory.buildElectionDone(	0, getBestSubstituteRelayAddress(),getLocalClusterAddress(),getLocalClusterHeadAddress(),getConnectedClusterHeadAddress(),BCAST, PortConfiguration.PORT_ELECTION_IN);
 						getComClusterManager().sendTo(dpOut);
 						
-						dpOut = RelayMessageFactory.buildElectionDone(	0, getBestSubstituteRelayAddress(),getLocalClusterAddress(),getLocalClusterHeadAddress(),getConnectedClusterHeadAddress(),BCAST, PortConfiguration.PORT_ELECTION_IN);
+						dpOut = RelayMessageFactory.buildElectionDone(	0, getBestSubstituteRelayAddress(),getLocalClusterAddress(),getLocalClusterHeadAddress(),getConnectedClusterHeadAddress(),BCASTHEAD, PortConfiguration.PORT_ELECTION_IN);
 						getComClusterHeadManager().sendTo(dpOut);
 						//firstELECTION_DONEsent = true;
 					} catch (IOException e) {e.printStackTrace();}
@@ -1000,7 +997,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	private String getBestSubstituteRelayAddress() {return bestSubstituteRelayAddress;}
 	
 	private void setBestSubstituteRelayInetAddress(InetAddress bestSubstituteRelayInetAddress) {this.bestSubstituteRelayInetAddress = bestSubstituteRelayInetAddress;}
-	private InetAddress getBestSubstituteRelayInetAddress() {return bestSubstituteRelayInetAddress;}
+	public InetAddress getBestSubstituteRelayInetAddress() {return bestSubstituteRelayInetAddress;}
 	
 	public void setRelayMessageReader(RelayMessageReader relayMessageReader){this.relayMessageReader = relayMessageReader;}
 	public RelayMessageReader getRelayMessageReader(){return relayMessageReader;}
@@ -1033,10 +1030,10 @@ public class RelayElectionManager extends Observable implements Observer{
 	public int getActiveRelay(){ return activeRelay;}
 	
 	private void setElecting(boolean electing){this.electing=electing;}
-	private boolean getElecting(){return electing;}
+	public boolean isElecting(){return electing;}
 	
 	private void setElectingHead(boolean electingHead){this.electingHead=electingHead;}
-	private boolean getElectingHead(){return electingHead;}
+	public boolean isElectingHead(){return electingHead;}
 	
 	private void clearClientVisibility(){this.client_visibity=0;}
 	private void addClientVisibility(int client){this.client_visibity+=client;}
@@ -1049,7 +1046,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	private void setPossibleRelay(Vector<Couple> possibleRelay){this.possibleRelay = possibleRelay;}
 	private Vector<Couple> getPossibleRelay(){return possibleRelay;}
 	
-	private void setFfirstELECTION_DONE(boolean firstELECTION_DONE){this.firstELECTION_DONE = firstELECTION_DONE;}
+	private void setFirstELECTION_DONE(boolean firstELECTION_DONE){this.firstELECTION_DONE = firstELECTION_DONE;}
 	private boolean getFirstELECTION_DONE(){return firstELECTION_DONE;}
 	
 	private void setFirstELECTION_REQUEST(boolean firstELECTION_REQUEST){this.firstELECTION_REQUEST = firstELECTION_REQUEST;}
