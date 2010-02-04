@@ -41,6 +41,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	/*
 	 * Connessione Nominale:
 	 */
+	private String streamingServerAddress;
 	private int normalReceivingPort;
 	private int streamingServerSendingPort;
 
@@ -94,13 +95,15 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	 * <br/>
 	 * @param newProxy 
 	 * @param RelayBufferManager buffer
+	 * @param streaming server address: l'indirizzo di chi manda lo straming
 	 * @throws IOException
 	 * @throws IncompatibleSourceException
 	 */
-	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer, Proxy proxy) throws IOException, IncompatibleSourceException{
+	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer, Proxy proxy, String streamingServerAddress) throws IOException, IncompatibleSourceException{
 		this.buffer = buffer;
 		this.proxy = proxy;
 		this.nexProxy = newProxy;
+		this.streamingServerAddress= streamingServerAddress;
 		//ottengo una porta per lo stream in input
 		normalReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();	
 		normalReceiver = new RTPReceiverPS(normalReceivingPort);
@@ -115,9 +118,24 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 			recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort);
 		}
 	}
+	
+	/**
+	 * 
+	 * @param newProxy
+	 * @param buffer  il riferimento al buffer manager
+	 * @param myLocalClusterAddress l'indirizzo  sul cluster locale ( quello inferiore,di cui diventerà relay) del nodo sul quale si trova l'RTPReceptionManager
+	 * @param streamingServerAddress l'indirizzo del nodo da cui si riceverà lo streaming
+	 * @param oldProxyStreamInPort la porta dalla quale il vecchio proxy riceveva lo streaming
+	 * @param proxy un riferimento al proxy che possiende l'RTPReceptionManager
+	 * @throws IOException
+	 * @throws IncompatibleSourceException
+	 */
 
-	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer, int oldProxyStreamInPort, Proxy proxy) throws IOException, IncompatibleSourceException{
+	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer,String myLocalClusterAddress, String streamingServerAddress, int oldProxyStreamInPort, Proxy proxy) throws IOException, IncompatibleSourceException{
+	
+
 		this.buffer = buffer;
+		this.streamingServerAddress= streamingServerAddress;
 
 		this.proxy = proxy;
 		//imposto la porta di ricezione del proxy di recovery con la vecchia porta di ricezione del proxy
@@ -126,7 +144,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		RelayPortMapper.getInstance().setRangePortInRTPProxy(normalReceivingPort);
 		//ottengo dal port mapper la porta di ricezione dello stream proveniente dal vecchio proxy
 		this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();
-		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort, InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS));
+		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort, InetAddress.getByName(myLocalClusterAddress));
 
 	}
 
@@ -147,7 +165,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	 * @throws IncompatibleSourceException 
 	 */
 	public void initNormalConnection() throws UnknownHostException, IOException, IncompatibleSourceException{
-		normalReceiver.setSender(InetAddress.getByName(Parameters.SERVER_ADDRESS), streamingServerSendingPort);
+		normalReceiver.setSender(InetAddress.getByName(this.streamingServerAddress), streamingServerSendingPort);
 		//	normalReceiver.setBufferLength(this.buffer.getBufSize());
 		normalReceiver.addReceiveStreamEventListener(this);
 
@@ -194,6 +212,24 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 			this.trackFormats2 = recoveryRTPParser.getTracksFormat();
 			recoveryParserThread = new ParserThreadPS(recoveryRTPParser, buffer.getBufSize(), buffer.getRecoveryBuffer());
 		}
+	}
+	
+	/**
+	 * Questo metodo richiama il metodo SetSender di NormalReceiver, la speranza è che,
+	 * usato qunado il proxy riceve un leave dal big boss questo serva a ricevere il flusso
+	 * dal nuovo proxy sul big boss
+	 * @param streamingServerAddress l'indirizzo del nuovo nodo che eroga il flusso
+	 * @param streamingServerSendingPort la porta dalla quale il nuovo nodo eroga il flusso
+	 * 
+	 */
+	
+	public boolean setStreamingServer (String streamingServerAddress, int streamingServerSendingPort){
+		// prima aggiorno le mie variabili interne
+		
+		this.streamingServerAddress= streamingServerAddress;
+		this.streamingServerSendingPort= this.streamingServerSendingPort;
+		// poi invoco il metodo su nomalReceiver
+		normalReceiver.setSender(InetAddress.getByName(this.streamingServerAddress), streamingServerSendingPort);
 	}
 
 	/**
