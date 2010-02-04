@@ -3,8 +3,6 @@ package relay.connection;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.omg.PortableInterceptor.INACTIVE;
-
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
 
@@ -18,8 +16,8 @@ public class RelayPortMapper {
 
 
 	/*porte delle socket per la gestione l'elezione, in ingresso e in uscita */
-	private int portInAdHocElection;
-	private int portOutAdHocElection;
+	private int portElectionIN;
+	private int portElectionOUT;
 
 	/*porte rispettivamente per l'invio periodico dei REQUEST_RSSI e per la ricezione dei NOTIFY_RSSI*/
 	private int portOutRSSI;
@@ -49,8 +47,8 @@ public class RelayPortMapper {
 		portInWhoIsRelay = PortConfiguration.WHO_IS_RELAY_PORT_IN;
 		portOutWhoIsRelay = PortConfiguration.WHO_IS_RELAY_PORT_OUT;
 		
-		portInAdHocElection = PortConfiguration.PORT_ELECTION_IN;
-		portOutAdHocElection = PortConfiguration.PORT_ELECTION_OUT;
+		portElectionIN = PortConfiguration.PORT_ELECTION_IN;
+		portElectionOUT = PortConfiguration.PORT_ELECTION_OUT;
 
 	
 		portInRSSI = PortConfiguration.RSSI_PORT_IN;
@@ -74,11 +72,11 @@ public class RelayPortMapper {
 	
 	/**Metodo per ottenere la porta su cui l'ElectionManager del RELAY riceve i messaggi di elezione dalla rete Ad-Hoc
 	 * @return un intero rappresentante la porta di cui sopra*/
-	public int getPortInAdHocElection() {return portInAdHocElection;}
+	public int getPortElectionIN() {return portElectionIN;}
 
 	/**Metodo per ottenere la porta su cui l'ElectionManager del RELAY invia i messaggi di elezione alla rete Ad-Hoc
 	 * @return un intero rappresentante la porta di cui sopra*/
-	public int getPortOutAdHocElection() {return portOutAdHocElection;}
+	public int getPortElectionOUT() {return portElectionOUT;}
 	
 
 	/**Metodo per ottenere la porta su cui il PositioningManager dell'ElectionManager del RELAY attuale 

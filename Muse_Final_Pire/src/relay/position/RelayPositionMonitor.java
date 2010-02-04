@@ -18,7 +18,6 @@ import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
 import parameters.TimeOutConfiguration;
-
 import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
 import relay.messages.RelayMessageFactory;
@@ -50,6 +49,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	private int numberOfValideRSSI;
 	private boolean started;
 	private boolean stopped;
+	private boolean debug = false;
 	private DebugConsole console = null;
 	
 	static{
@@ -74,7 +74,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		positiveDisconnectionPrediction = 0;
 		averageValues = new Vector<Double>();
 		addObserver(electionManager);
-		rrcm = RelayConnectionFactory.getRSSIClusterConnectionManager(this,false);	
+		this.rrcm = RelayConnectionFactory.getRSSIClusterConnectionManager(this,false);
 		setDebugConsole(console);
 		setStarted(false);
 		
@@ -127,7 +127,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 			rrcm.sendTo(dp);	
 			seqNum++;
 			tnRSSI = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_NOTIFY_RSSI, TimeOutConfiguration.TIME_OUT_NOTIFY_RSSI);
-			console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionCOntroller: spedito RSSI Request a tutti e TIMEOUT_NOTIFY_RSSI attivato");
+			if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionCOntroller: spedito RSSI Request a tutti e TIMEOUT_NOTIFY_RSSI attivato");
 		} catch (Exception e) {e.printStackTrace();}
 	}
 
@@ -140,16 +140,17 @@ public class RelayPositionMonitor extends Observable implements Observer {
 				rmr.readContent((DatagramPacket)arg1);
 			} catch (IOException e) {e.printStackTrace();}
 
+//			if(rmr.getCode()==MessageCodeConfiguration.LOSE_MESSAGE){
+//				console.debugMessage(DebugConfiguration.DEBUG_INFO, "LOSE MESSAGE: "+rmr.getIndex());
+//			}
 			if(rmr.getCode() == MessageCodeConfiguration.NOTIFY_RSSI){
 				double RSSIValue = rmr.getRSSI();
 				int activeClient = rmr.getActiveClient();
 				if(rmr.getTypeNode()==MessageCodeConfiguration.TYPERELAY)
-					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI da un RELAY attivo IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
-					else System.out.println("RelayPositionController: ricevuto nuovo valore RSSI da un RELAY attivo IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
+					if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI da un RELAY attivo IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
 				if(rmr.getTypeNode() ==MessageCodeConfiguration.TYPECLIENT)
-					if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI da un CLIENT IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
-					else System.out.println("RelayPositionController: ricevuto nuovo valore RSSI da un CLIENT IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
-
+					if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionController: ricevuto nuovo valore RSSI da un CLIENT IP:"+ ((DatagramPacket)arg1).getAddress()+" RSSI:"+rmr.getRSSI()+" ActiveClient:"+activeClient);
+				
 				if(RSSIValue < ElectionConfiguration.VALID_RSSI_THRS && RSSIValue > 0 && RSSIValue != Double.NaN){
 					sumOfRSSI = sumOfRSSI + (RSSIValue*activeClient);
 					numberOfValideRSSI+=activeClient;
@@ -171,14 +172,14 @@ public class RelayPositionMonitor extends Observable implements Observer {
 						
 						filter = new GreyModel(getLastAverageValues());
 						double prevision = filter.predictRSSI();
-
-						console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionController: RSSI PREVISTO "+prevision);
+						
+						if(debug)debug(getDebugConsole(),  DebugConfiguration.DEBUG_INFO,"RelayPositionController: RSSI PREVISTO "+prevision);
 
 						if(prevision >= ElectionConfiguration.CLIENTS_DISCONNECTION_THRS){
 							positiveDisconnectionPrediction++;
-							console.debugMessage(DebugConfiguration.DEBUG_INFO,"RelayPositionController: RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE. PREDIZIONE DI DISCONNESSIONE No"+positiveDisconnectionPrediction);
+							if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionController: RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE. PREDIZIONE DI DISCONNESSIONE No"+positiveDisconnectionPrediction);
 							if(positiveDisconnectionPrediction == ElectionConfiguration.NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION){
-								console.debugMessage(DebugConfiguration.DEBUG_INFO, " RelayPositionController:DISCONNESSIONE RILEVATA COME SICURA. AVVERTO L'OBSERVER");
+								if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO, " RelayPositionController:DISCONNESSIONE RILEVATA COME SICURA. AVVERTO L'OBSERVER");
 								setChanged();
 								notifyObservers("DISCONNECTION_WARNING");
 							}
@@ -239,7 +240,17 @@ public class RelayPositionMonitor extends Observable implements Observer {
 		return stopped;
 	}
 	
-	
+	public void setDebug(boolean db){this.debug = db;}
 	public void setDebugConsole(DebugConsole console){this.console = console;}
 	public DebugConsole getDebugConsole(){return console;}
+	
+	private void debug(DebugConsole console,int type, String message){
+		if(console!=null)console.debugMessage(type, message);
+		else{
+			if(type==DebugConfiguration.DEBUG_INFO|| type ==DebugConfiguration.DEBUG_WARNING)
+				System.out.println(message);
+			if(type==DebugConfiguration.DEBUG_ERROR)
+				System.err.println(message);
+		}
+	}
 }

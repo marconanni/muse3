@@ -16,8 +16,8 @@ public class GreyModel implements RSSIFilter
 	/**
 	 * Numero minimo di campioni di segnale necessari ad effettuare una predizione col Grey Model
 	 */
-	public static final int NUMBER_OF_RSSI=5;
-	public static final double PREVISION_THRS=20;
+	//public static final int NUMBER_OF_RSSI=5;
+	//public static final double PREVISION_THRS=20;
 	private double realValues[];
 	private long predictedTime=-1;
 	private int time=-1;
@@ -45,9 +45,9 @@ public class GreyModel implements RSSIFilter
 		predictedTime=realValues.length;
 	
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-//		if(realValues.length<NUMBER_OF_RSSI){
-//			return realValues[realValues.length-1];
-//		}
+		if(realValues.length<ElectionConfiguration.GREY_MIN_NUMBER_OF_RSSI){
+			return realValues[realValues.length-1];
+		}
 		
 		try
 		{
@@ -96,7 +96,7 @@ public class GreyModel implements RSSIFilter
 			double res=xk1-xk;
 			if(res==Double.NaN)
 				res= realValues[realValues.length-1];
-			if(Math.abs(res-realValues[realValues.length-1])>=PREVISION_THRS)
+			if(Math.abs(res-realValues[realValues.length-1])>=ElectionConfiguration.PREVISION_THRS)
 				res= realValues[realValues.length-1];
 			return res;
 
@@ -128,7 +128,7 @@ public class GreyModel implements RSSIFilter
 		this.time=time;
 
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-		if(realValues.length<NUMBER_OF_RSSI)
+		if(realValues.length<ElectionConfiguration.GREY_MIN_NUMBER_OF_RSSI)
 			return realValues[realValues.length-1];
 		try
 		{
@@ -185,7 +185,7 @@ public class GreyModel implements RSSIFilter
 			double res=xk1-xk;
 			if(res==Double.NaN)
 				res= realValues[realValues.length-1];
-			if(Math.abs(res-realValues[realValues.length-1])>=PREVISION_THRS)
+			if(Math.abs(res-realValues[realValues.length-1])>=ElectionConfiguration.PREVISION_THRS)
 				res= realValues[realValues.length-1];
 			return res;
 
