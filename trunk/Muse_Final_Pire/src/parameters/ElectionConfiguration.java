@@ -1,18 +1,24 @@
 package parameters;
 
 public class ElectionConfiguration {
-
 	/*
-	 ************ SOGLIE DI DISCONNESSIONE E DI RIELEZIONE ********************
-	 * 
-	 * */
+	 * ************** PER IL GREYMODEL **************************
+	 */
+	/** numero minimo di valori RSSI effettivi per iniziare la predizione del valore RSSI successivo */
+	public static final int GREY_MIN_NUMBER_OF_RSSI=5;
+	/** se il valore predetto supera questa soglia rispetto all'ultimo valore RSSI effettivo letto viene restituito l ultimo valore RSSI effettivo*/
+	public static final double PREVISION_THRS = 20;
+	
+	/*
+	 ************ SOGLIE DI DISCONNESSIONE E DI RIELEZIONE *******************
+	 */
 	
 	/**Soglia superata la quale si considera molto probabile il presentarsi di una disconnessione dall'AP */
 	public static final double AP_DISCONNECTION_THRS = 70;
 	
 	/** Numero massimo di riscontri positivi per la disconnessione dall'AP raggiunto 
 	 *  il quale la disconnessione è considerata come certa */
-	public static final int NUMBER_OF_AP_DISCONNECTION_DETECTION = 3;
+	public static final int NUMBER_OF_AP_DISCONNECTION_DETECTION = 2;
 	
 	/** Soglia al di sopra della quale un valore RSSI non viene considerato nel calcolo della media
 	 *  degli RSSI rilevati dai Clients serviti nei confronti del Relay attuale */
@@ -23,11 +29,11 @@ public class ElectionConfiguration {
 	
 	/** Soglia superata la quale si considera molto probabile il presentarsi di una disconnessione
 	 *  dai Clients che il Relay attuale sta servendo. */
-	public static final double CLIENTS_DISCONNECTION_THRS = 40;
+	public static final double CLIENTS_DISCONNECTION_THRS = 67;
 	
 	/** Numero massimo di riscontri positivi per la disconnessione dai Clients serviti raggiunto 
 	 *  il quale tale disconnessione è considerata come certa */
-	public static final double NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION =4;
+	public static final double NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION =3;
 	
 	/*
 	 *************** PARAMETRI PER IL CALCOLO DEL PESO W **********************
