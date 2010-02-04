@@ -16,7 +16,6 @@ public class TimeOutSingleWithMessage extends Timer {
 
 	public void schedule(final Observer obs, long tV, final String message){
 		super.schedule(new TimerTask(){public void run(){obs.update(null,message);cancelTimeOutSingleWithMessage();}}, tV);
-		System.out.println("TIMEOUTFILEREQUEST_SCHEDULE: SETTATO IL TIMEOUT...");
 	} 
 
 	public void cancelTimeOutSingleWithMessage(){

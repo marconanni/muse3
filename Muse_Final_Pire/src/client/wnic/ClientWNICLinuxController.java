@@ -40,28 +40,21 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		}catch (IOException e){e.printStackTrace();}
 		
 		if(line!=null){
-			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR, "Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
-			else System.out.println("Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
+			debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR, "Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
 			throw new WNICException("ClientWNICLinuxController ERRORE: Impossibile accendere la scheda di rete, interfaccia ["+getInterfaceName()+"] non esiste.");
 		}else{
 			isOn = true;
 				
 			refreshStatus();
-				if (!isOn || !ismodeAdHoc() || !isEssidFound()){
-					if(console!=null)
-						console.debugMessage(DebugConfiguration.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
+			if (!isOn || !ismodeAdHoc() || !isEssidFound()){
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
+					"\nESSID: "+NetConfiguration.NAME_OF_CLIENT_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.CLIENT_ADDRESS);
+				throw new WNICException("La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
 						"\nESSID: "+NetConfiguration.NAME_OF_CLIENT_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.CLIENT_ADDRESS);
-					throw new WNICException("La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
-							"\nESSID: "+NetConfiguration.NAME_OF_CLIENT_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.CLIENT_ADDRESS);
-				}else{
-					if(console!=null)
-						console.debugMessage(DebugConfiguration.DEBUG_INFO, "Configurazione scheda WIFI:\nInterfaccia: "+interf+
-						"\nESSID: "+NetConfiguration.NAME_OF_CLIENT_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.CLIENT_ADDRESS);
-					else
-						System.out.println("Configurazione scheda WIFI:\nInterfaccia: "+interf+
-								"\nESSID: "+NetConfiguration.NAME_OF_CLIENT_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.CLIENT_ADDRESS);
-				}
-				
+			}else{
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO, "Configurazione scheda WIFI:\nInterfaccia: "+interf+
+					"\nESSID: "+NetConfiguration.NAME_OF_CLIENT_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.CLIENT_ADDRESS);
+			}
 		}
 	}
 
@@ -102,7 +95,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		try {
 			return getActualRSSIValue(interf);
 		}catch (Exception e) {
-			if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR, "Impossibile ottenere il nuovo valore di RSSI");
+			debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR, "Impossibile ottenere il nuovo valore di RSSI");
 			throw new WNICException("ClientWNICLinuxController ERRORE: impossibile ottenere il nuovo valore di RSSI");
 		}
 	}
@@ -121,7 +114,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 			p.waitFor();
 			return new BufferedReader(new InputStreamReader(p.getInputStream()));
 		}catch (Exception e){
-			if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nell'eseguire il comando : /sbin/ifconfig " + getInterfaceName()+ "up");
+			debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"Errore nell'eseguire il comando : /sbin/ifconfig " + getInterfaceName()+ "up");
 			throw new WNICException("ClientWNICLinuxController ERRORE: Errore nell'eseguire il comando : /sbin/ifconfig " + getInterfaceName()+ "up");
 		}	
 		
@@ -140,10 +133,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 				res1 = interfaceInfo.readLine();
 				setWifiInfo(res, res1);
 			}else{
-				if(debug){
-					if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
-					else System.out.println("L'interfaccia "+ interf +" NON ESISTE!");
-				}
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"L'interfaccia "+ interf +" NON ESISTE!");
 			}
 			interfaceInfo.close();
 		}catch (IOException e){e.printStackTrace();}
@@ -155,8 +145,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 			isAssociated = false;
 			//essidFound = false;
 			if(debug){
-				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_WARNING,"L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
-				else System.out.println("L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_WARNING,"L'interfaccia ["+ interf +"] ESISTE però è SPENTA!");
 			}
 		}
 
@@ -164,21 +153,18 @@ public class ClientWNICLinuxController implements ClientWNICController{
 		else if (line1.contains("IEEE") && !line2.contains("Not-Associated")){
 			isAssociated = true;
 			if(debug){
-				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
-				else System.out.println("L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"]  ESISTE ed è ACCESA.");
 			}
 		}
 		if(line1.contains(essidName)){
 			essidFound = true;
 			if(debug){
-				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
-				else System.out.println("L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"L'interfaccia ["+ interf +"] è CONNESSA alla rete ["+essidName+"]");
 			}
 		}else {
 			essidFound = false;
 			if(debug){
-				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
-				else System.out.println("L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"L'interfaccia ["+ interf +"] non è connessa alla rete [" + essidName+"]");
 			}
 		}
 		if(line2.contains("Ad-Hoc")) modeAdHoc = true;
@@ -198,7 +184,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 			p.waitFor();
 			return new BufferedReader(new InputStreamReader(p.getInputStream()));
 		}catch (Exception e){
-			if(console!=null)console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere informazioni dalla scheda wireless");
+			debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere informazioni dalla scheda wireless");
 			throw new WNICException("ClientWNICLinuxController ERRORE: Impossibile ottenere informazioni dalla scheda wireless");
 		}	
 	}
@@ -225,7 +211,7 @@ public class ClientWNICLinuxController implements ClientWNICController{
 			try{
 				res = Integer.parseInt(token.substring(0,3).trim());
 			}catch(NumberFormatException ee){
-				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere il valore RSSI attuale");
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere il valore RSSI attuale");
 				throw new WNICException("ClientWNICLinuxController Impossibile ottenere il valore RSSI attuale");
 			}
 		}
@@ -248,4 +234,14 @@ public class ClientWNICLinuxController implements ClientWNICController{
 	private String getInterfaceName() {return interf;}
 	private void setInterfaceName(String interf) {this.interf=interf;}
 	private void setEssidName(String essidName) {this.essidName=essidName;}
+	
+	private void debug(DebugConsole console,int type, String message){
+		if(console!=null)console.debugMessage(type, message);
+		else{
+			if(type==DebugConfiguration.DEBUG_INFO|| type ==DebugConfiguration.DEBUG_WARNING)
+				System.out.println(message);
+			if(type==DebugConfiguration.DEBUG_ERROR)
+				System.err.println(message);
+		}
+	}
 }
