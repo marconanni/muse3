@@ -18,8 +18,11 @@ public class PortConfiguration {
 	//Client && Relay
 	/** porta su cui il CLIENT e RELAY riceve i messaggi di REQUEST_RSSI
 	 *  e la porta da cui invia NOTIFY_RSSI al RELAY corrispondente*/
-	public static final int RSSI_PORT_IN = 3004;
-	public static final int RSSI_PORT_OUT = 3005;
+//	public static final int RSSI_PORT_IN = 3004;
+//	public static final int RSSI_PORT_OUT = 3005;
+	
+	public static final int RSSI_PORT_IN = 3006;
+	public static final int RSSI_PORT_OUT = 3007;
 
 	//SERVER
 	/** porte utilizzate per la gestione della sessione sul SERVER*/

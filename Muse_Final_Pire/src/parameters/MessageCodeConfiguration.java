@@ -42,5 +42,7 @@ public class MessageCodeConfiguration {
 	
 	public static final int SERVER_UNREACHEABLE = 50;
 	public static final int SESSION_INVALIDATION = 51;
+	
+	public static final int LOSE_MESSAGE = 80;
 
 }
