@@ -150,8 +150,10 @@ public class ClientElectionManager extends Observable implements Observer{
 
 		//PARTE PER LA GESTIONE DEI MESSAGGI PROVENIENTI DALLA RETE
 		if(arg1 instanceof DatagramPacket){
+			
 			DatagramPacket dpIn = (DatagramPacket)arg1;
 			setClientMessageReader(new ClientMessageReader());
+			
 			try {
 				getClientMessageReader().readContent(dpIn);
 			} catch (IOException e) {
@@ -170,10 +172,12 @@ public class ClientElectionManager extends Observable implements Observer{
 				memorizeConnectedRelayAddress();
 				setElecting(false);
 				setActualStatus(ClientStatus.IDLE);
-				
+				clearIndexELECTION_BEACON();
+				clearIndexEM_DET_CLIENT();
 				cancelTimeoutSearch();
 				
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": IM_RELAY arrivato,actualRelayAddress: " + getConnectedRelayAddress()+".\nPronto per richiesta file e iniziare streaming RTP.");
+				
 				//Notifico ClientSessionManager e anche il relay a cui sono connesso
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+getConnectedRelayAddress());
@@ -200,7 +204,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					
 				cancelTimeoutSearch();
 				clearElection();
-				setElecting(true);
+				clearIndexELECTION_BEACON();
 
 				
 				if(getActualStatus() == ClientStatus.ACTIVE){
@@ -209,32 +213,29 @@ public class ClientElectionManager extends Observable implements Observer{
 				
 					
 					//ulteriore controllo ma per forza deve essere true altrimenti lo stato sarebbe IDLE
-					if (isImServed()) {
-
-						DatagramPacket dpOut = null;
-
-						try {
-							//Messaggio destinato ai possibili sostituti
-							dpOut = ClientMessageFactory.buildElectioBeaconRelay(getIndexELECTION_BEACON(), BCAST,PortConfiguration.PORT_ELECTION_IN,1);
-							getComManager().sendTo(dpOut);
-							//Messaggio destinati ai client coinvolti nella elezione
-							dpOut = ClientMessageFactory.buildElectioBeacon(getIndexELECTION_BEACON(), BCAST, PortConfiguration.PORT_ELECTION_IN);
-							getComManager().sendTo(dpOut);
+					DatagramPacket dpOut = null;
+					try {
+						//Messaggio destinato ai possibili sostituti
+						dpOut = ClientMessageFactory.buildElectioBeaconRelay(getIndexELECTION_BEACON(), BCAST,PortConfiguration.PORT_ELECTION_IN,1);
+						getComManager().sendTo(dpOut);
+						//Messaggio destinati ai client coinvolti nella elezione
+						dpOut = ClientMessageFactory.buildElectioBeacon(getIndexELECTION_BEACON(), BCAST, PortConfiguration.PORT_ELECTION_IN);
+						getComManager().sendTo(dpOut);
 							
-							addIndexELECTION_BEACON(1);
-						} catch (IOException e){e.printStackTrace();}
+						addIndexELECTION_BEACON(1);
+					} catch (IOException e){e.printStackTrace();}
 
-						setTimeoutFailToElect(ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
+					setTimeoutFailToElect(ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
 						
-						setActualStatus(ClientStatus.WAITING_END_ELECTION);
+					setActualStatus(ClientStatus.WAITING_END_ELECTION);
 						
-						debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
-					}
-
-					setChanged();
-					notifyObservers("RECIEVED_ELECTION_REQUEST");
+					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
 				}
+
+				setChanged();
+				notifyObservers("RECIEVED_ELECTION_REQUEST");
 			}
+			
 			
 			/** ELECTION_BEACON
 			 *  Messaggio per propagare lo stato di elezione
@@ -243,9 +244,8 @@ public class ClientElectionManager extends Observable implements Observer{
 			else if((getClientMessageReader().getCode()==MessageCodeConfiguration.ELECTION_BEACON) &&
 					(!sameAddress(getClientMessageReader().getPacketAddress()))){
 				
-				setElecting(true);
-				setConnectedRelayAddress(null);
-				setConnectedRelayInetAddress(null);
+				cancelTimeoutSearch();
+				clearElection();
 				
 				if((getIndexELECTION_BEACON()==0) && (getActualStatus()==ClientStatus.ACTIVE)){
 					
@@ -269,6 +269,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_BEACON inviato e start TIMEOUT_FAIL_TO_ELECT");
 				}
+				addIndexELECTION_BEACON(1);
 				
 			}
 			
@@ -286,6 +287,15 @@ public class ClientElectionManager extends Observable implements Observer{
 				if(getActualStatus()==ClientStatus.WAITING_END_ELECTION){
 					cancelTimeoutFailToElect();
 					setActualStatus(ClientStatus.ACTIVE);
+					DatagramPacket dpOut = null;
+					try {
+						dpOut = ClientMessageFactory.buildAckConnection(getConnectedRelayInetAddress(), PortConfiguration.PORT_ELECTION_IN,MessageCodeConfiguration.TYPECLIENT);
+						getComManager().sendTo(dpOut);
+					} catch (IOException e) {
+						debug(getConsoleWifiInterface(),DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di ACK_CONNECTION");
+						e.getStackTrace();}
+
+					debug(getConsoleWifiInterface(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": client connesso al nuovo Relay IP:"+getConnectedRelayAddress()+" e ACK_CONNECTION spedito");
 				}
 				getComManager().sendTo(prepareRepropagation(dpIn));
 				setFirstELECTION_DONE(true);
@@ -365,10 +375,10 @@ public class ClientElectionManager extends Observable implements Observer{
 	}
 	
 	public void clearElection(){
+		setElecting(true);
 		setConnectedRelayAddress(null);
 		setConnectedRelayInetAddress(null);
 		setFirstELECTION_DONE(false);
-		clearIndexELECTION_BEACON();
 	}
 
 

@@ -16,7 +16,6 @@ public class ClientController {
 
 //	private ClientSessionManager sessionManager;
 	private ClientElectionManager electionManager;
-	private DebugConsole console;
 
 	public ClientController(){//ClientFrame frame){
 		//if(frame.getController() != null)
