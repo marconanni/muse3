@@ -23,7 +23,7 @@ public class RelayConnectionFactory {
 		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAddress(),rpm.getLocalClusterHeadBCASTAddress(),rpm.getPortElectionIN(),rpm.getPortElectionOUT(),obser, bcast);
 	}
 	
-	public static RelayCM getClusterHeadElectionConnectionManagerBIGBISS(Observer obser, boolean bcast){
+	public static RelayCM getClusterHeadElectionConnectionManagerBIGBOSS(Observer obser, boolean bcast){
 		return new RelayCM("RelayElectionCM Cluster Head Server", rpm.getLocalManagedAddress(), rpm.getLocalManagedBCASTAddress(), rpm.getPortElectionIN(), rpm.getPortElectionOUT(), obser,bcast);
 	}
 
