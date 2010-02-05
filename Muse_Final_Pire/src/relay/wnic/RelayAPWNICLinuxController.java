@@ -37,6 +37,13 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 			throw new WNICException("RelayWNICLinuxController: ERRORE: la scheda wireless deve essere accesa per procedere");
 		}*/
 	}
+	
+	public RelayAPWNICLinuxController(int RSSI, String ethX, String netName) throws WNICException{
+		setInterfaceName(ethX);
+		setEssidName(netName);
+		setNumberOfPreviousRSSI(RSSI);
+
+	}
 
 
 	public RelayAPWNICLinuxController(String ethX, String netName) throws WNICException{		
@@ -80,6 +87,7 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 			isOn = true;
 				
 			refreshStatus();
+			System.out.println("IsON:"+isOn()+" - isManaged:"+isModeManaged()+" - isEssidFound:"+isEssidFound());
 				if (!isOn || !isModeManaged() || !isEssidFound()){
 					if(console!=null)
 						console.debugMessage(DebugConfiguration.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
