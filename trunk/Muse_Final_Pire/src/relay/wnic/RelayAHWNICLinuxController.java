@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 
 import parameters.DebugConfiguration;
 import parameters.NetConfiguration;
+import relay.wnic.exception.InvalidAccessPoint;
 import relay.wnic.exception.WNICException;
 
 import debug.DebugConsole;
@@ -210,12 +211,21 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 		}	
 	}
 	
-	private int convertRSSI(int dBm){
-		if(dBm<-100)
-			return 0;
-		if(dBm>20)
-			return 120;
-		return dBm+100;
+	private int extractRSSIValue(String line) throws InvalidAccessPoint{
+		StringTokenizer st = new StringTokenizer(line);
+		String token = null;
+		int res = -1;
+
+		do token = st.nextToken("=-"); 
+		while(st.hasMoreTokens() && !token.contains("dBm"));
+
+		try{
+			res = Integer.parseInt((token.substring(0,3).trim()));			
+		}catch(NumberFormatException ee){
+			throw new InvalidAccessPoint("ERRORE: RSSI non valido");
+		}
+
+		return res;
 	}
 
 	/**Metodo per ottenere il valore di RSSI attuale avvertito nei confronti del Relay attuale tramite il comando <code>iwconfig<code>
@@ -228,19 +238,22 @@ public class RelayAHWNICLinuxController implements RelayWNICController {
 
 		BufferedReader br = getInterfaceInfo(iN); 
 		setWifiInfo(br.readLine(), br.readLine());
+		String riga = null;
 		if(isConnected()){
 			try{
-				String riga = br.readLine();
-				while(riga!=null){
-					StringTokenizer stringToken = new StringTokenizer(riga," \"\t\n\r\f");
-					while(stringToken.hasMoreElements()){
-						String token = stringToken.nextToken();
-						if(token.equals("Signal")){
-							return convertRSSI(Integer.parseInt(stringToken.nextToken().substring(6)));
-						}
-					}
-					riga=br.readLine();
-				}
+				do{riga = br.readLine();}
+				while(!riga.contains("Signal") && riga != null);
+				br.close();
+				return extractRSSIValue(riga);
+//					StringTokenizer stringToken = new StringTokenizer(riga," \"\t\n\r\f");
+//					while(stringToken.hasMoreElements()){
+//						String token = stringToken.nextToken();
+//						if(token.equals("Signal")){
+//							return convertRSSI(Integer.parseInt(stringToken.nextToken().substring(6)));
+//						}
+//					}
+//					riga=br.readLine();
+//				}
 			}catch (Exception e) {
 				if(console!=null) console.debugMessage(DebugConfiguration.DEBUG_ERROR,"Impossibile ottenere il valore RSSI attuale");
 				throw new WNICException("RelayAHWNICLinuxController Impossibile ottenere il valore RSSI attuale");
