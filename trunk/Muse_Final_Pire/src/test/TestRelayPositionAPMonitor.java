@@ -1,5 +1,6 @@
 package test;
 
+import debug.DebugConsole;
 import relay.position.RelayPositionAPMonitor;
 import relay.wnic.RelayAPWNICLinuxController;
 import relay.wnic.exception.WNICException;
@@ -7,13 +8,16 @@ import relay.wnic.exception.WNICException;
 class TestRelayPositionAPMonitor{
 
 	public static void main(String args[]){
+		DebugConsole console = new DebugConsole("GREY VALUE AP");
 		System.out.println("TestRelayPositionAPMonitor");
-		TestObserver to = new TestObserver();
+		TestObserver to = new TestObserver(console);
 		RelayAPWNICLinuxController rwlc = null;
 		RelayPositionAPMonitor rpAPm = null;
 		try {
-			rwlc = new RelayAPWNICLinuxController(15,"wlan0", "lord");
-			rpAPm = new RelayPositionAPMonitor(rwlc,4000,to);
+			rwlc = new RelayAPWNICLinuxController(15,"wlan1","labmuse");
+			rwlc.setDebugConsole(console);
+			rwlc.init();
+			rpAPm = new RelayPositionAPMonitor(rwlc,3000,to);
 			rpAPm.start();
 			
 		/*	try {
