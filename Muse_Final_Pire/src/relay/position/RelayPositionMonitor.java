@@ -49,7 +49,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	private int numberOfValideRSSI;
 	private boolean started;
 	private boolean stopped;
-	private boolean debug = false;
+	private boolean debug = true;
 	private DebugConsole console = null;
 	
 	static{
