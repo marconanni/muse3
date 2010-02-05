@@ -410,11 +410,14 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 		String token = null;
 		int res = -1;
 
-		do token = st.nextToken("=-"); 
+		do token = st.nextToken("=-\":-"); 
 		while(st.hasMoreTokens() && !token.contains("dBm"));
 
 		try{
-			res = Integer.parseInt((token.substring(0,3).trim()));			
+			StringTokenizer st1 = new StringTokenizer(token);
+			
+			//res = Integer.parseInt((token.substring(0,3).trim()));
+			res = Integer.parseInt(st1.nextToken(" "));
 		}catch(NumberFormatException ee){
 			throw new InvalidAccessPoint("ERRORE: RSSI non valido");
 		}
