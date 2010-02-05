@@ -45,7 +45,7 @@ public class GreyModel implements RSSIFilter
 		predictedTime=realValues.length;
 	
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-		if(realValues.length<ElectionConfiguration.GREY_MIN_NUMBER_OF_RSSI){
+		if(realValues.length-1<=ElectionConfiguration.GREY_MIN_NUMBER_OF_RSSI){
 			return realValues[realValues.length-1];
 		}
 		
