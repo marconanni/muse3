@@ -531,6 +531,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					setFirstELECTION_REQUEST(true);
 					setFirstELECTION_DONE(false);
 
+				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "Arrivato ELECTION_REQUEST");
 				//rielezione nuovo nodo relay BigBoss/Relay secondario e sono un nodo possibile sostituto
 				//un nodo possibile sostituti sta in ascolto solo dei messaggi broadcast emessi sulla rete (CLUSTER) in cui ne fa parte
 				if((isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY())&& (getActualStatus()==RelayStatus.IDLE)){
@@ -640,12 +641,14 @@ public class RelayElectionManager extends Observable implements Observer{
 					(getActualStatus() == RelayStatus.WAITING_END_NORMAL_ELECTION) &&
 					(!sameAddress(getRelayMessageReader().getPacketAddess())) &&
 					(!getFirstELECTION_DONE())){
+				
 				setFirstELECTION_DONE(true);
 				setFirstELECTION_REQUEST(false);
-				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_DONE arrivato: nuovo Relay: "+getRelayMessageReader().getNewRelayLocalClusterAddress());
-							
-				cancelTimeoutFailToElect();
 				
+				cancelTimeoutFailToElect();
+				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_DONE arrivato: nuovo Relay: "+getRelayMessageReader().getNewRelayLocalClusterAddress());
+			
+				//caso in cui viene eletto un nuovo BIGBOSS devo ricollegare il relay attivo
 				if(isRELAY()){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un relay secondario attivo ed è stato appena eletto un nuovo BIGBOSS, lo memorizzo.");
 										
@@ -699,13 +702,16 @@ public class RelayElectionManager extends Observable implements Observer{
 				//propagazione del messaggio ELECTION_DONE
 				getComClusterManager().sendTo(prepareRepropagationCluster(dpIn));
 				//Se si tratta di una elezione a livello cluster faccio partire una propagazione al livello cluster head per essere sicuro che gli arriva il messaggio al bigboss
-				if(isRELAY()||isPOSSIBLE_RELAY()){
+				if(isRELAY()){
 					getComClusterHeadManager().sendTo(prepareRepropagationClusterHead(dpIn));
-					debug(getConsoleClusterWifiInterface(),DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": Propagazione messaggio ELECTION_DONE inviato....");
+					debug(getConsoleClusterWifiInterface(),DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": Propagazione messaggio ELECTION_DONE sul CLUSTER HEAD inviato....");
 				}
 			}
+			
+			//ho rieletto un nuovo relay secondario ed è arrivato il messaggio al bigboss corrente
 			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_DONE) && 
 					(isBIGBOSS())&&
+					(getActualStatus()==RelayStatus.MONITORING) &&
 					(!getFirstELECTION_DONE())){
 				try {
 					if(!sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayLocalClusterAddress())))
@@ -713,6 +719,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					notifyObservers("NEW_RELAY:"+getRelayMessageReader().getNewRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+":"+getRelayMessageReader().getHeadNodeAddress());
 					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+"\nnuovo relay manderà un messaggio di ACK_CONNECTION");
 					setFirstELECTION_DONE(true);
+					setFirstELECTION_REQUEST(false);
 				} catch (UnknownHostException e) {e.printStackTrace();}
 			
 			}
@@ -842,7 +849,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					
 					}
 					else{
-					
+						debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_ERROR, "RelayElectionManager STATO:"+actualStatus+" non ci sono nodi sostituti --> FASE DI EMERGENZA, questo nodo nn ne fa parte");
 						//FASE DI EMERGENZA
 					}
 					getComClusterHeadManager().close();
