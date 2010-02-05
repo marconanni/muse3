@@ -14,8 +14,8 @@ import unibo.core.EventCircularBuffer;
 public class RelayBufferManager {
 
 	
-	private EventCircularBuffer normalBuffer;
-	private EventCircularBuffer recoveryBuffer;
+	private ExtensibleEvenCircularBuffer normalBuffer;
+	private ExtensibleEvenCircularBuffer recoveryBuffer;
 	private IClientView controller;
 	//dimensione dei buffer in termini di numero di frame contenuti 
 	private int bufSize;

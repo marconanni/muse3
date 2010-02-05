@@ -193,6 +193,9 @@ public class ClientSessionManager implements Observer, BufferFullListener , Buff
 				 * sbirciando nel metodo di clientPlaying sembra che si setti solo la dimensione del buffer e non la soglia,
 				 * probabilmente però questa è legata al booleano is normalMode ( l'ultimo parametro inviato) che è settato a false
 				 * 
+				 * Nota : la soglia inferiore viene posta alla soglia inferiore normale+ la met� della dimensione
+				 * massima del buffer, mentre la soglia superiore viene posta alla massima dimensione del buffer.
+				 * 
 				 */
 			{
 				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);

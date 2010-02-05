@@ -215,6 +215,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	}
 	
 	/**
+	 * @author Marco
 	 * Questo metodo richiama il metodo SetSender di NormalReceiver, la speranza è che,
 	 * usato qunado il proxy riceve un leave dal big boss questo serva a ricevere il flusso
 	 * dal nuovo proxy sul big boss
