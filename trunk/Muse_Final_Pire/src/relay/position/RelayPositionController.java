@@ -33,7 +33,7 @@ public class RelayPositionController implements Observer {
 	private RelayElectionManager electionManger = null;
 	private DebugConsole console = null;
 	
-	private boolean debug = false;
+	private boolean debug = true;
 	
 	/**Metodo per ottenere un ClientPositionController
 	 * @param interf una String che rappresenta l'interfaccia di rete da gestire
