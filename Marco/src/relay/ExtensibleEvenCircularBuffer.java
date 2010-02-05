@@ -26,6 +26,14 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	 private int sogliaSuperioreNormal;		 // soglia oltre alla quale , in modalit� normale viene lanciato 
 											//l'evento di bufferFull
 	 
+	 
+	 private int sogliaInferioreElection;  //// soglia oltre alla quale , in modalit� elezione viene lanciato 
+												//l'evento di bufferEmpty
+	 private int sogliaInferioreNormal;  //// soglia oltre alla quale , in modalit� notmale viene lanciato 
+												//l'evento di bufferEmpty
+	 
+	 
+	 
 
 	
 	
@@ -56,9 +64,36 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 
 
 
+	public int getSogliaInferioreElection() {
+		return sogliaInferioreElection;
+	}
+
+
+
+	public void setSogliaInferioreElection(int sogliaInferioreElection) {
+		this.sogliaInferioreElection = sogliaInferioreElection;
+	}
+
+
+
+	public int getSogliaInferioreNormal() {
+		return sogliaInferioreNormal;
+	}
+
+
+
+	public void setSogliaInferioreNormal(int sogliaInferioreNormal) {
+		this.sogliaInferioreNormal = sogliaInferioreNormal;
+	}
+
+
+
 	/**
 	 * In questa versione del costruttore il valore della soglia superiore in modalit� Election
-	 * � posto pari al doppio della sogli superiore in funzionamento normale 
+	 * � posto pari al doppio della sogli superiore in funzionamento normale, se tale valore non 
+	 * supera la dimensione massima del buffer
+	 * Discorso analogo per la soglia inferiore in caso di elezione
+	 * e viene posta pari alla soglia superiore standard
 	 * @param numFrames = � la dimensione totale del buffer
 	 * @param sogliaInferiore = � la soglia sotto la quale viene lanciato l'evento di bufferEmpty
 	 * @param sogliaSuperiore = � la soglia sopra la quale, in funzionamento normale, viene lanciato 
@@ -67,7 +102,14 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	 */
 	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperiore){
 		super(numFrames,view,sogliaInferiore, sogliaSuperiore);
-		this.setSogliaSuperioreElection(sogliaSuperiore*2);
+		
+		this.sogliaSuperioreNormal = sogliaSuperiore;
+		this.sogliaInferioreNormal= sogliaInferiore;
+		if(sogliaSuperiore*2<=numFrames)
+			this.setSogliaSuperioreElection(sogliaSuperiore*2);
+		else
+			this.sogliaInferioreElection=numFrames;
+		this.sogliaInferioreElection= sogliaSuperiore;
 		
 	}
 	

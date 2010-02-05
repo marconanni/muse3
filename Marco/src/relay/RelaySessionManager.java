@@ -584,14 +584,26 @@ public class RelaySessionManager implements Observer{
 				}
 			}
 			// TODO ELECTION_REQUEST_RECEIVED si inizia la fase di rielezione
-			if(this.event.equals("ELECTION_REQUEST_RECEIVED"))// Marco aggiungi condizione sono il relay secondario e non il big boss
+			if(this.event.equals("ELECTION_REQUEST_RECEIVED")&&isRelay())// Marco aggiungi condizione sono il relay secondario e non il big boss
 			{
 				/*
-				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo ï¿½ un relay secondario
+				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo è un relay secondario
 				 * servito dal big boss.
 				 * Qui il relay secondario deve ingrandire i buffer (alzando la soglia superiore) dei propri proxy, analogamente
 				 * a quello che fanno i clients.
+				 * Nota il nodo che lancia l'electionRequest non riceve questo messaggio, sei quindi tutelato nel caso
+				 * sia il relay secondario ad indire la rielezione per il suo cluster.
+				 * 
+				 * Comunico ai proxy di ingrandire i propri buffers.
 				 */
+				Enumeration <String> chiavi;
+				while(chiavi.hasMoreElements()){
+					sessions.get(chiavi.nextElement()).getProxy()//.elnargeBuffer
+				}
+				
+				
+				
+				
 			}
 			
 		}
