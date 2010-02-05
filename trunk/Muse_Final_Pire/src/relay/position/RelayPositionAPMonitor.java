@@ -108,7 +108,7 @@ public class RelayPositionAPMonitor extends Observable {
 					tmp +=" PREVISIONE:"+prevision;
 					debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: "+tmp);
 				}
-				
+				debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RSSI nei confronti del AP:"+ actualRSSI+"  -  Previsione: "+prevision);
 				if(prevision >= ElectionConfiguration.AP_DISCONNECTION_THRS){
 					positiveDisconnectionPrediction++;
 					debug(getDebugConsole(), DebugConfiguration.DEBUG_WARNING,"RelayPositionAPMonitor: RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE ("+positiveDisconnectionPrediction+" su"+ElectionConfiguration.NUMBER_OF_AP_DISCONNECTION_DETECTION+")");
