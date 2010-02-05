@@ -9,9 +9,15 @@ import java.net.DatagramPacket;
 import java.util.Observable;
 import java.util.Observer;
 
+import debug.DebugConsole;
+
+import parameters.DebugConfiguration;
+
 import relay.battery.RelayBatteryMonitor;
 
 public class TestObserver implements Observer {
+	
+	private DebugConsole console = null;
 	
 	//private RelaySessionCM rscm = null;
 	//private ProxyCM pcm = null;
@@ -19,6 +25,10 @@ public class TestObserver implements Observer {
 	
 	public TestObserver(){
 		System.out.println("testObserver: creato");
+	}
+	
+	public TestObserver(DebugConsole console){
+		this.console = console;
 	}
 	
 //	public void setRelaySessionCM(RelaySessionCM rs, ProxyCM pc){
@@ -61,6 +71,8 @@ public class TestObserver implements Observer {
 			}
 		}
 		else if(arg1 instanceof String){
+			
+			if(this.console!=null)this.console.debugMessage(0,(String)arg1);
 			System.out.println("RICEVUTO MESSAGGIO: " + (String)arg1);
 //			if(arg0 instanceof RelayBatteryMonitor)
 //				((RelayBatteryMonitor)arg0).close();
