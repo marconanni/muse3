@@ -3,9 +3,18 @@ package parameters;
 public class BufferConfiguration {
 	
 	/**
-	 * dimensione del buffer lato proxy
+	 * caratteristiche del buffer lato proxy
 	 */
-	public static final int PROXY_BUFFER = 150;
+	public static final int PROXY_BUFFER = 160;
+	
+	public static final int PROXY_SOGLIA_INFERIORE_NORMAL  = 0;
+	
+	public static final int PROXY_SOGLIA_INFERIORE_ELECTION  = 80;
+	
+	public static final int PROXY_SOGLIA_SUPERIORE_NORMAL  = 80;
+	
+	public static final int PROXY_SOGLIA_SUPERIORE_ELECTION  = 150;
+	
 	
 	/**
 	 * dimensione del buffer lato client

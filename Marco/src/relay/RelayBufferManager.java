@@ -23,18 +23,22 @@ public class RelayBufferManager {
 	
 	/**
 	 * Crea un RelayBufferManager i cui buffer interni hanno una 
-	 * dimensione nFrames (in termini di numero di frame contenuti)
+	 * dimensione nFrames (in termini di numero di frame contenuti),
+	 * ènecessartio specificare le soglie oltre alle quali vengono lanciati gli eventi
+	 *  di bufferEmpty e bufferFull nel funzionamento normale d durente la fase di rielezione
 	 *  
 	 * @param nFrames
 	 */
-	public RelayBufferManager(int nFrames, IClientView controller, int sogliaInferiore, int sogliaSuperiore, Proxy proxy){
+	public RelayBufferManager(int nFrames, IClientView controller, int sogliaInferioreNormal, int sogliaInferioreElection, int sogliaSuperioreNormal, int  sogliaSuperioreElection, Proxy proxy){
 		this.controller = controller;
 		this.proxy = proxy;
-		normalBuffer = new EventCircularBuffer(nFrames, controller, sogliaInferiore, sogliaSuperiore);
+		normalBuffer = new ExtensibleEvenCircularBuffer(nFrames,controller,sogliaInferioreNormal,sogliaInferioreElection,sogliaSuperioreNormal,sogliaSuperioreElection);
 		normalBuffer.addBufferFullEventListener(this.proxy);
 		normalBuffer.addBufferEmptyEventListener(this.proxy);
 		bufSize = nFrames;
 	}
+	
+	
 
 	/*
 	 * Ho deciso di eliminare questo metodo in quanto superfluo,
@@ -75,6 +79,20 @@ public class RelayBufferManager {
 	 */
 	public int getBufSize() {
 		return bufSize;
+	}
+
+
+	/**
+	 * @author Marco Nanni
+	 * Ingrandisce il buffer nomale chiamando il metodo 
+	 * setNormalMode del buffer normale
+	 * questo metodo pone le soglie del buffer pari a quelle specificate coem
+	 * soglie da usare in fase di elezione ( superiori a quelle da usare durante 
+	 * il funzionamento normale)
+	 */
+	public void elnargeNormalBuffer() {
+		this.normalBuffer.setNormalMode(false);
+		
 	}
 
 

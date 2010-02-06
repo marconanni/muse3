@@ -537,7 +537,7 @@ public class RelaySessionManager implements Observer{
 				}
 			}
 			
-			// TODO scattato il timeout su SessionInfo , ma posso ancora provare a ritrasmettere
+			//TODO scattato il timeout su SessionInfo , ma posso ancora provare a ritrasmettere
 			
 			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions != 0 && this.status.equals(SessionManagerStatus.RequestingSession)) // Nuovo Realy: è scattato il timout sull'attesa di SessionInfo
 			{
@@ -608,7 +608,7 @@ public class RelaySessionManager implements Observer{
 			
 		}
 		
-		// TODO il proxy, dopo aver creato la sessione comunica al sessionManager le porte che usa
+		// TODO : il proxy, dopo aver creato la sessione comunica al sessionManager le porte che usa
 		/**
 		 * il proxy dopo aver creato la sessione ha il compito di avvertire il sessionmanager
 		 * ++++++++++++++++++++++++++EVENTO SOLLEVATO DAI PROXY++++++++++++++++++++++++++++++
