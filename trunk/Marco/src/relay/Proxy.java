@@ -75,9 +75,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String streamingServerAddress; //è l'indirizzo di chi manda il flusso al proxy
 	private String futureStreamingAddress; // è l'indirizzo del nuovo big boss che manderà il flusso al proxy quando questo riceverà il messaggio
 											// di LEAVE dal proxy sul vecchio relay
-	// TODO cerca il mapametro proxy buffer nei nuovi parametri di pire
-	int initialSupThreshold = (BufferConfiguration.PROXY_BUFFER*70)/100; // Marco: la soglia di buffer pieno  viene posta al 70%
 	
+			
 	private boolean servingClient; // se true indice che si eroga il flusso al client, se è false
 	
 	//porte(le porte di ricezione del proxy si trovano dentro l'RTPReceptionManager): 
@@ -187,7 +186,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 		try {
 			//relay buffer manager, this e' un listener per gli eventi sollevati dal buffer nominale
-			buffer = new RelayBufferManager(BufferConfiguration.PROXY_BUFFER, this.fProxy.getController(), 0,initialSupThreshold, this);
+			buffer = new RelayBufferManager(BufferConfiguration.PROXY_BUFFER, this.fProxy.getController(), BufferConfiguration.PROXY_SOGLIA_INFERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_INFERIORE_ELECTION,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_ELECTION,initialSupThreshold, this);
 			//buffer.getNormalBuffer().addBufferEmptyEventListener(this);
 			//buffer.getNormalBuffer().addBufferFullEventListener(this);
 			
@@ -1313,6 +1312,19 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			streamingServerSessionPort=PortConfiguration.SERVER_SESSION_PORT_IN;
 		else
 			streamingServerSessionPort= streamingServerCtrlPort;// ricevo il flusso da un altro proxy.
+		
+	}
+	
+	/**
+	 * Metodo che ingrandisce il buffer normale del proxy, usato quando il proxy su un 
+	 * relay secondario deve ingrandire i propri bufffer a causa della rielezione del big boss
+	 */
+	private void elnargeNormalBuffer (){
+		/*
+		 * Agisce chiamndo l'omonimo metodo del bufferManager
+		 */
+		
+		this.buffer.elnargeNormalBuffer();
 		
 	}
 	

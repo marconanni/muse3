@@ -33,7 +33,7 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 												//l'evento di bufferEmpty
 	 
 	 
-	 
+	 private boolean normalMode; // normal mode
 
 	
 	
@@ -127,8 +127,47 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperioreNormal, int sogliaSuperioreElection){
 		super(numFrames,view,sogliaInferiore, sogliaSuperioreNormal);
 		this.setSogliaSuperioreElection(sogliaSuperioreElection);
+		this.setNormalMode(true);
 		
 	}
+	
+	
+	
+	/**
+	 * In questa versione del costruttore sono pspecificabili i valori delle soglie 
+	 * da usare in caso di rielezione
+	 * @param numFrames = ï¿½ la dimensione totale del buffer
+	 * @param sogliaInferioreNormal = ï¿½ la soglia sotto la quale viene lanciato l'evento di bufferEmpty in funzionamento normale
+	 * @param sogliaInferioreElection = è la soglia sotto la quale viene lanciato l'evento di bufferEmpty durante la rielezione
+	 * @param sogliaSuperiorenNormal = ï¿½ la soglia sopra la quale, in funzionamento normale, viene lanciato 
+	 * l'evento di bufferfull.
+	 * @param sogliaSuperioreNormal = ï¿½ la soglia sopra la quale, in funzionamento normale, viene lanciato 
+	 * l'evento di bufferfull.
+	 * @param sogliaSuperioreElection = ï¿½ la soglia oltre la quale viene lanciato l'eventodi 
+	 * bufferFull quando il buffer ï¿½ in modalitï¿½ Election
+	 * 
+	 */
+	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferioreNormal,int sogliaInferioreElection, int sogliaSuperioreNormal, int sogliaSuperioreElection){
+		
+		super(numFrames,view,sogliaInferioreNormal, sogliaSuperioreNormal);
+		this.sogliaInferioreNormal = sogliaInferioreNormal;
+		this.sogliaInferioreElection= sogliaInferioreElection;
+		this.sogliaSuperioreNormal = sogliaSuperioreNormal;
+		this.sogliaSuperioreElection=sogliaSuperioreElection;
+		this.setNormalMode(false);
+		
+		
+		
+		}
+		
+	
+		
+		
+
+	
+
+	
+
 
 
 	/**
@@ -141,6 +180,9 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 
 	@Override
 	public void setNormalMode(boolean normalMode) {
+		
+		super.setNotmalMode(normalMode);
+		
 		
 		if(normalMode== true)
 			super.setSogliaSuperiore(sogliaSuperioreNormal);
