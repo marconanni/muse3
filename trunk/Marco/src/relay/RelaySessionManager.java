@@ -55,7 +55,6 @@ public class RelaySessionManager implements Observer{
 	 */
 	private DatagramPacket message;
 	public static final RelaySessionManager INSTANCE = new RelaySessionManager(); // Marco: il relay è un singleton
-	private boolean imRelay; // Marco:  im'relay: è il primo parametro del file parameters, credo che indichi se il Relay è attualmente attivo o è solo un possibile relay
 	private String clientAddress; //Marco: variabile di appoggio che si usa per capire chi ha mandato un certo messaggio
 	private String relayAddress; // Marco: è l'indirizzo locale al cluster dell'attuale relay;
 	private String maxWnextRelay;  // Marco : è l'indirizzo del nuovo relay sul cluster 
@@ -102,33 +101,11 @@ public class RelaySessionManager implements Observer{
 	}
 
 
-	/**
-	 * @return the imRelay
-	 */
-	public boolean isImRelay() { // Marco: è il metodo che ritorna true se il nodo è attualmente il relay della rete
-		return imRelay;
-	}
-
-	/**
-	 * @param imRelay the imRelay to set
-	 */
 	
-	public void setImRelay(boolean imRelay) {
-		/*
-		 * // Marco: è il metodo per settare il flag quando il nodo diventa il relay attvio o si disattiva
-		 * un relay disattivo è per forza waiting
-		 * un relay che si attiva va in status idle
-		 */
-		this.imRelay = imRelay;
-		if(this.imRelay)
-		{
-			status = SessionManagerStatus.Idle;
-		}
-		else
-		{
-			status = SessionManagerStatus.Waiting;
-		}
-	}
+
+	
+	
+	
 
 	/* (non-Javadoc)
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
@@ -208,8 +185,10 @@ public class RelaySessionManager implements Observer{
 			 */
 			
 			
+			// unico dubbio: serve proprio il controllo sullo stato del SessionManager?
 			
-			if(messageReader.getCode() == MessageCodeConfiguration.REQUEST_SESSION && this.status==SessionManagerStatus.Active )
+			
+			if(messageReader.getCode() == MessageCodeConfiguration.REQUEST_SESSION && this.status==SessionManagerStatus.AttendingRequestSession )
 			{
 				if(toSessionRequest!=null) // Marco: viene disattivato il timeout request session: il messaggio è arrivato
 					toSessionRequest.cancelTimeOutSessionRequest();
@@ -223,7 +202,7 @@ public class RelaySessionManager implements Observer{
 						this.message = RelayMessageFactory.buildSessionInfo(0, sessions, InetAddress.getByName(this.maxWnextRelay), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 						
 					}
-					// se sessions � vuoto passo come parametro null: build sessioninfo creer� un pacchetto senza le indicazioni delle sessioni
+					// se sessions � vuoto passo come parametro null: build sessioninfo creer� un pacchetto senza le indicazioni delle sessioni, tuttavia non dovrei finirci se non ho sessioni attive...
 					else{this.message = RelayMessageFactory.buildSessionInfo(0, null, InetAddress.getByName(this.maxWnextRelay), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);}
 
 					this.sessionCM.sendTo(this.message); //Marco: invio il messaggio preparato
@@ -316,7 +295,7 @@ public class RelaySessionManager implements Observer{
 			this.event = (String)arg;
 			
 			// TODO "end of media" un proxy mi comunica che ha finito
-			if(this.event.equals("End_Of_Media") && status.equals(SessionManagerStatus.Active) && imRelay)
+			if(this.event.equals("End_Of_Media") && status.equals(SessionManagerStatus.Active) && (this.isRelay()&&this.isBigBoss()))
 			{
 				/*
 				 * fine di una canzone  
@@ -371,7 +350,7 @@ public class RelaySessionManager implements Observer{
 					consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_REQUEST");
 				if(this.event.equals("TIMEOUTACKSESSIONINFO") && status.equals(SessionManagerStatus.AttendingAckSession))
 					consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_ACK_SESSION_INFO");
-				//TODO DEVO AVVISARE IL RELAYELECTIONMANAGER
+				
 				/*
 				 * Marco: in sostanza, se il nuovo relay non risponde, cerco di nominare il secondo
 				 * classificato alle elezioni
@@ -480,15 +459,14 @@ public class RelaySessionManager implements Observer{
 					
 					if (this.getLocalClusterAddress().equals(oldRelayLocalClusterAddress)){
 						this.maxWnextRelay = newRelay;
-						this.imRelay = false; // Marco: cambio già il flag: non è un po' presto? io lo avrei fatto dopo aver inviato tutti i messaggi di leave
+						this.status= SessionManagerStatus.AttendingRequestSession;
 						this.toSessionRequest = RelayTimeoutFactory.getTimeOutSessionRequest(this, TimeOutConfiguration.TIMEOUT_SESSION_REQUEST);
 	
 					}
 					else{
 						// il nodo � il vincitore!
 						if(this.getLocalClusterAddress().equals(newRelay)){
-							this.imRelay = true; // Marco : cambio già lo stato: non è presto? forse sarebbe meglio aspettare dopo aver mandato il Redirect al server...
-							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN); // Marco: qui relayAdress è l'indirizzo del vecchio relay
+							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 							this.sessionCM.sendTo(message);
 							this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO);
 							this.status = SessionManagerStatus.RequestingSession;
@@ -513,29 +491,29 @@ public class RelaySessionManager implements Observer{
 			
 			} // Fine evento new Relay
 			
-			// TODO nuovo relay eletto tramite elezione di emergenza
-			if(this.event.contains("NEW_EM_RELAY"))
-			{
-				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di NEW_EM_RELAY");
-				StringTokenizer st = new StringTokenizer(this.event, ":");
-				st.nextToken();
-				String newRelay = st.nextToken();
-				try {
-					if(InetAddress.getLocalHost().toString().equals(newRelay))
-					{
-						this.imRelay = true;
-						this.status = SessionManagerStatus.Active;
-					}
-					else
-					{
-						this.relayAddress = newRelay;
-						this.status = SessionManagerStatus.Waiting;
-					}
-				} catch (UnknownHostException e) {
-					
-					e.printStackTrace();
-				}
-			}
+			// TODO nuovo relay eletto tramite elezione di emergenza, commentato, per ora non abbiamo elezioni di emergenza
+//			if(this.event.contains("NEW_EM_RELAY"))
+//			{
+//				consolle.debugMessage("RELAY_SESSION_MANAGER: Evento di NEW_EM_RELAY");
+//				StringTokenizer st = new StringTokenizer(this.event, ":");
+//				st.nextToken();
+//				String newRelay = st.nextToken();
+//				try {
+//					if(InetAddress.getLocalHost().toString().equals(newRelay))
+//					{
+//						this.imRelay = true;
+//						this.status = SessionManagerStatus.Active;
+//					}
+//					else
+//					{
+//						this.relayAddress = newRelay;
+//						this.status = SessionManagerStatus.Waiting;
+//					}
+//				} catch (UnknownHostException e) {
+//					
+//					e.printStackTrace();
+//				}
+//			}
 			
 			//TODO scattato il timeout su SessionInfo , ma posso ancora provare a ritrasmettere
 			
@@ -689,7 +667,7 @@ public class RelaySessionManager implements Observer{
 	 * proxy che gestisce quella sessione
 	 * es (192.168.1.1_5000_162.168.1.2_6000)
 	 */
-	private String createProxyFromSession(Hashtable sessions) // TODO Da sistemare: l'oggetto � in realty un session, e non pi� un vettore di interi
+	private String createProxyFromSession(Hashtable sessions) 
 	{
 		/*
 		 * 
@@ -899,7 +877,7 @@ enum SessionManagerStatus{
 	Active, // Marco: stato del relay quando è attivo e sta erogando dei flussi verso i client.
 	AttendingAckSession, // Marco: un vecchio relay è in questo stato quando ha inviato il messaggio di SessionInfo, contente i dati relativi alle sessioni aperte di cui fare l'handoff ed attende l'ack_ session da parte del nuovo relay, con l'indicazione delle porte dei proxy sul nuovo relay sulle quali ridirigere lo stream 
 	RequestingSession, // Marco: stato in cui si trova il nuovo relay dopo aver mandato il messaggio di REQUEST SESSION in attesa del SESSION INFO
-	
+	AttendingRequestSession // Marco: un vecchio relay si trova in questo stato quando attende il request session dal suo sostituto.
 	
 }
 

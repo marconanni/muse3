@@ -663,10 +663,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				 * mittente il futureStreamingServer che il session manager mi ha comunicato
 				 * quando è arrivato il messaggio di NEW_RELAY a seguito della ricezione 
 				 * dell'election done.
-				 * Rimpicciolisco il buffer alle dimensioni normali e cambio sorgente di streaming
-				 *  invocando il metodo 
+				 * cambio sorgente di streaming invocando il metodo 
 				 * setStreamingServer dellRTPReceptionMan, che è colui che gestisce la ricezione
 				 * del flusso multimendiale.
+				 * Rimpicciolisco il buffer alle dimensioni normali
 				 * 
 				 * 
 				 * infine, nel caso sia un relay secondario che è diventato big boss, ricontrollo
@@ -677,9 +677,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				// il nuovo proxy eroga il flusso dalla stessa porta della quale lo erogava il vecchio.
 				
 				this.setStreamingServerAddress(futureStreamingAddress);
-				this.restrinctNormalBuffer();
-				this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
 				
+				this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
+				this.restrinctNormalBuffer();
 				this.determinaPorteSessione(servingClient, streamingServerAddress);
 				
 				
