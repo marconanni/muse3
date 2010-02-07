@@ -52,58 +52,58 @@ import util.Logger;
 public class Proxy extends Observable implements Observer, BufferFullListener, BufferEmptyListener, ControllerListener{
 
 	//flags
-	private boolean debug = true;
-	private boolean serverStopped; //indica se si ï¿½ inviato STOPTX al server
+	protected boolean debug = true;
+	protected boolean serverStopped; //indica se si ï¿½ inviato STOPTX al server
 	
 	//variabili di stato, eventi, messaggi:
-	private ProxyState state;
-	private boolean newProxy;
-	private String event;
-	private DatagramPacket msg;
+	protected ProxyState state;
+	protected boolean newProxy;
+	protected String event;
+	protected DatagramPacket msg;
 	
 	
-	private boolean request_pending;
+	protected boolean request_pending;
 	//timeout:
-	private TimeOutAckForward timeoutAckForward;
-	private TimeOutAckClientReq timeoutAckClientReq;
-	private TimeOutSessionInterrupted timeoutSessionInterrupted;
+	protected TimeOutAckForward timeoutAckForward;
+	protected TimeOutAckClientReq timeoutAckClientReq;
+	protected TimeOutSessionInterrupted timeoutSessionInterrupted;
 	
 	//parametri:
-	private String proxyID = "-1";
-	private String filename;
-	private String clientAddress;
-	private String streamingServerAddress; //Ã¨ l'indirizzo di chi manda il flusso al proxy
-	private String futureStreamingAddress; // Ã¨ l'indirizzo del nuovo big boss che manderÃ  il flusso al proxy quando questo riceverÃ  il messaggio
+	protected String proxyID = "-1";
+	protected String filename;
+	protected String clientAddress;
+	protected String streamingServerAddress; //Ã¨ l'indirizzo di chi manda il flusso al proxy
+	protected String futureStreamingAddress; // Ã¨ l'indirizzo del nuovo big boss che manderÃ  il flusso al proxy quando questo riceverÃ  il messaggio
 											// di LEAVE dal proxy sul vecchio relay
 	
 			
-	private boolean servingClient; // se true indice che si eroga il flusso al client, se Ã¨ false
+	protected boolean servingClient; // se true indice che si eroga il flusso al client, se Ã¨ false
 	
 	//porte(le porte di ricezione del proxy si trovano dentro l'RTPReceptionManager): 
-	private int clientStreamPort = 0; 	//porta su cui il client riceve lo stream rtp 
-	private int serverStreamPort = 0; 	//porta da cui lo streamingserver invia lo stream rtp
-	private int outStreamPort = 0;		//porta da cui il proxy invia lo stream rtp
-	private int inStreamPort = 0;       //porta da cui il proxy riceve lo str 
-	private int streamingServerCtrlPort = 0; //porta su cui lo streamingserver riceve i messaggi di controllo
-//	private int sessionControlPort;  //porta su cui il proxy riceve i messaggi di controllo dal client durante la trasmissione:
-	private int proxyStreamingCtrlPort = 0;
-	private int clientStreamControlPort=0; // la porta di controllo del client (è valida e diversa da -1
+	protected int clientStreamPort = 0; 	//porta su cui il client riceve lo stream rtp 
+	protected int serverStreamPort = 0; 	//porta da cui lo streamingserver invia lo stream rtp
+	protected int outStreamPort = 0;		//porta da cui il proxy invia lo stream rtp
+	protected int inStreamPort = 0;       //porta da cui il proxy riceve lo str 
+	protected int streamingServerCtrlPort = 0; //porta su cui lo streamingserver riceve i messaggi di controllo
+//	protected int sessionControlPort;  //porta su cui il proxy riceve i messaggi di controllo dal client durante la trasmissione:
+	protected int proxyStreamingCtrlPort = 0;
+	protected int clientStreamControlPort=0; // la porta di controllo del client (è valida e diversa da -1
 	// solo se il client è un altro proxy
 	
 	
 	
 	// porte di sessione di sender e receiver
-	private int streamingServerSessionPort;
-	private int clientSessionPort;
+	protected int streamingServerSessionPort;
+	protected int clientSessionPort;
 	
 	//componenti:
-	private ProxyCM proxyCM;
-	private RTPReceptionManager rtpReceptionMan; 
-	private RelayBufferManager buffer;
-	private RTPSenderPS rtpSender;
-	private RTPMultiplexer rtpMux;
-	private MuseMultiplexerThread muxTh;
-	private boolean ending = false;
+	protected ProxyCM proxyCM;
+	protected RTPReceptionManager rtpReceptionMan; 
+	protected RelayBufferManager buffer;
+	protected RTPSenderPS rtpSender;
+	protected RTPMultiplexer rtpMux;
+	protected MuseMultiplexerThread muxTh;
+	protected boolean ending = false;
 	
 	/**
 	 * @return the ending
@@ -133,13 +133,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		return muxThR;
 	}
 
-	private MuseMultiplexerThread muxThR;
-	private int recoveryStreamInPort;
+	protected MuseMultiplexerThread muxThR;
+	protected int recoveryStreamInPort;
 	
 	//classi di utilita':
-	private RelayMessageReader msgReader;
+	protected RelayMessageReader msgReader;
 
-	private Observer sessionManager;
+	protected Observer sessionManager;
 	
 	
 	
@@ -662,9 +662,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				 * Quando arriva il LEAVE dal vecchio relay devo considerare come mio nuovo
 				 * mittente il futureStreamingServer che il session manager mi ha comunicato
 				 * quando è arrivato il messaggio di NEW_RELAY a seguito della ricezione 
-				 * dell'election done. Cambio sorgente di streaming invocando il metodo 
+				 * dell'election done.
+				 * Rimpicciolisco il buffer alle dimensioni normali e cambio sorgente di streaming
+				 *  invocando il metodo 
 				 * setStreamingServer dellRTPReceptionMan, che è colui che gestisce la ricezione
-				 * del flusso multimendiale 
+				 * del flusso multimendiale.
+				 * 
 				 * 
 				 * infine, nel caso sia un relay secondario che è diventato big boss, ricontrollo
 				 * le porte di sessione, visoto che dovro mandare i messaggi ad un server
@@ -674,6 +677,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				// il nuovo proxy eroga il flusso dalla stessa porta della quale lo erogava il vecchio.
 				
 				this.setStreamingServerAddress(futureStreamingAddress);
+				this.restrinctNormalBuffer();
 				this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
 				
 				this.determinaPorteSessione(servingClient, streamingServerAddress);
@@ -950,7 +954,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * ***************************************************************
 	 */
 	
-	private void initNormalSession(){
+	protected void initNormalSession(){
 		
 		try {
 			/*
@@ -977,7 +981,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 	}
 	
-	private void initRecoverySession(int senderPort, InetAddress senderAddress) {
+	protected void initRecoverySession(int senderPort, InetAddress senderAddress) {
 		
 		/*
 		 * Marco: questa dovrebbe preparare una  trasmissione che sfrutta il recovery buffer
@@ -1014,7 +1018,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 
 	
-	private void startNormalStreamToClient(){
+	protected void startNormalStreamToClient(){
 		/*
 		 * Questa funzione dovrebbe far partire lo stream sul normal buffer
 		 */
@@ -1048,7 +1052,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 	
 	
-	private void startRecoveryStreamToClient(){
+	protected void startRecoveryStreamToClient(){
 		/*
 		 * Marco: questa dovrebbe far partire lo stream usando i frames presenti nel recovery buffer
 		 */
@@ -1085,7 +1089,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 	
-	private void pauseNormalStreamToClient() {
+	protected void pauseNormalStreamToClient() {
 		/*
 		 * Marco: questa funzione ferma lo stream verso il client, la domanda Ã¨ : perchÃ¨ non c'Ã¨ anche la versione da usare
 		 * nel caso si stiano mando i frames del recovery buffer? 
@@ -1096,7 +1100,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		System.out.println("Trasmissione Proxy -> Client sospesa");	
 	}
 	
-	private void startRecoveryStreamToClientOLD(){
+	protected void startRecoveryStreamToClientOLD(){
 		/*
 		 * Marco: vecchia versione, non credo che venga mai usata
 		 */
@@ -1116,7 +1120,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		System.out.println("ProxySender: inizio trasmissione");
 	}
 		
-	private void endProxy(){
+	protected void endProxy(){
 		this.muxTh.close();
 		this.rtpReceptionMan.closeAll();
 		this.state = ProxyState.ended;
@@ -1125,7 +1129,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.fProxy.dispose();
 	}
  
-	private void sendForwardReqFileToServer(){
+	protected void sendForwardReqFileToServer(){
 		/*
 		 * Quando all'inizio il client chiede la lista delle canzoni disponibili sul server, questa funzione passa la richiesta al server
 		 * la domanda Ã¨: ma non dovrebbe essere fatto dal session Manager ed il proxy instanziato solo all'atto della trasmissione del flusso?
@@ -1160,7 +1164,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	//@ TODO commentare i metodi per preparare i messaggi.
 
-	private void sendStartTXToServer(){
+	protected void sendStartTXToServer(){
 		try {
 			//Creo un messaggio START_TX e lo invio al server
 			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(this.streamingServerAddress), this.streamingServerCtrlPort);
@@ -1178,7 +1182,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 
 	
 	
-	private void sendRedirectToServer(){
+	protected void sendRedirectToServer(){
 		/*
 		 *  il server potrebbe anche essere un proxy sul big boss; ma il metodo non dà problemi
 		 *  a riguardo, visto che  l'indirizzo viene fornito dal costruttore e la porta
@@ -1203,7 +1207,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 	
-	private void sendStopTXToServer() {
+	protected void sendStopTXToServer() {
 		DatagramPacket stopTX;
 		try {
 			stopTX = RelayMessageFactory.buildStopTx(0, InetAddress.getByName(this.streamingServerAddress), this.streamingServerCtrlPort);
@@ -1218,7 +1222,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 	}
 
-	private void sendAckClientReqToClient(){
+	protected void sendAckClientReqToClient(){
 		try {
 			this.proxyStreamingCtrlPort = proxyCM.getLocalAdHocInputPort();
 			//Creo un messaggio ACK_CLIENT_REQ
@@ -1237,7 +1241,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 	}
 
-	private void sendServerUnreacheableToClient(){
+	protected void sendServerUnreacheableToClient(){
 		try {
 			//invio SERVER_UNREACHABLE al client:
 			
@@ -1256,7 +1260,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 	// TODO	sendleaveMessage to client!
-	private void sendLeaveMsgToClient() {
+	protected void sendLeaveMsgToClient() {
 		try {
 			//invio LEAVE al client:
 			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), this.clientSessionPort);
@@ -1286,7 +1290,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * @param streamingServerAddress l'indirizzo del nodo che sta erogando il flusso a questo proxy.
 	 */
 	
-	private void determinaPorteSessione(boolean servingClient, String streamingServerAddress){
+	protected void determinaPorteSessione(boolean servingClient, String streamingServerAddress){
 		/*
 		 * Se sto servendo un cliente la sua porta di sessione è quella dei client,
 		 * infatti i messaggi di LEAVE arrivano  al ClientSessionManager, mentre
@@ -1319,13 +1323,24 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * Metodo che ingrandisce il buffer normale del proxy, usato quando il proxy su un 
 	 * relay secondario deve ingrandire i propri bufffer a causa della rielezione del big boss
 	 */
-	private void elnargeNormalBuffer (){
+	protected void elnargeNormalBuffer (){
 		/*
 		 * Agisce chiamndo l'omonimo metodo del bufferManager
 		 */
 		
 		this.buffer.elnargeNormalBuffer();
 		
+	}
+	
+	/**
+	 * metodo richiamato all'arrivo ddi un LEAVE dal vecchio proxy che serviva questo
+	 * qualora il proxy sia su un relay secondario e ci sia la rielezione del big boss.
+	 * rihciama il metodo omonimo del bufferManager per reimpostare le soglie a quelle di
+	 * funzionamento normale.
+	 */
+	
+	public void restrinctNormalBuffer(){
+		this.buffer.restrictNormalBuffer();
 	}
 	
 	
