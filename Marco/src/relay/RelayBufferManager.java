@@ -94,6 +94,10 @@ public class RelayBufferManager {
 		this.normalBuffer.setNormalMode(false);
 		
 	}
+	
+	public void restrictNormalBuffer(){
+		this.normalBuffer.setNormalMode(true);
+	}
 
 
 }
