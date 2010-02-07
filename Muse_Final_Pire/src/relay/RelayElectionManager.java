@@ -787,7 +787,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			 * 	WAITING_BEACON
 			 * 	il nodo corrente è un possibile sostituto,presume di aver ricevuto messaggi da ogni nodo coinvolto, calcola il proprio peso W 
 			 */
-			else if((getEvent().equals("TIMEOUTELECTIONBEACON")) &&
+			else if((getEvent().equals(TimeOutConfiguration.TIME_OUT_ELECTION_BEACON)) &&
 					(isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY()) &&
 					getActualStatus() == RelayStatus.WAITING_BEACON){
 				
@@ -815,7 +815,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			 * 	WAITING_RESPONSE
 			 * 	il nodo corrente valuta i suoi possibili nodi sostituti e ne sceglie uno
 			 */
-			else if(getEvent().equals("TIMEOUTTOELECT")){
+			else if(getEvent().equals(TimeOutConfiguration.TIME_OUT_TO_ELECT)){
 				
 				//Sono il vecchio relay o il vecchio bigboss, rivecuto risposta da possibili nodi sostituti, eleggo quello migliore
 				//se nn ce ne sono -->FASE di ERMERGENZA
@@ -870,6 +870,17 @@ public class RelayElectionManager extends Observable implements Observer{
 				else if(getActualStatus() == RelayStatus.WAITING_END_NORMAL_ELECTION){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": Rielezione nuovo BIGBOSS fallita -->fase di EMERGENZA");
 				}
+			}
+			else if(getEvent().equals(TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT)){
+				if(isBIGBOSS() && getActualStatus()==RelayStatus.MONITORING){
+					//è in corso un elezione di emergenza di un relay secondario...
+					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "RElayElectionManager Stato."+getActualStatus()+" TIME_OUT_FAIL_TO_ELECT scattato --> fase di emergenza per rieleggere un nuovo relay secondario. Vecchio relay IP:"+getRelauToElect());
+				}
+				else if(isRELAY() && getActualStatus()==RelayStatus.WAITING_END_NORMAL_ELECTION){
+					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_ERROR, "RelayElectionManager Stato."+getActualStatus()+" TIME_OUT_FAIL_TO_ELECT scattato --> in corso fase di emergenza per la rielezione di un nuovo BIGBOSS... tutto perso");
+				}
+				else if(isPOSSIBLE_BIGBOSS()|| isPOSSIBLE_RELAY())
+					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_ERROR, "RelayElectionManager Stato."+getActualStatus()+" TIME_OUT_FAIL_TO_ELECT scattato --> fase di emergenza");
 			}
 		}
 	}

@@ -84,6 +84,7 @@ public class RelayPositionController implements Observer {
 
 		if(arg1 instanceof DatagramPacket){
 			int RSSIvalue =-1;
+			int temp = -1;
 			cmr = new RelayMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);
