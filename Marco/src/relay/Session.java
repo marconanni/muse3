@@ -13,9 +13,9 @@ package relay;
 
 public class Session {
 	
-	private String id;						//( l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	private String id;						//( lï¿½indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	private Proxy proxy;					//riferimento al Proxy che gestisce lo streaming
-	private String relaySecondario;			//Una stringa che contiene l’indirizzo dell’eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
+	private String relaySecondario;			//Una stringa che contiene lï¿½indirizzo dellï¿½eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
 	private int senderStreamPort;			 //porta dalla quale il server eroga lo stream
 	private int inStreamPort;				//porta sulla quale il proxy riceve lo stream
 	private int outStreamPort;				//porta dalla quale il proxy eroga lo steam verso il client
@@ -85,9 +85,9 @@ public class Session {
 	
 	/**
 	 * 
-	 * @param id	 l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param id	 lï¿½indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	* @param proxy riferimento al Proxy che gestisce lo streaming
-	* @param relaySecondario Una stringa che contiene l’indirizzo dell’eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
+	* @param relaySecondario Una stringa che contiene lï¿½indirizzo dellï¿½eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
 	* @param serverStreamPort porta dalla quale il server eroga lo stream
 	* @param inStreamPort porta sulla quale il proxy riceve lo stream
 	* @param outStreamPort porta dalla quale il proxy eroga lo steam verso il client
@@ -115,7 +115,7 @@ public class Session {
 	
 	/**
 	 * costruttore senza relay indicazione del relay secondario ( il parametro viene messo a null)
-	 * @param id	 l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param id	 lï¿½indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	* @param proxy riferimento al Proxy che gestisce lo streaming
 	* @param serverStreamPort porta dalla quale il server eroga lo stream
 	* @param inStreamPort porta sulla quale il proxy riceve lo stream
@@ -144,9 +144,9 @@ public class Session {
 	
 	/**
 	 * 
-	 * @param id l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param id lï¿½indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	 * @param proxy  riferimento al Proxy che gestisce lo streaming
-	 * @param relaySecondario Una stringa che contiene l’indirizzo dell’eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
+	 * @param relaySecondario Una stringa che contiene lï¿½indirizzo dellï¿½eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
 	 * @param sessionInfo i dati sulle porte utilizzate per questa sessione
 	 */
 	
@@ -166,7 +166,7 @@ public class Session {
 	/**
 	 * versione per la costruzione senza relay secondario e vettore sessioninfo
 	 * 
-	 * @param id l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param id lï¿½indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	 * @param proxy  riferimento al Proxy che gestisce lo streaming
 	 * @param sessionInfo i dati sulle porte utilizzate per questa sessione
 	 */
@@ -188,9 +188,9 @@ public class Session {
 	 * impostate o singolaremente o tutte insieme tramite il metodo setSessionInfo
 	 * 
 	 * 
-	 * @param id l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param id lï¿½indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	 * @param proxy  riferimento al Proxy che gestisce lo streaming
-	 * @param relaySecondario Una stringa che contiene l’indirizzo dell’eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
+	 * @param relaySecondario Una stringa che contiene lï¿½indirizzo dellï¿½eventuale relay secondario che ottiene lo streamig dal big boss per poi ridirigerlo verso un suo client
 	 */
 	public Session(String id, Proxy proxy, String relaySecondario) 
 	{
@@ -212,7 +212,7 @@ public class Session {
 	 * impostate o singolaremente o tutte insieme tramite il metodo setSessionInfo
 	 * 
 	 * 
-	 * @param id l’indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
+	 * @param id lï¿½indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	 * @param proxy  riferimento al Proxy che gestisce lo streaming
 	 */
 	public Session(String id, Proxy proxy) 
@@ -233,7 +233,7 @@ public class Session {
 	///// TODO MEDTODI AGGIUNTIVI
 	/**
 	 * 
-	 * @return true se il flusso di questa sessione viene diretto verso un relay secondario che poi lo manderà al client
+	 * @return true se il flusso di questa sessione viene diretto verso un relay secondario che poi lo manderï¿½ al client
 	 */
 	
 	public boolean isMediata(){
@@ -289,6 +289,9 @@ public class Session {
 		this.proxyStreamingCtrlPort = sessionInfo[5];
 		
 	}
+	
+	
+	
 	
 	
 }

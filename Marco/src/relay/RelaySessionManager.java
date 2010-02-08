@@ -871,7 +871,15 @@ public boolean isBigBoss(){
 ////////////////////////////////////////////////////////////////////////////////////
 
 
-		
+public void tAddSession(Session session){
+	this.sessions.put(session.getId(), session);
+	consolle.debugMessage(1, "Sessionmanager: forzato l'inserimento della sessione "+session );
+}	
+
+public void tRemoveSession(Session session){
+	this.sessions.remove(session.getId());
+	consolle.debugMessage(2, "Sessionmanager: forzato la rimozione della sessione "+session );
+}
 
 
 
