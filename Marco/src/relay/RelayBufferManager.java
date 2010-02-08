@@ -24,7 +24,7 @@ public class RelayBufferManager {
 	/**
 	 * Crea un RelayBufferManager i cui buffer interni hanno una 
 	 * dimensione nFrames (in termini di numero di frame contenuti),
-	 * ènecessartio specificare le soglie oltre alle quali vengono lanciati gli eventi
+	 * ï¿½necessartio specificare le soglie oltre alle quali vengono lanciati gli eventi
 	 *  di bufferEmpty e bufferFull nel funzionamento normale d durente la fase di rielezione
 	 *  
 	 * @param nFrames
@@ -90,7 +90,7 @@ public class RelayBufferManager {
 	 * soglie da usare in fase di elezione ( superiori a quelle da usare durante 
 	 * il funzionamento normale)
 	 */
-	public void elnargeNormalBuffer() {
+	public void enlargeNormalBuffer() {
 		this.normalBuffer.setNormalMode(false);
 		
 	}
