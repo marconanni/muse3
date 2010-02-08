@@ -56,6 +56,16 @@ public class DebugConsole {
 		}
 	}
 	
+	
+	/**
+	 * Metodo per la visualizzazione dei messaggi di debug, stampa
+	 * il messaggio in nero
+	 * @param message - il messaggio di debug da visualizzare
+	 * */
+	public void debugMessage(String message){
+		this.debugMessage(DebugConfiguration.DEBUG_ERROR,message);
+	}
+	
 	public void setText(Pane text) {
 		this.text = text;
 	}

@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 
 import javax.media.NoDataSourceException;
 
+import debug.DebugConsole;
 import debug.DebugConsolle;
 
 import parameters.*;
@@ -72,7 +73,7 @@ public class RelaySessionManager implements Observer{
 	private TimeOutSessionInfo toSessionInfo;
 	private RelayCM sessionCM; // Marco: è chi si occupa di spedire  e ricevere i messaggi.
 	private RelayMessageReader messageReader;
-	private DebugConsolle consolle;
+	private DebugConsole consolle;
 	
 	private RelayElectionManager electionManager;
 	
@@ -269,8 +270,9 @@ public class RelaySessionManager implements Observer{
 				
 				this.toSessionInfo.cancelTimeOutSessionInfo();
 				consolle.debugMessage("RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
-				this.sessions = messageReader.getSessions(); // attualmente per� non ci sono i proxy
-				String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte sulle quali ridirigere le varie sessioni
+				this.sessions = messageReader.getSessions(); // creo le sessioni ggio dal messa attualmente per� non ci sono i proxy, li metto con il 
+				//metodo
+				String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte di recovery dei relay sostituivi sulle quali ridirigere le varie sessioni
 				try {
 					this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 					this.sessionCM.sendTo(this.message);
@@ -428,11 +430,13 @@ public class RelaySessionManager implements Observer{
 				String indFornitoreFlussiVecchioRelay=st.nextToken();
 				
 				
-				// � stato rieletto il big boss, devo avvertire i Proxy.
-				if(this.connectedClusterHeadAddress.equals(vecchioRelay)){
+				//io sono un relay seconario ed � stato rieletto il big boss, devo avvertire i Proxy.
+				//nota. è imposibile che un relay secondario con delle sessioni attive diventi big boss.
+				//possono diventarlo solo nodi senza sessioni attive, 
+				if(this.connectedClusterHeadAddress.equals(vecchioRelay)&&this.isRelay()){
 					// posso gi� permettermi di sostituire il riferimento al big boss all'interno di sessionManager 
 					// perchè so che ci pu� essere una sola rielezione in corso alla volta, si interagirebbe con il 
-					// big bosso solo se nel caso di una rielezione di questo proxy secondario, che
+					// big boss solo se nel caso di una rielezione di questo proxy secondario, che
 					// per� non pu� aver luogo prima che la rielezione del big boss sia finita.
 					this.connectedClusterHeadAddress=newRelay;
 					
@@ -540,7 +544,7 @@ public class RelaySessionManager implements Observer{
 			// TODO scattato il timeut sul sessioninfo e non ho pi� ritrasmissioni; invalido tutto
 			if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions == 0)
 			{
-				/*
+				/*updateSessions
 				 * Marco: sono il nuovo relay: è scattato il timeout sulla ricezione del messaggio SessionInfo.
 				 * il parametro numberOf ritrasmissions idica quante volte posso chiedere la ritrasmissione del messaggio Sessioninfo
 				 * sfortunatamente non posso ritrasmetterlo: non mi resta che mandare IN BROADCAST
@@ -565,7 +569,7 @@ public class RelaySessionManager implements Observer{
 			if(this.event.equals("ELECTION_REQUEST_RECEIVED")&&isRelay())// Marco aggiungi condizione sono il relay secondario e non il big boss
 			{
 				/*
-				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo � un relay secondario
+				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo � un relay secondario
 				 * servito dal big boss.
 				 * Qui il relay secondario deve ingrandire i buffer (alzando la soglia superiore) dei propri proxy, analogamente
 				 * a quello che fanno i clients.
@@ -576,7 +580,7 @@ public class RelaySessionManager implements Observer{
 				 */
 				Enumeration <String> chiavi;
 				while(chiavi.hasMoreElements()){
-					sessions.get(chiavi.nextElement()).getProxy()//.elnargeBuffer
+					(sessions.get(chiavi.nextElement()).getProxy()).enlargeNormalBuffer();
 				}
 				
 				
@@ -644,6 +648,7 @@ public class RelaySessionManager implements Observer{
 	public void setMaxWnextRelay(String maxWnextRelay) {
 		this.maxWnextRelay = maxWnextRelay;
 	}
+	
 
 	public void updateSessions()
 	{
@@ -658,7 +663,8 @@ public class RelaySessionManager implements Observer{
 	/**
 	 * Metdo chiamato dal nuovo proxy quando gli arriva il messaggio SESSION_INFO per creare
 	 * i proxy
-	 * Crea i proxy dalla tabella di sessioni ottenuta dal messaggio di Sessioninfo e restituisce,
+	 * Crea i proxy dalla tabella di sessioni ottenuta dal messaggio di Sessioninfo,
+	 *  inserisce i proxy nelle sessioni e restituisceun'altra tabella che indica
 	 * per ogni sessione le porte di recovery sulle quali il vecchio relay deve ridirigere il flusso,
 	 * inoltre riempie i campi proxy delle sessioni presenti nella tabella con i proxy appena creati
 	 * @param sessions � una tabella che contiene i dati come tabella di Session, la chiave � l'indirizzo del client
@@ -731,7 +737,7 @@ public class RelaySessionManager implements Observer{
 						servingClient=true;
 					
 					
-					proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut,this.connectedClusterHeadAddress ,InetAddress.getByName(this.relayAddress), serverCtrlPort, proxyCtrlPort, servingClient);
+					proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut,this.connectedClusterHeadAddress ,InetAddress.getByName(this.oldRelayLocalClusterAddress), serverCtrlPort, proxyCtrlPort, servingClient);
 					session.setProxy(proxy);
 					recStreamInports = recStreamInports+"_"+chiave+"_"+proxy.getRecoveryStreamInPort();
 				} catch (UnknownHostException e) {
@@ -860,11 +866,12 @@ public boolean isBigBoss(){
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////////
+//...........................METODI CREATI PER I TEST..............................\\
+////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-
+		
 
 
 
