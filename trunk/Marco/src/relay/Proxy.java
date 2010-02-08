@@ -306,6 +306,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.sendRedirectToServer();
 
 		
+		
+		
+		
 		/*
 		 * Ho un'altro thread in ricezione: quello che riceve il flusso dal vecchio relay
 		 */

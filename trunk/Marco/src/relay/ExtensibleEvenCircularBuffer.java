@@ -1,10 +1,10 @@
 package relay;
 import javax.swing.event.EventListenerList;
 
-import client.gui.IClientView;
-import relay.gui.ProxyFrameController;
 
-import com.sun.media.ExtBuffer;
+
+
+
 
 /**
  * @Author Marco Nanni. 
@@ -20,7 +20,7 @@ import com.sun.media.ExtBuffer;
  */
 
 
-public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer {
+public class ExtensibleEvenCircularBuffer extends dummies.DummyBuffer {
 	private int sogliaSuperioreElection; // soglia oltre alla quale , in modalitï¿½ recovery viene lanciato 
 											//l'evento di bufferFull
 	 private int sogliaSuperioreNormal;		 // soglia oltre alla quale , in modalitï¿½ normale viene lanciato 
@@ -100,8 +100,8 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	 * l'evento di bufferfull.
 	 * 
 	 */
-	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperiore){
-		super(numFrames,view,sogliaInferiore, sogliaSuperiore);
+	public ExtensibleEvenCircularBuffer(int numFrames,  int sogliaInferiore, int sogliaSuperiore){
+		super(numFrames,sogliaInferiore, sogliaSuperiore);
 		
 		this.sogliaSuperioreNormal = sogliaSuperiore;
 		this.sogliaInferioreNormal= sogliaInferiore;
@@ -124,8 +124,8 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	 * bufferFull quando il buffer ï¿½ in modalitï¿½ Election
 	 * 
 	 */
-	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperioreNormal, int sogliaSuperioreElection){
-		super(numFrames,view,sogliaInferiore, sogliaSuperioreNormal);
+	public ExtensibleEvenCircularBuffer(int numFrames,  int sogliaInferiore, int sogliaSuperioreNormal, int sogliaSuperioreElection){
+		super(numFrames,sogliaInferiore, sogliaSuperioreNormal);
 		this.setSogliaSuperioreElection(sogliaSuperioreElection);
 		this.setNormalMode(true);
 		
@@ -138,7 +138,7 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	 * da usare in caso di rielezione
 	 * @param numFrames = ï¿½ la dimensione totale del buffer
 	 * @param sogliaInferioreNormal = ï¿½ la soglia sotto la quale viene lanciato l'evento di bufferEmpty in funzionamento normale
-	 * @param sogliaInferioreElection = è la soglia sotto la quale viene lanciato l'evento di bufferEmpty durante la rielezione
+	 * @param sogliaInferioreElection = ï¿½ la soglia sotto la quale viene lanciato l'evento di bufferEmpty durante la rielezione
 	 * @param sogliaSuperiorenNormal = ï¿½ la soglia sopra la quale, in funzionamento normale, viene lanciato 
 	 * l'evento di bufferfull.
 	 * @param sogliaSuperioreNormal = ï¿½ la soglia sopra la quale, in funzionamento normale, viene lanciato 
@@ -147,9 +147,9 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	 * bufferFull quando il buffer ï¿½ in modalitï¿½ Election
 	 * 
 	 */
-	public ExtensibleEvenCircularBuffer(int numFrames, IClientView view, int sogliaInferioreNormal,int sogliaInferioreElection, int sogliaSuperioreNormal, int sogliaSuperioreElection){
+	public ExtensibleEvenCircularBuffer(int numFrames,  int sogliaInferioreNormal,int sogliaInferioreElection, int sogliaSuperioreNormal, int sogliaSuperioreElection){
 		
-		super(numFrames,view,sogliaInferioreNormal, sogliaSuperioreNormal);
+		super(numFrames,sogliaInferioreNormal, sogliaSuperioreNormal);
 		this.sogliaInferioreNormal = sogliaInferioreNormal;
 		this.sogliaInferioreElection= sogliaInferioreElection;
 		this.sogliaSuperioreNormal = sogliaSuperioreNormal;
@@ -181,7 +181,7 @@ public class ExtensibleEvenCircularBuffer extends unibo.core.EventCircularBuffer
 	@Override
 	public void setNormalMode(boolean normalMode) {
 		
-		super.setNotmalMode(normalMode);
+		super.setNormalMode(normalMode);
 		
 		
 		if(normalMode== true)
