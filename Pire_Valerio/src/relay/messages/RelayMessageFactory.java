@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+
 import parameters.MessageCodeConfiguration;
 
 
@@ -244,7 +245,180 @@ public class RelayMessageFactory {
 
 		return new DatagramPacket(data, data.length, addr, port);
 
-	}	
+	}
+	
+	//VALERIO
+	//nel RelaySessionManager dovrò stare attento a quale di questi metodi chiamare. Ad esempio: se sono un normale relay e sto salendo verso il server
+	//chiamerò ad esempio buildForwardRequestList e lo invierò al bigboss, bigboss prenderà il messaggio lo riscriverà (per aggiornare il valore
+	//di Parameters.RELAY_SESSION_AD_HOC_PORT_IN che è la porta su cui aspetta la risposta) e lo invierà al server, il server risponderà
+	//sull'indirizzo di bigboss sulla porta specificata con un messaggio del tipo FORWARD_LIST_RESPONSE contenente indirizzo e porta di relay e client
+	//	
+
+		//Valerio: messaggio di richiesta lista file che bigboss invia al server in caso di catena: client->bigboss->server
+		static public DatagramPacket buildRequestList(int sequenceNumber, InetAddress addr, int port, String clientAddress) throws IOException {
+
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			//String content = sequenceNumber+"_"+Parameters.REQUEST_LIST+"_"+Parameters.BIG_BOSS_SESSION_AD_HOC_PORT_IN+"_"+clientAddress+"_"+clientPort;
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_LIST+"_"+clientAddress;
+			
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, addr, port);
+
+		}
+	
+		//Valerio: messaggio di richiesta lista file che bigboss invia al server in caso di catena: client->relay->bigboss->server
+		//questo messaggio è lo stesso che viene inviato dal relay al bigboss
+		static public DatagramPacket buildForwardRequestList(int sequenceNumber, InetAddress addr, int port, String relayAddress, String clientAddress) throws IOException {
+
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = null;
+			//String content = sequenceNumber+"_"+Parameters.FORWARD_REQ_LIST+"_"+Parameters.BIG_BOSS_SESSION_AD_HOC_PORT_IN+"_"+relayAddress+"_"+relayPort+"_"+clientAddress+"_"+clientPort;
+			if(relayAddress==null)
+				content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_LIST+"_"+clientAddress;
+			else
+				content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_LIST+"_"+relayAddress+"_"+clientAddress;
+			System.err.println("messaggio inviato dal relay al bigboss "+content);
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, addr, port);
+
+		}
+		
+		//Valerio: messaggio con la lista file che bigboss invia al client in caso di catena: server->bigboss->client	
+		//o che il relay manda al client in caso di catena server->bigboss->relay->client	
+		static public DatagramPacket buildListResponse(int sequenceNumber, InetAddress addr, int port,String listaFile) throws IOException {
+
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.LIST_RESPONSE+"_"+listaFile;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, addr, port);
+
+		}
+		
+		//Valerio: messaggio con la lista file che il server invia al bigboss in caso di catena: server->bigboss->relay->client
+		//questo messaggio è lo stesso che viene inviato dal bigboss al relay
+		//il server metterà come addr l'indirizzo da cui ha ricevuto la richiesta della lista e come port qeulla specificata nella richiesta
+		//il bigboss metterà come addr lo stesso valore di relayAddress e come port lo stesso valore di relayPort
+		static public DatagramPacket buildForwardListResponse(int sequenceNumber, InetAddress addr, int port,String clientAddress, String listaFile) throws IOException {
+
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = null;
+			content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_LIST_RESPONSE+"_"+null+"_"+clientAddress+"_"+listaFile;//+"_"+relayAddress+"_"+relayPort+"_"+clientAddress+"_"+clientPort;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, addr, port);
+
+		}
+		
+		//Valerio: messaggio richiesta file che bigboss invia al server in caso di catena: client->bigboss->server
+		static public DatagramPacket buildReqFile(int sequenceNumber, String filename, int controlBigBossPort,int bigbossStreamingInPort, String clientAddress, int controlPortClient, int streamingPortClient,InetAddress serveraddr, int serverport) throws IOException {
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_FILE+"_"+filename+"_"+controlBigBossPort+"_"+bigbossStreamingInPort+"_"+clientAddress+"_"+controlPortClient+"_"+streamingPortClient;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, serveraddr, serverport);
+		}
+		
+		//Valerio: messaggio richiesta file che relay invia a bigboss in caso di catena: client->relay->bigboss->server
+		//bisogna stare attenti quando si usa perchè alcuni vampi vanno lasciati vuoti: ad esempio il relay non conosce la porta stream di big boss
+		//vi penserà big boss a inserire il valore quando girerà il messaggio al server. altri campi vanno replicati, ad esempio
+		//per il relay la porta del server è uguale a bigbossControlPort e l'indirizzo del server è l'indirizzo di bigboss
+		static public DatagramPacket buildForwardReqFile(int sequenceNumber, String filename,int bigbossControlPort, int bigbossStreamingInPort, String relayAddress, int controlPortRelay, int streamPortRelay,String clientAddress, int streamingPortClient,InetAddress serveraddr, int serverport) throws IOException {
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_FILE+"_"+filename+"_"+bigbossControlPort+"_"+bigbossStreamingInPort+"_"+relayAddress+"_"+controlPortRelay+"_"+streamPortRelay+"_"+clientAddress+"_"+streamingPortClient;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, serveraddr, serverport);
+		}
+		
+		/**
+		 * Pacchetto per inoltrare la richiesta al server del file da trasmettere
+		 * @param sequenceNumber
+		 * @param serveraddr indirizzo del server
+		 * @param serverport porta di ricezione del sever
+		 * @param portStreamingPort porta sulla quale il proxy riceve lo stream da parte del server
+		 * @param proxyCtrlPort porta di controllo proxy 
+		 * @param clientAddr indirizzo del client che serve come chiave per identificare sul server la sessione alla relativa richiesta
+		 * @param filename nome del file da trasmettere
+		 * @return
+		 * @throws IOException
+		 */
+		static public DatagramPacket buildForwardReqFile(int sequenceNumber, String clientAddr, String filename, int controlProxyPort,int proxyStreamingInPort, InetAddress serveraddr, int serverport) throws IOException {
+
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_FILE+"_"+clientAddr+"_"+filename+"_"+controlProxyPort+"_"+proxyStreamingInPort;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, serveraddr, serverport);
+
+		}
+		
+		/**
+		 * Pacchetto di richiesta di inizio della trasmissione o ripresa flusso di streaming verso il server
+		 * @param sequenceNumber
+		 * @param addr indirizzo del server
+		 * @param port porta verso la quale inoltrare la richiesta (tale parametro � stato precedentemente trasmesso dal server)
+		 * @return
+		 * @throws IOException
+		 */
+		static public DatagramPacket buildStartTx(int sequenceNumber, InetAddress addr, int port) throws IOException {
+
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.START_TX;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, addr, port);
+
+		}
+		
+		/**
+		 * Pacchetto di richiesta di stop della trasmissione verso il server
+		 * @param sequenceNumber
+		 * @param addr indirizzo del server
+		 * @param port porta verso la quale inoltrare la richiesta (tale parametro � stato precedentemente trasmesso dal server)
+		 * @return
+		 * @throws IOException
+		 */
+		static public DatagramPacket buildStopTx(int sequenceNumber, InetAddress addr, int port) throws IOException {
+
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.STOP_TX;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+
+			return new DatagramPacket(data, data.length, addr, port);
+
+		}
+		
+
 }
 
 
