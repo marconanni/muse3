@@ -310,12 +310,12 @@ public class RelayMessageFactory {
 		//questo messaggio è lo stesso che viene inviato dal bigboss al relay
 		//il server metterà come addr l'indirizzo da cui ha ricevuto la richiesta della lista e come port qeulla specificata nella richiesta
 		//il bigboss metterà come addr lo stesso valore di relayAddress e come port lo stesso valore di relayPort
-		static public DatagramPacket buildForwardListResponse(int sequenceNumber, InetAddress addr, int port,String clientAddress, String listaFile) throws IOException {
+		static public DatagramPacket buildForwardListResponse(int sequenceNumber, InetAddress addr, int port,String relayAddress,String clientAddress, String listaFile) throws IOException {
 
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 			DataOutputStream doStream = new DataOutputStream(boStream);
 			String content = null;
-			content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_LIST_RESPONSE+"_"+null+"_"+clientAddress+"_"+listaFile;//+"_"+relayAddress+"_"+relayPort+"_"+clientAddress+"_"+clientPort;
+			content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_LIST_RESPONSE+"_"+relayAddress+"_"+clientAddress+"_"+listaFile;//+"_"+relayAddress+"_"+relayPort+"_"+clientAddress+"_"+clientPort;
 			doStream.writeUTF(content);
 			doStream.flush();
 			byte[] data = boStream.toByteArray();
