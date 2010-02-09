@@ -39,7 +39,9 @@ public class RelayMessageReader {
 	private String listaFile="";
 	private String clientAddress;
 	private String relayAddress;
-	private  String filename;
+	private String filename;
+	
+	private int clientStreamingPort;
 	
 	
 	public RelayMessageReader(){}
@@ -93,13 +95,26 @@ public class RelayMessageReader {
 			listaFile=st.nextToken();
 		}
 		if(code==MessageCodeConfiguration.FORWARD_REQ_FILE){}
-		if(code == MessageCodeConfiguration.REQUEST_FILE){}
+		if(code == MessageCodeConfiguration.REQUEST_FILE){
+			filename=st.nextToken();
+			clientStreamingPort=Integer.parseInt(st.nextToken());
+		}
 		if(code == MessageCodeConfiguration.ACK_REQUEST_FILE){
 			clientAddress=st.nextToken();
 			portStreamingClient=Integer.parseInt(st.nextToken());
 			portStreamingServer = Integer.parseInt(st.nextToken());
 			portStreamingCtrlServer = Integer.parseInt(st.nextToken());
 		}
+	}
+
+	
+	 
+	public String getFilename() {
+		return filename;
+	}
+
+	public int getClientStreamingPort() {
+		return clientStreamingPort;
 	}
 
 	/**Metodo getter
