@@ -77,9 +77,7 @@ public class ServerMessageReader {
 		}
 		*/
 		if(code==MessageCodeConfiguration.REQUEST_LIST){
-			bigbossPort=Integer.parseInt(st.nextToken());
 			clientAddress=st.nextToken();
-			clientPort=Integer.parseInt(st.nextToken());
 		}
 		if(code==MessageCodeConfiguration.REQUEST_FILE){//messaggio mandato da bigboss con catena client->bigboss->server
 			fileName=st.nextToken();
