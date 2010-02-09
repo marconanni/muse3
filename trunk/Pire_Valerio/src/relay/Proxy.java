@@ -15,6 +15,8 @@ import javax.media.ControllerListener;
 import javax.media.EndOfMediaEvent;
 import javax.media.IncompatibleSourceException;
 
+import parameters.MessageCodeConfiguration;
+import parameters.NetConfiguration;
 import parameters.SessionConfiguration;
 
 import client.gui.IClientView;
@@ -256,7 +258,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 		try {
 			
-			buffer = new RelayBufferManager(Parameters.PROXY_BUFFER, this.fProxy.getController(), 0,initialSupThreshold, this);
+			buffer = new RelayBufferManager(SessionConfiguration.PROXY_BUFFER, this.fProxy.getController(), 0,initialSupThreshold, this);
 			//creo un rtpreceptionamanger
 			this.rtpReceptionMan = new RTPReceptionManager(newProxy, buffer, this.inStreamPort, this);
 			
@@ -553,7 +555,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				
 			} 
 */			
-			else if(msgReader.getCode() == Parameters.START_TX){
+			else if(msgReader.getCode() == MessageCodeConfiguration.START_TX){
 				/*
 				 * MArco:è arrivato un messaggio START_TX da parte del client
 				  come si comporta il proxy dipende dallo stato in cui si trova il proxy, sono che sono molto criptici
@@ -704,7 +706,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					this.newProxy = false;
 				}
 				this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
-			} else if(msgReader.getCode() == Parameters.STOP_TX){
+			} else if(msgReader.getCode() == MessageCodeConfiguration.STOP_TX){
 				
 				/*
 				 * Marco: qui finalemte le cose sono più chiare: arriva uno stop TX dal client,
@@ -981,7 +983,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			//rtpSender = new RTPSenderPS(outStreamPort);
 			if(isBigBoss){
-				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(Parameters.BIGBOSS_AD_HOC_ADDRESS));
+				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.r));
 			}
 			else{
 				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS));
