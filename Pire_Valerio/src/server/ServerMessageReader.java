@@ -103,6 +103,10 @@ public class ServerMessageReader {
 	
 	
 	
+	public static int getRelayStreamingInPort() {
+		return relayStreamingInPort;
+	}
+
 	public static int getBigbossControlPort() {
 		return bigbossControlPort;
 	}

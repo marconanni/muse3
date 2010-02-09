@@ -259,7 +259,7 @@ public class ServerSessionManager implements Observer{
 					e.printStackTrace();
 				}
 				try {
-					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(),sS.getTransmissionPort(), sS.getTransmissionControlPort());
+					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getRelayStreamingInPort(),ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(),ServerMessageReader.getClientRTPPort(),sS.getTransmissionPort(), sS.getTransmissionControlPort());
 					manager.sendPacket(confirm);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
