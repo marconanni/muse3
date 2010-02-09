@@ -23,7 +23,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
-import parameters.Parameters;
 import client.gui.BufferView;
 import client.gui.ClientFrame;
 import client.gui.ClientFrameController;
