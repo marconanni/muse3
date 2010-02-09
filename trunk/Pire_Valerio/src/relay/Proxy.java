@@ -29,6 +29,7 @@ import relay.connection.RelayConnectionFactory;
 import relay.gui.ProxyFrame;
 import relay.gui.ProxyFrameController;
 import relay.messages.RelayMessageFactory;
+import relay.messages.RelayMessageReader;
 import relay.timeout.*;
 import unibo.core.BufferEmptyEvent;
 import unibo.core.BufferEmptyListener;
@@ -307,6 +308,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		/*
 		 * Ho un'altro thread in ricezione: quello che riceve il flusso dal vecchio relay
 		 */
+//Valerio Questa parte non mi serve
+/*	
 		Thread runner2 = new Thread(){public void run(){try {
 			rtpReceptionMan.initRecoveryConnection(outStreamPort, oldProxyAddress);
 			System.err.print("Apertura ricezione recovery in corso...");
@@ -322,7 +325,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			e.printStackTrace();
 		}}};
 		runner2.start();
-		
+*/		
 		this.recoveryStreamInPort = rtpReceptionMan.getRecoveryReceivingPort();	
 		//inizializzo la sessione di recovery (quella tra old proxy e new proxy)
 //		this.initRecoverySession(recoverySenderPort, recoverySenderAddress); // Marco: non ci sto capendo niente: perchè è commentata?
@@ -439,7 +442,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				//reset timeout TimeOutAckForward
 				this.timeoutAckForward.cancelTimeOutAckForward();
 				//leggo le informazioni contenute nel messaggio
-				this.serverStreamPort = msgReader.getPortStreamingServer();
+				this.serverStreamPort = msgReader.get.getPortStreamingServer();
 				this.streamingServerCtrlPort = msgReader.getPortStreamingCtrlServer();
 				//imposto la porta da cui il server invia lo stream
 				this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
@@ -1219,21 +1222,23 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 
 	
 	
-//	private void sendRedirectToServer(){
-//		try {
-//			//Creo un messaggio START_TX e lo invio al server
-//			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
-//			proxyCM.sendToServer(redirect);
-//			//this.serverStopped = false;
-//		} catch (UnknownHostException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
-//	
+	private void sendRedirectToServer(){
+		/*
+		try {
+			
+			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+			proxyCM.sendToServer(redirect);
+			//this.serverStopped = false;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+		// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+	}
+	
 	
 	
 	
