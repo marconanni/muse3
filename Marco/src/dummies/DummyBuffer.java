@@ -7,6 +7,8 @@ import java.util.Vector;
 
 import javax.swing.event.EventListenerList;
 
+import client.gui.IClientView;
+
 import unibo.core.BufferEmptyListener;
 import unibo.core.BufferFullListener;
 
@@ -14,24 +16,60 @@ import unibo.core.BufferFullListener;
  * @author Marco Nanni
  *
  */
-public class DummyBuffer  {
+public class DummyBuffer extends relay.ExtensibleEventCircularBuffer  {
 	
 	public Vector<Byte> vector;
-	public int size;
+	public int capacity;
 	
-	public int sogliaInferiore;
-	public int sogliaSuperiore;
+	
+	
 	
 	public EventListenerList listeners= new EventListenerList();
 
-	public DummyBuffer( int size,int sogliaInferiore, int sogliaSuperiore) {
-		super();
-		this.vector = new Vector<Byte> ();
-		this.size = size;
-		this.sogliaInferiore = sogliaInferiore;
-		this.sogliaSuperiore = sogliaSuperiore;
+	
+	
+	/**
+	 * Costruttore usato per fare il buffer nomale
+	 * @param numFrames
+	 * @param view
+	 * @param sogliaInferioreNormal
+	 * @param sogliaInferioreElection
+	 * @param sogliaSuperioreNormal
+	 * @param sogliaSuperioreElection
+	 */
+
+	public DummyBuffer(int numFrames, IClientView view,
+			int sogliaInferioreNormal, int sogliaInferioreElection,
+			int sogliaSuperioreNormal, int sogliaSuperioreElection) {
+		super(numFrames, view, sogliaInferioreNormal, sogliaInferioreElection,
+				sogliaSuperioreNormal, sogliaSuperioreElection);
+		vector =new Vector<Byte> ();
+		capacity = numFrames;
+		
+		
+		
 	}
 	
+	/**
+	 * E' il costruttore del recoveryByffer
+	 * crea un buffer con soglia inferiore 0
+	 * e soglia superiore pari alla dimensione del 
+	 * buffer
+	 * 
+	 * @param recovery
+	 * @param numFrames l'unico utilizzato è la dimensione del buffer
+	 * @param view
+	 */
+	
+	public DummyBuffer(boolean recovery,int numFrames, IClientView view){
+		// questa riga è quadi inutile, ma devo metterla sennò non complia. ad ogni modo il
+		//buffer ha entrambe le soglie minime a zero e entrambe le soglie massime pari alla dimensione
+		// del buffe; ne segue che si svuota e si riempie del tutto
+		super(numFrames,view,0,0,numFrames,numFrames);
+		vector =new Vector<Byte> ();
+		capacity= numFrames;
+		
+	}
 	
 
 	/**
@@ -41,7 +79,7 @@ public class DummyBuffer  {
 	 */
 	public void put(Byte bite){
 		vector.add(bite);
-		if (vector.size()>sogliaSuperiore)
+		if (vector.size()>=super.getSogliaSuperiore())
 			this.throwBufferFullEvent();
 		
 	}
@@ -49,7 +87,7 @@ public class DummyBuffer  {
 	public Byte get(){
 		Byte bt = vector.firstElement();
 		vector.remove(bt);
-		if (vector.size()<this.sogliaInferiore)
+		if (vector.size()<=this.getSogliaInferiore())
 			this.throwBufferEmptyEvent();
 		return bt;
 		
@@ -120,28 +158,14 @@ public class DummyBuffer  {
 	}
 
 	public int getSize() {
-		return size;
+		return capacity;
 	}
 
 	public void setSize(int size) {
-		this.size = size;
+		this.capacity = size;
 	}
 
-	public int getSogliaInferiore() {
-		return sogliaInferiore;
-	}
-
-	public void setSogliaInferiore(int sogliaInferiore) {
-		this.sogliaInferiore = sogliaInferiore;
-	}
-
-	public int getSogliaSuperiore() {
-		return sogliaSuperiore;
-	}
-
-	public void setSogliaSuperiore(int sogliaSuperiore) {
-		this.sogliaSuperiore = sogliaSuperiore;
-	}
+	
 	
 	
 	

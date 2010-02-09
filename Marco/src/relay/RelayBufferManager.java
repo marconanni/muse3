@@ -1,6 +1,7 @@
 package relay;
 
 import client.gui.IClientView;
+import dummies.DummyBuffer;
 import unibo.core.CircularBuffer;
 import unibo.core.EventCircularBuffer;
 
@@ -14,8 +15,8 @@ import unibo.core.EventCircularBuffer;
 public class RelayBufferManager {
 
 	
-	private ExtensibleEvenCircularBuffer normalBuffer;
-	private ExtensibleEvenCircularBuffer recoveryBuffer;
+	private ExtensibleEventCircularBuffer normalBuffer;
+	private EventCircularBuffer recoveryBuffer;
 	private IClientView controller;
 	//dimensione dei buffer in termini di numero di frame contenuti 
 	private int bufSize;
@@ -32,7 +33,11 @@ public class RelayBufferManager {
 	public RelayBufferManager(int nFrames, IClientView controller, int sogliaInferioreNormal, int sogliaInferioreElection, int sogliaSuperioreNormal, int  sogliaSuperioreElection, Proxy proxy){
 		this.controller = controller;
 		this.proxy = proxy;
-		normalBuffer = new ExtensibleEvenCircularBuffer(nFrames,controller,sogliaInferioreNormal,sogliaInferioreElection,sogliaSuperioreNormal,sogliaSuperioreElection);
+		//codice normale:
+		//normalBuffer = new ExtensibleEventCircularBuffer(nFrames,controller,sogliaInferioreNormal,sogliaInferioreElection,sogliaSuperioreNormal,sogliaSuperioreElection);
+		// codice di test
+		normalBuffer = new DummyBuffer(nFrames,controller,sogliaInferioreNormal,sogliaInferioreElection,sogliaSuperioreNormal,sogliaSuperioreElection);
+
 		normalBuffer.addBufferFullEventListener(this.proxy);
 		normalBuffer.addBufferEmptyEventListener(this.proxy);
 		bufSize = nFrames;
@@ -66,9 +71,13 @@ public class RelayBufferManager {
 	 */
 	public EventCircularBuffer getRecoveryBuffer(){
 		if (recoveryBuffer == null)
+			// codice normale
+			//recoveryBuffer = new EventCircularBuffer(true ,bufSize, this.controller);
+			// codice di test
 			recoveryBuffer = new EventCircularBuffer(true ,bufSize, this.controller);
-			recoveryBuffer.addBufferEmptyEventListener(proxy);
-			recoveryBuffer.addBufferFullEventListener(proxy);
+
+		recoveryBuffer.addBufferEmptyEventListener(proxy);
+		recoveryBuffer.addBufferFullEventListener(proxy);
 		return recoveryBuffer;
 	}
 

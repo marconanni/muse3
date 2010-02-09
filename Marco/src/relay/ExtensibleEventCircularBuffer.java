@@ -1,8 +1,8 @@
 package relay;
 import javax.swing.event.EventListenerList;
 
-
-
+import client.gui.IClientView;
+import relay.gui.ProxyFrameController;
 
 
 
@@ -20,7 +20,7 @@ import javax.swing.event.EventListenerList;
  */
 
 
-public class ExtensibleEvenCircularBuffer extends dummies.DummyBuffer {
+public class ExtensibleEventCircularBuffer extends unibo.core.EventCircularBuffer {
 	private int sogliaSuperioreElection; // soglia oltre alla quale , in modalit� recovery viene lanciato 
 											//l'evento di bufferFull
 	 private int sogliaSuperioreNormal;		 // soglia oltre alla quale , in modalit� normale viene lanciato 
@@ -100,8 +100,8 @@ public class ExtensibleEvenCircularBuffer extends dummies.DummyBuffer {
 	 * l'evento di bufferfull.
 	 * 
 	 */
-	public ExtensibleEvenCircularBuffer(int numFrames,  int sogliaInferiore, int sogliaSuperiore){
-		super(numFrames,sogliaInferiore, sogliaSuperiore);
+	public ExtensibleEventCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperiore){
+		super(numFrames,view,sogliaInferiore, sogliaSuperiore);
 		
 		this.sogliaSuperioreNormal = sogliaSuperiore;
 		this.sogliaInferioreNormal= sogliaInferiore;
@@ -122,10 +122,10 @@ public class ExtensibleEvenCircularBuffer extends dummies.DummyBuffer {
 	 * l'evento di bufferfull.
 	 * @param sogliaSuperioreElection = � la soglia oltre la quale viene lanciato l'eventodi 
 	 * bufferFull quando il buffer � in modalit� Election
-	 * 
+	 *  
 	 */
-	public ExtensibleEvenCircularBuffer(int numFrames,  int sogliaInferiore, int sogliaSuperioreNormal, int sogliaSuperioreElection){
-		super(numFrames,sogliaInferiore, sogliaSuperioreNormal);
+	public ExtensibleEventCircularBuffer(int numFrames, IClientView view, int sogliaInferiore, int sogliaSuperioreNormal, int sogliaSuperioreElection){
+		super(numFrames,view,sogliaInferiore, sogliaSuperioreNormal);
 		this.setSogliaSuperioreElection(sogliaSuperioreElection);
 		this.setNormalMode(true);
 		
@@ -147,9 +147,9 @@ public class ExtensibleEvenCircularBuffer extends dummies.DummyBuffer {
 	 * bufferFull quando il buffer � in modalit� Election
 	 * 
 	 */
-	public ExtensibleEvenCircularBuffer(int numFrames,  int sogliaInferioreNormal,int sogliaInferioreElection, int sogliaSuperioreNormal, int sogliaSuperioreElection){
+	public ExtensibleEventCircularBuffer(int numFrames, IClientView view, int sogliaInferioreNormal,int sogliaInferioreElection, int sogliaSuperioreNormal, int sogliaSuperioreElection){
 		
-		super(numFrames,sogliaInferioreNormal, sogliaSuperioreNormal);
+		super(numFrames,view,sogliaInferioreNormal, sogliaSuperioreNormal);
 		this.sogliaInferioreNormal = sogliaInferioreNormal;
 		this.sogliaInferioreElection= sogliaInferioreElection;
 		this.sogliaSuperioreNormal = sogliaSuperioreNormal;
