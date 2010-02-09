@@ -36,6 +36,11 @@ public class RelayMessageReader {
 	private int activeClient;
 	private int typeNode;
 	
+	private String listaFile="";
+	private String clientAddress;
+	private String relayAddress;
+	private  String filename;
+	
 	
 	public RelayMessageReader(){}
 	
@@ -73,6 +78,23 @@ public class RelayMessageReader {
 			oldRelayLocalClusterHeadAddress = st.nextToken();
 			headNodeAddress = st.nextToken();
 		}
+		
+		if(code==MessageCodeConfiguration.FORWARD_REQ_LIST){
+			clientAddress=st.nextToken();
+		}
+		
+		if (code==MessageCodeConfiguration.LIST_RESPONSE){
+			listaFile=st.nextToken();
+			clientAddress=st.nextToken();
+		}
+		if(code==MessageCodeConfiguration.FORWARD_LIST_RESPONSE){
+			relayAddress=st.nextToken();
+			clientAddress=st.nextToken();
+			listaFile=st.nextToken();
+		}
+		if(code==MessageCodeConfiguration.FORWARD_REQ_FILE){}
+		if(code == MessageCodeConfiguration.REQUEST_FILE){}
+		if(code == MessageCodeConfiguration.ACK_REQUEST_FILE){}
 	}
 
 	/**Metodo getter
@@ -111,6 +133,10 @@ public class RelayMessageReader {
 	public String getHeadNodeAddress(){ return headNodeAddress;}
 	public String getOldRelayLocalClusterAddress(){return oldRelayLocalClusterAddress;}
 	public String getOldRelayLocalClusterHeadAddress(){return oldRelayLocalClusterHeadAddress;}
+	
+	public String getClientAddress() {return clientAddress;}
+	public String getRelayAddress(){return relayAddress;}
+	public String getListaFile(){return listaFile;}
 	
 }
 
