@@ -4,10 +4,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="unibo"/>
 	<classpathentry kind="src" path="sv60122"/>
-	<classpathentry kind="lib" path="/home/valerio/JMF-2.1.1e/lib/jffmpeg-1.1.0.jar"/>
-	<classpathentry kind="lib" path="/home/valerio/JMF-2.1.1e/lib/jmf.jar"/>
-	<classpathentry kind="lib" path="/home/valerio/JMF-2.1.1e/lib/mediaplayer.jar"/>
-	<classpathentry kind="lib" path="/home/valerio/JMF-2.1.1e/lib/mp3plugin.jar"/>
-	<classpathentry kind="lib" path="/home/valerio/JMF-2.1.1e/lib/multiplayer.jar"/>
+	<classpathentry kind="lib" path="lib/Jama-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jffmpeg-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jmf.jar"/>
+	<classpathentry kind="lib" path="lib/mediaplayer.jar"/>
+	<classpathentry kind="lib" path="lib/mp3plugin.jar"/>
+	<classpathentry kind="lib" path="lib/multiplayer.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
