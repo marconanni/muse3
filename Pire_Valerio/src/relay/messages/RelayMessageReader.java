@@ -42,8 +42,19 @@ public class RelayMessageReader {
 	private String filename;
 	
 	private int clientStreamingPort;
+	private int bigbossControlPort;
+	private int bigbossStreamingPort;
+	private int relayControlPort;
+	private int relayStreamingInPort;
 	
-	
+	public int getRelayControlPort() {
+		return relayControlPort;
+	}
+
+	public int getRelayStreamingInPort() {
+		return relayStreamingInPort;
+	}
+
 	public RelayMessageReader(){}
 	
 	/** Metodo che consente di leggere il contenuto di un pacchetto
@@ -94,7 +105,17 @@ public class RelayMessageReader {
 			clientAddress=st.nextToken();
 			listaFile=st.nextToken();
 		}
-		if(code==MessageCodeConfiguration.FORWARD_REQ_FILE){}
+		if(code==MessageCodeConfiguration.FORWARD_REQ_FILE){
+			filename=st.nextToken();
+			bigbossControlPort=Integer.parseInt(st.nextToken());//questo campo non ha senso.viene messo dal messagefactory perchè è lo stesso messaggio che viene inviato al server
+			bigbossStreamingPort=Integer.parseInt(st.nextToken());//questo campo non ha senso.viene messo dal messagefactory perchè è lo stesso messaggio che viene inviato al server
+			relayAddress=st.nextToken();
+			relayControlPort=Integer.parseInt(st.nextToken());
+			relayStreamingInPort=Integer.parseInt(st.nextToken());
+			clientAddress=st.nextToken();
+			clientStreamingPort=Integer.parseInt(st.nextToken());
+			
+		}
 		if(code == MessageCodeConfiguration.REQUEST_FILE){
 			filename=st.nextToken();
 			clientStreamingPort=Integer.parseInt(st.nextToken());
@@ -109,9 +130,7 @@ public class RelayMessageReader {
 
 	
 	 
-	public String getFilename() {
-		return filename;
-	}
+
 
 	public int getClientStreamingPort() {
 		return clientStreamingPort;
