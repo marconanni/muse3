@@ -85,7 +85,7 @@ public class RelaySessionManager implements Observer{
 	private int clientStreamingPort;
 	private String fileName;
 	
-	//se bigboss
+	
 	private String localClusterAddress=null;			//indirizzo locale (interfacciato sul CLUSTER)
 	private String localClusterHeadAddress = null;			//indirizzo locale (interfacciato sul CLUSTER HEAD)
 	private String connectedClusterHeadAddress = null;
@@ -131,6 +131,13 @@ public class RelaySessionManager implements Observer{
 		seqNumSendClient=0;// "" 		""			""	"	client
 		seqNumSendBigBoss=0;
 		seqNumSendRelay=0;
+				
+		//mi vado a prendere i tre indirizzi con cui un relay ha a che fare
+		//domanda: dove vanno agiornati se c'è un cambio di relay?
+		localClusterAddress=electionManager.getLocalClusterAddress();
+		localClusterHeadAddress=electionManager.getLocalClusterHeadAddress();
+		connectedClusterHeadAddress=electionManager.getConnectedClusterHeadAddress();
+		
 		System.out.println("RelaySessionManager è partito");
 	}
 
@@ -285,7 +292,7 @@ public class RelaySessionManager implements Observer{
 			System.out.println("E' arrivato un REQUEST_FILE dal Relay, ora creo il proxy");
 			//Valerio: non so ne nel proxy va cambiato qualcosa o se va bene anche se ad inviare al client invio ad un relay
 			//ovviamente gli passo l'indirizzo del relay e non quello del client
-			proxy = new Proxy(this, true, messageReader.getFilename(), this.relayAddress, messageReader.getRelayControlPort(),messageReader.getRelayStreamingInPort(), messageReader.getClientAddress(), messageReader.getClientStreamingPort() ,isBigBoss,false);
+			proxy = new Proxy(this, true, messageReader.getFilename(), this.relayAddress, messageReader.getRelayControlPort(),messageReader.getRelayStreamingInPort(), messageReader.getClientAddress(), messageReader.getClientStreamingPort() ,isBigBoss,false,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
 		
 			pReferences.put(this.relayAddress, proxy);
 			this.numberOfSession++;
@@ -357,7 +364,7 @@ public class RelaySessionManager implements Observer{
 			this.clientAddress = message.getAddress().getHostAddress();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
-			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getClientStreamingPort(),isBigBoss,true);
+			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getClientStreamingPort(),isBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
 			pReferences.put(this.clientAddress, proxy);
 			this.numberOfSession++;
 			}
@@ -371,7 +378,7 @@ public class RelaySessionManager implements Observer{
 			this.fileName=messageReader.getFilename();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+this.fileName+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
-			proxy = new Proxy(this, true, this.fileName,null,-1,-1, this.clientAddress, this.clientStreamingPort,isBigBoss,true);
+			proxy = new Proxy(this, true, this.fileName,null,-1,-1, this.clientAddress, this.clientStreamingPort,isBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
 			pReferences.put(this.relayAddress, proxy);
 			this.numberOfSession++;
 			}
@@ -785,7 +792,7 @@ private String createProxyFromSession(Hashtable sessionInfo)
 				 *  numero della porta dalla quale sia il vecchio che il nuovo relay erogano il flusso.
 				 * 
 				 */
-				proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut ,InetAddress.getByName(this.relayAddress), serverCtrlPort, proxyCtrlPort);
+				proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut ,InetAddress.getByName(this.relayAddress), serverCtrlPort, proxyCtrlPort,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
 				recStreamInports = recStreamInports+"_"+chiave+"_"+proxy.getRecoveryStreamInPort();
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block

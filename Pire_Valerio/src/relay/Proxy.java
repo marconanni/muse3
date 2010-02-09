@@ -15,6 +15,7 @@ import javax.media.ControllerListener;
 import javax.media.EndOfMediaEvent;
 import javax.media.IncompatibleSourceException;
 
+import parameters.ElectionConfiguration;
 import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
@@ -73,9 +74,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	private boolean request_pending;
 	//timeout:
-	private TimeOutAckForward timeoutAckForward;
-	private TimeOutAckClientReq timeoutAckClientReq;
-	private TimeOutSessionInterrupted timeoutSessionInterrupted;
+//	private TimeOutAckForward timeoutAckForward;
+//	private TimeOutAckClientReq timeoutAckClientReq;
+//	private TimeOutSessionInterrupted timeoutSessionInterrupted;
 	
 	//parametri:
 	private String proxyID = "-1";
@@ -107,6 +108,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	private int bigbossStreamOut;
 	private int bigbossControlPort;
+	
+
+
 	/**
 	 * @return the ending
 	 */
@@ -150,6 +154,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 	private boolean isBigBoss;
+	private String connectedClusterHeadAddr;
+	private String localClusterHeadAddr;
 	/*
 	 * ***************************************************************
 	 * **********************COSTRUTTORI******************************
@@ -165,7 +171,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * @param clientAddress
 	 * @param clientStreamPort
 	 */
-	public Proxy(Observer sessionManager,boolean newProxy, String filename,String relayAddress, int relayControlPort,int relayStreamPort, String clientAddress, int clientStreamPort, boolean isBigBoss, boolean servoUnClient) {
+	public Proxy(Observer sessionManager,boolean newProxy, String filename,String relayAddress, int relayControlPort,int relayStreamPort, String clientAddress, int clientStreamPort, boolean isBigBoss, boolean servoUnClient, String localClusterHeadAddr, String connectedClusterHeadAddr) {
+		
+		this.connectedClusterHeadAddr=connectedClusterHeadAddr;
+		this.localClusterHeadAddr=localClusterHeadAddr;
 		
 		this.fProxy = new ProxyFrame();
 		this.sessionManager = sessionManager;
@@ -195,7 +204,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			//buffer.getNormalBuffer().addBufferEmptyEventListener(this);
 			//buffer.getNormalBuffer().addBufferFullEventListener(this);
 			
-			this.rtpReceptionMan = new RTPReceptionManager(newProxy, buffer, this, isBigBoss);
+			this.rtpReceptionMan = new RTPReceptionManager(newProxy, buffer, this, isBigBoss,this.localClusterHeadAddr,this.connectedClusterHeadAddr);
+			
 			this.recoveryStreamInPort = rtpReceptionMan.getRecoveryReceivingPort();	
 		} catch (IncompatibleSourceException e) {
 			// TODO Auto-generated catch block
@@ -224,7 +234,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 		
 		//imposto il timeout
-		this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, TimeOutConfiguration.TIMEOUT_ACK_FORWARD);
+//		this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, TimeOutConfiguration.TIMEOUT_ACK_FORWARD);
 		//transito nello stato di WaitingServerRes 
 		this.state = ProxyState.waitingServerRes;
 		fProxy.getController().debugMessage(this.state.name());
@@ -244,8 +254,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 
-	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort){
+	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String connectedClusterHeadAddr){
 //	TODO: controllare che le porte siano tutte ben mappate
+		
+		this.localClusterHeadAddr=localClusterHeadAddr;
+		this.connectedClusterHeadAddr=connectedClusterHeadAddr;
+		
 		this.sessionManager = sessionManager;
 		this.addObserver(this.sessionManager);
 		this.serverStopped = false;
@@ -473,7 +487,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					this.notifyObservers(sessionports);
 				}
 				//imposto il timeout ack client req:
-				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
+//				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
 				
@@ -519,7 +533,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					this.notifyObservers(sessionports);
 				}
 				//imposto il timeout ack client req:
-				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
+//				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
 				
@@ -530,7 +544,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				//reset timeout TimeOutAckForward
-				this.timeoutAckForward.cancelTimeOutAckForward();
+//				this.timeoutAckForward.cancelTimeOutAckForward();
 				//leggo le informazioni contenute nel messaggio
 				this.serverStreamPort = msgReader.getServerStreamingPort();
 				this.streamingServerCtrlPort = msgReader.getServerStreamingControlPort();
@@ -574,7 +588,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					
 				}
 				//imposto il timeout ack client req:
-				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, Parameters.TIMEOUT_ACK_CLIENT_REQ);
+//				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, Parameters.TIMEOUT_ACK_CLIENT_REQ);
 				
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
@@ -588,10 +602,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				  come si comporta il proxy dipende dallo stato in cui si trova il proxy, sono che sono molto criptici
 				  * non si capisce che cosa significano e quando si verificano...
 				*/
-				if(this.timeoutSessionInterrupted!=null)
-				{
-					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
-				}
+//				if(this.timeoutSessionInterrupted!=null)
+//				{
+//					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
+//				}
 				if (state == ProxyState.waitingClientAck){					
 					/*
 					 * 
@@ -608,7 +622,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//resetto TimeOutAckClientReq
-					this.timeoutAckClientReq.cancelTimeOutAckClientReq();
+//					this.timeoutAckClientReq.cancelTimeOutAckClientReq();
 					
 					//invio il msg StartTX al server
 					
@@ -654,7 +668,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//resetto il TimeOutSessionInterrupted
-					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();					
+//					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();					
 					//invio il msg di startTX al server
 					if(serverStopped) sendStartTXToServer();					
 					//avvio la normale trasmissione versio il client
@@ -731,7 +745,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					state = ProxyState.TransmittingTempBuffer;
 					this.newProxy = false;
 				}
-				this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
+//				this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
 			}
 			
 			
@@ -745,14 +759,14 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				 */
 				
 				if (state == ProxyState.transmittingToClient){
-					if(this.timeoutSessionInterrupted!=null)
-					{
-						this.timeoutSessionInterrupted.cancel();
-					}
+//					if(this.timeoutSessionInterrupted!=null)
+//					{
+//						this.timeoutSessionInterrupted.cancel();
+//					}
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());				
 					//imposto il timeoutSessionInterrupted
-					this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
+//					this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
 
 					//interrompo lo strem versoil client
 					pauseNormalStreamToClient();
