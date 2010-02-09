@@ -27,7 +27,11 @@ public class RelayController {
 			setState(true);
 		}
 		sessionManager = RelaySessionManager.getInstance();
-		RelayElectionManager.getInstance(type, state, sessionManager);
+		electionManager = RelayElectionManager.getInstance(type, state, sessionManager);
+		//Valerio:qui dentro scrivo a mano i tre indirizzi che mi servono per un relay
+		electionManager.setLocalClusterAddress(localClusterAddress);
+		electionManager.setLocalClusterHeadAddress(localClusterHeadAddress);
+		electionManager.setConnectedClusterHeadAddress(connectedClusterHeadAddress);
 		sessionManager.setElectionManager(electionManager);
 		
 	}
