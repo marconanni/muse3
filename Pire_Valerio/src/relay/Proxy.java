@@ -26,6 +26,7 @@ import client.gui.IClientView;
 
 import relay.connection.ProxyCM;
 import relay.connection.RelayConnectionFactory;
+import relay.connection.RelayPortMapper;
 import relay.gui.ProxyFrame;
 import relay.gui.ProxyFrameController;
 import relay.messages.RelayMessageFactory;
@@ -425,23 +426,26 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			
 			
-			
-			
-			////////////////////////////////////////////////////////////////////////////////////////////
-			//c'è da fare anche il caso di Parameters.FORWARD_ACK_REQ
-			////////////////////////////////////////////////////////////////////////////////////////////
-			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes){
+
+			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes&&isBigBoss){
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				this.serverStreamPort=msgReader.get
+			
+			
+				sendAckFileToRelay();//ancora da implementare:deve mandare al proxy del relay quello che gli serve
+			}
+			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes&&!isBigBoss){
+				
 			}
 			
 			
+			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes&&isBigBoss){
+				
+			}
 			
-			
-			//valerio
-			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes){
-				//va differenziato il comportamento fra proxy del big boss e proxy del relay??
+			//valerio: comportamento se è un proxy del bigboss
+			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes&&isBigBoss){
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				//reset timeout TimeOutAckForward
@@ -514,6 +518,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					e.printStackTrace();
 				}
 				*/
+			
 			}
 			
 			
@@ -1269,7 +1274,6 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			this.proxyStreamingCtrlPort = proxyCM.getLocalAdHocInputPort();
 			//Creo un messaggio ACK_CLIENT_REQ
 			DatagramPacket ackClientReq = RelayMessageFactory.buildAckClientReq(0, PortConfiguration.CLIENT_PORT_SESSION_IN,InetAddress.getByName(this.clientAddress), this.outStreamPort, this.proxyStreamingCtrlPort);
-			
 			proxyCM.sendTo(ackClientReq);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -1280,6 +1284,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 	}
 
+	private void sendAckFileToRelay(){
+		
+	}
+	
 	private void sendServerUnreacheableToClient(){
 		try {
 			//invio SERVER_UNREACHABLE al client:
