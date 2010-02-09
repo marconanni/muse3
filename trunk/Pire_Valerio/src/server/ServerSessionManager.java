@@ -224,7 +224,7 @@ public class ServerSessionManager implements Observer{
 					//confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), ServerMessageReader.getBigbossPort(), ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(), ServerMessageReader.getClientRTPPort());
 					//da sistemare, non capisco perchè la risposta la devo mandare sulla porta 9000 e non su quella di bigboss
 					//forse perchè il proxy crea una porpia porta, ma non è quella che passo al server col messaggio request file?
-					confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), SessionConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(), ServerMessageReader.getClientRTPPort(), sender.getTransmissionPort(), sender.getTransmissionControlPort());
+					confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(), ServerMessageReader.getClientRTPPort(), sender.getTransmissionPort(), sender.getTransmissionControlPort());
 					manager.sendPacket(confirm);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
