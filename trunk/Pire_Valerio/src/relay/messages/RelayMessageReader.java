@@ -47,6 +47,15 @@ public class RelayMessageReader {
 	private int relayControlPort;
 	private int relayStreamingInPort;
 	
+	private int serverStreamingPort;
+	
+	private int clientControlPort;
+	private int serverStreamingControlPort;
+	
+	public int getServerStreamingPort() {
+		return serverStreamingPort;
+	}
+
 	public int getRelayControlPort() {
 		return relayControlPort;
 	}
@@ -122,15 +131,34 @@ public class RelayMessageReader {
 		}
 		if(code == MessageCodeConfiguration.ACK_REQUEST_FILE){
 			clientAddress=st.nextToken();
-			portStreamingClient=Integer.parseInt(st.nextToken());
-			portStreamingServer = Integer.parseInt(st.nextToken());
-			portStreamingCtrlServer = Integer.parseInt(st.nextToken());
+			clientControlPort=Integer.parseInt(st.nextToken());
+			clientStreamingPort=Integer.parseInt(st.nextToken());
+			serverStreamingControlPort=Integer.parseInt(st.nextToken());
+			serverStreamingPort=Integer.parseInt(st.nextToken());
+		}
+		if(code==MessageCodeConfiguration.FORWARD_ACK_REQ){
+			clientAddress=st.nextToken();
+			clientControlPort=Integer.parseInt(st.nextToken());
+			clientStreamingPort=Integer.parseInt(st.nextToken());
+			relayAddress=st.nextToken();
+			relayControlPort=Integer.parseInt(st.nextToken());
+			relayStreamingInPort=Integer.parseInt(st.nextToken());
+			serverStreamingControlPort=Integer.parseInt(st.nextToken());
+			serverStreamingPort=Integer.parseInt(st.nextToken());
 		}
 	}
 
 	
-	 
+	
 
+
+	public int getClientControlPort() {
+		return clientControlPort;
+	}
+
+	public int getServerStreamingControlPort() {
+		return serverStreamingControlPort;
+	}
 
 	public int getClientStreamingPort() {
 		return clientStreamingPort;
