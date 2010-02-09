@@ -142,6 +142,7 @@ public class RelayMessageReader {
 	public String getClientAddress() {return clientAddress;}
 	public String getRelayAddress(){return relayAddress;}
 	public String getListaFile(){return listaFile;}
+	public String getFilename(){return filename;}
 	
 }
 
