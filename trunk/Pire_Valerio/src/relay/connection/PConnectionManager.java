@@ -1,3 +1,5 @@
+package relay.connection;
+
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
