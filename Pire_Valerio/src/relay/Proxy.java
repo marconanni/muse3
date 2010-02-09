@@ -28,6 +28,7 @@ import relay.connection.ProxyCM;
 import relay.connection.RelayConnectionFactory;
 import relay.gui.ProxyFrame;
 import relay.gui.ProxyFrameController;
+import relay.messages.RelayMessageFactory;
 import relay.timeout.*;
 import unibo.core.BufferEmptyEvent;
 import unibo.core.BufferEmptyListener;
@@ -98,6 +99,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private boolean ending = false;
 	private String relayAddress;
 	private int relayControlPort;
+	private int relayStreamingPort;
 	/**
 	 * @return the ending
 	 */
@@ -170,6 +172,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 		this.msgReader = new RelayMessageReader();
 		
+		this.relayStreamingPort=relayStreamPort;
 		this.isBigBoss=isBigBoss;
 		this.relayAddress=relayAddress;
 		this.relayControlPort=relayControlPort;
@@ -1152,7 +1155,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		System.out.println("sendForwardReqFileToServer");
 		try {
 			this.inStreamPort = rtpReceptionMan.getNormalReceivingPort();
-			DatagramPacket reqFile =  RelayMessageFactory.buildForwardReqFile(0, filename,  proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.relayAddress, this.relayControlPort, this.recoveryStreamInPort, clientAddress, PortConfiguration.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+			DatagramPacket reqFile =  RelayMessageFactory.buildForwardReqFile(0, filename,  proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.relayAddress, this.relayControlPort, this.relayStreamingPort, clientAddress, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -1165,8 +1168,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			//Creo un messaggio FORWARD_REQ_FILE e lo invio al server
 //			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, Parameters.RELAY_SESSION_AD_HOC_PORT_IN, this.inStreamPort, this.clientAddress, Parameters.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(Parameters.SERVER_ADDRESS), Parameters.SERVER_SESSION_PORT_IN);
 //			(0, clientAddress, filename, proxyCM.getLocalManagedInputOutputPort(),this.inStreamPort, InetAddress.getByName(Parameters.SERVER_ADDRESS),Parameters.SERVER_SESSION_PORT_IN);
-			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, Parameters.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(Parameters.SERVER_ADDRESS), Parameters.SERVER_SESSION_PORT_IN);
-			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+Parameters.CLIENT_PORT_SESSION_IN+", "+this.clientStreamPort);
+			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, PortConfiguration.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+PortConfiguration.CLIENT_PORT_SESSION_IN+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
 			//this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, Parameters.TIMEOUT_ACK_FORWARD);
 		} catch (Exception e) {
@@ -1180,7 +1183,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.inStreamPort = rtpReceptionMan.getNormalReceivingPort();
 		DatagramPacket reqFile;
 		try {
-			reqFile = RelayMessageFactory.buildForwardReqFile(0, filename, 0, 0,"questo campo non mi serve, lo riempirà bigboss", proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress,  this.clientStreamPort, InetAddress.getByName(Parameters.BIGBOSS_AD_HOC_ADDRESS), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
+			reqFile = RelayMessageFactory.buildForwardReqFile(0, filename, 0, 0,"questo campo non mi serve, lo riempirà bigboss", proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress,  this.clientStreamPort, InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
 		} catch (Exception e) {
@@ -1201,7 +1204,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendStartTXToServer(){
 		try {
 			//Creo un messaggio START_TX e lo invio al server
-			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(Parameters.SERVER_ADDRESS), this.streamingServerCtrlPort);
+			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), this.streamingServerCtrlPort);
 			proxyCM.sendToServer(startTX);
 			
 			this.serverStopped = false;
@@ -1216,28 +1219,28 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 
 	
 	
-	private void sendRedirectToServer(){
-		try {
-			//Creo un messaggio START_TX e lo invio al server
-			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0, InetAddress.getByName(Parameters.SERVER_ADDRESS), Parameters.SERVER_SESSION_PORT_IN);
-			proxyCM.sendToServer(redirect);
-			//this.serverStopped = false;
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
+//	private void sendRedirectToServer(){
+//		try {
+//			//Creo un messaggio START_TX e lo invio al server
+//			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+//			proxyCM.sendToServer(redirect);
+//			//this.serverStopped = false;
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
+//	
 	
 	
 	
 	private void sendStopTXToServer() {
 		DatagramPacket stopTX;
 		try {
-			stopTX = RelayMessageFactory.buildStopTx(0, InetAddress.getByName(Parameters.SERVER_ADDRESS), this.streamingServerCtrlPort);
+			stopTX = RelayMessageFactory.buildStopTx(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), this.streamingServerCtrlPort);
 			proxyCM.sendToServer(stopTX);
 			this.serverStopped = true;
 		} catch (UnknownHostException e) {
@@ -1253,8 +1256,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		try {
 			this.proxyStreamingCtrlPort = proxyCM.getLocalAdHocInputPort();
 			//Creo un messaggio ACK_CLIENT_REQ
-			DatagramPacket ackClientReq = RelayMessageFactory.buildAckClientReq(0, Parameters.CLIENT_PORT_SESSION_IN, 
-					InetAddress.getByName(this.clientAddress), this.outStreamPort, this.proxyStreamingCtrlPort);
+			DatagramPacket ackClientReq = RelayMessageFactory.buildAckClientReq(0, PortConfiguration.CLIENT_PORT_SESSION_IN,InetAddress.getByName(this.clientAddress), this.outStreamPort, this.proxyStreamingCtrlPort);
 			
 			proxyCM.sendTo(ackClientReq);
 		} catch (UnknownHostException e) {
@@ -1269,8 +1271,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendServerUnreacheableToClient(){
 		try {
 			//invio SERVER_UNREACHABLE al client:
-			DatagramPacket serverUnreach = RelayMessageFactory.buildServerUnreacheable(0, InetAddress.getByName(this.clientAddress), 
-					Parameters.CLIENT_PORT_SESSION_IN);
+			DatagramPacket serverUnreach = RelayMessageFactory.buildServerUnreacheable(0, InetAddress.getByName(this.clientAddress),PortConfiguration.CLIENT_PORT_SESSION_IN);
 			proxyCM.sendTo(serverUnreach);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -1284,7 +1285,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendLeaveMsgToClient() {
 		try {
 			//invio LEAVE al client:
-			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), Parameters.CLIENT_PORT_SESSION_IN);
+			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN);
 			proxyCM.sendTo(leave);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
