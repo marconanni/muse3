@@ -13,11 +13,13 @@ import javax.media.rtp.ReceiveStreamListener;
 import javax.media.rtp.event.ByeEvent;
 import javax.media.rtp.event.ReceiveStreamEvent;
 
+import parameters.NetConfiguration;
+
+import relay.connection.RelayPortMapper;
+
 
 //import muse.proxy.ProxySender;
 
-
-import parameters.Parameters;
 
 import unibo.core.multiplexer.RTPMultiplexer;
 import unibo.core.parser.RTPParser;
@@ -97,6 +99,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	 * @throws IOException
 	 * @throws IncompatibleSourceException
 	 */
+	//Valerio: passare per parametro l'indirizzo
 	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer, Proxy proxy, boolean bigboss) throws IOException, IncompatibleSourceException{
 		this.buffer = buffer;
 		this.proxy = proxy;
@@ -105,7 +108,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		normalReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();	
 		//normalReceiver = new RTPReceiverPS(normalReceivingPort);
 		if(bigboss){
-			normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(Parameters.BIGBOSS_MANAGED_ADDRESS));
+			normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(NetConfiguration.BIGBOSS_MANAGED_ADDRESS));
 		}
 		else{
 			normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS));
