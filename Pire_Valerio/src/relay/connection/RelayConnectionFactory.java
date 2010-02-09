@@ -55,7 +55,7 @@ public class RelayConnectionFactory {
 	 * @return un istanza di ProxyCM
 	 */
 	public static ProxyCM getProxyConnectionManager(Observer obser){
-		return new ProxyCM(false, rpm.getLocalAdHocHostAddress().getHostAddress(), rpm.getFirstFreeControlAdHocInPort(),rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
+		return new ProxyCM(false, rpm.getLocalClusterAddress(),null, rpm.getFirstFreeControlAdHocInPort(),rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalClusterHeadAddress(), rpm.getFirstFreeControlManagedOutPort(), obser,false);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di ProxyCM quando il Proxy viene creato per accogliere una sessione RTP esistente
@@ -64,7 +64,7 @@ public class RelayConnectionFactory {
 	 */
 	public static ProxyCM getProxyConnectionManager(Observer obser, int oldProxyCtrlPortIn){
 		rpm.setRangeAdHocPortInControlProxy(oldProxyCtrlPortIn);
-		return new ProxyCM(true, rpm.getLocalAdHocHostAddress().getHostAddress(), oldProxyCtrlPortIn ,rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
+		return new ProxyCM(true, rpm.getLocalClusterAddress(),null, oldProxyCtrlPortIn ,rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalClusterHeadAddress(), rpm.getFirstFreeControlManagedOutPort(), obser,false);
 	}
 	/**Metoto statico per ottenere un'istanza di RelaySessionCM 
 	 * possibilità di ricevere e mandare messaggi sulla rete ad hoc e mandare messaggi sulla rete managed 
@@ -72,6 +72,6 @@ public class RelayConnectionFactory {
 	 * @return un istanza di RelaySessionCM
 	 */
 	public static RelayCM getSessionConnectionManager(Observer obser){
-		return new RelayCM("RelaySessionCM",rpm.getLocalAdHocHostAddress().getHostAddress(),rpm.getPortInAdHocSession(),rpm.getPortOutAdHocSession(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getPortOutManagedSession(),obser);
+		return new RelayCM("RelaySessionCM",rpm.getLocalClusterAddress(),null,rpm.getPortInAdHocSession(),rpm.getPortOutAdHocSession(),obser,false);
 	}
 }
