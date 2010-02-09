@@ -60,6 +60,8 @@ public class ServerSessionManager implements Observer{
 	private ConnectionManager manager;
 	private int portaOutUDP;
 	
+	private InetAddress bigbossAddress;
+	
 	public ServerSessionManager()
 	{
 		this.status = "Idle";
@@ -175,6 +177,7 @@ public class ServerSessionManager implements Observer{
 			if(ServerMessageReader.getCode()==MessageCodeConfiguration.FORWARD_REQ_LIST){//catena: client->relay->bigboss->server
 				System.out.println("Ricevuta richiesta lista files, messaggio FORWARD_REQ_LIST");
 				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Ricevuta richiesta lista files, messaggio FORWARD_REQ_LIST");
+				this.bigbossAddress=this.message.getAddress();
 				String list="";
 				for(int i=0;i<files.length;i++)
 				{
@@ -183,11 +186,9 @@ public class ServerSessionManager implements Observer{
 						list+=",";
 				}
 				try {
-					System.out.println("Indirizzo da cui ho ricevuto la richiesta e su cui rispondo: "+this.message.getAddress());
-					consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Indirizzo da cui ho ricevuto la richiesta e su cui rispondo: "+this.message.getAddress());
-					System.out.println("Porta specificata nel messaggio su cui rispondo: "+ServerMessageReader.getBigbossPort());
-					consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Porta specificata nel messaggio su cui rispondo: "+ServerMessageReader.getBigbossPort());
-					message=ServerMessageFactory.buildForwardFilesListMessage(msgIdx++, ServerMessageReader.getPacketAddress(),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, ServerMessageReader.getRelayAddress(),ServerMessageReader.getClientAddress(), list);
+					System.out.println("Indirizzo da cui ho ricevuto la richiesta e su cui rispondo: "+this.bigbossAddress+":"+PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+					consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Indirizzo da cui ho ricevuto la richiesta e su cui rispondo: "+this.bigbossAddress+":"+PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+					message=ServerMessageFactory.buildForwardFilesListMessage(msgIdx++, this.bigbossAddress,PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, ServerMessageReader.getRelayAddress(),ServerMessageReader.getClientAddress(), list);
 					manager.sendPacket(message);
 					System.out.println("Inviata lista files al bigboss");
 					consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Inviata lista files al bigboss");
