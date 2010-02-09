@@ -94,7 +94,12 @@ public class RelayMessageReader {
 		}
 		if(code==MessageCodeConfiguration.FORWARD_REQ_FILE){}
 		if(code == MessageCodeConfiguration.REQUEST_FILE){}
-		if(code == MessageCodeConfiguration.ACK_REQUEST_FILE){}
+		if(code == MessageCodeConfiguration.ACK_REQUEST_FILE){
+			clientAddress=st.nextToken();
+			portStreamingClient=Integer.parseInt(st.nextToken());
+			portStreamingServer = Integer.parseInt(st.nextToken());
+			portStreamingCtrlServer = Integer.parseInt(st.nextToken());
+		}
 	}
 
 	/**Metodo getter
