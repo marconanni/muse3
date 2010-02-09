@@ -28,6 +28,7 @@ import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutAckSessionInfo;
 import relay.timeout.TimeOutSessionInfo;
 import relay.timeout.TimeOutSessionRequest;
+import relay.timeout.TimeOutSingleWithMessage;
 
 
 //import javax.media.NoDataSourceException;
@@ -61,9 +62,9 @@ public class RelaySessionManager implements Observer{
 	private RelayElectionManager electionManager;
 
 //X Pire: non so come hai chiamato i timeout
-	private TimeOutSessionRequest toSessionRequest;
-	private TimeOutAckSessionInfo toAckSessionInfo;
-	private TimeOutSessionInfo toSessionInfo;
+	private TimeOutSingleWithMessage toSessionRequest;
+	private TimeOutSingleWithMessage toAckSessionInfo;
+	private TimeOutSingleWithMessage toSessionInfo;
 	
 	
 	private RelayCM sessionCM; // Marco: è chi si occupa di spedire i messaggi.
@@ -82,6 +83,9 @@ public class RelaySessionManager implements Observer{
 	
 	private String bigbossAddress;
 	private int bigbossPort;
+	
+	private int clientStreamingPort;
+	private String fileName;
 	
 	//stati in cui si può trovare il RelayElectionManager
 	public enum RelaySessionStatus {  
@@ -298,7 +302,7 @@ public class RelaySessionManager implements Observer{
 			}
 			this.relayAddress=messageReader.getRelayAddress();
 			try {
-				this.message=RelayMessageFactory.buildForwardListResponse(seqNumSendRelay, InetAddress.getByName(this.relayAddress),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, this.messageReader.getClientAddress(), listaFile);
+				this.message=RelayMessageFactory.buildForwardListResponse(seqNumSendRelay++, InetAddress.getByName(this.relayAddress),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, this.relayAddress,this.messageReader.getClientAddress(), listaFile);
 				sessionCM.sendTo(this.message);
 			}catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -324,8 +328,9 @@ public class RelaySessionManager implements Observer{
 				System.out.println(files[i]);
 				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,files[i]);
 			}
+			this.clientAddress=messageReader.getClientAddress();
 			try {
-				this.message=RelayMessageFactory.buildListResponse(seqNumSendClient++,InetAddress.getByName(messageReader.getClientAddress()), PortConfiguration.CLIENT_PORT_SESSION_IN, listaFile);
+				this.message=RelayMessageFactory.buildListResponse(seqNumSendClient++,InetAddress.getByName(this.clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN, listaFile);
 				sessionCM.sendTo(this.message);
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -358,10 +363,12 @@ public class RelaySessionManager implements Observer{
 			//allora essendo relay devo inoltrare un forwardrequestfile al bigboss
 			this.status = RelaySessionStatus.ACTIVE_NORMAL;
 //			this.clientAddress = message.getAddress().getHostAddress();
-			this.relayAddress=message.getAddress().getHostAddress();
-			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
+			this.clientAddress=message.getAddress().getHostAddress();
+			this.clientStreamingPort=messageReader.getClientStreamingPort();
+			this.fileName=messageReader.getFilename();
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+this.fileName+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
-			proxy = new Proxy(this, true, messageReader.getFilename(),null,-1,-1, this.clientAddress, messageReader.getPortStreamingClient(),isBigBoss,true);
+			proxy = new Proxy(this, true, this.fileName,null,-1,-1, this.clientAddress, this.clientStreamingPort,isBigBoss,true);
 			pReferences.put(this.relayAddress, proxy);
 			this.numberOfSession++;
 			}
