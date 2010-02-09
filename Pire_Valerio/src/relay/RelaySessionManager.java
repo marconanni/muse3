@@ -210,7 +210,7 @@ public class RelaySessionManager implements Observer{
 			this.clientAddress = message.getAddress().getHostAddress();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al server: "+this.serverAddress+" sulla porta "+this.serverPortSessionIn+" e la risposta andrà inviata al client sulla porta "+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			try{
-				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer, InetAddress.getByName(this.serverAddress), this.serverPortSessionIn, this.clientAddress, this.clientSessionPort);
+				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, InetAddress.getByName(this.serverAddress), this.serverPortSessionIn, this.clientAddress);
 				sessionCM.sendTo(this.message);
 				System.out.println("BigBoss: inviato il messaggio request list al server");
 			}catch (Exception e) {
@@ -357,7 +357,7 @@ public class RelaySessionManager implements Observer{
 			this.clientAddress = message.getAddress().getHostAddress();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
-			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getPortStreamingClient(),isBigBoss,true);
+			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getClientStreamingPort(),isBigBoss,true);
 			pReferences.put(this.clientAddress, proxy);
 			this.numberOfSession++;
 			}
