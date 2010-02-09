@@ -200,8 +200,8 @@ public class ServerSessionManager implements Observer{
 			}
 			
 			if(ServerMessageReader.getCode()==MessageCodeConfiguration.REQUEST_FILE){
-				System.out.println("ServerSessionManager si deve QUI procedere con lo streming");
-				
+				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"SERVER_SESSION_MANAGER: Arrivato un REQUEST_FILE");
+				System.out.println("ServerSessionManager si deve QUI procedere con lo streming");				
 				String fileRichiesto=ServerMessageReader.getFileName();
 				int portaRTPSuCuiInviare=ServerMessageReader.getBigbossStreamingPort();
 				DatagramPacket confirm;
@@ -213,6 +213,8 @@ public class ServerSessionManager implements Observer{
 					//System.err.println("*********************************INDIRIZZO CLIENT: "+ServerMessageReader.getClientAddress()+"???????????????????????");
 					sender = new StreamingServer(fileRichiesto, ServerMessageReader.getClientAddress(),ServerMessageReader.getClientPort(), portaRTPSuCuiInviare, this,consolle);
 					//StreamingServer sender = new StreamingServer(fileRichiesto,this.message.getAddress().toString(),ServerMessageReader.getClientPort(), portaRTPSuCuiInviare, this,consolle);
+					ssReferences.put(ServerMessageReader.getClientAddress(), sender);
+					numberOfSession++;
 				} catch (NoDataSourceException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -231,33 +233,41 @@ public class ServerSessionManager implements Observer{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("Inviata conferma dell'avvenuta ricezione del file al client "+this.message.getAddress()+" sulla sua porta "+ServerMessageReader.getClientPort());
-				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Inviata conferma dell'avvenuta ricezione del file al client "+this.message.getAddress()+" sulla sua porta "+ServerMessageReader.getClientPort());
-
-				
-				
-				
+				System.out.println("Inviata conferma dell'avvenuta ricezione della richiesta del file al bigboss "+this.message.getAddress());
+				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Inviata conferma dell'avvenuta ricezione della richiesta del file al bigboss "+this.message.getAddress());
 			}
-/*			
-			if(ServerMessageReader.getCode() == Parameters.FORWARD_REQ_FILE)
-			{
-				consolle.debugMessage("SERVER_SESSION_MANAGER: Arrivato un FORWARD_REQ_FILE");
+			
+				
+			if(ServerMessageReader.getCode() == MessageCodeConfiguration.FORWARD_REQ_FILE){
+				DatagramPacket confirm;
+				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"SERVER_SESSION_MANAGER: Arrivato un FORWARD_REQ_FILE");
+				String fileRichiesto=ServerMessageReader.getFileName();
+				int portaRTPSuCuiInviare=ServerMessageReader.getBigbossStreamingPort();
 				try {
-					sS = new StreamingServer(ServerMessageReader.getFileName(), this.message.getAddress().getHostAddress(), ServerMessageReader.getProxyControlPort(), ServerMessageReader.getProxyReceivingStreamPort(), this, this.consolle);
+					//sS = new StreamingServer(fileRichiesto, this.message.getAddress().getHostAddress(), ServerMessageReader.getProxyControlPort(), ServerMessageReader.getProxyReceivingStreamPort(), this, this.consolle);
+					sS= new StreamingServer(fileRichiesto, this.message.getAddress().getHostAddress(),ServerMessageReader.getBigbossControlPort(), portaRTPSuCuiInviare, this,consolle);
 					ssReferences.put(ServerMessageReader.getClientAddress(), sS);
 					numberOfSession++;
 				} catch (NoDataSourceException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					Logger.write("STREAMING_SERVER(COSTRUTTORE): Errore nel DataSource creato...");
-					this.consolle.debugMessage("STREAMING_SERVER(COSTRUTTORE): Errore nel DataSource creato...");
+					this.consolle.debugMessage(DebugConfiguration.DEBUG_ERROR,"STREAMING_SERVER(COSTRUTTORE): Errore nel DataSource creato...");
 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				try {
+					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort());
+					manager.sendPacket(confirm);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Inviata conferma dell'avvenuta ricezione della richiesta del file al bigboss "+this.message.getAddress());
+				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Inviata conferma dell'avvenuta ricezione della richiesta del file al bigboss "+this.message.getAddress());		
 			}
-*/			
+			 	
 			
 /*			
 			if(ServerMessageReader.getCode() == Parameters.REDIRECT)
