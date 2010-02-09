@@ -430,20 +430,25 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			////////////////////////////////////////////////////////////////////////////////////////////
 			//c'è da fare anche il caso di Parameters.FORWARD_ACK_REQ
 			////////////////////////////////////////////////////////////////////////////////////////////
-			
+			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes){
+				fProxy.getController().debugMessage(this.state.name());
+				System.err.println(this.state.name());
+				this.serverStreamPort=msgReader.get
+			}
 			
 			
 			
 			
 			//valerio
 			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes){
+				//va differenziato il comportamento fra proxy del big boss e proxy del relay??
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				//reset timeout TimeOutAckForward
 				this.timeoutAckForward.cancelTimeOutAckForward();
 				//leggo le informazioni contenute nel messaggio
-				this.serverStreamPort = msgReader.get.getPortStreamingServer();
-				this.streamingServerCtrlPort = msgReader.getPortStreamingCtrlServer();
+				this.serverStreamPort = msgReader.getServerStreamingPort();
+				this.streamingServerCtrlPort = msgReader.getServerStreamingControlPort();
 				//imposto la porta da cui il server invia lo stream
 				this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
 				//inizializzo la sessione
