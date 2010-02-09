@@ -1,5 +1,3 @@
-package relay.connection;
-
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
@@ -9,9 +7,6 @@ import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
-import parameters.Parameters;
-
-import relay.RelayPortMapper;
 
 /**Classe che rappresenta un oggetto in grado di spedire messaggi verso la rete 
  * Managed solo dopo averne ricevuto uno dalla stessa rete, Inoltre è in grado di inviare messaggi alla rete Ad-Hoc
@@ -47,12 +42,12 @@ public class PConnectionManager extends AConnectionManager  {
 	 * @param localManagedInputOutputPort un int che rappresenta la porta attraverso cui inviare e ricevere messaggi alla/dalla rete Managed
 	 * @param observer l'Observer che deve essere avvertito dal PConnectionManager all'arrivo di un messaggio
 	 */
-	public PConnectionManager(boolean cR, String localAdHocAddress, int localAdHocInputPort, int localAdHocOutputPort, String localManagedAddress,  int localManagedInputOutputPort, Observer observer){
-		super( localAdHocAddress,localAdHocInputPort,localAdHocOutputPort, observer);
+	public PConnectionManager(boolean cR, InetAddress localAdHocAddress,InetAddress localAdHocBcastAddress, int localAdHocInputPort, int localAdHocOutputPort, InetAddress localManagedAddress,  int localManagedInputOutputPort, Observer observer, boolean bcast){
+		super( localAdHocAddress, localAdHocBcastAddress, localAdHocInputPort,localAdHocOutputPort, observer, bcast);
 
 		if(localManagedAddress == null) throw new IllegalArgumentException(managerName+" : indirizzo passato al costruttore a null");
 
-		this.localManagedAddress = localManagedAddress;
+		this.localManagedAddress = localManagedAddress.getHostAddress();
 		this.localManagedInputOutputPort = localManagedInputOutputPort;
 		
 		this.localAdHocInputPort = localAdHocInputPort;
@@ -64,7 +59,7 @@ public class PConnectionManager extends AConnectionManager  {
 		changingRelay = cR;
 
 		try {
-			managedInputOutputSocket = new DatagramSocket(localManagedInputOutputPort);
+			managedInputOutputSocket = new DatagramSocket(localManagedInputOutputPort,localManagedAddress);
 		} catch (SocketException e) {
 			e.printStackTrace();
 		}
