@@ -19,6 +19,7 @@ import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
 import parameters.SessionConfiguration;
+import parameters.TimeOutConfiguration;
 
 import client.gui.IClientView;
 
@@ -102,6 +103,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String relayAddress;
 	private int relayControlPort;
 	private int relayStreamingPort;
+	
+	
+	private int bigbossStreamOut;
+	private int bigbossControlPort;
 	/**
 	 * @return the ending
 	 */
@@ -430,22 +435,98 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes&&isBigBoss){
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
-				this.serverStreamPort=msgReader.get
+				this.serverStreamPort=msgReader.getServerStreamingPort();
+				this.streamingServerCtrlPort=msgReader.getServerStreamingControlPort();
+				//imposto la porta da cui il server invia lo stream
+				this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
+				outStreamPort = RelayPortMapper.getInstance().getFirstFreeStreamOutPort(); 
+				//invio al client il msg AckClientReq
+				this.state = ProxyState.waitingClientAck;
+				sendAckFileToRelay(msgReader.getClientAddress(),msgReader.getClientControlPort(),msgReader.getClientStreamingPort());//ancora da implementare:deve mandare al proxy del relay quello che gli serve
+				this.proxyCM.start();
 			
-			
-				sendAckFileToRelay();//ancora da implementare:deve mandare al proxy del relay quello che gli serve
+				/**
+				 * Ora ho tutti i dati della sessione pronti ergo posso avvertire il sessionmanager e passarglieli tutti
+				 */
+				
+				System.out.println("inStreamPort "+inStreamPort);
+				System.out.println("outStreamPort "+outStreamPort);
+				System.out.println("streamingServerControlPort "+streamingServerCtrlPort);
+				System.out.println("proxyStreamingCtrlPort "+proxyStreamingCtrlPort);
+				System.out.println("clientStreamPort "+clientStreamPort);
+				
+				if(this.inStreamPort!=0 && this.outStreamPort!=0 && this.serverStreamPort!=0 && this.streamingServerCtrlPort!=0 && this.proxyStreamingCtrlPort!=0 && this.clientStreamPort!=0)
+				{
+					System.out.println("Avviso il SessionManager con i dati della sessione");
+					int[] sessionports = new int[6];
+					sessionports[0] = this.serverStreamPort;
+					sessionports[1] = this.inStreamPort;
+					sessionports[2] = this.outStreamPort;
+					sessionports[3] = this.clientStreamPort;
+					sessionports[4] = this.streamingServerCtrlPort;
+					sessionports[5] = this.proxyStreamingCtrlPort;
+					
+					for(int i=0;i<sessionports.length;i++)				
+						System.out.println(sessionports[i]);
+					
+					this.setChanged();
+					this.notifyObservers(sessionports);
+				}
+				//imposto il timeout ack client req:
+				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
+				//transito nel nuovo stato
+				this.state = ProxyState.waitingClientAck;
+				
 			}
 			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes&&!isBigBoss){
+				fProxy.getController().debugMessage(this.state.name());
+				System.err.println(this.state.name());
+				this.serverStreamPort=msgReader.getServerStreamingPort();
+				this.streamingServerCtrlPort=msgReader.getServerStreamingControlPort();
+				//imposto la porta da cui il server invia lo stream
+				this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
+				outStreamPort = RelayPortMapper.getInstance().getFirstFreeStreamOutPort(); 
+				//invio al client il msg AckClientReq
+				this.state = ProxyState.waitingClientAck;
+				sendAckClientReqToClient();//manda l'ack al client
+				this.proxyCM.start();
+			
+				/**
+				 * Ora ho tutti i dati della sessione pronti ergo posso avvertire il sessionmanager e passarglieli tutti
+				 */
+				
+				System.out.println("inStreamPort "+inStreamPort);
+				System.out.println("outStreamPort "+outStreamPort);
+				System.out.println("streamingServerControlPort "+streamingServerCtrlPort);
+				System.out.println("proxyStreamingCtrlPort "+proxyStreamingCtrlPort);
+				System.out.println("clientStreamPort "+clientStreamPort);
+				
+				if(this.inStreamPort!=0 && this.outStreamPort!=0 && this.serverStreamPort!=0 && this.streamingServerCtrlPort!=0 && this.proxyStreamingCtrlPort!=0 && this.clientStreamPort!=0)
+				{
+					System.out.println("Avviso il SessionManager con i dati della sessione");
+					int[] sessionports = new int[6];
+					sessionports[0] = this.serverStreamPort;
+					sessionports[1] = this.inStreamPort;
+					sessionports[2] = this.outStreamPort;
+					sessionports[3] = this.clientStreamPort;
+					sessionports[4] = this.streamingServerCtrlPort;
+					sessionports[5] = this.proxyStreamingCtrlPort;
+					
+					for(int i=0;i<sessionports.length;i++)				
+						System.out.println(sessionports[i]);
+					
+					this.setChanged();
+					this.notifyObservers(sessionports);
+				}
+				//imposto il timeout ack client req:
+				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
+				//transito nel nuovo stato
+				this.state = ProxyState.waitingClientAck;
 				
 			}
 			
-			
-			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes&&isBigBoss){
-				
-			}
-			
-			//valerio: comportamento se è un proxy del bigboss
-			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes&&isBigBoss){
+			//valerio:il messaggio ACK_REQUEST_FILE può arrivare solo al bigboss
+			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes){
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				//reset timeout TimeOutAckForward
@@ -497,27 +578,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
-				
 			
-				
-				/*
-				try {
-					DatagramPacket ack=RelayMessageFactory.buildAckClientReq(0, Parameters.CLIENT_PORT_SESSION_IN, InetAddress.getByName(this.clientAddress), this.outStreamPort, this.proxyStreamingCtrlPort);
-					proxyCM.sendTo(ack);
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				try {
-					System.out.println("ho mandato all'indirizzo "+InetAddress.getByName(this.clientAddress)+":"+Parameters.CLIENT_PORT_SESSION_IN+" il messaggio di ack dando come mia porta di stream out: "+this.outStreamPort+" e come porta di controllo: "+this.proxyStreamingCtrlPort);
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				*/
 			
 			}
 			
@@ -1284,8 +1345,15 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 	}
 
-	private void sendAckFileToRelay(){
-		
+	private void sendAckFileToRelay(String clientAddr,int clientControlPort, int clientStreamPort){//messaggio che il bigboss invia al relay
+		try{
+			this.proxyStreamingCtrlPort=proxyCM.getLocalAdHocInputPort();
+			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,PortConfiguration.CLIENT_PORT_SESSION_IN,InetAddress.getByName(this.clientAddress),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientControlPort,clientStreamPort);
+			proxyCM.sendTo(ackRelayReq);
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 	
 	private void sendServerUnreacheableToClient(){
