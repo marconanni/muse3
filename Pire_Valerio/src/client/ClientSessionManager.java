@@ -392,22 +392,10 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 	 */
 	public void requestFile(String filename) {
 		System.out.println("ClientSessionManager: requestFile");
-
-		// this.relayAddress="127.0.1.1";//ho messo l'indirizzo statico per
-		// provare lo streaming!!!!!!!!!!!!!!!!!!!!
-		//this.serverAddress = Parameters.SERVER_ADDRESS;//provo lo streaming diretto da server a client!!!
-		// if(this.relayAddress!=null)
-		this.relayAddress=NetConfiguration.RELAY_CLUSTER_ADDRESS;
-		//if (this.serverAddress != null) {
 		if(this.relayAddress!=null)	{
 			 System.out.println("relayAddress: " + this.relayAddress);
-			//System.out.println("serverAddress: " + this.serverAddress);
 			this.filename=filename;
 			try {
-				// this.msg = ClientMessageFactory.buildRequestFile(0,
-				// this.filename, this.myStreamingPort,
-				// InetAddress.getByName(this.relayAddress),
-				// Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
 				this.msg = ClientMessageFactory.buildRequestFile(msgIdx++,this.filename, this.myStreamingPort, InetAddress.getByName(this.relayAddress),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 				sessionCM.sendTo(this.msg);
 				System.out.println("waiting for response");
@@ -428,7 +416,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("l'indirizzo del relay è null");
+			System.err.println("l'indirizzo del relay è null");
 			// this.electionManager.tryToSearchTheRelay();
 			// this.frameController.debugMessage("RELAY DISCOVERING...\nSE NON SI RICEVONO NOTIFICHE ENTRO BREVE SI CONSIGLIA DI CAMBIARE POSIZIONE E RIPROVARE.");
 		}
