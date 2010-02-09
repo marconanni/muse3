@@ -22,6 +22,7 @@ import parameters.PortConfiguration;
 import relay.connection.RelayCM;
 import relay.connection.RelayConnectionFactory;
 
+import relay.messages.RelayMessageFactory;
 import relay.messages.RelayMessageReader;
 import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutAckSessionInfo;
@@ -200,7 +201,6 @@ public class RelaySessionManager implements Observer{
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_LIST && imRelay && imBigBoss){//Valerio: aggiunto da me
 			System.out.println("codice request_list e sono il relay bigboss");
 			this.clientAddress = message.getAddress().getHostAddress();
-			this.clientSessionPort = messageReader.getClientPort();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al server: "+this.serverAddress+" sulla porta "+this.serverPortSessionIn+" e la risposta andrà inviata al client sulla porta "+messageReader.getClientPort());
 			try{
 				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer, InetAddress.getByName(this.serverAddress), this.serverPortSessionIn, this.clientAddress, this.clientSessionPort);
@@ -216,7 +216,6 @@ public class RelaySessionManager implements Observer{
 			//se non è bigboss dovrò creare un messaggio di tipo FORWARD_REQUEST_LIST
 			System.out.println("codice request_list e sono un relay normale");
 			this.clientAddress = message.getAddress().getHostAddress();
-			this.clientSessionPort = messageReader.getClientPort();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al big boss: "+this.bigbossAddress+" sulla porta "+this.bigbossPort+" e la risposta andrà inviata al client sulla porta "+messageReader.getClientPort());
 			try{
 				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss, InetAddress.getByName(this.bigbossAddress), this.bigbossPort,null, message.getAddress().getHostAddress());
