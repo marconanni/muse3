@@ -30,11 +30,13 @@ public class ServerMessageReader {
 	private static int clientPort;
 	private static int clientRTPPort;
 	private static int relayPort;
+	private static int relayStreamingInPort;
 	private static String relayAddress; 
 
 
 	private static int bigbossPort;
 	private static int bigbossStreamingPort;
+	private static int bigbossControlPort;
 	private static InetAddress packetAddress;
 	
 	/**
@@ -68,14 +70,18 @@ public class ServerMessageReader {
 		c = st.nextToken();
 		code = Integer.parseInt(c);
 		System.out.println("Code " + code);
-		/*
-		if (code == Parameters.FORWARD_REQ_FILE){
-			clientAddress = st.nextToken();
-			fileName = st.nextToken();
-			proxyControlPort = Integer.parseInt(st.nextToken());
-			proxyReceivingStreamPort = Integer.parseInt(st.nextToken());
+		
+		if (code == MessageCodeConfiguration.FORWARD_REQ_FILE){
+			fileName=st.nextToken();
+			bigbossControlPort=Integer.parseInt(st.nextToken());
+			bigbossStreamingPort=Integer.parseInt(st.nextToken());
+			relayAddress=st.nextToken();
+			relayControlPort=Integer.parseInt(st.nextToken());
+			relayStreamingInPort=Integer.parseInt(st.nextToken());
+			clientAddress=st.nextToken();
+			clientRTPPort=Integer.parseInt(st.nextToken());
 		}
-		*/
+		
 		if(code==MessageCodeConfiguration.REQUEST_LIST){
 			clientAddress=st.nextToken();
 		}
@@ -95,6 +101,12 @@ public class ServerMessageReader {
 	
 	public static InetAddress getPacketAddress(){return packetAddress;}
 	
+	
+	
+	public static int getBigbossControlPort() {
+		return bigbossControlPort;
+	}
+
 	public static int getClientRTPPort() {
 		return clientRTPPort;
 	}
