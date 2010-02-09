@@ -1,0 +1,81 @@
+package relay;
+
+import client.gui.IClientView;
+import unibo.core.CircularBuffer;
+import unibo.core.EventCircularBuffer;
+
+
+/**
+ * Questa classe inclapsula due istanze della classe unibo.core.CircularBuffer. 
+ * 
+ * @author Carlo Di Fulco
+ * @created 27-nov-2008 20.26.57
+ */
+public class RelayBufferManager {
+
+	
+	private EventCircularBuffer normalBuffer;
+	private EventCircularBuffer recoveryBuffer;
+	private IClientView controller;
+	//dimensione dei buffer in termini di numero di frame contenuti 
+	private int bufSize;
+	private Proxy proxy;
+	
+	/**
+	 * Crea un RelayBufferManager i cui buffer interni hanno una 
+	 * dimensione nFrames (in termini di numero di frame contenuti)
+	 *  
+	 * @param nFrames
+	 */
+	public RelayBufferManager(int nFrames, IClientView controller, int sogliaInferiore, int sogliaSuperiore, Proxy proxy){
+		this.controller = controller;
+		this.proxy = proxy;
+		normalBuffer = new EventCircularBuffer(nFrames, controller, sogliaInferiore, sogliaSuperiore);
+		normalBuffer.addBufferFullEventListener(this.proxy);
+		normalBuffer.addBufferEmptyEventListener(this.proxy);
+		bufSize = nFrames;
+	}
+
+	/*
+	 * Ho deciso di eliminare questo metodo in quanto superfluo,
+	 * infatti basta ottenere un riferimento al buffer di interesse
+	 * (normal o recovery) e usare i metodi messi a disposizione 
+	 * dalla classe CircularBuffer  
+	 */
+//	public ExtBuffer getFrame(){
+//		return null;
+//	}
+	 
+	/**
+	 * Ritorna un riferimento al normalBuffer
+	 *    
+	 * @return CircularBuffer 
+	 */
+	public EventCircularBuffer getNormalBuffer(){
+		return normalBuffer;
+	}
+
+	/**
+	 * Ritorna un riferimento al recoveryBuffer
+	 * 
+	 * @return CircularBuffer 
+	 */
+	public EventCircularBuffer getRecoveryBuffer(){
+		if (recoveryBuffer == null)
+			recoveryBuffer = new EventCircularBuffer(true ,bufSize, this.controller);
+			recoveryBuffer.addBufferEmptyEventListener(proxy);
+			recoveryBuffer.addBufferFullEventListener(proxy);
+		return recoveryBuffer;
+	}
+
+	/**
+	 * Ritorna la dimensione dei buffer in termini di numero massimo di frame contenuti
+	 * 
+	 * @return the bufSize
+	 */
+	public int getBufSize() {
+		return bufSize;
+	}
+
+
+}
