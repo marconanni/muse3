@@ -224,7 +224,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 		
 		//imposto il timeout
-		this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, Parameters.TIMEOUT_ACK_FORWARD);
+		this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, TimeOutConfiguration.TIMEOUT_ACK_FORWARD);
 		//transito nello stato di WaitingServerRes 
 		this.state = ProxyState.waitingServerRes;
 		fProxy.getController().debugMessage(this.state.name());
@@ -1342,31 +1342,31 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 	
 	private void sendServerUnreacheableToClient(){
-		try {
-			//invio SERVER_UNREACHABLE al client:
-			DatagramPacket serverUnreach = RelayMessageFactory.buildServerUnreacheable(0, InetAddress.getByName(this.clientAddress),PortConfiguration.CLIENT_PORT_SESSION_IN);
-			proxyCM.sendTo(serverUnreach);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+//		try {
+//			//invio SERVER_UNREACHABLE al client:
+//			DatagramPacket serverUnreach = RelayMessageFactory.buildServerUnreacheable(0, InetAddress.getByName(this.clientAddress),PortConfiguration.CLIENT_PORT_SESSION_IN);
+//			proxyCM.sendTo(serverUnreach);
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}		
 	}
 		
 	private void sendLeaveMsgToClient() {
-		try {
-			//invio LEAVE al client:
-			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN);
-			proxyCM.sendTo(leave);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+//		try {
+//			//invio LEAVE al client:
+//			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN);
+//			proxyCM.sendTo(leave);
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}		
 	}
 }
 
