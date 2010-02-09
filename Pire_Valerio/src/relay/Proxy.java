@@ -581,59 +581,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			
 			}
-			
-			
-/*			
-			if (msgReader.getCode() == Parameters.ACK_RELAY_FORW && state == ProxyState.waitingServerRes){
 
-				fProxy.getController().debugMessage(this.state.name());
-				System.err.println(this.state.name());
-				//reset timeout TimeOutAckForward
-				this.timeoutAckForward.cancelTimeOutAckForward();
-				
-				//leggo le informazioni contenute nel messaggio
-				this.serverStreamPort = msgReader.getPortStreamingServer();
-				this.streamingServerCtrlPort = msgReader.getPortStreamingCtrlServer();
-				
-				//imposto la porta da cui il server invia lo stream
-				this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
-				
-				//inizializzo la sessione
-				//initNormalSession();
-				
-				outStreamPort = RelayPortMapper.getInstance().getFirstFreeStreamOutPort(); 
-					
-				//invio al client il msg AckClientReq
-				this.state = ProxyState.waitingClientAck;
-				sendAckClientReqToClient();
-				
-				
-				this.proxyCM.start();
-				
-				// Ora ho tutti i dati della sessione pronti ergo posso avvertire il sessionmanager e passarglieli tutti
-				 
-				if(this.inStreamPort!=0 && this.outStreamPort!=0 && this.serverStreamPort!=0 && this.streamingServerCtrlPort!=0 && this.proxyStreamingCtrlPort!=0 && this.clientStreamPort!=0)
-				{
-					System.out.println("Avviso il SessionManager con i dati della sessione");
-					int[] sessionports = new int[6];
-					sessionports[0] = this.serverStreamPort;
-					sessionports[1] = this.inStreamPort;
-					sessionports[2] = this.outStreamPort;
-					sessionports[3] = this.clientStreamPort;
-					sessionports[4] = this.streamingServerCtrlPort;
-					sessionports[5] = this.proxyStreamingCtrlPort;
-					this.setChanged();
-					this.notifyObservers(sessionports);
-				}
-				//imposto il timeout ack client req:
-				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, Parameters.TIMEOUT_ACK_CLIENT_REQ);
-				
-				//transito nel nuovo stato
-				this.state = ProxyState.waitingClientAck;
-				
-			} 
-*/			
-			else if(msgReader.getCode() == MessageCodeConfiguration.START_TX){
+			if(msgReader.getCode() == MessageCodeConfiguration.START_TX){
 				/*
 				 * MArco:è arrivato un messaggio START_TX da parte del client
 				  come si comporta il proxy dipende dallo stato in cui si trova il proxy, sono che sono molto criptici
@@ -643,8 +592,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				{
 					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
 				}
-				if (state == ProxyState.waitingClientAck){
-					
+				if (state == ProxyState.waitingClientAck){					
 					/*
 					 * 
 					 * Marco: probabilmente questa è la prima volta che mando qualcosa al client, ma non ne sono affatto sicuro
@@ -682,7 +630,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					runner.start(); // Marco: poi qui faccio partire il thread ( e quindi metto in esecuzione il metodo run)
 					
 					initNormalSession(); // Marco: qui dovrei far partire la trasmissione verso il client.
-					sendStartTXToServer();
+					
+					if(isBigBoss)
+						sendStartTXToServer();
+					else
+						sendStartTXToBigBoss();
 					
 					System.err.println("initNormalSession() FINITO");
 				
@@ -702,15 +654,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//resetto il TimeOutSessionInterrupted
-					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
-					
+					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();					
 					//invio il msg di startTX al server
-					if(serverStopped) sendStartTXToServer();
-					
+					if(serverStopped) sendStartTXToServer();					
 					//avvio la normale trasmissione versio il client
-					
-					
-					
+									
 					/**
 					 * se il buffer del proxy è vuoto allora aspetto che il buffer si sia riempito e poi invio al client
 					 */
@@ -784,7 +732,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					this.newProxy = false;
 				}
 				this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
-			} else if(msgReader.getCode() == MessageCodeConfiguration.STOP_TX){
+			}
+			
+			
+			else
+				if(msgReader.getCode() == MessageCodeConfiguration.STOP_TX){
 				
 				/*
 				 * Marco: qui finalemte le cose sono più chiare: arriva uno stop TX dal client,
@@ -879,9 +831,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}else if (state == ProxyState.attemptingToStart){
 			fProxy.getController().debugMessage(this.state.name());
 			System.err.println(this.state.name());
-			//invio al server il msg di StopTX
-			sendStopTXToServer(); 
 			
+			
+			if(isBigBoss)
+				sendStopTXToServer();//invio al server il msg di StopTX
+			else
+				sendStopTXToBigBoss();
 			//rimango nello stato in cui mi trovo
 			
 		}else if (state == ProxyState.FirstReceivingromServer){
@@ -1293,6 +1248,21 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 	}
 
+	private void sendStartTXToBigBoss(){
+		try {
+			//Creo un messaggio START_TX e lo invio al server
+			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS), this.bigbossControlPort);
+			proxyCM.sendToServer(startTX);
+			
+			this.serverStopped = false;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	
 	private void sendRedirectToServer(){
@@ -1319,6 +1289,21 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		DatagramPacket stopTX;
 		try {
 			stopTX = RelayMessageFactory.buildStopTx(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), this.streamingServerCtrlPort);
+			proxyCM.sendToServer(stopTX);
+			this.serverStopped = true;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void sendStopTXToBigBoss(){
+		DatagramPacket stopTX;
+		try {
+			stopTX = RelayMessageFactory.buildStopTx(0, InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS), this.bigbossControlPort);
 			proxyCM.sendToServer(stopTX);
 			this.serverStopped = true;
 		} catch (UnknownHostException e) {
