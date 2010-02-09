@@ -255,9 +255,11 @@ public class RelaySessionManager implements Observer{
 			//allora questo è bigboss che deve inoltrare tutto al server
 			System.out.println("codice forward_request_list quindi sono un relay");
 			this.relayAddress=message.getAddress().getHostAddress();
-			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+serverAddress+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client sulla porta "+messageReader.getClientPort());
+			this.clientAddress=messageReader.getClientAddress();
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+serverAddress+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client "+this.clientAddress+":"+PortConfiguration.CLIENT_PORT_SESSION_IN);
+			System.out.println("Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+serverAddress+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client "+this.clientAddress+":"+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			try{
-				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, InetAddress.getByName(bigbossAddress), bigbossPort,messageReader.getPacketAddress().getHostAddress(), messageReader.getClientAddress());
+				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, InetAddress.getByName(serverAddress), serverPortSessionIn,this.relayAddress, this.clientAddress);
 				sessionCM.sendTo(this.message);
 				System.out.println("Relay: inviato il messaggio request list al BigBoss");
 			}catch (Exception e) {
