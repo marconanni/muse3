@@ -243,6 +243,7 @@ public class ServerSessionManager implements Observer{
 				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"SERVER_SESSION_MANAGER: Arrivato un FORWARD_REQ_FILE");
 				String fileRichiesto=ServerMessageReader.getFileName();
 				int portaRTPSuCuiInviare=ServerMessageReader.getBigbossStreamingPort();
+				sS=null;
 				try {
 					//sS = new StreamingServer(fileRichiesto, this.message.getAddress().getHostAddress(), ServerMessageReader.getProxyControlPort(), ServerMessageReader.getProxyReceivingStreamPort(), this, this.consolle);
 					sS= new StreamingServer(fileRichiesto, this.message.getAddress().getHostAddress(),ServerMessageReader.getBigbossControlPort(), portaRTPSuCuiInviare, this,consolle);
@@ -258,7 +259,7 @@ public class ServerSessionManager implements Observer{
 					e.printStackTrace();
 				}
 				try {
-					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort());
+					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(),sS.getTransmissionPort(), sS.getTransmissionControlPort());
 					manager.sendPacket(confirm);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

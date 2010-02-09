@@ -84,11 +84,11 @@ public class ServerMessageFactory {
 	    
 	  }
 	  */
-	  static protected DatagramPacket buildConfirmRequest(int sequenceNum, InetAddress addr, int port, String clientAddress, int clientPort, int clientStreamingPort, int serverStreamingPort, int serverStreamingControlPort) throws IOException {
+	  static protected DatagramPacket buildConfirmRequest(int sequenceNum, InetAddress addr, int port, String clientAddress, int clientControlPort, int clientStreamingPort, int serverStreamingPort, int serverStreamingControlPort) throws IOException {
 		    
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		    DataOutputStream doStream = new DataOutputStream(boStream);
-		    String content = sequenceNum+"_"+MessageCodeConfiguration.ACK_REQUEST_FILE+"_"+clientAddress+"_"+clientPort+"_"+clientStreamingPort+"_"+serverStreamingPort+"_"+serverStreamingControlPort;
+		    String content = sequenceNum+"_"+MessageCodeConfiguration.ACK_REQUEST_FILE+"_"+clientAddress+"_"+clientControlPort+"_"+clientStreamingPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
 		    doStream.writeUTF(content);
 		    doStream.flush();
 		    byte[] data = boStream.toByteArray();
@@ -97,11 +97,11 @@ public class ServerMessageFactory {
 		    
 		  }
 	  
-	  static protected DatagramPacket buildForwardConfirmRequest(int sequenceNum, InetAddress addr, int port, String relayAddress, int relayport, String clientAddress, int clientPort) throws IOException {
+	  static protected DatagramPacket buildForwardConfirmRequest(int sequenceNum, InetAddress addr, int port, String relayAddress, int relayControlPort, int relayStreamPort,String clientAddress, int clientControlPort, int clientStreamPort,int serverStreamingPort, int serverStreamingControlPort) throws IOException {
 		    
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		    DataOutputStream doStream = new DataOutputStream(boStream);
-		    String content = sequenceNum+"_"+MessageCodeConfiguration.ACK_REQUEST_FILE+"_"+relayAddress+"_"+relayport+"_"+clientAddress+"_"+clientPort;
+		    String content = sequenceNum+"_"+MessageCodeConfiguration.FORWARD_ACK_REQ+"_"+clientAddress+"_"+clientControlPort+"_"+clientStreamPort+"_"+relayAddress+"_"+relayControlPort+"_"+relayStreamPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
 		    doStream.writeUTF(content);
 		    doStream.flush();
 		    byte[] data = boStream.toByteArray();
