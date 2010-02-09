@@ -138,6 +138,9 @@ public class RelaySessionManager implements Observer{
 		localClusterHeadAddress=electionManager.getLocalClusterHeadAddress();
 		connectedClusterHeadAddress=electionManager.getConnectedClusterHeadAddress();
 		
+		System.out.println("localClusterAddress = "+localClusterAddress+", localClusterHeadAddress = "+localClusterHeadAddress+", connectedClusterHeadAddress = "+connectedClusterHeadAddress);
+		consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"localClusterAddress = "+localClusterAddress+", localClusterHeadAddress = "+localClusterHeadAddress+", connectedClusterHeadAddress = "+connectedClusterHeadAddress);
+		
 		System.out.println("RelaySessionManager è partito");
 	}
 
