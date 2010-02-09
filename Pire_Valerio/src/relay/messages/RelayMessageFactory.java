@@ -418,6 +418,16 @@ public class RelayMessageFactory {
 
 		}
 		
+		
+		static public DatagramPacket buildAckClientReq(int sequenceNumber, int port,InetAddress addr, int proxyOutStreaming, int proxyCtrl) throws IOException {
+			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+			DataOutputStream doStream = new DataOutputStream(boStream);
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.ACK_CLIENT_REQ+"_"+proxyOutStreaming+"_"+proxyCtrl;
+			doStream.writeUTF(content);
+			doStream.flush();
+			byte[] data = boStream.toByteArray();
+			return new DatagramPacket(data, data.length, addr, port);
+		}
 
 }
 
@@ -485,15 +495,7 @@ public class RelayMessageFactory {
 //* @return
 //* @throws IOException
 //*/
-//static public DatagramPacket buildAckClientReq(int sequenceNumber, int port,InetAddress addr, int proxyOutStreaming, int proxyCtrl) throws IOException {
-//	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-//	DataOutputStream doStream = new DataOutputStream(boStream);
-//	String content = sequenceNumber+"_"+MessageCodeConfiguration.ACK_CLIENT_REQ+"_"+proxyOutStreaming+"_"+proxyCtrl;
-//	doStream.writeUTF(content);
-//	doStream.flush();
-//	byte[] data = boStream.toByteArray();
-//	return new DatagramPacket(data, data.length, addr, port);
-//}
+
 
 ///**
 //* Pacchetto per inoltrare la richiesta al server del file da trasmettere
