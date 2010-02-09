@@ -26,7 +26,7 @@ import relay.timeout.RelayTimeoutFactory;
 import relay.timeout.TimeOutAckSessionInfo;
 import relay.timeout.TimeOutSessionInfo;
 import relay.timeout.TimeOutSessionRequest;
-import util.Logger;
+
 
 //import javax.media.NoDataSourceException;
 
@@ -534,9 +534,9 @@ public class RelaySessionManager implements Observer{
 		if(this.event.equals("TIMEOUTSESSIONREQUEST") || this.event.equals("TIMEOUTACKSESSIONINFO")) //VECCHIO RELAY: il nuovo relay non ha risposto
 		{
 			if(this.event.equals("TIMEOUTSESSIONREQUEST") && status.equals("Active"))
-				consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_REQUEST");
+				consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_REQUEST");
 			if(this.event.equals("TIMEOUTACKSESSIONINFO") && status.equals("AttendingAckSession"))
-				consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_ACK_SESSION_INFO");
+				consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_ACK_SESSION_INFO");
 			//TODO DEVO AVVISARE IL RELAYELECTIONMANAGER
 			/*
 			 * Marco: in sostanza, se il nuovo relay non risponde, cerco di nominare il secondo
@@ -630,9 +630,9 @@ public class RelaySessionManager implements Observer{
 			 * il parametro numberOf ritrasmissions idica quante volte posso chiedere la ritrasmissione del messaggio Sessioninfo
 			 * fortunatamente qui posso ritrasmetterlo diminuendo il numero di ritrasmissioni rimaste
 			 */
-			consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO");
+			consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO");
 			try {
-				this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(this.relayAddress), Parameters.RELAY_SESSION_AD_HOC_PORT_IN);
+				this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 				this.sessionCM.sendTo(message);
 				this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, Parameters.TIMEOUT_SESSION_INFO);
 				this.numberOfRetrasmissions--;
@@ -650,7 +650,7 @@ public class RelaySessionManager implements Observer{
 			 * sfortunatamente non posso ritrasmetterlo: non mi resta che mandare IN BROADCAST
 			 *  ai client il messaggio di invalidare le sessioni attive, ipotizzo quindi che il vecchio relay non ci sia più
 			 */
-			consolle.debugMessage("RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO e numero di ritrasmissioni a 0");
+			consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO e numero di ritrasmissioni a 0");
 			this.status = "Waiting";
 			//Invio il messaggio di invalidazione della sessione ai client che conoscono l'identità del nuovo relay ma non si ha modo di recuperare la sessione
 			try {

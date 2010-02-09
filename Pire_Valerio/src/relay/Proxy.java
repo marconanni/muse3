@@ -17,6 +17,7 @@ import javax.media.IncompatibleSourceException;
 
 import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
+import parameters.PortConfiguration;
 import parameters.SessionConfiguration;
 
 import client.gui.IClientView;
@@ -429,7 +430,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			
 			//valerio
-			if(msgReader.getCode()==Parameters.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes){
+			if(msgReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE&&state==ProxyState.waitingServerRes){
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				//reset timeout TimeOutAckForward
@@ -983,10 +984,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			//rtpSender = new RTPSenderPS(outStreamPort);
 			if(isBigBoss){
-				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.r));
+				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS));
 			}
 			else{
-				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS));
+				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS));
 			}
 			rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
 			
@@ -1051,7 +1052,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				CircularBuffer[] b = this.rtpReceptionMan.getNormalParserThread().getOutputBufferSet();
 				try {
 					muxTh = new MuseMultiplexerThread(mux, b,null,5);
-					muxTh.setTimeToWait(Parameters.TTW-48);
+					muxTh.setTimeToWait(SessionConfiguration.TTW-48);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1085,7 +1086,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				CircularBuffer[] b = this.rtpReceptionMan.getRecoveryParserThread().getOutputBufferSet();
 				try {
 					muxThR = new MuseMultiplexerThread(mux, b,null,5);
-					muxThR.setTimeToWait(Parameters.TTW-48);
+					muxThR.setTimeToWait(SessionConfiguration.TTW-48);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1151,7 +1152,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		System.out.println("sendForwardReqFileToServer");
 		try {
 			this.inStreamPort = rtpReceptionMan.getNormalReceivingPort();
-			DatagramPacket reqFile =  RelayMessageFactory.buildForwardReqFile(0, filename,  proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.relayAddress, controlPortRelay, streamPortRelay, clientAddress, controlPortClient, streamingPortClient, InetAddress.getByName(Parameters.SERVER_ADDRESS), Parameters.SERVER_SESSION_PORT_IN);
+			DatagramPacket reqFile =  RelayMessageFactory.buildForwardReqFile(0, filename,  proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.relayAddress, this.relayControlPort, this.recoveryStreamInPort, clientAddress, PortConfiguration.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
