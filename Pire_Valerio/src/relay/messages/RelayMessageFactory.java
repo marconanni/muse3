@@ -11,8 +11,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 import parameters.MessageCodeConfiguration;
+import relay.Session;
 
 
 public class RelayMessageFactory {
@@ -443,7 +446,7 @@ public class RelayMessageFactory {
 			return new DatagramPacket(data, data.length, addr, port);
 		}
 
-}
+
 
 
 
@@ -569,73 +572,71 @@ public class RelayMessageFactory {
 //	return new DatagramPacket(data, data.length, addr, port);
 //}
 
-///**
-//* Messaggio di ElectionDone
-//* @param newRelayAddress
-//* @param addr
-//* @param port
-//* @return
-//* @throws IOException
-//*/
-//static public DatagramPacket buildRequestSession(int sequenceNumber, InetAddress addr, int port) throws IOException {
-//
-//	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-//	DataOutputStream doStream = new DataOutputStream(boStream);
-//	String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_SESSION;
-//	doStream.writeUTF(content);
-//	doStream.flush();
-//	byte[] data = boStream.toByteArray();
-//
-//	return new DatagramPacket(data, data.length, addr, port);
-//
-//}
+/**
+ * Messaggio di ElectionDone
+ * @param newRelayAddress
+ * @param addr
+ * @param port
+ * @return
+ * @throws IOException
+ */
+static public DatagramPacket buildRequestSession(int sequenceNumber, InetAddress addr, int port) throws IOException {
+	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+	DataOutputStream doStream = new DataOutputStream(boStream);
+	String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_SESSION;
+	doStream.writeUTF(content);
+	doStream.flush();
+	byte[] data = boStream.toByteArray();
+	return new DatagramPacket(data, data.length, addr, port);
+}
 
-///**
-//* Messaggio di ElectionDone
-//* @param newRelayAddress
-//* @param addr
-//* @param port
-//* @return
-//* @throws IOException
-//*/
-//static public DatagramPacket buildSessionInfo(int sequenceNumber, Hashtable sessionInfo, InetAddress addr, int port) throws IOException {
+/**
+ * Messaggio di SessionInfo - manda al nuovo relay le caratterisitiche delle connessioni in corso sotto forma di 
+ * un'unica grande stringona;
+ * @param newRelayAddress
+ * @param addr indirizzo del nuovo relay al quale mandare il pacchetto
+ * @param port la porta sulla quale il nuovo relay attende il pacchetto
+ * @return il pacchetto da inviare 
+ * @throws IOException
+ */
+static public DatagramPacket buildSessionInfo(int sequenceNumber, Hashtable sessions, InetAddress addr, int port) throws IOException {
+
+	String session="";
+	if(sessions!=null){
+		session = getSession(sessions); // il metofo getSession trasforma la tabella sessions in un'unica stringona
+	}
+	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+	DataOutputStream doStream = new DataOutputStream(boStream);
+	String content = sequenceNumber+"_"+MessageCodeConfiguration.SESSION_INFO+session;
+	doStream.writeUTF(content);
+	doStream.flush();
+	byte[] data = boStream.toByteArray();
+
+	return new DatagramPacket(data, data.length, addr, port);
+
+}
 //
-//	String session="";
-//	if(sessionInfo!=null){
-//		session = getSession(sessionInfo);
-//	}
-//	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-//	DataOutputStream doStream = new DataOutputStream(boStream);
-//	String content = sequenceNumber+"_"+MessageCodeConfiguration.SESSION_INFO+session;
-//	doStream.writeUTF(content);
-//	doStream.flush();
-//	byte[] data = boStream.toByteArray();
 //
-//	return new DatagramPacket(data, data.length, addr, port);
-//
-//}
-//
-//
-///**
-//* Messaggio di ElectionDone
-//* @param newRelayAddress
-//* @param addr
-//* @param port
-//* @return
-//* @throws IOException
-//*/
-//static public DatagramPacket buildAckSession(int sequenceNumber, String proxyInfo, InetAddress addr, int port) throws IOException {
-//
-//	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-//	DataOutputStream doStream = new DataOutputStream(boStream);
-//	String content = sequenceNumber+"_"+MessageCodeConfiguration.ACK_SESSION+proxyInfo;
-//	doStream.writeUTF(content);
-//	doStream.flush();
-//	byte[] data = boStream.toByteArray();
-//
-//	return new DatagramPacket(data, data.length, addr, port);
-//
-//}
+/**
+ * Messaggio di ElectionDone
+ * @param newRelayAddress
+ * @param addr
+ * @param port
+ * @return
+ * @throws IOException
+ */
+static public DatagramPacket buildAckSession(int sequenceNumber, String proxyInfo, InetAddress addr, int port) throws IOException {
+
+	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+	DataOutputStream doStream = new DataOutputStream(boStream);
+	String content = sequenceNumber+"_"+MessageCodeConfiguration.ACK_SESSION+proxyInfo;
+	doStream.writeUTF(content);
+	doStream.flush();
+	byte[] data = boStream.toByteArray();
+
+	return new DatagramPacket(data, data.length, addr, port);
+
+}
 //
 ///**
 //* Messaggio di ElectionDone
@@ -726,29 +727,70 @@ public class RelayMessageFactory {
 //}
 //
 //
-//private static String getSession(Hashtable sessionInfo)
-//{
-//	String session = "";
-//	String chiave;
-//	Hashtable ht = sessionInfo;
-//	Enumeration keys = ht.keys();
-//	while(keys.hasMoreElements())
-//	{
-//		chiave = keys.nextElement().toString();
-//		//session.concat("_"+chiave);
-//		session = session+"_"+chiave;
-//
-//		int[] values =(int[]) ht.get(chiave);
-//		for(int i = 0; i<values.length;i++)
-//		{
-//			System.out.println("Porta "+ i+":..."+ values[i]);
-//			//session.concat("_"+values[i]);
-//			session = session +"_"+ values[i];
-//		}
-//		//session = session;
-//	}
-//	//session.replaceFirst("_", "");
-////	session = session.substring(0, session.length()-1);
-//	System.err.println("IN SESSION_INFO: "+session);
-//	return session;
-//}
+
+/**
+ * 
+ * Metodo che converte le informazioni delle sessioni in un'unica stringona
+ * 
+ * la stringa ritornata � del tipo ( ip del client della sessione1_porte del client della sessione1_
+ * ip del relay secondario della sessione1 ( o "null" se non c'� il relay secondario)_
+ * ip del cilent della sessione 2_ porte della sessione 2 ecc)
+ * 
+ * es ( per una sola sessione)
+ * "192.168.1.2_1000_2000_3000_5000_6000_null"
+ * 
+ * @param sessions una tabella di tipo id sessione( i'ip del client come stringa) - sessione (istanza della classe Session)
+ * @return un'unica stringa che rappresenta tutti i dati relativi alle sessioni
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+private static String getSession(Hashtable sessions)
+{
+	String session = ""; // la stringona finale
+	String chiave;
+	String relaySecondario;
+	Hashtable ht = sessions;
+	Enumeration keys = ht.keys();
+	while(keys.hasMoreElements())
+	{
+		chiave = keys.nextElement().toString();
+		//session.concat("_"+chiave);
+		//Scrivo l'indirizzo del client ( l'identificativo della sessione)
+		session = session+"_"+chiave;
+		
+		// recupero le porte come un arrey di interi dallla sessione
+		int[] values =((Session) (ht.get(chiave))).getSessionInfo();
+		for(int i = 0; i<values.length;i++)
+		{
+			System.out.println("Porta "+ i+":..."+ values[i]);
+			//session.concat("_"+values[i]);
+			session = session +"_"+ values[i];
+		}
+		
+		// scrittura relay secondario: se null scrivo "null", altrimenti scrivo l'ip che contiene
+		
+		
+		if (((Session) ht.get(chiave)).getRelaySecondario()!=null){
+			relaySecondario= ((Session) ht.get(chiave)).getRelaySecondario();
+			
+			
+		}
+		else{
+			relaySecondario="null";
+		}
+		session=session+"_"+relaySecondario;
+		
+		
+		//session = session;
+	}// fine while
+	//session.replaceFirst("_", "");
+//	session = session.substring(0, session.length()-1);
+	System.err.println("IN SESSION_INFO: "+session);
+	return session;
+}
+
+}

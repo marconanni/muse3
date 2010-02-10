@@ -15,6 +15,7 @@ import javax.media.ControllerListener;
 import javax.media.EndOfMediaEvent;
 import javax.media.IncompatibleSourceException;
 
+import parameters.BufferConfiguration;
 import parameters.ElectionConfiguration;
 import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
@@ -82,7 +83,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String proxyID = "-1";
 	private String filename;
 	private String clientAddress;
+	private String streamingServerAddress; //è l'indirizzo di chi manda il flusso al proxy
+	private String futureStreamingAddress; // è l'indirizzo del nuovo big boss che manderà il flusso al proxy quando questo riceverà il messaggio
+											// di LEAVE dal proxy sul vecchio relay
 	int initialSupThreshold = (SessionConfiguration.PROXY_BUFFER*70)/100;
+	
+	private boolean servingClient; // se true indice che si eroga il flusso al client, se è false
 	
 	//porte(le porte di ricezione del proxy si trovano dentro l'RTPReceptionManager): 
 	private int clientStreamPort = 0; 	//porta su cui il client riceve lo stream rtp 
@@ -92,6 +98,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private int streamingServerCtrlPort = 0; //porta su cui lo streamingserver riceve i messaggi di controllo
 //	private int sessionControlPort;  //porta su cui il proxy riceve i messaggi di controllo dal client durante la trasmissione:
 	private int proxyStreamingCtrlPort = 0;
+	private int clientStreamControlPort=0; // la porta di controllo del client (� valida e diversa da -1
+	// solo se il client � un altro proxy
+	
+	// porte di sessione di sender e receiver
+	private int streamingServerSessionPort;
+	private int clientSessionPort;
 	
 	//componenti:
 	private ProxyCM proxyCM;
@@ -101,16 +113,22 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private RTPMultiplexer rtpMux;
 	private MuseMultiplexerThread muxTh;
 	private boolean ending = false;
+	
+	
+	
+	
 	private String relayAddress;
 	private int relayControlPort;
-	private int relayStreamingPort;
-	
-	
+	private int relayStreamingPort;	
 	private int bigbossStreamOut;
 	private int bigbossControlPort;
+	private boolean isBigBoss;
+	private String connectedClusterHeadAddr;
+	private String localClusterHeadAddr;
 	
-
-
+	private String streamingClientAddress; //indirizzo dell'entità che riceve il flusso in uscita dal proxy
+	
+	
 	/**
 	 * @return the ending
 	 */
@@ -144,18 +162,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	//classi di utilita':
 	private RelayMessageReader msgReader;
-
 	private Observer sessionManager;
 	
-	//INTERFACCIA GRAFICA 
-	
+	//INTERFACCIA GRAFICA 	
 	private ProxyFrame fProxy;
-	
-	
-	
-	private boolean isBigBoss;
-	private String connectedClusterHeadAddr;
-	private String localClusterHeadAddr;
 	/*
 	 * ***************************************************************
 	 * **********************COSTRUTTORI******************************
@@ -171,10 +181,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * @param clientAddress
 	 * @param clientStreamPort
 	 */
-	public Proxy(Observer sessionManager,boolean newProxy, String filename,String relayAddress, int relayControlPort,int relayStreamPort, String clientAddress, int clientStreamPort, boolean isBigBoss, boolean servoUnClient, String localClusterHeadAddr, String connectedClusterHeadAddr) {
+	public Proxy(Observer sessionManager,boolean newProxy, String filename,String relayAddress, int relayControlPort,int relayStreamPort, String clientAddress, int clientStreamPort, boolean isBigBoss, boolean servingClient, String localClusterHeadAddr, String connectedClusterHeadAddr) {
 		
 		this.connectedClusterHeadAddr=connectedClusterHeadAddr;
 		this.localClusterHeadAddr=localClusterHeadAddr;
+		
+		this.servingClient=servingClient;
 		
 		this.fProxy = new ProxyFrame();
 		this.sessionManager = sessionManager;
@@ -200,7 +212,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 		try {
 			//relay buffer manager, this e' un listener per gli eventi sollevati dal buffer nominale
-			buffer = new RelayBufferManager(SessionConfiguration.PROXY_BUFFER, this.fProxy.getController(), 0,initialSupThreshold, this);
+			buffer = new RelayBufferManager(BufferConfiguration.PROXY_BUFFER, this.fProxy.getController(), BufferConfiguration.PROXY_SOGLIA_INFERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_INFERIORE_ELECTION,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_ELECTION,this);
 			//buffer.getNormalBuffer().addBufferEmptyEventListener(this);
 			//buffer.getNormalBuffer().addBufferFullEventListener(this);
 			
@@ -215,18 +227,18 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			e.printStackTrace();
 		}
 
-		if(this.isBigBoss && servoUnClient){//client->bigboss
+		if(this.isBigBoss && this.servingClient){//client->bigboss
 			System.out.println("Proxy: mando la richiesta file al server");
 			sendReqFileToServer();
 			}
 		else{
-			if(!this.isBigBoss && servoUnClient){//client->relay
+			if(!this.isBigBoss && this.servingClient){//client->relay
 				//se non è un proxy di bigboss dovrò fare un altro metodo 
 				System.out.println("Proxy: mando la richiesta file al BigBoss");
 				sendReqFileToBigBoss();
 			}
 			else{
-				if(this.isBigBoss && !servoUnClient){//relay->bigboss
+				if(this.isBigBoss && !this.servingClient){//relay->bigboss
 					System.out.println("Proxy:mando la richiesta file al BigBoss");
 					sendForwardReqFileToServer();
 				}
@@ -254,7 +266,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 
-	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String connectedClusterHeadAddr){
+	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String connectedClusterHeadAddr, boolean servingClient){
 //	TODO: controllare che le porte siano tutte ben mappate
 		
 		this.localClusterHeadAddr=localClusterHeadAddr;
@@ -283,7 +295,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 		try {
 			
-			buffer = new RelayBufferManager(SessionConfiguration.PROXY_BUFFER, this.fProxy.getController(), 0,initialSupThreshold, this);
+			buffer = new RelayBufferManager(BufferConfiguration.PROXY_BUFFER, this.fProxy.getController(), BufferConfiguration.PROXY_SOGLIA_INFERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_INFERIORE_ELECTION,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_ELECTION,this);
 			//creo un rtpreceptionamanger
 			this.rtpReceptionMan = new RTPReceptionManager(newProxy, buffer, this.inStreamPort, this);
 			
@@ -328,8 +340,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		/*
 		 * Ho un'altro thread in ricezione: quello che riceve il flusso dal vecchio relay
 		 */
-//Valerio Questa parte non mi serve
-/*	
+	
 		Thread runner2 = new Thread(){public void run(){try {
 			rtpReceptionMan.initRecoveryConnection(outStreamPort, oldProxyAddress);
 			System.err.print("Apertura ricezione recovery in corso...");
@@ -345,7 +356,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			e.printStackTrace();
 		}}};
 		runner2.start();
-*/		
+		
 		this.recoveryStreamInPort = rtpReceptionMan.getRecoveryReceivingPort();	
 		//inizializzo la sessione di recovery (quella tra old proxy e new proxy)
 //		this.initRecoverySession(recoverySenderPort, recoverySenderAddress); // Marco: non ci sto capendo niente: perchè è commentata?
@@ -443,8 +454,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			System.err.println("PROXY: sono nell'update  e mi è arrivato un datagramma con codice "+msgReader.getCode());
 			
-			
-			
+						
 
 			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes&&isBigBoss){
 				fProxy.getController().debugMessage(this.state.name());
@@ -775,6 +785,43 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					state = ProxyState.stopToClient;
 				}
 			}
+		
+			
+			// TODO: arrivo Leave
+				else if (msgReader.getCode() == MessageCodeConfiguration.LEAVE){
+					/*
+					 * Quando arriva il LEAVE dal vecchio relay devo considerare come mio nuovo
+					 * mittente il futureStreamingServer che il session manager mi ha comunicato
+					 * quando � arrivato il messaggio di NEW_RELAY a seguito della ricezione 
+					 * dell'election done.
+					 * cambio sorgente di streaming invocando il metodo 
+					 * setStreamingServer dellRTPReceptionMan, che � colui che gestisce la ricezione
+					 * del flusso multimendiale.
+					 * Rimpicciolisco il buffer alle dimensioni normali
+					 * 
+					 * 
+					 */
+					// il nuovo proxy eroga il flusso dalla stessa porta della quale lo erogava il vecchio.
+					this.connectedClusterHeadAddr=futureStreamingAddress;
+					this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
+					this.restrictNormalBuffer();
+				}
+			// TODO Arrivo Redirect
+				else if (msgReader.getCode() == MessageCodeConfiguration.REDIRECT){
+					/*
+					 * C'� stata la rielezione di un nuovo relay secondario, il proxy sostitutivo
+					 * sul nuovo relay secondario mi manda il redirect, affich� io mandi i flussi
+					 * su di lui.
+					 * Estraggo il suo indirizzo dal messaggio e invoco il metodo startHandoff che ridirige
+					 * il flusso in uscita
+					 */
+					String newClientAddress = ((DatagramPacket)arg).getAddress().getHostAddress();					
+					// non ho bisogno di controllare le porte sulle quali opera il  proxy sostitutivo perch�  sono
+					// le stesse di quelle del proxy sul vecchio relay secondario.
+					this.redirectOutputStream(InetAddress.getByName(clientAddress),this.clientStreamPort, InetAddress.getByName(newClientAddress));
+					this.clientAddress = newClientAddress;
+								
+				}
 			
 		}
 		
@@ -926,7 +973,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * ***************************************************************
 	 */
 	
+	
 	/**
+	 * @author marco Nanni
+	 * Metodo che ciene chiamato dal SessionManager del vecchio relay per far ridirigere
+	 * i flussi dal client al prosy sostitutivo creato sulnuovo relay e far mandare 
+	 * il messaggio di leave al client.
 	 * 
 	 * @param portStremInNewProxy - indica la porta rtp su cui � in ascolto il nuovo proxy
 	 * @param newRelayAddr - indirizz del nuovo relay
@@ -934,6 +986,56 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * 
 	 */
 	public boolean startHandoff(int portStremInNewProxy, InetAddress newRelayAddr){
+		boolean result=false;
+		if(servingClient)
+			try {
+				result= this.startHandoff(InetAddress.getByName(clientAddress),portStremInNewProxy, newRelayAddr, true);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		else
+			try {
+				result= this.startHandoff(InetAddress.getByName(relayAddress),portStremInNewProxy, newRelayAddr, true);
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return result;
+	}
+	
+	/**
+	 * @author marco Nanni
+	 * Metodo simile a StartHandoff, solo che non manda il leave al client 
+	 * è usato dal proxy del big boss durante la rielezione di un relay secondario per ridirigere il flusso
+	 * sul nuovo relay quando il nuovo proxy inivia a quello sul big boss il messaggio di redirect
+	 * @param oldClientAddress l'indirizzo del nuovo relay secondario
+	 * @param portStreamInNewClient - indica la porta rtp su cui � in ascolto il nuovo proxy
+	 * @param newRelayAddr - indirizzo del nuovo relay secondario
+	 * @return true se l'oerazione � andata a buon fine; false altrimenti
+	 */
+	
+	public boolean redirectOutputStream(InetAddress oldClientAddress,int portStremInNewProxy, InetAddress newClientAddr){
+		return this.startHandoff(oldClientAddress,portStremInNewProxy, newClientAddr, false);
+		
+	}
+	
+	
+	/**
+	 * @author marco nanni
+	 * Importante, il metodo prende l'indirizzo del vecchio client 
+	 * Metodo da usare internamente alla classe per ridirigere il flusso rtp in uscita
+	 * viene chiamato  sia dal metodo start handoff, sia da redirectOutputStream in
+	 * occasioni diverse nel protocolla di handoff ( vedi la documentazione dei due metodi)
+	 * 
+	 * @param oldClientAddress - l'indirizzo del vecchio client
+	 * @param portStremInNewClient - indica la porta rtp su cui � in ascolto il nuovo proxy
+	 * @param newClientAddress - indirizz del nuovo client
+	 * @param alsoSendRedirectToclient -  indica se madare anche il messaggio di redirect al client
+	 * @return true se l'oerazione � andata a buon fine; false altrimenti
+	 * 
+	 */
+	protected boolean startHandoff(InetAddress oldClientAddress, int portStremInNewClient, InetAddress newClientAddress, boolean alsoSendRedirectToclient){
 		
 		/*
 		 * Marco: questo metodo effettua la ridirezione del flusso in uscita dal client al nuovo rela.
@@ -951,25 +1053,27 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			//metto in pausa la trasmissione verso il client
 			pauseNormalStreamToClient();
 			
-			//invio un messaggio di Leave al client
-			sendLeaveMsgToClient();		 //informo il client che mi sto staccando
 			
+			if (alsoSendRedirectToclient == true){
+			//invio un messaggio di Leave al client
+					sendLeaveMsgToClient();		 //informo il client che mi sto staccando
+			}
 			try {
 				//elimino il client dalla lista dei destinatari del sender
-				rtpSender.removeTarget(InetAddress.getByName(clientAddress), clientStreamPort);
+				rtpSender.removeTarget(oldClientAddress, clientStreamPort);
 				
 				//dirotto la connessione in out verso il client al new proxy
-				this.clientStreamPort = portStremInNewProxy;  // port stremInNewProxy è la porta sulla quale il nuovo proxy riceve il flusso dal vecchio proxy
+				this.clientStreamPort = portStremInNewClient;  // port stremInNewProxy è la porta sulla quale il nuovo proxy riceve il flusso dal vecchio proxy
 				
 				//aggiungo il nuovo relay cm destinatario inserendo la porta e l'indirizzo del proxy sul nuovo relay
-				rtpSender.addDestination(newRelayAddr, clientStreamPort);
+				rtpSender.addDestination(newClientAddress, clientStreamPort);
 				
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				return false;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				return false;
 			}
@@ -1382,6 +1486,65 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //			e.printStackTrace();
 //		}		
 	}
+	
+	
+	/**
+	 * @return restituisce l'indirizzo dell'entità verso cui il proxy spara lo stream
+	 */
+//	
+//	private String getStreamingClientAddress(){
+//		if(this.isBigBoss&&!this.servingClient){//bigboss serve relay
+//			return this.relayAddress;
+//		}
+//		else{
+//			return this.clientAddress;
+//		}
+//	}
+	
+	/**
+	 * Metodo che dermina le porte a cui mandare i messaggi di sessione sia per i messaggi da mandare 
+	 * verso chi eroga il flusso che per i messaggi indirizati verso chi riceve il flusso.
+	 * 
+	 * in particolare se questo soggetto � un altro relay i messaggi verranno ricevuti dal proxy,
+	 * la porta di sessione viene in questo caso posta pari alla porta di controllo sulla quale 
+	 * gi� viaggiano messaggi come StartTx e StopTx.
+	 * 
+	 * Altrimenti si usano le porte CLIENT_PORT_SESSION_IN e SERVER_SESSION_PORT_IN
+	 * per parlare rispettivamente con un client o con il server.
+	 * 
+	 * @param servingClient variabile boolana che � true se si sta servendo un client, false se si 
+	 * 		eroga il flusso verso un altro relay
+	 * @param streamingServerAddress l'indirizzo del nodo che sta erogando il flusso a questo proxy.
+	 */
+	
+//	protected void determinaPorteSessione(boolean servingClient, String streamingServerAddress){
+//		/*
+//		 * Se sto servendo un cliente la sua porta di sessione � quella dei client,
+//		 * infatti i messaggi di LEAVE arrivano  al ClientSessionManager, mentre
+//		 * start tx e top tx arrivano a ClientBufferDataPlaying
+//		 * Se sto servendo un relay arrivano ad un proxy e posso usare la porta di 
+//		 * controllo, come porta di sessione, visto che � il proxy a dover ricevere tutti i messaggi
+//		 * da me mandati ( compreso LEAVE).
+//		 * Discorso analogo per il server, i messaggi di sessione arrivano al
+//		 * server Session Manager, mentre StartTX e STOP TX a streamingServer
+//		 * Se sto ricevendo da un proxy su big boss,posso usare la porta di 
+//		 * controllo, come porta di sessione, visto che � il proxy a dover ricevere tutti i messaggi
+//		 * da me mandati ( compreso REDIRECT).
+//		 * auguri!		
+//		 */
+//		
+//		if(servingClient)
+//			clientSessionPort= PortConfiguration.CLIENT_PORT_SESSION_IN;
+//		else
+//				if (clientStreamControlPort != 0)
+//				clientSessionPort= this.clientStreamControlPort;
+//		
+//		if (streamingServerAddress.equals(NetConfiguration.SERVER_ADDRESS)) // in questo caso so che sto ricevendo il flusso dal server
+//			streamingServerSessionPort=PortConfiguration.SERVER_SESSION_PORT_IN;
+//		else
+//			streamingServerSessionPort= streamingServerCtrlPort;// ricevo il flusso da un altro proxy.
+//		
+//	}
 }
 
 /*
