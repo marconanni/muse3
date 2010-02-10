@@ -70,7 +70,7 @@ public class RelaySessionManager implements Observer{
 	
 	private boolean isBigBoss;//Valerio: questo flag viene settato in base al metodo che ha Pire in ElectionManager
 	private int clientSessionPort;
-	private String serverAddress;
+//	private String serverAddress;
 	private int serverPortSessionIn;
 	private int seqNumSendServer;
 	private int seqNumSendClient;
@@ -79,7 +79,7 @@ public class RelaySessionManager implements Observer{
 	private String listaFile;
 	private String[] files;
 	
-	private String bigbossAddress;
+//	private String bigbossAddress;
 	private int bigbossPort;
 	
 	private int clientStreamingPort;
@@ -121,15 +121,9 @@ public class RelaySessionManager implements Observer{
 		imBigBoss=electionManager.isBIGBOSS();
 		imRelay=electionManager.isRELAY();//X Pire: diamo lo stesso significato alla variabile? per me indica un Relay attivo
 		
-		if(imBigBoss){
-			//Valerio: se questo è il bigboss ha l'indirizzo del server, e la porta a cui inviare le richieste
-			serverAddress=electionManager.getConnectedClusterHeadAddress();
-			serverPortSessionIn=PortConfiguration.SERVER_SESSION_PORT_IN;
-		}
-		else{
-			bigbossAddress=electionManager.getConnectedClusterHeadAddress();
-			bigbossPort=PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN;
-		}
+		serverPortSessionIn=PortConfiguration.SERVER_SESSION_PORT_IN;
+		bigbossPort=PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN;
+		
 		seqNumSendServer=0;//numero datagrammi inviati al server
 		seqNumSendClient=0;// "" 		""			""	"	client
 		seqNumSendBigBoss=0;
@@ -221,7 +215,7 @@ public class RelaySessionManager implements Observer{
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_LIST && imRelay && imBigBoss){//Valerio: aggiunto da me
 			System.out.println("codice request_list e sono il relay bigboss");
 			this.clientAddress = message.getAddress().getHostAddress();
-			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al server: "+this.serverAddress+" sulla porta "+this.serverPortSessionIn+" e la risposta andrà inviata al client sulla porta "+PortConfiguration.CLIENT_PORT_SESSION_IN);
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al server: "+electionManager.getConnectedClusterHeadInetAddress()+" sulla porta "+this.serverPortSessionIn+" e la risposta andrà inviata al client sulla porta "+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			try{
 //				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, InetAddress.getByName(this.serverAddress), this.serverPortSessionIn, this.clientAddress);
 				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, electionManager.getConnectedClusterHeadInetAddress(), this.serverPortSessionIn, this.clientAddress);//messaggio modificato prendendo l'indirizzo coi metodi di Pire
@@ -237,7 +231,7 @@ public class RelaySessionManager implements Observer{
 			//se non è bigboss dovrò creare un messaggio di tipo FORWARD_REQUEST_LIST
 			System.out.println("codice request_list e sono un relay normale");
 			this.clientAddress = message.getAddress().getHostAddress();
-			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al big boss: "+this.bigbossAddress+" sulla porta "+this.bigbossPort+" e la risposta andrà inviata al client sulla porta "+PortConfiguration.CLIENT_PORT_SESSION_IN);
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al big boss: "+electionManager.getConnectedClusterHeadInetAddress()+" sulla porta "+this.bigbossPort+" e la risposta andrà inviata al client sulla porta "+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			try{
 //				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, InetAddress.getByName(this.bigbossAddress), this.bigbossPort,null, this.clientAddress);
 				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, electionManager.getConnectedClusterHeadInetAddress(), this.bigbossPort,null, this.clientAddress);//messaggio modificato prendendo l'indirizzo coi metodi di Pire
@@ -251,6 +245,7 @@ public class RelaySessionManager implements Observer{
 		}
 		
 		if(this.messageReader.getCode() == MessageCodeConfiguration.LIST_RESPONSE && imRelay){
+			//un messaggio di tipo List_Response può arrivare solo al bigboss
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"E' arrivata la lista dei file");
 			listaFile=messageReader.getListaFile();
 			files = listaFile.split(",");
@@ -278,10 +273,10 @@ public class RelaySessionManager implements Observer{
 			System.out.println("codice forward_request_list quindi sono un relay");
 			this.relayAddress=message.getAddress().getHostAddress();
 			this.clientAddress=messageReader.getClientAddress();
-			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+serverAddress+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client "+this.clientAddress+":"+PortConfiguration.CLIENT_PORT_SESSION_IN);
-			System.out.println("Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+serverAddress+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client "+this.clientAddress+":"+PortConfiguration.CLIENT_PORT_SESSION_IN);
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+electionManager.getConnectedClusterHeadInetAddress()+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client "+this.clientAddress+":"+PortConfiguration.CLIENT_PORT_SESSION_IN);
+			System.out.println("Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+electionManager.getConnectedClusterHeadInetAddress()+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client "+this.clientAddress+":"+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			try{
-				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, InetAddress.getByName(serverAddress), serverPortSessionIn,this.relayAddress, this.clientAddress);
+				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, electionManager.getConnectedClusterHeadInetAddress(), serverPortSessionIn,this.relayAddress, this.clientAddress);
 				sessionCM.sendTo(this.message);
 				System.out.println("Relay: inviato il messaggio request list al BigBoss");
 			}catch (Exception e) {
@@ -306,9 +301,9 @@ public class RelaySessionManager implements Observer{
 			this.numberOfSession++;
 		}
 		if(this.messageReader.getCode()==MessageCodeConfiguration.FORWARD_LIST_RESPONSE&&imRelay&&imBigBoss){
-			//devo differenziare fra bigboss e relay normale
-			System.out.println("Sono BigBoss, è arrivato un messaggio di FORWARD_LIST_RESPONSE da inviare al Relay");
-			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Sono BigBoss, è arrivato un messaggio di FORWARD_LIST_RESPONSE da inviare al Relay");
+			//sono bigboss devo quindi mandare il messaggio di forward list response al relay
+			System.out.println("Sono BigBoss, è arrivato un messaggio di FORWARD_LIST_RESPONSE da inviare al Relay: "+messageReader.getRelayAddress());
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Sono BigBoss, è arrivato un messaggio di FORWARD_LIST_RESPONSE da inviare al Relay: "+messageReader.getRelayAddress());
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"E' arrivata la lista dei file");
 			listaFile=messageReader.getListaFile();
 			files = listaFile.split(",");
@@ -318,9 +313,8 @@ public class RelaySessionManager implements Observer{
 				System.out.println(files[i]);
 				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,files[i]);
 			}
-			this.relayAddress=messageReader.getRelayAddress();
 			try {
-				this.message=RelayMessageFactory.buildForwardListResponse(seqNumSendRelay++, InetAddress.getByName(this.relayAddress),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, this.relayAddress,this.messageReader.getClientAddress(), listaFile);
+				this.message=RelayMessageFactory.buildForwardListResponse(seqNumSendRelay++, InetAddress.getByName(messageReader.getRelayAddress()),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, messageReader.getRelayAddress(),this.messageReader.getClientAddress(), listaFile);
 				sessionCM.sendTo(this.message);
 			}catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -330,7 +324,7 @@ public class RelaySessionManager implements Observer{
 				e.printStackTrace();
 			}
 			System.out.println("Sono BigBoss, ho inviato la lista file al Relay");
-				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Sono BigBoss, ho inviato la lista file al Relay");
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Sono BigBoss, ho inviato la lista file al Relay");
 		}
 		
 		
@@ -360,11 +354,7 @@ public class RelaySessionManager implements Observer{
 			System.out.println("Sono un Relay, ho inviato la lista file al Client");
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Sono un Relay, ho inviato la lista file al Client");
 		}
-		}
-		
-		
-		
-		
+					
 		
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_FILE && imRelay&&imBigBoss){
 			//se il request file arriva al bigboss ho questo comportamento
@@ -504,6 +494,7 @@ public class RelaySessionManager implements Observer{
 //			}
 //		}
 //	}
+	}
 	/**
 	 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	 * ++++++++++++++++++++++++++++++EVENTI ARRIVATI -- STRINGHE ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
