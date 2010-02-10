@@ -105,8 +105,15 @@ public class RelaySessionManager implements Observer{
 	 * @param electionManager the electionManager to set
 	 */
 	public void setElectionManager(RelayElectionManager electionManager) {
+		//mi vado a prendere i tre indirizzi con cui un relay ha a che fare
+		//affermazione: quando vado mi servono passo dall'election manager, non uso questi
 		this.electionManager = electionManager;
-	}
+		localClusterAddress=electionManager.getLocalClusterAddress();
+		localClusterHeadAddress=electionManager.getLocalClusterHeadAddress();
+		connectedClusterHeadAddress=electionManager.getConnectedClusterHeadAddress();
+		System.out.println("localClusterAddress = "+localClusterAddress+", localClusterHeadAddress = "+localClusterHeadAddress+", connectedClusterHeadAddress = "+connectedClusterHeadAddress);
+		consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"localClusterAddress = "+localClusterAddress+", localClusterHeadAddress = "+localClusterHeadAddress+", connectedClusterHeadAddress = "+connectedClusterHeadAddress);
+		}
 
 	public RelaySessionManager()
 	{
@@ -116,7 +123,9 @@ public class RelaySessionManager implements Observer{
 		this.sessionCM = RelayConnectionFactory.getSessionConnectionManager(this);
 		this.messageReader = new RelayMessageReader();
 		this.sessionCM.start();
-		this.consolle.setTitle("RELAY SESSION MANAGER DEBUG CONSOLLE");
+		this.consolle=new DebugConsole("RELAY SESSION MANAGER DEBUG CONSOLLE");
+		
+		
 		
 		imBigBoss=electionManager.isBIGBOSS();
 		imRelay=electionManager.isRELAY();//X Pire: diamo lo stesso significato alla variabile? per me indica un Relay attivo
@@ -128,15 +137,6 @@ public class RelaySessionManager implements Observer{
 		seqNumSendClient=0;// "" 		""			""	"	client
 		seqNumSendBigBoss=0;
 		seqNumSendRelay=0;
-				
-		//mi vado a prendere i tre indirizzi con cui un relay ha a che fare
-		//domanda: dove vanno agiornati se c'è un cambio di relay?
-		localClusterAddress=electionManager.getLocalClusterAddress();
-		localClusterHeadAddress=electionManager.getLocalClusterHeadAddress();
-		connectedClusterHeadAddress=electionManager.getConnectedClusterHeadAddress();
-		
-		System.out.println("localClusterAddress = "+localClusterAddress+", localClusterHeadAddress = "+localClusterHeadAddress+", connectedClusterHeadAddress = "+connectedClusterHeadAddress);
-		consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"localClusterAddress = "+localClusterAddress+", localClusterHeadAddress = "+localClusterHeadAddress+", connectedClusterHeadAddress = "+connectedClusterHeadAddress);
 		
 		System.out.println("RelaySessionManager è partito");
 	}
@@ -149,9 +149,9 @@ public class RelaySessionManager implements Observer{
 	/**
 	 * @return the imRelay
 	 */
-	public boolean isImRelay() {
-		return imRelay;
-	}
+//	public boolean isImRelay() {
+//		return imRelay;
+//	}
 	
 	/**
 	 * @return the imBigBoss
@@ -202,6 +202,8 @@ public class RelaySessionManager implements Observer{
 			consolle.debugMessage(DebugConfiguration.DEBUG_ERROR,"RELAY_SESSION_MANAGER: Errore nella lettura del Datagramma");
 			e.printStackTrace();
 		}
+		
+		System.err.println("E' arrivato un messaggio con codice: "+messageReader.getCode()+", imRelay: "+imRelay+", imBigBoss: "+imBigBoss);
 
 		/**
 		 * arrivato messaggio di richiesta da parte del client
@@ -215,10 +217,11 @@ public class RelaySessionManager implements Observer{
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_LIST && imRelay && imBigBoss){//Valerio: aggiunto da me
 			System.out.println("codice request_list e sono il relay bigboss");
 			this.clientAddress = message.getAddress().getHostAddress();
+			System.out.println("Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al server: "+electionManager.getConnectedClusterHeadAddress()+" sulla porta "+this.serverPortSessionIn+" e la risposta andrà inviata al client sulla porta "+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Arrivata la richiesta della lista file da "+ this.clientAddress+" devo inviarla al server: "+electionManager.getConnectedClusterHeadInetAddress()+" sulla porta "+this.serverPortSessionIn+" e la risposta andrà inviata al client sulla porta "+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			try{
 //				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, InetAddress.getByName(this.serverAddress), this.serverPortSessionIn, this.clientAddress);
-				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, electionManager.getConnectedClusterHeadInetAddress(), this.serverPortSessionIn, this.clientAddress);//messaggio modificato prendendo l'indirizzo coi metodi di Pire
+				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, InetAddress.getByName(electionManager.getConnectedClusterHeadAddress()), this.serverPortSessionIn, this.clientAddress);//messaggio modificato prendendo l'indirizzo coi metodi di Pire
 				sessionCM.sendTo(this.message);
 				System.out.println("BigBoss: inviato il messaggio request list al server");
 			}catch (Exception e) {

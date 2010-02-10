@@ -14,6 +14,8 @@ public class RelayMain {
 //		RelaySessionManager sessionManager = null;
 //		sessionManager = RelaySessionManager.getInstance();
 //		sessionManager.setImRelay(imBigBoss,imRelay);
+
+//		new RelayController(sessionManager);//fa tutto lui
 		new RelayController();//fa tutto lui
 	}
 

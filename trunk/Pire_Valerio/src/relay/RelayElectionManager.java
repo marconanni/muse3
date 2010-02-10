@@ -54,8 +54,8 @@ public class RelayElectionManager extends Observable implements Observer{
 
 	
 	private static RelayElectionManager INSTANCE = null;	//istanza singleton del RelayElectionManager
-	private static boolean BIGBOSS = false;					//boolean che indica che si è il BIGBOSS (connesso al server)
-	private static boolean RELAY = false;					//boolean che indica che si è un RELAY attivo (connesso al BIGBOSS)
+	private static boolean BIGBOSS = true;					//boolean che indica che si è il BIGBOSS (connesso al server)
+	private static boolean RELAY = true;					//boolean che indica che si è un RELAY attivo (connesso al BIGBOSS)
 	private static boolean POSSIBLE_BIGBOSS = false;		//boolean che indica che si è un possibile sostituto del BIGBOSS (BIGBOSS passivo)
 	private static boolean POSSIBLE_RELAY = false;			//boolean che indica che si è un possibile sostituto di un RELAY attivo (RELAY passivo)
 	private static boolean CLIENT = false;					//boolean che indica che si è semplicemente un client

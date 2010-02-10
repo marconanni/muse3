@@ -26,6 +26,7 @@ public class RelayController {
 			setType(2);
 			setState(true);
 		}
+
 		sessionManager = RelaySessionManager.getInstance();
 		electionManager = RelayElectionManager.getInstance(type, state, sessionManager);
 		
