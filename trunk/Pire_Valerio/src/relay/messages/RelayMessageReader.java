@@ -11,9 +11,11 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
-
 import parameters.MessageCodeConfiguration;
+import parameters.SessionConfiguration;
+import relay.Session;
 
 public class RelayMessageReader {
 	
@@ -51,6 +53,11 @@ public class RelayMessageReader {
 	
 	private int clientControlPort;
 	private int serverStreamingControlPort;
+	
+	private String newRelayAddress;
+	
+	private  Hashtable<String, Session> sessions;
+	private  Hashtable<String, int[]> proxyInfo;
 	
 	public int getServerStreamingPort() {
 		return serverStreamingPort;
@@ -146,6 +153,12 @@ public class RelayMessageReader {
 			serverStreamingControlPort=Integer.parseInt(st.nextToken());
 			serverStreamingPort=Integer.parseInt(st.nextToken());
 		}
+		
+		if(code == MessageCodeConfiguration.ELECTION_DONE) newRelayAddress = st.nextToken();
+		if(code == MessageCodeConfiguration.EM_ELECTION) W = Float.parseFloat(st.nextToken());
+		if(code == MessageCodeConfiguration.SESSION_INFO) getHashTable(st);
+		if(code == MessageCodeConfiguration.ACK_SESSION) getHashTable(st);
+		
 	}
 
 	
@@ -206,9 +219,55 @@ public class RelayMessageReader {
 	public String getListaFile(){return listaFile;}
 	public String getFilename(){return filename;}
 	
-}
-
-
+	/**
+	 * Metodo che da una stringona che rappresenta una tabella estrae la tabella stessa
+	 * ovviamente la tabella estratta dipende da quale messaggio si sta analizzando.
+	 * @param elements la stringona arrivata per messaggio "wrappata" in un string tokenizer
+	 * @return la tabella sessions (ip del cliente, Sessione), se il messaggio � un SESSION_INFO
+	 * la tabella proxyInfo(ip cliente, porta del proxy sul nuovo relay sulla quale ridirigere il flusso)
+	 * ,se il messaggio � ACK_SESSION
+	 */	
+	private  Hashtable getHashTable(StringTokenizer elements)
+	{
+		if(code == MessageCodeConfiguration.SESSION_INFO){
+			sessions = new Hashtable<String,Session>();
+			while(elements.hasMoreElements())
+			{
+				// estraggo l'indirizzo del cliente
+				String clientAddress = elements.nextToken();
+				// estraggo le porte
+				int[] sessionPorts = new int[6];
+				sessionPorts[0] = Integer.parseInt(elements.nextToken());
+				sessionPorts[1] = Integer.parseInt(elements.nextToken());
+				sessionPorts[2] = Integer.parseInt(elements.nextToken());
+				sessionPorts[3] = Integer.parseInt(elements.nextToken());
+				sessionPorts[4] = Integer.parseInt(elements.nextToken());
+				sessionPorts[5] = Integer.parseInt(elements.nextToken());
+				// estraggo l'indirizzo del relay secondario; se non c'�
+				// nella stringona trovo "null" e devo metterlo a null
+				String relaySecondario = elements.nextToken();
+				if (relaySecondario.equals("null"))
+					relaySecondario=null;
+				// Creo la sessione senza tuttavia indicare il proxy; andr� settato dopo dal SessionManager
+				Session session = new Session(clientAddress,null,relaySecondario,sessionPorts);
+				sessions.put(clientAddress, session);
+			}
+			return sessions;
+		}
+		if(code == MessageCodeConfiguration.ACK_SESSION)
+		{
+			proxyInfo = new Hashtable();
+			while(elements.hasMoreElements())
+			{
+				String clientAddress = elements.nextToken();
+				int[] sessionPorts = new int[1];
+				sessionPorts[0] = Integer.parseInt(elements.nextToken());
+				proxyInfo.put(clientAddress, sessionPorts);
+			}
+			return proxyInfo;
+		}
+		return null;
+	}
 
 
 //private  Hashtable<String, int[]> sessionInfo;
@@ -218,11 +277,7 @@ public class RelayMessageReader {
 //private  int portStreamingServer;
 //private int portStreamingCtrlServer;
 
-//if(code == Parameters.ELECTION_RESPONSE) W = Float.parseFloat(st.nextToken());
-//if(code == Parameters.ELECTION_DONE) newRelayAddress = st.nextToken();
-//if(code == Parameters.EM_ELECTION) W = Float.parseFloat(st.nextToken());
-//if(code == Parameters.SESSION_INFO) getHashTable(st);
-//if(code == Parameters.ACK_SESSION) getHashTable(st);
+
 //if(code == Parameters.REQUEST_FILE){
 //	filename = st.nextToken();
 //	portStreamingClient = Integer.parseInt(st.nextToken());
@@ -242,40 +297,7 @@ public class RelayMessageReader {
 //public  double getW() {return W;}
 //public int getPortStreamingCtrlServer() {return portStreamingCtrlServer;}
 
-//private  Hashtable getHashTable(StringTokenizer elements)
-//{
-//
-//	if(code == Parameters.SESSION_INFO)
-//	{
-//		sessionInfo = new Hashtable();
-//		while(elements.hasMoreElements())
-//		{
-//			String clientAddress = elements.nextToken();
-//			int[] sessionPorts = new int[6];
-//			sessionPorts[0] = Integer.parseInt(elements.nextToken());
-//			sessionPorts[1] = Integer.parseInt(elements.nextToken());
-//			sessionPorts[2] = Integer.parseInt(elements.nextToken());
-//			sessionPorts[3] = Integer.parseInt(elements.nextToken());
-//			sessionPorts[4] = Integer.parseInt(elements.nextToken());
-//			sessionPorts[5] = Integer.parseInt(elements.nextToken());
-//			sessionInfo.put(clientAddress, sessionPorts);
-//		}
-//		return sessionInfo;
-//	}
-//	if(code == Parameters.ACK_SESSION)
-//	{
-//		proxyInfo = new Hashtable();
-//		while(elements.hasMoreElements())
-//		{
-//			String clientAddress = elements.nextToken();
-//			int[] sessionPorts = new int[1];
-//			sessionPorts[0] = Integer.parseInt(elements.nextToken());
-//			proxyInfo.put(clientAddress, sessionPorts);
-//		}
-//		return proxyInfo;
-//	}
-//	return null;
-//}
+
 //
 //
 //public void stamp()
@@ -302,3 +324,4 @@ public class RelayMessageReader {
 //	RelayMessageReader r = new RelayMessageReader();
 //	r.stamp();
 //}
+}
