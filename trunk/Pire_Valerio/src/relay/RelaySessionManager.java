@@ -325,7 +325,7 @@ public class RelaySessionManager implements Observer{
 			System.out.println("E' arrivato un REQUEST_FILE dal Relay, ora creo il proxy");
 			//Valerio: non so ne nel proxy va cambiato qualcosa o se va bene anche se ad inviare al client invio ad un relay
 			//ovviamente gli passo l'indirizzo del relay e non quello del client
-			proxy = new Proxy(this, true, messageReader.getFilename(), this.relayAddress, messageReader.getRelayControlPort(),messageReader.getRelayStreamingInPort(), messageReader.getClientAddress(), messageReader.getClientStreamingPort() ,isBigBoss,false,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
+			proxy = new Proxy(this, true, messageReader.getFilename(), this.relayAddress, messageReader.getRelayControlPort(),messageReader.getRelayStreamingInPort(), messageReader.getClientAddress(), messageReader.getClientStreamingPort() ,electionManager.isBIGBOSS(),false,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
 			
 			Session sessione=new Session(messageReader.getClientAddress(), proxy, this.relayAddress);
 			this.sessions.put(messageReader.getClientAddress(), sessione);
