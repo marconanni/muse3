@@ -129,7 +129,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 			recoveryParserThread = null;
 		}else{
 			this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();
-			recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort);
+			recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(this.localClusterHeadAddr),InetAddress.getByName(this.connectedClusterHeadAddr));
 		}
 	}
 
@@ -139,7 +139,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		this.proxy = proxy;
 		//imposto la porta di ricezione del proxy di recovery con la vecchia porta di ricezione del proxy
 		normalReceivingPort = oldProxyStreamInPort;	
-		normalReceiver = new RTPReceiverPS(normalReceivingPort);
+		normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(this.localClusterHeadAddr),InetAddress.getByName(this.connectedClusterHeadAddr));
 		RelayPortMapper.getInstance().setRangePortInRTPProxy(normalReceivingPort);
 		//ottengo dal port mapper la porta di ricezione dello stream proveniente dal vecchio proxy
 		this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();

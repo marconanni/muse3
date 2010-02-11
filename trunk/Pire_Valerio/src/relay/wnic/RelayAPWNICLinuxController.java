@@ -91,18 +91,18 @@ public class RelayAPWNICLinuxController implements RelayWNICController{
 				if (!isOn || !isModeManaged() || !isEssidFound()){
 					if(console!=null)
 						console.debugMessage(DebugConfiguration.DEBUG_ERROR, "La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
-								NetConfiguration.NAME_OF_RELAY_MANAGED_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_RELAY_MANAGED_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_MANAGED_ADDRESS+
+								NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS+
 								"\n\n"+ NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_CLUSTER_ADDRESS);
 					throw new WNICException("La scheda wireless deve essere accesa e l'interfaccia ["+interf+"] deve essere configurata nel seguente modo:\n" +
-							NetConfiguration.NAME_OF_RELAY_MANAGED_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_RELAY_MANAGED_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_MANAGED_ADDRESS+
+							NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS+
 							"\n\n"+ NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE+"\nESSID: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK+"\nMODE:Ad-Hoc\nIP:"+NetConfiguration.RELAY_CLUSTER_ADDRESS);
 				}else{
 					if(console!=null)
 						console.debugMessage(DebugConfiguration.DEBUG_INFO, "Configurazione scheda WIFI:\nInterfaccia: "+interf+
-								"\nESSID: "+NetConfiguration.NAME_OF_RELAY_MANAGED_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_MANAGED_ADDRESS);
+								"\nESSID: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 					else
 						System.out.println("Configurazione scheda WIFI:\nInterfaccia: "+interf+
-								"\nESSID: "+NetConfiguration.NAME_OF_RELAY_MANAGED_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_MANAGED_ADDRESS);
+								"\nESSID: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK+"\nMODE:Managed\nIP:"+NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 				}
 				
 		}

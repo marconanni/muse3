@@ -26,12 +26,12 @@ public class RelayPortMapper {
 	
 	private InetAddress localClusterBCASTAddress = null;		
 	private InetAddress localClusterHeadBCASTAddress = null;
-	private InetAddress localManagedBCASTAdress = null;
+	//private InetAddress localManagedBCASTAdress = null;
 	
 	/*indirizzi locali per il relay*/
 	private InetAddress localClusterAddress =null;
 	private InetAddress localClusterHeadAddress =null;
-	private InetAddress localManagedAddress =null;
+	//private InetAddress localManagedAddress =null;
 	
 	
 	/*porte delle socket per la gestione della sessione verso la rete Ad-Hoc, in ingresso e in uscita */
@@ -93,10 +93,10 @@ public class RelayPortMapper {
 		try {
 			localClusterAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 			localClusterHeadAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
-			localManagedAddress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS);
+			//localManagedAddress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS);
 			localClusterBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_BROADCAST_ADDRESS);
 			localClusterHeadBCASTAddress = InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_BROADCAST_ADDRESS);
-			localManagedBCASTAdress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_BROADCAST_ADDRESS);
+			//localManagedBCASTAdress = InetAddress.getByName(NetConfiguration.RELAY_MANAGED_BROADCAST_ADDRESS);
 		} catch (UnknownHostException e) {e.printStackTrace();}
 	}
  	
@@ -134,8 +134,8 @@ public class RelayPortMapper {
 	
 	/**Metodo per ottenere l'indirizzo del nodo locale sulla rete Managed
 	 * @return un InetAddress rappresentante l'indirizzo di cui sopra*/
-	public InetAddress getLocalManagedAddress() {return localManagedAddress;}
-	public InetAddress getLocalManagedBCASTAddress(){return localManagedBCASTAdress;}
+//	public InetAddress getLocalManagedAddress() {return localManagedAddress;}
+//	public InetAddress getLocalManagedBCASTAddress(){return localManagedBCASTAdress;}
 
 
 
