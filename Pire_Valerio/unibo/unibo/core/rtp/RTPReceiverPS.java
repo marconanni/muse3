@@ -57,47 +57,47 @@ public class RTPReceiverPS implements ReceiveStreamListener
 * @param localPort la porta locale su cui attendere il traffico RTP
 * @throws IOException se l'inizializzazione fallisce
 */
-	public RTPReceiverPS(int localPort) throws IOException
-	{
-		bufferReady=false;
-		dataSync=new Object();
-		receivedDataSource=null;
-		rtpManager=RTPManager.newInstance();
-		rtpManager.addReceiveStreamListener(this);
-		
-		try
-		{
-			System.out.println(InetAddress.getLocalHost());
-			//SessionAddress localAddr=new SessionAddress(InetAddress.getLocalHost(),localPort);
-			//SessionAddress localAddr=new SessionAddress(InetAddress.getByName(Parameters.CLIENT_ADDRESS),localPort);
-			SessionAddress localAddr=new SessionAddress(InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS),localPort);
-			
-			
-			System.err.println("CONTROL: "+localAddr.getControlHostAddress()+":"+localAddr.getControlPort());
-			System.err.println("DATA: "+localAddr.getDataHostAddress()+":"+localAddr.getDataPort());
-			
-			//System.out.println("localAddress(): " + localAddr.getDataHostAddress());
-			//SessionAddress serverAddr=new SessionAddress(InetAddress.getLocalHost(),20000);
-			//SessionAddress serverAddr=new SessionAddress(InetAddress.getByName(Parameters.CLIENT_ADDRESS),20000);
-			SessionAddress serverAddr=new SessionAddress(InetAddress.getByName(NetConfiguration.RELAY_MANAGED_ADDRESS),20000);
-			
-			
-			rtpManager.initialize(localAddr);
-			rtpManager.addTarget(serverAddr);
-		}
-		catch(IOException e){ throw new IOException("RTP initializing failed:\n"+e); }
-		catch(InvalidSessionAddressException e){ throw new IOException("Invalid Local Address:\n"+e); }
-		//imposto un valor minimo per il buffer JMF altrimenti la riproduzione del flusso risulta disturbata
-		buffCtl = (BufferControl)rtpManager.getControl("javax.media.control.BufferControl");
-		if(buffCtl != null)
-		{
-			bufferReady=true;
-			buffCtl.setBufferLength(1050);  //valor minimo per il client
-			buffCtl.setMinimumThreshold(0);
-		}
-		else System.err.println(" RTPReceiver: no buffer control");
-	}
-	
+//	public RTPReceiverPS(int localPort) throws IOException
+//	{
+//		bufferReady=false;
+//		dataSync=new Object();
+//		receivedDataSource=null;
+//		rtpManager=RTPManager.newInstance();
+//		rtpManager.addReceiveStreamListener(this);
+//		
+//		try
+//		{
+//			System.out.println(InetAddress.getLocalHost());
+//			//SessionAddress localAddr=new SessionAddress(InetAddress.getLocalHost(),localPort);
+//			//SessionAddress localAddr=new SessionAddress(InetAddress.getByName(Parameters.CLIENT_ADDRESS),localPort);
+//			SessionAddress localAddr=new SessionAddress(InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS),localPort);
+//			
+//			
+//			System.err.println("CONTROL: "+localAddr.getControlHostAddress()+":"+localAddr.getControlPort());
+//			System.err.println("DATA: "+localAddr.getDataHostAddress()+":"+localAddr.getDataPort());
+//			
+//			//System.out.println("localAddress(): " + localAddr.getDataHostAddress());
+//			//SessionAddress serverAddr=new SessionAddress(InetAddress.getLocalHost(),20000);
+//			//SessionAddress serverAddr=new SessionAddress(InetAddress.getByName(Parameters.CLIENT_ADDRESS),20000);
+//			SessionAddress serverAddr=new SessionAddress(InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS),20000);
+//			
+//			
+//			rtpManager.initialize(localAddr);
+//			rtpManager.addTarget(serverAddr);
+//		}
+//		catch(IOException e){ throw new IOException("RTP initializing failed:\n"+e); }
+//		catch(InvalidSessionAddressException e){ throw new IOException("Invalid Local Address:\n"+e); }
+//		//imposto un valor minimo per il buffer JMF altrimenti la riproduzione del flusso risulta disturbata
+//		buffCtl = (BufferControl)rtpManager.getControl("javax.media.control.BufferControl");
+//		if(buffCtl != null)
+//		{
+//			bufferReady=true;
+//			buffCtl.setBufferLength(1050);  //valor minimo per il client
+//			buffCtl.setMinimumThreshold(0);
+//		}
+//		else System.err.println(" RTPReceiver: no buffer control");
+//	}
+//	
 	/**
 	* Costruttore. L'indirizzo del ricevitore e' quello del host locale.
 	* @param localPort la porta locale su cui attendere il traffico RTP
