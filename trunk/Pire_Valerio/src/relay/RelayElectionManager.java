@@ -287,7 +287,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			setFirstELECTION_DONE(false);
 			setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 			memorizeLocalClusterAddress();
-			setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
+			setLocalClusterHeadAddress(NetConfiguration.RELAY_MANAGED_ADDRESS);
 			memorizelocalClusterHeadAddress();
 			setConnectedClusterHeadAddress(NetConfiguration.SERVER_ADDRESS);
 		}
@@ -441,7 +441,8 @@ public class RelayElectionManager extends Observable implements Observer{
 		
 		setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 		memorizeLocalClusterAddress();
-		setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
+		if(isPOSSIBLE_BIGBOSS()) setLocalClusterHeadAddress(NetConfiguration.RELAY_MANAGED_ADDRESS);
+		if(isPOSSIBLE_RELAY())setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 		memorizeLocalClusterAddress();
 		
 		//memorizeConnectedClusterHeadAddress();
