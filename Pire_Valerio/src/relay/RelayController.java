@@ -5,7 +5,7 @@ import parameters.NetConfiguration;
 public class RelayController {
 	
 	private RelayElectionManager electionManager  = null;
-	private RelaySessionManager sessionManager = null;
+	//private RelaySessionManager sessionManager = null;
 	private int type = 0;
 	private boolean state = false;
 	
@@ -27,14 +27,14 @@ public class RelayController {
 			setState(true);
 		}
 
-		sessionManager = RelaySessionManager.getInstance();
-		electionManager = RelayElectionManager.getInstance(type, state, sessionManager);
+		//sessionManager = RelaySessionManager.getInstance();
+		electionManager = RelayElectionManager.getInstance(type, state);//, sessionManager);
 		
 		//Valerio:qui dentro scrivo a mano i tre indirizzi che mi servono per un relay
-		electionManager.setLocalClusterAddress("127.0.0.1");
-		electionManager.setLocalClusterHeadAddress("127.0.0.1");
-		electionManager.setConnectedClusterHeadAddress("127.0.0.1");
-		sessionManager.setElectionManager(electionManager);
+//		electionManager.setLocalClusterAddress("127.0.0.1");
+//		electionManager.setLocalClusterHeadAddress("127.0.0.1");
+//		electionManager.setConnectedClusterHeadAddress("127.0.0.1");
+//		sessionManager.setElectionManager(electionManager);
 		
 	}
 
