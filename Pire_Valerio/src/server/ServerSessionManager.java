@@ -131,6 +131,7 @@ public class ServerSessionManager implements Observer{
 	 */
 	@Override
 	public void update(Observable receiver, Object arg) {
+		System.err.println("UPDATE");
 		// TODO Auto-generated method stub
 		StreamingServer sS;
 		if(arg instanceof DatagramPacket)
@@ -207,8 +208,8 @@ public class ServerSessionManager implements Observer{
 				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"porta su cui manderò il flusso rtp "+ServerMessageReader.getRTPClientPort()+" porta su cui manderò la conferma di avvenuta ricezione al client "+ServerMessageReader.getClientPort());
 				StreamingServer sender = null;
 				try {
-					//System.err.println("*********************************INDIRIZZO CLIENT: "+ServerMessageReader.getClientAddress()+"???????????????????????");
-					sender = new StreamingServer(fileRichiesto, ServerMessageReader.getClientAddress(),ServerMessageReader.getClientPort(), portaRTPSuCuiInviare, this,consolle);
+					System.err.println("INDIRIZZO su cui sparo flusso : "+ServerMessageReader.getPacketAddress().getHostAddress());
+					sender = new StreamingServer(fileRichiesto, ServerMessageReader.getPacketAddress().getHostAddress(),ServerMessageReader.getClientPort(), portaRTPSuCuiInviare, this,consolle);
 					//StreamingServer sender = new StreamingServer(fileRichiesto,this.message.getAddress().toString(),ServerMessageReader.getClientPort(), portaRTPSuCuiInviare, this,consolle);
 					ssReferences.put(ServerMessageReader.getClientAddress(), sender);
 					numberOfSession++;
