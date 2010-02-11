@@ -28,6 +28,7 @@ public class ClientController {
 		this.electionManager.setClientSessionManager(sessionManager);
 		this.sessionManager.setElectionManager(electionManager);
 		frameController.setSessionManager(this.sessionManager);
+		this.electionManager.init();
 	}
 	
 	
