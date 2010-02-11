@@ -291,7 +291,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				
 				//ora mando al server il messaggio per far partire lo streaming
 				try {
-					this.msg=ClientMessageFactory.buildStartTX(msgIdx++, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS),10000);
+					this.msg=ClientMessageFactory.buildStartTX(msgIdx++, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS),messageReader.getRelayControlPort());//da rinominare
 					sessionCM.sendTo(this.msg);
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block

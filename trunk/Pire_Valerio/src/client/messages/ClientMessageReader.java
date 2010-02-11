@@ -84,7 +84,7 @@ public class ClientMessageReader {
 			listaFile=st.nextToken();
 		}
 	}
-
+	 
 	public String getNewRelayLocalClusterAddress(){return newRelayLocalClusterAddress;}
 	public String getHeadNodeAddress(){ return headNodeAddress;}
 	public String getOldRelayLocalClusterAddress(){return oldRelayLocalClusterAddress;}

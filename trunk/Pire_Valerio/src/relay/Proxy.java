@@ -209,6 +209,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.proxyCM.start();
 		
 		
+		System.err.println("isBibBoss="+this.isBigBoss+", servingClient="+this.servingClient);
+		
 		
 		try {
 			//relay buffer manager, this e' un listener per gli eventi sollevati dal buffer nominale
@@ -335,7 +337,6 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		runner1.start();
 		
 		this.sendRedirectToServer();
-
 		
 		/*
 		 * Ho un'altro thread in ricezione: quello che riceve il flusso dal vecchio relay
@@ -606,7 +607,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			}
 
-			if(msgReader.getCode() == MessageCodeConfiguration.START_TX){
+			if(msgReader.getCode() == MessageCodeConfiguration.START_TX)
+				System.err.println("E' arrivato START_TX");
 				/*
 				 * MArco:è arrivato un messaggio START_TX da parte del client
 				  come si comporta il proxy dipende dallo stato in cui si trova il proxy, sono che sono molto criptici
@@ -616,7 +618,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //				{
 //					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
 //				}
-				if (state == ProxyState.waitingClientAck){					
+				if (state == ProxyState.waitingClientAck){	
+					System.err.println("IL MIO STATO È WAITINGCLIENTACK");
 					/*
 					 * 
 					 * Marco: probabilmente questa è la prima volta che mando qualcosa al client, ma non ne sono affatto sicuro
@@ -634,12 +637,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					//resetto TimeOutAckClientReq
 //					this.timeoutAckClientReq.cancelTimeOutAckClientReq();
 					
-					//invio il msg StartTX al server
-					
 					// Marco: in pratica dichiaro qui il thread, ed il codice contenuto nell suo metodo run anzichè farlo in un file separato
 					Thread runner = new Thread(){public void run(){try {
 						rtpReceptionMan.initNormalConnection();
-						System.err.print("Apertura ricezione normale in corso...");
+						System.err.print("Apertura ricezione normale in corso BLABLABLA...");
 						rtpReceptionMan.startNormalConnection();
 					} catch (UnknownHostException e) {
 						// TODO Auto-generated catch block
@@ -654,22 +655,23 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					runner.start(); // Marco: poi qui faccio partire il thread ( e quindi metto in esecuzione il metodo run)
 					
 					initNormalSession(); // Marco: qui dovrei far partire la trasmissione verso il client.
-					
+					System.out.println("INITIAL NORMAL SESSION OK");
 					if(isBigBoss)
 						sendStartTXToServer();
 					else
 						sendStartTXToBigBoss();
-					
+
 					System.err.println("initNormalSession() FINITO");
 				
 					//avvio la ricezione
 
-					System.out.print("fatto.");
 					
 					//transito nel nuovo stato
 					this.state = ProxyState.FirstReceivingromServer;
-										
+					System.err.println(this.state.name());
+					
 				} else if(state == ProxyState.stopToClient){
+					System.err.println("IL MIO STATO È STOPCLIENT");
 					/*
 					 * Marco: qui ho a tutti gli effetti un'altro modo per mandare lo stream, ma cosa sono sti stati?
 					 * lo stato stop to client vuol dire che prima il client ha fermato la trsmissione mandandomi uno stop tx
@@ -680,7 +682,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					//resetto il TimeOutSessionInterrupted
 //					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();					
 					//invio il msg di startTX al server
-					if(serverStopped) sendStartTXToServer();					
+					if(serverStopped){
+						if(isBigBoss)sendStartTXToServer();
+						else sendStartTXToBigBoss();
+					}
+					
 					//avvio la normale trasmissione versio il client
 									
 					/**
@@ -688,7 +694,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					 */
 					if(!this.buffer.getNormalBuffer().isEmpty())
 					{
-						
+						System.err.print("CAZZO È QUI CHE DEVI SPEDIRE");
 						this.startNormalStreamToClient();
 					}
 					else{this.request_pending = true;}
@@ -698,6 +704,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					state = ProxyState.transmittingToClient; 
 					
 				} else if (state == ProxyState.receivingRetransmission){
+					System.err.println("IL MIO STATO È RECEIVINGRETRANSMISSION");
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					if(buffer.getRecoveryBuffer().isEmpty()){
@@ -709,6 +716,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						state = ProxyState.transmittingToClient;
 						
 					}else{
+						System.err.println("BOH!");
 						/*
 						 * MArco: qui dovrebbe essere più chiaro: ricevo uno start TX dal client ed ho il recovery buffer 
 						 * riempito con quanto rimasto dal buffer dell vecchio relay. faccio quindi partire un recovery stream
@@ -726,6 +734,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					}
 					
 				} else if (state == ProxyState.attemptingToStart && !this.newProxy){
+					System.err.println("IL MIO STATO È ATTEMPTINGTOSTART E NON SONO UN NUOVO PROXY");
 					/*
 					 * Marco: qui non ci si capisce nulla: sta fa cendo una trasmissione normale e non di recovery, ma il suo stato
 					 * è comunque trasmitting temp buffer?? 
@@ -743,6 +752,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					state = ProxyState.TransmittingTempBuffer;
 					
 				} else if (state == ProxyState.attemptingToStart && this.newProxy){
+					System.err.println("IL MIO STATO È ATTEMPTINGTOSTART E SONO UN NUOVO PROXY");
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//avvio lo stream di recovery verso il client
@@ -761,7 +771,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			else
 				if(msgReader.getCode() == MessageCodeConfiguration.STOP_TX){
-				
+				System.err.println("IL MIO STATO È ARRIVATO STOP_TX");
 				/*
 				 * Marco: qui finalemte le cose sono più chiare: arriva uno stop TX dal client,
 				 * sistemo i timeout e metto in pausa lo stream verso il client
@@ -769,6 +779,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				 */
 				
 				if (state == ProxyState.transmittingToClient){
+					System.err.println("IL MIO STATO È TRANSMITTINGTOCLIENT");
 //					if(this.timeoutSessionInterrupted!=null)
 //					{
 //						this.timeoutSessionInterrupted.cancel();
@@ -803,8 +814,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					 */
 					// il nuovo proxy eroga il flusso dalla stessa porta della quale lo erogava il vecchio.
 					this.connectedClusterHeadAddr=futureStreamingAddress;
-					this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
-					this.restrictNormalBuffer();
+					//MARCO ROBA TUA CHE HO COMMENTATO
+//					this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
+//					this.restrictNormalBuffer();
 				}
 			// TODO Arrivo Redirect
 				else if (msgReader.getCode() == MessageCodeConfiguration.REDIRECT){
@@ -818,14 +830,15 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					String newClientAddress = ((DatagramPacket)arg).getAddress().getHostAddress();					
 					// non ho bisogno di controllare le porte sulle quali opera il  proxy sostitutivo perch�  sono
 					// le stesse di quelle del proxy sul vecchio relay secondario.
-					this.redirectOutputStream(InetAddress.getByName(clientAddress),this.clientStreamPort, InetAddress.getByName(newClientAddress));
-					this.clientAddress = newClientAddress;
+					//MARCO ROBA TUA CHE HO COMMENTATO
+//					this.redirectOutputStream(InetAddress.getByName(clientAddress),this.clientStreamPort, InetAddress.getByName(newClientAddress));
+//					this.clientAddress = newClientAddress;
 								
 				}
 			
 		}
 		
-	}
+	//}
 	
 	/* (non-Javadoc)
 	 * @see javax.media.ControllerListener#controllerUpdate(javax.media.ControllerEvent)
@@ -1133,14 +1146,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			// Marco: rtp mux dovrebbe essere commentato perchè il multiplexer serve solo nella fase di ricovery, non nella trasmissione normale
 			
 			//rtpSender = new RTPSenderPS(outStreamPort);
-			if(isBigBoss){
-				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS));
-			}
-			else{
-				rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS));
-			}
+
+			rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS));
 			rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
 			
+			System.err.println("addDestination eseguita su "+clientAddress+":"+this.clientStreamPort);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1353,14 +1363,14 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendStartTXToServer(){
 		try {
 			//Creo un messaggio START_TX e lo invio al server
-			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), this.streamingServerCtrlPort);
+			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(connectedClusterHeadAddr), this.streamingServerCtrlPort);
 			proxyCM.sendToServer(startTX);
-			
+			System.out.println("StartTX mandato al server");
 			this.serverStopped = false;
-		} catch (UnknownHostException e) {
+		} catch (UnknownHostException e) {System.err.println("ERROER MANDARE STARTX SERVER");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (IOException e) {System.err.println("ERROER MANDARE STARTX SERVER");
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -1369,7 +1379,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendStartTXToBigBoss(){
 		try {
 			//Creo un messaggio START_TX e lo invio al server
-			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS), this.bigbossControlPort);
+			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(connectedClusterHeadAddr), this.bigbossControlPort);
 			proxyCM.sendToServer(startTX);
 			
 			this.serverStopped = false;

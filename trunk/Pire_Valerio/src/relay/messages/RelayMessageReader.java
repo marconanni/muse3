@@ -100,7 +100,8 @@ public class RelayMessageReader {
 		if(code == MessageCodeConfiguration.ACK_CONNECTION) typeNode = Integer.valueOf(st.nextToken());
 		//if(code == MessageCodeConfiguration.ELECTION_REQUEST)activeRelay =Integer.valueOf(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_BEACON_RELAY)activeClient = Integer.valueOf(st.nextToken());
-		if(code == MessageCodeConfiguration.ELECTION_RESPONSE)W = Double.parseDouble(st.nextToken());
+		//MARCO HO COMMENTATO LA RIGA SOTTO
+//		if(code == MessageCodeConfiguration.ELECTION_RESPONSE)W = Double.parseDouble(st.nextToken());
 		if(code == MessageCodeConfiguration.ELECTION_DONE){
 			newRelayLocalClusterAddress = st.nextToken();
 			oldRelayLocalClusterAddress = st.nextToken();
