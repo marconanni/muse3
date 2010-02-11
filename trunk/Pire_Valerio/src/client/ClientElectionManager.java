@@ -7,14 +7,18 @@ import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
+
 import parameters.DebugConfiguration;
 import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
 import parameters.TimeOutConfiguration;
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 import client.connection.ClientCM;
 import client.connection.ClientConnectionFactory;
+import client.gui.ClientFrameController;
 import client.messages.ClientMessageFactory;
 import client.messages.ClientMessageReader;
 import client.position.ClientPositionController;
@@ -58,8 +62,12 @@ public class ClientElectionManager extends Observable implements Observer{
 	private static ClientElectionManager INSTANCE = null;					//istanza singleton del ClientElectionManager
 	private DebugConsole consoleElectionManager = null;					//Serve per mostrare i messaggi di debug del CLientElectionManager
 	private DebugConsole consoleWifiInterface = null;
-	//private ClientFrameController frameController = null;				//ClientFrameController assegnabile al ClientElectionManager
+	private ClientFrameController frameController = null;				//ClientFrameController assegnabile al ClientElectionManager
+	private ClientSessionManager clientSessionManager = null;
 	
+	public ClientSessionManager getClientSessionManager() {return clientSessionManager;}
+
+	public void setClientSessionManager(ClientSessionManager clientSessionManager) {this.clientSessionManager = clientSessionManager;}
 	private String event = null;
 	
 	public enum ClientStatus {//stati in cui si può trovare il ClientElectionManager
@@ -181,6 +189,8 @@ public class ClientElectionManager extends Observable implements Observer{
 				//Notifico ClientSessionManager e anche il relay a cui sono connesso
 				setChanged();
 				notifyObservers("RELAY_FOUND:"+getConnectedRelayAddress());
+				getClientSessionManager().setRelayAddress(getConnectedRelayAddress());
+				getFrameController().debugMessage("CLIENT PRONTO connesso al nodo:"+getConnectedRelayAddress());
 				
 				DatagramPacket dpOut = null;
 				try {
@@ -536,8 +546,8 @@ public class ClientElectionManager extends Observable implements Observer{
 		}
 	}
 
-	//public ClientFrameController getFrameController() {return frameController;}
-	//public void setFrameController(ClientFrameController frameController) {//this.frameController = frameController;/}
+	public ClientFrameController getFrameController() {return frameController;}
+	public void setFrameController(ClientFrameController frameController) {this.frameController = frameController;}
 }
 
 //class TesterClientElectionManager{
