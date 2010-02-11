@@ -181,11 +181,11 @@ public class RelayElectionManager extends Observable implements Observer{
 			if((isBIGBOSS())||isPOSSIBLE_BIGBOSS()){
 				
 				setRelayClusterHeadWNICController(WNICFinder.getCurrentWNIC(
-						NetConfiguration.NAME_OF_RELAY_MANAGED_WIFI_INTERFACE,
-						NetConfiguration.NAME_OF_RELAY_MANAGED_NETWORK,
+						NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE,
+						NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK,
 						0));
 				
-				setConsoleClusterHeadWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_MANAGED_WIFI_INTERFACE));
+				setConsoleClusterHeadWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE));
 				getRelayClusterHeadWNICController().setDebugConsole(getConsoleClusterHeadWifiInterface());
 				getRelayClusterHeadWNICController().init();
 			}
@@ -223,14 +223,14 @@ public class RelayElectionManager extends Observable implements Observer{
 		//comunicazione col CLUSTER HEAD
 		//Il big boss non comunica col server e quindi non serve un connection Manager col server
 		//Ogni relay di ogni cluster comunica col big boss, ovvero il relay del cluster head
-		if(isBIGBOSS()){
-			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManagerBIGBOSS(this,true));
-			getComClusterHeadManager().start();
-		}
-		if(isRELAY()){
+		if(isBIGBOSS() || isRELAY()){
 			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
 			getComClusterHeadManager().start();
 		}
+//		if(isRELAY()){
+//			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
+//			getComClusterHeadManager().start();
+//		}
 
 		//Se parto come Relay BIG BOSS
 		//WIFI Managed deve essere associata al AP e quindi connessa
@@ -287,13 +287,13 @@ public class RelayElectionManager extends Observable implements Observer{
 			setFirstELECTION_DONE(false);
 			setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 			memorizeLocalClusterAddress();
-			setLocalClusterHeadAddress(NetConfiguration.RELAY_MANAGED_ADDRESS);
+			setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 			memorizelocalClusterHeadAddress();
 			setConnectedClusterHeadAddress(NetConfiguration.SERVER_ADDRESS);
 		}
 		
 		if(state == 1){
-			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManagerBIGBOSS(this,true));
+			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
 			getComClusterHeadManager().start();
 		}
 		
@@ -441,8 +441,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		
 		setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
 		memorizeLocalClusterAddress();
-		if(isPOSSIBLE_BIGBOSS()) setLocalClusterHeadAddress(NetConfiguration.RELAY_MANAGED_ADDRESS);
-		if(isPOSSIBLE_RELAY())setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
+		setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 		memorizeLocalClusterAddress();
 		
 		//memorizeConnectedClusterHeadAddress();

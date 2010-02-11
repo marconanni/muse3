@@ -23,9 +23,9 @@ public class RelayConnectionFactory {
 		return new RelayCM("RelayElectionCM Cluster Head",rpm.getLocalClusterHeadAddress(),rpm.getLocalClusterHeadBCASTAddress(),rpm.getPortElectionIN(),rpm.getPortElectionOUT(),obser, bcast);
 	}
 	
-	public static RelayCM getClusterHeadElectionConnectionManagerBIGBOSS(Observer obser, boolean bcast){
-		return new RelayCM("RelayElectionCM Cluster Head Server", rpm.getLocalManagedAddress(), rpm.getLocalManagedBCASTAddress(), rpm.getPortElectionIN(), rpm.getPortElectionOUT(), obser,bcast);
-	}
+//	public static RelayCM getClusterHeadElectionConnectionManagerBIGBOSS(Observer obser, boolean bcast){
+//		return new RelayCM("RelayElectionCM Cluster Head Server", rpm.getLocalManagedAddress(), rpm.getLocalManagedBCASTAddress(), rpm.getPortElectionIN(), rpm.getPortElectionOUT(), obser,bcast);
+//	}
 
 	/**Metoto statico per ottenere un'istanza di RelayRSSICM
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelayRSSICM
@@ -71,7 +71,13 @@ public class RelayConnectionFactory {
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelaySessionCM
 	 * @return un istanza di RelaySessionCM
 	 */
-	public static RelayCM getSessionConnectionManager(Observer obser){
+	public static RelayCM getClusterSessionConnectionManager(Observer obser){
 		return new RelayCM("RelaySessionCM",rpm.getLocalClusterAddress(),null,rpm.getPortInAdHocSession(),rpm.getPortOutAdHocSession(),obser,false);
 	}
+	
+	public static RelayCM getClusterHeadSessionConnectionManager(Observer obser){
+		return new RelayCM("RelaySessionCM",rpm.getLocalClusterHeadAddress(),null,rpm.getPortInAdHocSession(),rpm.getPortOutAdHocSession(),obser,false);
+	}
+	
+	
 }

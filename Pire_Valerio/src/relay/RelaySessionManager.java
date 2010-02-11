@@ -84,7 +84,8 @@ public class RelaySessionManager implements Observer{
 //	private TimeOutSingleWithMessage toSessionInfo;
 	
 	
-	private RelayCM sessionCM; // Marco: è chi si occupa di spedire i messaggi.
+	private RelayCM sessionCMClusterHead; // Marco: è chi si occupa di spedire i messaggi.
+	private RelayCM sessionCMCluster;
 	private RelayMessageReader messageReader;
 	
 	private boolean isBigBoss;//Valerio: questo flag viene settato in base al metodo che ha Pire in ElectionManager
@@ -144,9 +145,11 @@ public class RelaySessionManager implements Observer{
 //		pReferences = new Hashtable();
 //		sessionInfo = new Hashtable();
 		this.sessions= new Hashtable<String, Session>();
-		this.sessionCM = RelayConnectionFactory.getSessionConnectionManager(this);
+		this.sessionCMCluster = RelayConnectionFactory.getClusterSessionConnectionManager(this);
+		this.sessionCMClusterHead = RelayConnectionFactory.getClusterHeadSessionConnectionManager(this);
 		this.messageReader = new RelayMessageReader();
-		this.sessionCM.start();
+		this.sessionCMCluster.start();
+		this.sessionCMClusterHead.start();
 		this.consolle=new DebugConsole("RELAY SESSION MANAGER DEBUG CONSOLLE");
 		
 		
@@ -246,7 +249,7 @@ public class RelaySessionManager implements Observer{
 			try{
 //				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, InetAddress.getByName(this.serverAddress), this.serverPortSessionIn, this.clientAddress);
 				this.message=RelayMessageFactory.buildRequestList(seqNumSendServer++, InetAddress.getByName(electionManager.getConnectedClusterHeadAddress()), this.serverPortSessionIn, this.clientAddress);//messaggio modificato prendendo l'indirizzo coi metodi di Pire
-				sessionCM.sendTo(this.message);
+				sessionCMClusterHead.sendTo(this.message);
 				System.out.println("BigBoss: inviato il messaggio request list al server");
 			}catch (Exception e) {
 				// TODO: handle exception
@@ -262,7 +265,7 @@ public class RelaySessionManager implements Observer{
 			try{
 //				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, InetAddress.getByName(this.bigbossAddress), this.bigbossPort,null, this.clientAddress);
 				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, electionManager.getConnectedClusterHeadInetAddress(), this.bigbossPort,null, this.clientAddress);//messaggio modificato prendendo l'indirizzo coi metodi di Pire
-				sessionCM.sendTo(this.message);
+				sessionCMClusterHead.sendTo(this.message);
 				System.out.println("Relay: inviato il messaggio forward request list al bigboss");
 				}catch (Exception e) {
 				// TODO: handle exception
@@ -284,7 +287,7 @@ public class RelaySessionManager implements Observer{
 			}
 			try {
 				this.message=RelayMessageFactory.buildListResponse(seqNumSendClient++,InetAddress.getByName(messageReader.getClientAddress()), PortConfiguration.CLIENT_PORT_SESSION_IN, listaFile);
-				sessionCM.sendTo(this.message);
+				sessionCMCluster.sendTo(this.message);
 				System.out.println("inviata la lista dei file al client");
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
@@ -304,7 +307,7 @@ public class RelaySessionManager implements Observer{
 			System.out.println("Arrivata la richiesta della lista file da "+this.relayAddress+" devo inviarla al server: "+electionManager.getConnectedClusterHeadInetAddress()+" sulla porta "+serverPortSessionIn+" e la risposta andrà inviata al client "+this.clientAddress+":"+PortConfiguration.CLIENT_PORT_SESSION_IN);
 			try{
 				this.message=RelayMessageFactory.buildForwardRequestList(seqNumSendBigBoss++, electionManager.getConnectedClusterHeadInetAddress(), serverPortSessionIn,this.relayAddress, this.clientAddress);
-				sessionCM.sendTo(this.message);
+				sessionCMClusterHead.sendTo(this.message);
 				System.out.println("Relay: inviato il messaggio request list al BigBoss");
 			}catch (Exception e) {
 				// TODO: handle exception
@@ -344,7 +347,7 @@ public class RelaySessionManager implements Observer{
 			}
 			try {
 				this.message=RelayMessageFactory.buildForwardListResponse(seqNumSendRelay++, InetAddress.getByName(messageReader.getRelayAddress()),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, messageReader.getRelayAddress(),this.messageReader.getClientAddress(), listaFile);
-				sessionCM.sendTo(this.message);
+				sessionCMCluster.sendTo(this.message);
 			}catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -372,7 +375,7 @@ public class RelaySessionManager implements Observer{
 			this.clientAddress=messageReader.getClientAddress();
 			try {
 				this.message=RelayMessageFactory.buildListResponse(seqNumSendClient++,InetAddress.getByName(this.clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN, listaFile);
-				sessionCM.sendTo(this.message);
+				sessionCMCluster.sendTo(this.message);
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -458,7 +461,7 @@ public class RelaySessionManager implements Observer{
 				// se sessions � vuoto passo come parametro null: build sessioninfo creer� un pacchetto senza le indicazioni delle sessioni, tuttavia non dovrei finirci se non ho sessioni attive...
 				else{this.message = RelayMessageFactory.buildSessionInfo(0, null, InetAddress.getByName(this.maxWnextRelay), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);}
 
-				this.sessionCM.sendTo(this.message); //Marco: invio il messaggio preparato
+				this.sessionCMCluster.sendTo(this.message); //Marco: invio il messaggio preparato
 				this.status = RelaySessionStatus.ATTENDIGACKSESSION;
 				//TIMEOUT COMMENTATI
 //				this.toAckSessionInfo = RelayTimeoutFactory.getTimeOutAckSessionInfo(this, TimeOutConfiguration.TIMEOUT_ACK_SESSION_INFO);
@@ -529,7 +532,7 @@ public class RelaySessionManager implements Observer{
 			String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte di recovery dei relay sostituivi sulle quali ridirigere le varie sessioni
 			try {
 				this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
-				this.sessionCM.sendTo(this.message);
+				this.sessionCMCluster.sendTo(this.message);
 				if(electionManager.isBIGBOSS())
 					this.status = RelaySessionStatus.ACTIVE_BIGBOSS;
 				else
@@ -760,7 +763,7 @@ public class RelaySessionManager implements Observer{
 					if(electionManager.getLocalClusterAddress().equals(newRelay)){
 						//MARCO: ROBA TUA CHE HO DOVUTO COMMENTARE
 //						this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
-						this.sessionCM.sendTo(message);
+						this.sessionCMCluster.sendTo(message);
 						//TIMEOUT DISABILITATI
 //						this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO);
 						this.status = RelaySessionStatus.RequestingSession;
