@@ -14,7 +14,7 @@ public class BufferConfiguration {
 //	public static final int PROXY_SOGLIA_SUPERIORE_NORMAL  = 80;
 //	
 //	public static final int PROXY_SOGLIA_SUPERIORE_ELECTION  = 80;
-	public static final int PROXY_BUFFER = 80;
+	public static final int PROXY_BUFFER = 160;
 	
 	public static final int PROXY_SOGLIA_INFERIORE_NORMAL  = 0;
 	

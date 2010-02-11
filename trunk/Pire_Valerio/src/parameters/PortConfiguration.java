@@ -22,8 +22,8 @@ public class PortConfiguration {
 //	public static final int RSSI_PORT_IN = 3004;
 //	public static final int RSSI_PORT_OUT = 3005;
 	
-	public static final int RSSI_PORT_IN = 3006;
-	public static final int RSSI_PORT_OUT = 3007;
+	public static final int RSSI_PORT_IN = 3004;
+	public static final int RSSI_PORT_OUT = 3005;
 
 	
 	//Valerio
