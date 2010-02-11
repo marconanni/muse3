@@ -1342,7 +1342,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.inStreamPort = rtpReceptionMan.getNormalReceivingPort();
 		DatagramPacket reqFile;
 		try {
-			reqFile = RelayMessageFactory.buildForwardReqFile(0, filename, 0, 0,"questo campo non mi serve, lo riempirà bigboss", proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress,  this.clientStreamPort, InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+			reqFile = RelayMessageFactory.buildForwardReqFile(0, filename, 0, 0,"questo campo non mi serve, lo riempirà bigboss", proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress,  this.clientStreamPort, InetAddress.getByName(this.connectedClusterHeadAddr), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
 		} catch (Exception e) {
