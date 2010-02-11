@@ -15,17 +15,18 @@ public class ClientController {
 	private ClientFrameController frameController;
 
 	private ClientSessionManager sessionManager;
-//	private ClientElectionManager electionManager;
+	private ClientElectionManager electionManager;
 
 	public ClientController(ClientFrame frame){
 		if(frame.getController() != null)
 		frameController = frame.getController();
 		this.sessionManager = ClientSessionManager.getInstance();
 		this.sessionManager.setFrameController(frameController);
-//		this.electionManager = ClientElectionManager.getINSTANCE();
-//		this.electionManager.setFrameController(frameController);
-//		this.electionManager.addObserver(this.sessionManager);
-//		this.sessionManager.setElectionManager(electionManager);
+		this.electionManager = ClientElectionManager.getINSTANCE();
+		this.electionManager.setFrameController(frameController);
+		this.electionManager.addObserver(this.sessionManager);
+		this.electionManager.setClientSessionManager(sessionManager);
+		this.sessionManager.setElectionManager(electionManager);
 		frameController.setSessionManager(this.sessionManager);
 	}
 	

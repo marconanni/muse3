@@ -50,7 +50,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 	private TimeOutSingleWithMessage timeoutFileRequest;
 	private String relayAddress; //provo lo styream diretto server->client
 
-	private String serverAddress;
+	//private String serverAddress;
 	private String[] files;
 	private String listaFile;
 	private int msgIdx = 0;
@@ -72,10 +72,10 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 	 * @param electionManager
 	 *            the electionManager to set
 	 */
-	/*
-	 * public void setElectionManager(ClientElectionManager electionManager) {
-	 * this.electionManager = electionManager; }
-	 */
+	
+	 public void setElectionManager(ClientElectionManager electionManager) {
+	 this.electionManager = electionManager; }
+
 
 	public static final ClientSessionManager INSTANCE = new ClientSessionManager();
 
@@ -94,7 +94,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 		this.status = "Idle";
 		this.myStreamingPort = PortConfiguration.CLIENT_PORT_RTP_IN;
 		
-		this.relayAddress=NetConfiguration.RELAY_CLUSTER_ADDRESS;//Valerio: simulo che il client sia collegato ad un relay
+		//this.relayAddress=NetConfiguration.RELAY_CLUSTER_ADDRESS;//Valerio: simulo che il client sia collegato ad un relay
 														//e non a bigboss, questa parte va modificata, non posso sapere a priori
 														//a chi mi collego
 		System.out.println("finito costruttore clientsessionmanager");
@@ -291,7 +291,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				
 				//ora mando al server il messaggio per far partire lo streaming
 				try {
-					this.msg=ClientMessageFactory.buildStartTX(msgIdx++, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS),messageReader.getRelayControlPort());//da rinominare
+					this.msg=ClientMessageFactory.buildStartTX(msgIdx++, InetAddress.getByName(this.relayAddress),messageReader.getRelayControlPort());//da rinominare
 					sessionCM.sendTo(this.msg);
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
@@ -300,8 +300,8 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("mandato all'indirizzo "+this.serverAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
-				frameController.debugMessage("mandato all'indirizzo "+this.serverAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
+				System.out.println("mandato all'indirizzo "+this.relayAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
+				frameController.debugMessage("mandato all'indirizzo "+this.relayAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
 				
 				System.out.println("dovrebbe iniziare a suonare qui");
 				clientPlaying.start();
@@ -453,5 +453,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 	public static void main(String[] args) {
 		ClientSessionManager.getInstance();
 	}
+	
+	public void setRelayAddress(String relayAddress){this.relayAddress = relayAddress;}
 
 }
