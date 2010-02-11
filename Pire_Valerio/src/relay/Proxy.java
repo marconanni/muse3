@@ -1148,8 +1148,15 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			//rtpSender = new RTPSenderPS(outStreamPort);
 
 			rtpSender = new RTPSenderPS(outStreamPort,InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS));
-			rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
-			
+			if(servingClient){
+				rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
+				System.err.println("FATTA ADDDESTINATION SUL CLIENT: "+clientAddress+":"+clientStreamPort);
+			}
+			else{
+				rtpSender.addDestination(InetAddress.getByName(relayAddress), this.relayStreamingPort);
+				System.err.println("FATTA ADDDESTINATION SUL CLIENT: "+relayAddress+":"+relayStreamingPort);
+				
+			}
 			System.err.println("addDestination eseguita su "+clientAddress+":"+this.clientStreamPort);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -1461,7 +1468,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendAckFileToRelay(String clientAddr,int clientControlPort, int clientStreamPort){//messaggio che il bigboss invia al relay
 		try{
 			this.proxyStreamingCtrlPort=proxyCM.getLocalAdHocInputPort();
-			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,PortConfiguration.CLIENT_PORT_SESSION_IN,InetAddress.getByName(this.clientAddress),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientControlPort,clientStreamPort);
+			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,msgReader.getRelayControlPort(),InetAddress.getByName(msgReader.getRelayAddress()),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientControlPort,clientStreamPort);
 			proxyCM.sendTo(ackRelayReq);
 		}catch (Exception e) {
 			// TODO: handle exception
