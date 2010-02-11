@@ -5,15 +5,24 @@ public class BufferConfiguration {
 	/**
 	 * caratteristiche del buffer lato proxy
 	 */
-	public static final int PROXY_BUFFER = 160;
+//	public static final int PROXY_BUFFER = 160;
+//	
+//	public static final int PROXY_SOGLIA_INFERIORE_NORMAL  = 0;
+//	
+//	public static final int PROXY_SOGLIA_INFERIORE_ELECTION  = 80;
+//	
+//	public static final int PROXY_SOGLIA_SUPERIORE_NORMAL  = 80;
+//	
+//	public static final int PROXY_SOGLIA_SUPERIORE_ELECTION  = 80;
+	public static final int PROXY_BUFFER = 80;
 	
 	public static final int PROXY_SOGLIA_INFERIORE_NORMAL  = 0;
 	
-	public static final int PROXY_SOGLIA_INFERIORE_ELECTION  = 80;
+	public static final int PROXY_SOGLIA_INFERIORE_ELECTION  = 0;
 	
-	public static final int PROXY_SOGLIA_SUPERIORE_NORMAL  = 80;
+	public static final int PROXY_SOGLIA_SUPERIORE_NORMAL  = 0;
 	
-	public static final int PROXY_SOGLIA_SUPERIORE_ELECTION  = 150;
+	public static final int PROXY_SOGLIA_SUPERIORE_ELECTION  = 0;
 	
 	
 	/**
@@ -44,5 +53,5 @@ public class BufferConfiguration {
 	 */
 	public static final int TTW = 65;
 	
-	public static final int PLAYBACK_DELAY_START = 20000;
+	public static final int PLAYBACK_DELAY_START = 2000;
 }

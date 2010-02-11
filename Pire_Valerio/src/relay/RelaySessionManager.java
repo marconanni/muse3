@@ -387,11 +387,12 @@ public class RelaySessionManager implements Observer{
 		
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_FILE && imBigBoss){
 			//se il request file arriva al bigboss ho questo comportamento
+			System.out.println("arrivata richiesta file e sono bigboss, vado a creare il proxy");
 			this.status = RelaySessionStatus.ACTIVE_BIGBOSS;
 			this.clientAddress = message.getAddress().getHostAddress();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
-			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getClientStreamingPort(),isBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
+			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getClientStreamingPort(),imBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
 			Session sessione=new Session(this.clientAddress, proxy);
 			this.sessions.put(this.clientAddress, sessione);
 //			pReferences.put(this.clientAddress, proxy);
@@ -400,6 +401,7 @@ public class RelaySessionManager implements Observer{
 		
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_FILE && imRelay){
 			//allora essendo relay devo inoltrare un forwardrequestfile al bigboss
+			System.out.println("arrivata richiesta file e NON sono bigboss, vado a creare il proxy");
 			this.status = RelaySessionStatus.ACTIVE_NORMAL;
 //			this.clientAddress = message.getAddress().getHostAddress();
 			this.clientAddress=message.getAddress().getHostAddress();
@@ -407,7 +409,7 @@ public class RelaySessionManager implements Observer{
 			this.fileName=messageReader.getFilename();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+this.fileName+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
-			proxy = new Proxy(this, true, this.fileName,null,-1,-1, this.clientAddress, this.clientStreamingPort,isBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
+			proxy = new Proxy(this, true, this.fileName,null,-1,-1, this.clientAddress, this.clientStreamingPort,imBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
 //			pReferences.put(this.relayAddress, proxy);
 			Session sessione=new Session(this.clientAddress, proxy);
 			this.sessions.put(this.clientAddress, sessione);
@@ -489,7 +491,7 @@ public class RelaySessionManager implements Observer{
 			// il metodo getProxyInfo restituisce una tabella che ha per ogni chiave ( l'ip del client) la porta sulla
 			//quale ridirigere il flusso.
 			
-			this.changeProxySession(messageReader.getProxyInfo()); 
+//			this.changeProxySession(messageReader.getProxyInfo()); //X MARCO!!! QUESTO L'HO COMMENTATO PER FARE LE PROVE, PERCHÈ MI DAVA ERRORE!!
 		}
 		
 		// TODO arrivo messaggio SESSION_INFO da parte del vecchio relay
@@ -521,8 +523,9 @@ public class RelaySessionManager implements Observer{
 			//TIMEOUT COMMENTATI
 //			this.toSessionInfo.cancelTimeOutSessionInfo();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
-			this.sessions = messageReader.getSessions(); // creo le sessioni ggio dal messa attualmente per� non ci sono i proxy, li metto con il 
+			 // creo le sessioni ggio dal messa attualmente per� non ci sono i proxy, li metto con il 
 			//metodo
+//			this.sessions = messageReader.getSessions();//X MARCO!!! QUESTO L'HO COMMENTATO PER FARE LE PROVE, PERCHÈ MI DAVA ERRORE!!
 			String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte di recovery dei relay sostituivi sulle quali ridirigere le varie sessioni
 			try {
 				this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
@@ -735,7 +738,7 @@ public class RelaySessionManager implements Observer{
 				
 				while (chiavi.hasMoreElements()){
 					Session sessione = sessions.get(chiavi.nextElement());
-					sessione.getProxy().setFutureStreamingAddress(newRelay);
+//					sessione.getProxy().setFutureStreamingAddress(newRelay);
 				}
 				
 				
@@ -755,7 +758,8 @@ public class RelaySessionManager implements Observer{
 				else{
 					// il nodo � il vincitore!
 					if(electionManager.getLocalClusterAddress().equals(newRelay)){
-						this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+						//MARCO: ROBA TUA CHE HO DOVUTO COMMENTARE
+//						this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 						this.sessionCM.sendTo(message);
 						//TIMEOUT DISABILITATI
 //						this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO);
@@ -873,13 +877,14 @@ public class RelaySessionManager implements Observer{
 		while(keys.hasMoreElements()){
 			String chiave = keys.nextElement();
 			Session sessione = sessions.get(chiave);
-			if ( sessione.getProxy().equals(proxy)){
-				sessione.setSessionInfo(sessionPorts);
-				// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
-				// per stare dalla parte dei bottoni lascio tutto cos�.
-				// ps ho controllato effettivamente va bene, l'equals è true solo se si tratta della 
-				// stessa istanza del proxy
-			}
+			//MARCO ROBA TUA CHE HO COMMENTATO
+//			if ( sessione.getProxy().equals(proxy)){
+//				sessione.setSessionInfo(sessionPorts);
+//				// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
+//				// per stare dalla parte dei bottoni lascio tutto cos�.
+//				// ps ho controllato effettivamente va bene, l'equals è true solo se si tratta della 
+//				// stessa istanza del proxy
+//			}
 		}
 		
 		

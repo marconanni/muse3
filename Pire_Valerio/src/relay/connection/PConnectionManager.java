@@ -73,9 +73,9 @@ public class PConnectionManager extends AConnectionManager  {
 	 */
 	public void sendToServer(DatagramPacket dp){
 		try {
-			managedInputOutputSocket.send(dp);
 			System.out.println(managerName+".sendToServer(): messaggio inviato al Server");
 			System.out.println(managerName+".sendToServer(): messaggio inviato a: "+dp.getAddress().getHostAddress()+" porta: "+ dp.getPort());
+			managedInputOutputSocket.send(dp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

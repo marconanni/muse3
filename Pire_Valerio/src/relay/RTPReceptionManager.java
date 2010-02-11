@@ -165,6 +165,8 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		//	normalReceiver.setBufferLength(this.buffer.getBufSize());
 		normalReceiver.addReceiveStreamEventListener(this);
 
+		System.err.println("Indirizzo da cui ricevo "+this.connectedClusterHeadAddr+":"+streamingServerSendingPort);
+		
 		System.out.println("Proxy receiver: attesa ricezione stream...");
 
 		//ricezione dello stream RTP
@@ -352,28 +354,28 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		{
 			System.out.println("___Bye Message in PROXY RECEIVER___\n");
 			this.EOM = true;
-/*
-			closeNormalConnection();
-
-			closeRecoveryConnection();
-
-			com.sun.media.ExtBuffer frame=new com.sun.media.ExtBuffer();
-			frame.setEOM(true);
-
-			try{ Thread.sleep(100); }
-			catch(InterruptedException e){ System.err.println(e); }
-
-			buffer.getNormalBuffer().setFrame(frame);
-			if(this.proxy.getMuxTh().isPauseMultiplexing() || !buffer.getNormalBuffer().isEmpty())
-				this.proxy.getMuxTh().restart();
-			if(buffer.getRecoveryBuffer() != null){
-				com.sun.media.ExtBuffer recframe=new com.sun.media.ExtBuffer();
-				recframe.setEOM(true);
-				buffer.getRecoveryBuffer().setFrame(recframe);
-				if(this.proxy.getMuxThR().isPauseMultiplexing() || !buffer.getRecoveryBuffer().isEmpty())
-					this.proxy.getMuxThR().restart();
-					*/
-			}
+//
+//			closeNormalConnection();
+//
+//			closeRecoveryConnection();
+//
+//			com.sun.media.ExtBuffer frame=new com.sun.media.ExtBuffer();
+//			frame.setEOM(true);
+//
+//			try{ Thread.sleep(100); }
+//			catch(InterruptedException e){ System.err.println(e); }
+//
+//			buffer.getNormalBuffer().setFrame(frame);
+//			if(this.proxy.getMuxTh().isPauseMultiplexing() || !buffer.getNormalBuffer().isEmpty())
+//				this.proxy.getMuxTh().restart();
+//			if(buffer.getRecoveryBuffer() != null){
+//				com.sun.media.ExtBuffer recframe=new com.sun.media.ExtBuffer();
+//				recframe.setEOM(true);
+//				buffer.getRecoveryBuffer().setFrame(recframe);
+//				if(this.proxy.getMuxThR().isPauseMultiplexing() || !buffer.getRecoveryBuffer().isEmpty())
+//					this.proxy.getMuxThR().restart();
+//					
+//			}
 
 		//	closeAll();
 
@@ -381,7 +383,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 			
 			System.out.println("Flush del buffer...");
 			
-	//	}
+		}
 
 
 	}
