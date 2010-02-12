@@ -1419,21 +1419,26 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 	
 	
-	private void sendRedirectToServer(){
+	protected void sendRedirectToServer(){
 		/*
+		 *  il server potrebbe anche essere un proxy sul big boss; ma il metodo non d� problemi
+		 *  a riguardo, visto che  l'indirizzo viene fornito dal costruttore e la porta
+		 *  di sessione viene stabilita in base al tipo di nodo che eroga il fusso dal
+		 *  metodo determinaPorteSessione
+		 */
 		try {
+			//Creo un messaggio REDIRECT e lo invio al server
 			
-			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0,InetAddress.getByName(this.streamingServerAddress), this.streamingServerSessionPort);
 			proxyCM.sendToServer(redirect);
 			//this.serverStopped = false;
 		} catch (UnknownHostException e) {
-			// Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-		// Auto-generated catch block
+			
 			e.printStackTrace();
 		}
-		*/
 	}
 	
 	
@@ -1509,18 +1514,23 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //		}		
 	}
 		
-	private void sendLeaveMsgToClient() {
-//		try {
-//			//invio LEAVE al client:
-//			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN);
-//			proxyCM.sendTo(leave);
-//		} catch (UnknownHostException e) {
-//			// Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// Auto-generated catch block
-//			e.printStackTrace();
-//		}		
+	// TODO	sendleaveMessage to client!
+	protected void sendLeaveMsgToClient() {
+		try {
+			//invio LEAVE al client:
+			DatagramPacket leave=null;
+			if(servingClient)
+				leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), this.clientSessionPort);
+			else
+				leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(relayAddress), this.relayControlPort);
+			proxyCM.sendTo(leave);
+		} catch (UnknownHostException e) {
+			
+			e.printStackTrace();
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}		
 	}
 	
 	
