@@ -646,18 +646,18 @@ static public DatagramPacket buildAckSession(int sequenceNumber, String proxyInf
 //* @return
 //* @throws IOException
 //*/
-//static public DatagramPacket buildRedirect(int sequenceNumber, InetAddress addr, int port) throws IOException {
-//
-//	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-//	DataOutputStream doStream = new DataOutputStream(boStream);
-//	String content = sequenceNumber+"_"+MessageCodeConfiguration.REDIRECT;
-//	doStream.writeUTF(content);
-//	doStream.flush();
-//	byte[] data = boStream.toByteArray();
-//
-//	return new DatagramPacket(data, data.length, addr, port);
-//
-//}
+static public DatagramPacket buildRedirect(int sequenceNumber, InetAddress addr, int port) throws IOException {
+
+	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+	DataOutputStream doStream = new DataOutputStream(boStream);
+	String content = sequenceNumber+"_"+MessageCodeConfiguration.REDIRECT;
+	doStream.writeUTF(content);
+	doStream.flush();
+	byte[] data = boStream.toByteArray();
+
+	return new DatagramPacket(data, data.length, addr, port);
+
+}
 //
 //
 ///**
@@ -668,18 +668,18 @@ static public DatagramPacket buildAckSession(int sequenceNumber, String proxyInf
 //* @return
 //* @throws IOException
 //*/
-//static public DatagramPacket buildLeave(int sequenceNumber, InetAddress addr, int port) throws IOException {
-//
-//	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-//	DataOutputStream doStream = new DataOutputStream(boStream);
-//	String content = sequenceNumber+"_"+MessageCodeConfiguration.LEAVE;
-//	doStream.writeUTF(content);
-//	doStream.flush();
-//	byte[] data = boStream.toByteArray();
-//
-//	return new DatagramPacket(data, data.length, addr, port);
-//
-//}
+static public DatagramPacket buildLeave(int sequenceNumber, InetAddress addr, int port) throws IOException {
+
+	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+	DataOutputStream doStream = new DataOutputStream(boStream);
+	String content = sequenceNumber+"_"+MessageCodeConfiguration.LEAVE;
+	doStream.writeUTF(content);
+	doStream.flush();
+	byte[] data = boStream.toByteArray();
+
+	return new DatagramPacket(data, data.length, addr, port);
+
+}
 //
 //
 ///*
