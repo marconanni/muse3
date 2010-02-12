@@ -33,7 +33,7 @@ public class ExtensibleEventCircularBuffer extends unibo.core.EventCircularBuffe
 												//l'evento di bufferEmpty
 	 
 	 
-	 private boolean normalMode; // normal mode
+	 
 
 	
 	
@@ -110,6 +110,7 @@ public class ExtensibleEventCircularBuffer extends unibo.core.EventCircularBuffe
 		else
 			this.sogliaInferioreElection=numFrames;
 		this.sogliaInferioreElection= sogliaSuperiore;
+		this.setNormalMode(true);
 		
 	}
 	
@@ -154,7 +155,7 @@ public class ExtensibleEventCircularBuffer extends unibo.core.EventCircularBuffe
 		this.sogliaInferioreElection= sogliaInferioreElection;
 		this.sogliaSuperioreNormal = sogliaSuperioreNormal;
 		this.sogliaSuperioreElection=sogliaSuperioreElection;
-		this.setNormalMode(false);
+		this.setNormalMode(true);
 		
 		
 		
