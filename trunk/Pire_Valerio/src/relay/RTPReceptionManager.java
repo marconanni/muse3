@@ -112,14 +112,6 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		//ottengo una porta per lo stream in input
 		normalReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();	
 		//normalReceiver = new RTPReceiverPS(normalReceivingPort);
-		
-//		if(bigboss){
-//			normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(NetConfiguration.BIGBOSS_MANAGED_ADDRESS));
-//		}
-//		else{
-//			normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(Parameters.RELAY_AD_HOC_ADDRESS));
-//		}
-
 		//indirizzoricezione altro non è che localclusterheadaddress, indirizzotramissione è connectedclusterheadaddress
 		normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(this.localClusterHeadAddr),InetAddress.getByName(this.connectedClusterHeadAddr));
 		if(newProxy){
@@ -143,9 +135,11 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		RelayPortMapper.getInstance().setRangePortInRTPProxy(normalReceivingPort);
 		//ottengo dal port mapper la porta di ricezione dello stream proveniente dal vecchio proxy
 		this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();
-		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort, InetAddress.getByName(this.connectedClusterHeadAddr),InetAddress.getByName(this.localClusterHeadAddr));
-
-	}
+		/*
+		 * Non abbiamo capito come funziona il costruttore di recoveryreceiver 
+		 */
+		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(this.localClusterHeadAddr), InetAddress.getByName(this.connectedClusterHeadAddr));
+		}
 
 
 	/*
