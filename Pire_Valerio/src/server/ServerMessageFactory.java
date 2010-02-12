@@ -42,7 +42,7 @@ public class ServerMessageFactory {
 	   * @throws IOException
 	   */
 	  static protected DatagramPacket buildFilesListMessage(int sequenceNumber, InetAddress addr, int port, String files) throws IOException {
-	    ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+		    ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 	    DataOutputStream doStream = new DataOutputStream(boStream);
 	    String content = sequenceNumber+"_"+MessageCodeConfiguration.LIST_RESPONSE+"_"+files+"_"+ServerMessageReader.getClientAddress()+"_"+ServerMessageReader.getClientPort();
 	    doStream.writeUTF(content);
