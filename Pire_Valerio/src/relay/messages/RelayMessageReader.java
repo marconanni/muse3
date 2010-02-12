@@ -220,6 +220,16 @@ public class RelayMessageReader {
 	public String getListaFile(){return listaFile;}
 	public String getFilename(){return filename;}
 	
+	public Hashtable<String, Session> getSessions() {
+		return this.sessions;
+	}
+	
+	public  Hashtable<String, int[]> getProxyInfo() {
+		return proxyInfo;
+	}
+	
+	
+	
 	/**
 	 * Metodo che da una stringona che rappresenta una tabella estrae la tabella stessa
 	 * ovviamente la tabella estratta dipende da quale messaggio si sta analizzando.
@@ -269,6 +279,8 @@ public class RelayMessageReader {
 		}
 		return null;
 	}
+
+	
 
 
 //private  Hashtable<String, int[]> sessionInfo;

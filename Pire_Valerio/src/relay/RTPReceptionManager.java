@@ -211,6 +211,42 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 			recoveryParserThread = new ParserThreadPS(recoveryRTPParser, buffer.getBufSize(), buffer.getRecoveryBuffer());
 		}
 	}
+	
+	
+	/**
+	 * @author Marco
+	 * Questo metodo richiama il metodo SetSender di NormalReceiver, la speranza è che,
+	 * usato qunado il proxy riceve un leave dal big boss questo serva a ricevere il flusso
+	 * dal nuovo proxy sul big boss
+	 * @param connectedClusterHeadAddr l'indirizzo del nuovo nodo che eroga il flusso
+	 * @param streamingServerSendingPort la porta dalla quale il nuovo nodo eroga il flusso
+	 * 
+	 */
+	
+	public boolean setStreamingServer (String connectedClusterHeadAddr, int streamingServerSendingPort){
+		// prima aggiorno le mie variabili interne
+		boolean result = false;
+		this.connectedClusterHeadAddr= connectedClusterHeadAddr;
+		this.streamingServerSendingPort= streamingServerSendingPort;
+		// poi invoco il metodo su nomalReceiver
+		try {
+			
+			normalReceiver.setSender(InetAddress.getByName(this.connectedClusterHeadAddr), streamingServerSendingPort);
+			result = true;
+		} catch (UnknownHostException e) {
+			//  Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			//  Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	
+	
+	}
+	
+	
+	
 
 	/**
 	 * 

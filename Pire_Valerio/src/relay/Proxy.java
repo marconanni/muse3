@@ -222,10 +222,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			this.recoveryStreamInPort = rtpReceptionMan.getRecoveryReceivingPort();	
 		} catch (IncompatibleSourceException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -307,10 +307,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			//imposto la porta di ricezione normale
 			//this.rtpReceptionMan.setNormalReceivingPort(proxyStreamPortIn);// Marco: perchè è commentato?
 		} catch (IncompatibleSourceException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -325,13 +325,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			System.err.print("Apertura ricezione normale in corso...");
 			rtpReceptionMan.startNormalConnection();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IncompatibleSourceException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}}};
 		runner1.start();
@@ -347,13 +347,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			System.err.print("Apertura ricezione recovery in corso...");
 			rtpReceptionMan.startRecoveryConnection();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IncompatibleSourceException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}}};
 		runner2.start();
@@ -643,13 +643,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						System.err.print("Apertura ricezione normale in corso BLABLABLA...");
 						rtpReceptionMan.startNormalConnection();
 					} catch (UnknownHostException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					} catch (IncompatibleSourceException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}}};
 					runner.start(); // Marco: poi qui faccio partire il thread ( e quindi metto in esecuzione il metodo run)
@@ -815,8 +815,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					// il nuovo proxy eroga il flusso dalla stessa porta della quale lo erogava il vecchio.
 					this.connectedClusterHeadAddr=futureStreamingAddress;
 					//MARCO ROBA TUA CHE HO COMMENTATO
-//					this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
-//					this.restrictNormalBuffer();
+					this.rtpReceptionMan.setStreamingServer(streamingServerAddress, this.streamingServerSessionPort);
+					this.restrictNormalBuffer();
 				}
 			// TODO Arrivo Redirect
 				else if (msgReader.getCode() == MessageCodeConfiguration.REDIRECT){
@@ -831,8 +831,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					// non ho bisogno di controllare le porte sulle quali opera il  proxy sostitutivo perch�  sono
 					// le stesse di quelle del proxy sul vecchio relay secondario.
 					//MARCO ROBA TUA CHE HO COMMENTATO
-//					this.redirectOutputStream(InetAddress.getByName(clientAddress),this.clientStreamPort, InetAddress.getByName(newClientAddress));
-//					this.clientAddress = newClientAddress;
+					try {
+						this.redirectOutputStream(InetAddress.getByName(clientAddress),this.clientStreamPort, InetAddress.getByName(newClientAddress));
+					} catch (UnknownHostException e) {
+						//  Auto-generated catch block
+						e.printStackTrace();
+					}
+					this.clientAddress = newClientAddress;
 								
 				}
 			
@@ -1004,14 +1009,14 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			try {
 				result= this.startHandoff(InetAddress.getByName(clientAddress),portStremInNewProxy, newRelayAddr, true);
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		else
 			try {
 				result= this.startHandoff(InetAddress.getByName(relayAddress),portStremInNewProxy, newRelayAddr, true);
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		return result;
@@ -1102,6 +1107,17 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 	}
 	
+	/**
+	 * metodo richiamato all'arrivo ddi un LEAVE dal vecchio proxy che serviva questo
+	 * qualora il proxy sia su un relay secondario e ci sia la rielezione del big boss.
+	 * rihciama il metodo omonimo del bufferManager per reimpostare le soglie a quelle di
+	 * funzionamento normale.
+	 */
+	
+	public void restrictNormalBuffer(){
+		this.buffer.restrictNormalBuffer();
+	}
+	
 	/*
 	 * ***************************************************************
 	 * *******************GETTERS&SETTERS*****************************
@@ -1159,10 +1175,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			}
 			System.err.println("addDestination eseguita su "+clientAddress+":"+this.clientStreamPort);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1193,10 +1209,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
 			
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -1221,13 +1237,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					muxTh = new MuseMultiplexerThread(mux, b,null,5);
 					muxTh.setTimeToWait(SessionConfiguration.TTW-48);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 				//imposto il datasource
 				rtpSender.sendData(mux.getDataOutput());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -1255,13 +1271,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					muxThR = new MuseMultiplexerThread(mux, b,null,5);
 					muxThR.setTimeToWait(SessionConfiguration.TTW-48);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 				//imposto il datasource
 				rtpSender.sendData(mux.getDataOutput());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -1298,7 +1314,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		//	muxTh = new MultiplexerThreadEV(rtpMux, buffer.getRecoveryBuffer(), null , this.clientAddress);
 			rtpSender.sendData(rtpMux.getDataOutput());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -1339,7 +1355,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			proxyCM.sendToServer(reqFile);	
 			//this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, Parameters.TIMEOUT_ACK_FORWARD);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -1353,7 +1369,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} 
 	}
@@ -1375,10 +1391,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			System.out.println("StartTX mandato al server");
 			this.serverStopped = false;
 		} catch (UnknownHostException e) {System.err.println("ERROER MANDARE STARTX SERVER");
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {System.err.println("ERROER MANDARE STARTX SERVER");
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1391,10 +1407,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			this.serverStopped = false;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1408,10 +1424,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			proxyCM.sendToServer(redirect);
 			//this.serverStopped = false;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-		// TODO Auto-generated catch block
+		// Auto-generated catch block
 			e.printStackTrace();
 		}
 		*/
@@ -1427,10 +1443,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			proxyCM.sendToServer(stopTX);
 			this.serverStopped = true;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1442,10 +1458,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			proxyCM.sendToServer(stopTX);
 			this.serverStopped = true;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1457,10 +1473,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			DatagramPacket ackClientReq = RelayMessageFactory.buildAckClientReq(0, PortConfiguration.CLIENT_PORT_SESSION_IN,InetAddress.getByName(this.clientAddress), this.outStreamPort, this.proxyStreamingCtrlPort);
 			proxyCM.sendTo(ackClientReq);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1482,10 +1498,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //			DatagramPacket serverUnreach = RelayMessageFactory.buildServerUnreacheable(0, InetAddress.getByName(this.clientAddress),PortConfiguration.CLIENT_PORT_SESSION_IN);
 //			proxyCM.sendTo(serverUnreach);
 //		} catch (UnknownHostException e) {
-//			// TODO Auto-generated catch block
+//			// Auto-generated catch block
 //			e.printStackTrace();
 //		} catch (IOException e) {
-//			// TODO Auto-generated catch block
+//			// Auto-generated catch block
 //			e.printStackTrace();
 //		}		
 	}
@@ -1496,10 +1512,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN);
 //			proxyCM.sendTo(leave);
 //		} catch (UnknownHostException e) {
-//			// TODO Auto-generated catch block
+//			// Auto-generated catch block
 //			e.printStackTrace();
 //		} catch (IOException e) {
-//			// TODO Auto-generated catch block
+//			// Auto-generated catch block
 //			e.printStackTrace();
 //		}		
 	}
