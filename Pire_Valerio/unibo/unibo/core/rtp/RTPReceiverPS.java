@@ -104,7 +104,12 @@ public class RTPReceiverPS implements ReceiveStreamListener
 	* @param local indirizzo IP locale
 	* @throws IOException se l'inizializzazione fallisce
 	*/
-		public RTPReceiverPS(int localPort, InetAddress local, InetAddress source) throws IOException
+	
+	/*
+	 * da chiedere: perchè non passo anche una sourcePort? qui sembra cablata a 20000 e non si capisce perchè funzioni
+	 * da server a bigboss.
+	 */
+	public RTPReceiverPS(int localPort, InetAddress local, InetAddress source) throws IOException
 		{
 			bufferReady=false;
 			dataSync=new Object();
