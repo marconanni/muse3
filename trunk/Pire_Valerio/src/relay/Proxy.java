@@ -1205,6 +1205,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			//this.rtpReceptionMan.initRecoveryConnection(senderPort, senderAddress);
 			
 			//rtpMux = new RTPMultiplexer(this.rtpReceptionMan.getNormalTracksFormat());
+			
+			System.out.println("Init Recovery Sessione controllare costruttore RTPSENDERPS");
+			// TODO Init Recovery Sessione controllare costruttore RTPSENDERPS
 			this.rtpSender = new RTPSenderPS(outStreamPort);
 			rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
 			
