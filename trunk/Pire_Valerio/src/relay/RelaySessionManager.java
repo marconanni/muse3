@@ -494,7 +494,7 @@ public class RelaySessionManager implements Observer{
 			// il metodo getProxyInfo restituisce una tabella che ha per ogni chiave ( l'ip del client) la porta sulla
 			//quale ridirigere il flusso.
 			
-//			this.changeProxySession(messageReader.getProxyInfo()); //X MARCO!!! QUESTO L'HO COMMENTATO PER FARE LE PROVE, PERCHÈ MI DAVA ERRORE!!
+			this.changeProxySession(messageReader.getProxyInfo()); 
 		}
 		
 		// TODO arrivo messaggio SESSION_INFO da parte del vecchio relay
@@ -528,7 +528,7 @@ public class RelaySessionManager implements Observer{
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
 			 // creo le sessioni ggio dal messa attualmente per� non ci sono i proxy, li metto con il 
 			//metodo
-//			this.sessions = messageReader.getSessions();//X MARCO!!! QUESTO L'HO COMMENTATO PER FARE LE PROVE, PERCHÈ MI DAVA ERRORE!!
+			this.sessions = messageReader.getSessions();//X MARCO!!! QUESTO L'HO COMMENTATO PER FARE LE PROVE, PERCHÈ MI DAVA ERRORE!!
 			String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte di recovery dei relay sostituivi sulle quali ridirigere le varie sessioni
 			try {
 				this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
