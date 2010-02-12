@@ -297,7 +297,7 @@ public class RelaySessionManager implements Observer{
 			this.event = (String)arg;
 			
 			// TODO "end of media" un proxy mi comunica che ha finito
-			if(this.event.equals("End_Of_Media") && status.equals(SessionManagerStatus.Active) && (this.isRelay()&&this.isBigBoss()))
+			if(this.event.equals("End_Of_Media") && status.equals(SessionManagerStatus.Active) && (this.isRelay()||this.isBigBoss()))
 			{
 				/*
 				 * fine di una canzone  
