@@ -281,11 +281,10 @@ public class RelayMessageFactory {
 			DataOutputStream doStream = new DataOutputStream(boStream);
 			String content = null;
 			//String content = sequenceNumber+"_"+Parameters.FORWARD_REQ_LIST+"_"+Parameters.BIG_BOSS_SESSION_AD_HOC_PORT_IN+"_"+relayAddress+"_"+relayPort+"_"+clientAddress+"_"+clientPort;
-			if(relayAddress==null)
-				content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_LIST+"_"+clientAddress;
-			else
+//			if(relayAddress==null)
+//				content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_LIST+"_"+clientAddress;
+//			else
 				content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_LIST+"_"+relayAddress+"_"+clientAddress;
-			System.err.println("messaggio inviato dal relay al bigboss "+content);
 			doStream.writeUTF(content);
 			doStream.flush();
 			byte[] data = boStream.toByteArray();
