@@ -365,18 +365,18 @@ public class RelayMessageFactory {
 		 * @return
 		 * @throws IOException
 		 */
-		static public DatagramPacket buildForwardReqFile(int sequenceNumber, String clientAddr, String filename, int controlProxyPort,int proxyStreamingInPort, InetAddress serveraddr, int serverport) throws IOException {
-
-			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-			DataOutputStream doStream = new DataOutputStream(boStream);
-			String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_FILE+"_"+clientAddr+"_"+filename+"_"+controlProxyPort+"_"+proxyStreamingInPort;
-			doStream.writeUTF(content);
-			doStream.flush();
-			byte[] data = boStream.toByteArray();
-
-			return new DatagramPacket(data, data.length, serveraddr, serverport);
-
-		}
+//		static public DatagramPacket buildForwardReqFile(int sequenceNumber, String clientAddr, String filename, int controlProxyPort,int proxyStreamingInPort, InetAddress serveraddr, int serverport) throws IOException {
+//
+//			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+//			DataOutputStream doStream = new DataOutputStream(boStream);
+//			String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_REQ_FILE+"_"+clientAddr+"_"+filename+"_"+controlProxyPort+"_"+proxyStreamingInPort;
+//			doStream.writeUTF(content);
+//			doStream.flush();
+//			byte[] data = boStream.toByteArray();
+//
+//			return new DatagramPacket(data, data.length, serveraddr, serverport);
+//
+//		}
 		
 		/**
 		 * Pacchetto di richiesta di inizio della trasmissione o ripresa flusso di streaming verso il server
