@@ -24,18 +24,8 @@ import relay.RelaySessionManager;
 
 import relay.connection.ProxyCM;
 import relay.connection.RelayConnectionFactory;
-import relay.gui.ProxyFrame;
-import relay.gui.ProxyFrameController;
 
-import unibo.core.BufferEmptyEvent;
-import unibo.core.BufferEmptyListener;
-import unibo.core.BufferFullEvent;
-import unibo.core.BufferFullListener;
-import unibo.core.CircularBuffer;
-import unibo.core.multiplexer.RTPMultiplexer;
-import unibo.core.rtp.RTPSenderPS;
-import unibo.core.thread.MultiplexerThreadPS;
-import unibo.core.thread.MuseMultiplexerThread;
+
 
 import debug.*;
 
@@ -102,15 +92,6 @@ public class DummyDummyProxy extends Observable implements Observer{
 	//componenti:
 	protected ProxyCM proxyCM;
 	
-	
-	
-	
-	
-
-	
-
-	
-	
 	//classi di utilita':
 	protected RelayMessageReader msgReader;
 	protected DebugConsole consolle;
@@ -162,14 +143,14 @@ public class DummyDummyProxy extends Observable implements Observer{
 		this.streamingServerAddress= streamingServerAddress;
 		this.servingClient=servingClient;
 		this.determinaPorteSessione(this.servingClient, this.streamingServerAddress); // determino le porte su cui mandare i messaggi di sessione ( v doc metodo)
-		System.out.println("Inizializzazione del proxy in corso...");
+		consolle.debugMessage("Inizializzazione del proxy in corso...");
 		final InetAddress oldProxyAddress = recoverySenderAddress;
 		this.msgReader = new RelayMessageReader();
 		this.consolle= new DebugConsole();
 		
 		//proxy connection manager, e' osservato da this
 		// TODO sistema la parte di connectionManager.
-		this.proxyCM = RelayConnectionFactory.getProxyConnectionManager(this, this.proxyStreamingCtrlPort);
+		this.proxyCM = RelayConnectionFactory.getProxyConnectionManager(this);
 		this.proxyCM.start();
 		
 		
@@ -239,14 +220,14 @@ public class DummyDummyProxy extends Observable implements Observer{
 			 */
 			
 //			if (debug)
-//				System.out.println("Proxy: evento:" + arg);
+//				consolle.debugMessage("Proxy: evento:" + arg);
 //			
 //			if (event.equals("TIMEOUTSESSIONINTERRUPTED"))
 //			{
 //				this.endProxy();
 //			}
 //			if (event.equals("TIMEOUTACKFORWARD") && this.state == ProxyState.waitingServerRes){
-//				System.out.println("TimeoutAckFroward scaduto...");
+//				consolle.debugMessage("TimeoutAckFroward scaduto...");
 //				/**
 //				 * TODO: stampe sulla relativa intefaccia grafica
 //				 */
@@ -267,7 +248,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 			this.msg = (DatagramPacket) arg;
 			
 			if (debug)
-				System.out.println("Proxy: evento:" + arg);
+				consolle.debugMessage("Proxy: evento:" + arg);
 			
 			//leggo il messaggio:
 			
@@ -302,7 +283,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 				
 				this.setStreamingServerAddress(futureStreamingAddress);
 				
-				System.out.println("Proxy: ricevuto Leave dal vecchio Big Boss, rimpicciolisco il buffer: il nuovo streamingServer sarà "+ this.streamingServerAddress);
+				consolle.debugMessage("Proxy: ricevuto Leave dal vecchio Big Boss, rimpicciolisco il buffer: il nuovo streamingServer sarà "+ this.streamingServerAddress);
 				
 				
 				this.restrictNormalBuffer();
@@ -331,7 +312,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 				 * il flusso in uscita
 				 */
 				String newClientAddress = ((DatagramPacket)arg).getAddress().getHostAddress();
-				System.out.println("Arrivato redirect ridirigo il flusso in uscita da "+ clientAddress + " a "+ newClientAddress);
+				consolle.debugMessage("Arrivato redirect ridirigo il flusso in uscita da "+ clientAddress + " a "+ newClientAddress);
 				this.startHandoff(clientStreamPort, newClientAddress);
 				
 				
@@ -379,7 +360,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 		
 		
 		
-		System.out.println("Proxy: il sessionManager mi ha detto di ridirigere il flusso verso "+ newClientAddress +" la porta è sempre la "+ portStremInNewProxy);
+		consolle.debugMessage("Proxy: il sessionManager mi ha detto di ridirigere il flusso verso "+ newClientAddress +" la porta è sempre la "+ portStremInNewProxy);
 
 		return this.startHandoff(clientAddress,portStremInNewProxy, newClientAddress, true);
 	
@@ -397,8 +378,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 	
 	public boolean redirectOutputStream(String oldClientAddress,int portStremInNewProxy, String newClientAddr){
 		
-		System.out.println("Proxy: il ridirigo il flusso da "+ oldClientAddress+ " a "+ newClientAddr  +" la porta è sempre la "+ portStremInNewProxy);
-		
+		consolle.debugMessage("Proxy: il ridirigo il flusso da "+ oldClientAddress+ " a "+ newClientAddr  +" la porta è sempre la "+ portStremInNewProxy);
 		return this.startHandoff(oldClientAddress,portStremInNewProxy, newClientAddr, false);
 	}
 	
@@ -420,11 +400,6 @@ public class DummyDummyProxy extends Observable implements Observer{
 	protected boolean startHandoff(String oldClientAddress, int portStremInNewClient, String newClientAddress, boolean alsoSendRedirectToclient){
 		
 			
-		
-		
-		
-			
-			
 			if (alsoSendRedirectToclient == true){
 			//invio un messaggio di Leave al client
 					sendLeaveMsgToClient();		 //informo il client che mi sto staccando
@@ -434,23 +409,15 @@ public class DummyDummyProxy extends Observable implements Observer{
 			this.clientAddress= newClientAddress;
 			this.clientStreamPort= portStremInNewClient;
 			
-				
- 
-				
-			
+		
 			return true;
 			
-//		}else return false;
+
 		
 		
 		
 	}
-	
-	
-	
-	
-	
-	
+
 	
 	
 	/*
@@ -500,26 +467,10 @@ public class DummyDummyProxy extends Observable implements Observer{
 		return inStreamPort;
 	}
 	
-	//@ TODO commentare i metodi per preparare i messaggi.
-
-	protected void sendStartTXToServer(){
-		try {
-			//Creo un messaggio START_TX e lo invio al server
-			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(this.streamingServerAddress), this.streamingServerCtrlPort);
-			proxyCM.sendToServer(startTX);
-			
-			this.serverStopped = false;
-		} catch (UnknownHostException e) {
-			
-			e.printStackTrace();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
-	}
+	
 
 	
-	
+	// TODO send redirectToServer.
 	protected void sendRedirectToServer(){
 		/*
 		 *  il server potrebbe anche essere un proxy sul big boss; ma il metodo non d� problemi
@@ -614,7 +565,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 	 * relay secondario deve ingrandire i propri bufffer a causa della rielezione del big boss
 	 */
 	public void enlargeNormalBuffer (){
-		System.out.println("Proxy: se fossiun vero proxy ingrandirei il buffer, ma sono un dummy e nonce l'ho!");
+		consolle.debugMessage("Proxy: se fossi un vero proxy ingrandirei il buffer, ma sono un dummy e nonce l'ho!");
 		
 	}
 	
@@ -625,7 +576,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 	 */
 	
 	public void restrictNormalBuffer(){
-		System.out.println("Proxy: se fossiun vero proxy rimpicciolirei il buffer, ma sono un dummy e nonce l'ho!");
+		consolle.debugMessage("Proxy: se fossi un vero proxy rimpicciolirei il buffer, ma sono un dummy e nonce l'ho!");
 	}
 	
 	
@@ -684,6 +635,9 @@ public class DummyDummyProxy extends Observable implements Observer{
 }
 
 /*
+ * Gli stati sono quelli del proxy vero: qui non li ho eliminati perchè inparte vengono ancora usati
+ * 
+ * 
  * Marco: guida agli stati: è imprecisa, visto che non ho documentazione, anzi potrebbe addirittura esser sbagliata: ma tanto vale provarci!
  * 
  * FirstReceivingromServer: qui sono all'inizio della trasmissione: il client mi ha mandato il primo startTX, e io ho fatto lo stesso con

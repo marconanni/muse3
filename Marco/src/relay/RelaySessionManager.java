@@ -388,7 +388,6 @@ public class RelaySessionManager implements Observer{
 			 *	e mi metto in attesa delle informazioni sulle sessioni
 			 *
 			 */
-			// ******E' UN GRAN CASINO! RIPENSA TUTTO CON CALMA!*****//
 			// TODO "NEW_RELAY " l'elctionManager mi comunica chi ha vinto l'elezione
 			if(this.event.contains("NEW_RELAY")) 
 				/*
@@ -575,8 +574,7 @@ public class RelaySessionManager implements Observer{
 				}
 			}
 			// TODO ELECTION_REQUEST_RECEIVED si inizia la fase di rielezione
-			if(this.event.equals("ELECTION_REQUEST_RECEIVED")&&isRelay())// Marco aggiungi condizione sono il relay secondario e non il big boss
-			{
+			if(this.event.equals("ELECTION_REQUEST_RECEIVED")&&isRelay())			{
 				/*
 				 * Marco:entri in questo blocco quando parte la fase di rielezione del BigBoss e il nodo � un relay secondario
 				 * servito dal big boss.
