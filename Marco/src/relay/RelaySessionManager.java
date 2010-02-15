@@ -71,6 +71,14 @@ public class RelaySessionManager implements Observer{
 	private TimeOutSessionRequest toSessionRequest;  //Marco: questi qui sono i vari timeout
 	private TimeOutAckSessionInfo toAckSessionInfo;
 	private TimeOutSessionInfo toSessionInfo;
+	
+	/*
+	 * Per la natura dei protocollifinora creati il sessionmanager non comunica mai dirttamente con la rete sovrastante:
+	 * quando arrivano i messaggi di rielezione dal server o dal big boss, questi vengono intercettati dall'election manager,
+	 * mentre sono i proxy che inviano al server i messaggi di forwardrequestfile e di redirect. ne segue che
+	 * per la connessione bsta un RelayCm che invia invia e riceve messaggi sulla sola rete inferiore 
+	 * ossia quella sulla quale il relay è il nodo id rierimento.
+	 */
 	private RelayCM sessionCM; // Marco: è chi si occupa di spedire  e ricevere i messaggi.
 	private RelayMessageReader messageReader;
 	private DebugConsole consolle;
@@ -89,10 +97,11 @@ public class RelaySessionManager implements Observer{
 	{
 		this.numberOfSession = 0;
 		this.sessions= new Hashtable<String, Session>();
+		
 		this.sessionCM = RelayConnectionFactory.getSessionConnectionManager(this);
 		this.messageReader = new RelayMessageReader();
 		this.sessionCM.start();
-		this.consolle = new DebugConsolle();
+		this.consolle = new DebugConsole();
 		this.consolle.setTitle("RELAY SESSION MANAGER DEBUG CONSOLLE");
 		
 	}

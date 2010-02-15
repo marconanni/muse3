@@ -51,7 +51,8 @@ public class RelayConnectionFactory {
 	 * @return un istanza di ProxyCM
 	 */
 	public static ProxyCM getProxyConnectionManager(Observer obser){
-		return new ProxyCM(false, rpm.getLocalClusterAddress(), rpm.getFirstFreeControlAdHocInPort(),rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalClusterHeadAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
+	
+		return new ProxyCM(rpm.getLocalClusterAddress(), rpm.getFirstFreeControlAdHocInPort(),rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalClusterHeadAddress(), rpm.getFirstFreeControlManagedOutPort(),rpm.getFirstFreeControlManagedInPort(), obser);
 	}
 	
 	/**Metoto statico per ottenere un'istanza di ProxyCM quando il Proxy viene creato per accogliere una sessione RTP esistente
@@ -60,8 +61,8 @@ public class RelayConnectionFactory {
 	 */
 //	public static ProxyCM getProxyConnectionManager(Observer obser, int oldProxyCtrlPortIn){
 //		rpm.setRangeAdHocPortInControlProxy(oldProxyCtrlPortIn);
-//		return new ProxyCM(true, rpm.getLocalAdHocHostAddress().getHostAddress(), oldProxyCtrlPortIn ,rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
-//	}
+//	return new ProxyCM(true, rpm.getLocalAdHocHostAddress().getHostAddress(), oldProxyCtrlPortIn ,rpm.getFirstFreeControlAdHocOutPort(),rpm.getLocalManagedHostAddress().getHostAddress(), rpm.getFirstFreeControlManagedOutPort(), obser);
+//}
 	/**Metoto statico per ottenere un'istanza di RelaySessionCM 
 	 * possibilità di ricevere e mandare messaggi sulla rete ad hoc e mandare messaggi sulla rete managed 
 	 * @param obser l'Observer che deve essere avvertito dell'arrivo di un messaggio dal RelaySessionCM
