@@ -22,7 +22,11 @@ public class NetConfiguration {
 	 * */	
 	/** SERVER e BIGBOSS*/
 	public static final String SERVER_ADDRESS = "192.168.186.230";					//indirizzo IP del SERVE
+	public static final String BIGBOSS_AD_HOC_ADDRESS="127.0.0.1";
 	public static final String NAME_OF_SERVER_INTERFACE = "eth0";					//Nome dell'interfaccia con cui il Server si affaccia sulla rete Managed (cablato all'AP) 
+	
+	
+	
 	
 	//nel caso di big boss questi parametri sono uguali ai parametri del cluster head
 	public static final String NAME_OF_RELAY_MANAGED_NETWORK = "ALMAWIFI";				//Nome della rete Managed
