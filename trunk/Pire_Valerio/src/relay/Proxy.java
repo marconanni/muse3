@@ -1353,7 +1353,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			//Creo un messaggio FORWARD_REQ_FILE e lo invio al server
 //			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, Parameters.RELAY_SESSION_AD_HOC_PORT_IN, this.inStreamPort, this.clientAddress, Parameters.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(Parameters.SERVER_ADDRESS), Parameters.SERVER_SESSION_PORT_IN);
 //			(0, clientAddress, filename, proxyCM.getLocalManagedInputOutputPort(),this.inStreamPort, InetAddress.getByName(Parameters.SERVER_ADDRESS),Parameters.SERVER_SESSION_PORT_IN);
-			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, PortConfiguration.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+//			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, PortConfiguration.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
 			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+PortConfiguration.CLIENT_PORT_SESSION_IN+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
 			//this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, Parameters.TIMEOUT_ACK_FORWARD);
@@ -1492,7 +1493,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendAckFileToRelay(String clientAddr,int clientControlPort, int clientStreamPort){//messaggio che il bigboss invia al relay
 		try{
 			this.proxyStreamingCtrlPort=proxyCM.getLocalAdHocInputPort();
-			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,msgReader.getRelayControlPort(),InetAddress.getByName(msgReader.getRelayAddress()),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientControlPort,clientStreamPort);
+//			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,msgReader.getRelayControlPort(),InetAddress.getByName(msgReader.getRelayAddress()),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientControlPort,clientStreamPort);
+			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,msgReader.getRelayControlPort(),InetAddress.getByName(msgReader.getRelayAddress()),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientStreamPort);
 			proxyCM.sendTo(ackRelayReq);
 		}catch (Exception e) {
 			// TODO: handle exception

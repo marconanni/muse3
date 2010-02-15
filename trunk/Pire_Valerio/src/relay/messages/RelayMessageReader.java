@@ -139,14 +139,14 @@ public class RelayMessageReader {
 		}
 		if(code == MessageCodeConfiguration.ACK_REQUEST_FILE){
 			clientAddress=st.nextToken();
-			clientControlPort=Integer.parseInt(st.nextToken());
+//			clientControlPort=Integer.parseInt(st.nextToken());
 			clientStreamingPort=Integer.parseInt(st.nextToken());
 			serverStreamingControlPort=Integer.parseInt(st.nextToken());
 			serverStreamingPort=Integer.parseInt(st.nextToken());
 		}
 		if(code==MessageCodeConfiguration.FORWARD_ACK_REQ){
 			clientAddress=st.nextToken();
-			clientControlPort=Integer.parseInt(st.nextToken());
+//			clientControlPort=Integer.parseInt(st.nextToken());
 			clientStreamingPort=Integer.parseInt(st.nextToken());
 			relayAddress=st.nextToken();
 			relayControlPort=Integer.parseInt(st.nextToken());
