@@ -90,7 +90,7 @@ public class ServerMessageReader {
 			bigbossPort=Integer.parseInt(st.nextToken());
 			bigbossStreamingPort=Integer.parseInt(st.nextToken());
 			clientAddress=st.nextToken();
-			clientPort=Integer.parseInt(st.nextToken());
+//			clientPort=Integer.parseInt(st.nextToken());
 			clientRTPPort=Integer.parseInt(st.nextToken());
 		}
 		if(code==MessageCodeConfiguration.FORWARD_REQ_LIST){
@@ -173,10 +173,6 @@ public class ServerMessageReader {
 
 	public static int getProxyReceivingStreamPort() {
 		return proxyReceivingStreamPort;
-	}
-
-	public static int getClientPort(){
-		return clientPort;
 	}
 	
 	public static int getRTPClientPort(){

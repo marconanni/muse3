@@ -204,12 +204,12 @@ public class ServerSessionManager implements Observer{
 				int portaRTPSuCuiInviare=ServerMessageReader.getBigbossStreamingPort();
 				DatagramPacket confirm;
 			
-				System.out.println("porta su cui manderò il flusso rtp "+ServerMessageReader.getRTPClientPort()+" porta su cui manderò la conferma di avvenuta ricezione al client "+ServerMessageReader.getClientPort());
-				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"porta su cui manderò il flusso rtp "+ServerMessageReader.getRTPClientPort()+" porta su cui manderò la conferma di avvenuta ricezione al client "+ServerMessageReader.getClientPort());
+				System.out.println("porta su cui manderò il flusso rtp "+ServerMessageReader.getRTPClientPort());
+				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"porta su cui manderò il flusso rtp "+ServerMessageReader.getRTPClientPort());
 				StreamingServer sender = null;
 				try {
 					System.err.println("INDIRIZZO su cui sparo flusso : "+ServerMessageReader.getPacketAddress().getHostAddress());
-					sender = new StreamingServer(fileRichiesto, ServerMessageReader.getPacketAddress().getHostAddress(),ServerMessageReader.getClientPort(), portaRTPSuCuiInviare, this,consolle);
+					sender = new StreamingServer(fileRichiesto, ServerMessageReader.getPacketAddress().getHostAddress(),ServerMessageReader.getBigbossControlPort(), portaRTPSuCuiInviare, this,consolle);
 					//StreamingServer sender = new StreamingServer(fileRichiesto,this.message.getAddress().toString(),ServerMessageReader.getClientPort(), portaRTPSuCuiInviare, this,consolle);
 					ssReferences.put(ServerMessageReader.getClientAddress(), sender);
 					numberOfSession++;
@@ -225,7 +225,8 @@ public class ServerSessionManager implements Observer{
 					//confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), ServerMessageReader.getBigbossPort(), ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(), ServerMessageReader.getClientRTPPort());
 					//da sistemare, non capisco perchè la risposta la devo mandare sulla porta 9000 e non su quella di bigboss
 					//forse perchè il proxy crea una porpia porta, ma non è quella che passo al server col messaggio request file?
-					confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(), ServerMessageReader.getClientRTPPort(), sender.getTransmissionPort(), sender.getTransmissionControlPort());
+//					confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(), ServerMessageReader.getClientRTPPort(), sender.getTransmissionPort(), sender.getTransmissionControlPort());
+					confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), ServerMessageReader.getBigbossControlPort(),ServerMessageReader.getClientAddress(), ServerMessageReader.getClientRTPPort(), sender.getTransmissionPort(), sender.getTransmissionControlPort());
 					manager.sendPacket(confirm);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -257,7 +258,8 @@ public class ServerSessionManager implements Observer{
 					e.printStackTrace();
 				}
 				try {
-					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getRelayStreamingInPort(),ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(),ServerMessageReader.getClientRTPPort(),sS.getTransmissionPort(), sS.getTransmissionControlPort());
+//					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getRelayStreamingInPort(),ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(),ServerMessageReader.getClientRTPPort(),sS.getTransmissionPort(), sS.getTransmissionControlPort());
+					confirm = ServerMessageFactory.buildForwardConfirmRequest(msgIdx++, this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getRelayAddress(), ServerMessageReader.getRelayControlPort(), ServerMessageReader.getRelayStreamingInPort(),ServerMessageReader.getClientAddress(), ServerMessageReader.getClientRTPPort(),sS.getTransmissionPort(), sS.getTransmissionControlPort());
 					manager.sendPacket(confirm);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

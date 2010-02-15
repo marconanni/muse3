@@ -327,10 +327,12 @@ public class RelayMessageFactory {
 		}
 		
 		//Valerio: messaggio richiesta file che bigboss invia al server in caso di catena: client->bigboss->server
-		static public DatagramPacket buildReqFile(int sequenceNumber, String filename, int controlBigBossPort,int bigbossStreamingInPort, String clientAddress, int controlPortClient, int streamingPortClient,InetAddress serveraddr, int serverport) throws IOException {
+//		static public DatagramPacket buildReqFile(int sequenceNumber, String filename, int controlBigBossPort,int bigbossStreamingInPort, String clientAddress, int controlPortClient, int streamingPortClient,InetAddress serveraddr, int serverport) throws IOException {
+		static public DatagramPacket buildReqFile(int sequenceNumber, String filename, int controlBigBossPort,int bigbossStreamingInPort, String clientAddress, int streamingPortClient,InetAddress serveraddr, int serverport) throws IOException {
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 			DataOutputStream doStream = new DataOutputStream(boStream);
-			String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_FILE+"_"+filename+"_"+controlBigBossPort+"_"+bigbossStreamingInPort+"_"+clientAddress+"_"+controlPortClient+"_"+streamingPortClient;
+//			String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_FILE+"_"+filename+"_"+controlBigBossPort+"_"+bigbossStreamingInPort+"_"+clientAddress+"_"+controlPortClient+"_"+streamingPortClient;
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.REQUEST_FILE+"_"+filename+"_"+controlBigBossPort+"_"+bigbossStreamingInPort+"_"+clientAddress+"_"+streamingPortClient;
 			doStream.writeUTF(content);
 			doStream.flush();
 			byte[] data = boStream.toByteArray();
@@ -431,14 +433,16 @@ public class RelayMessageFactory {
 			return new DatagramPacket(data, data.length, addr, port);
 		}
 		
-		static public DatagramPacket buildForwardAckReq(int sequenceNumber, int port,InetAddress addr, int bigBossOutputStream, int bigBossControlStream, String clientAddr,int clientControlPort, int clientStreamPort)throws IOException{
+//		static public DatagramPacket buildForwardAckReq(int sequenceNumber, int port,InetAddress addr, int bigBossOutputStream, int bigBossControlStream, String clientAddr,int clientControlPort, int clientStreamPort)throws IOException{
+		static public DatagramPacket buildForwardAckReq(int sequenceNumber, int port,InetAddress addr, int bigBossOutputStream, int bigBossControlStream, String clientAddr,int clientStreamPort)throws IOException{
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 			DataOutputStream doStream = new DataOutputStream(boStream);
 			//i messaggi di questo tipo arrivano anche dal server al bigboss
 			//in questo caso è un messaggio che va dal big boss al relay, 
 			//ma essendo dello stesso tipo il messagereader è uguale
 			//quindi i campi che servono da server->bigboss e che non servono da bigboss->relay li riempo di cose inutili e poi non li andrò ad usare
-			String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_ACK_REQ+"_"+clientAddr+"_"+clientControlPort+"_"+clientStreamPort+"_"+null+"_"+-1+"_"+-1+"_"+bigBossControlStream+"_"+bigBossOutputStream;
+//			String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_ACK_REQ+"_"+clientAddr+"_"+clientControlPort+"_"+clientStreamPort+"_"+null+"_"+-1+"_"+-1+"_"+bigBossControlStream+"_"+bigBossOutputStream;
+			String content = sequenceNumber+"_"+MessageCodeConfiguration.FORWARD_ACK_REQ+"_"+clientAddr+"_"+clientStreamPort+"_"+null+"_"+-1+"_"+-1+"_"+bigBossControlStream+"_"+bigBossOutputStream;
 			doStream.writeUTF(content);
 			doStream.flush();
 			byte[] data = boStream.toByteArray();

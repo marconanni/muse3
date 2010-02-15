@@ -44,7 +44,7 @@ public class ServerMessageFactory {
 	  static protected DatagramPacket buildFilesListMessage(int sequenceNumber, InetAddress addr, int port, String files) throws IOException {
 		    ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 	    DataOutputStream doStream = new DataOutputStream(boStream);
-	    String content = sequenceNumber+"_"+MessageCodeConfiguration.LIST_RESPONSE+"_"+files+"_"+ServerMessageReader.getClientAddress()+"_"+ServerMessageReader.getClientPort();
+	    String content = sequenceNumber+"_"+MessageCodeConfiguration.LIST_RESPONSE+"_"+files+"_"+ServerMessageReader.getClientAddress();
 	    doStream.writeUTF(content);
 	    doStream.flush();
 	    byte[] data = boStream.toByteArray();
@@ -84,11 +84,12 @@ public class ServerMessageFactory {
 	    
 	  }
 	  */
-	  static protected DatagramPacket buildConfirmRequest(int sequenceNum, InetAddress addr, int port, String clientAddress, int clientControlPort, int clientStreamingPort, int serverStreamingPort, int serverStreamingControlPort) throws IOException {
-		    
+//	  static protected DatagramPacket buildConfirmRequest(int sequenceNum, InetAddress addr, int port, String clientAddress, int clientControlPort, int clientStreamingPort, int serverStreamingPort, int serverStreamingControlPort) throws IOException {
+	  static protected DatagramPacket buildConfirmRequest(int sequenceNum, InetAddress addr, int port, String clientAddress, int clientStreamingPort, int serverStreamingPort, int serverStreamingControlPort) throws IOException {
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		    DataOutputStream doStream = new DataOutputStream(boStream);
-		    String content = sequenceNum+"_"+MessageCodeConfiguration.ACK_REQUEST_FILE+"_"+clientAddress+"_"+clientControlPort+"_"+clientStreamingPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
+//		    String content = sequenceNum+"_"+MessageCodeConfiguration.ACK_REQUEST_FILE+"_"+clientAddress+"_"+clientControlPort+"_"+clientStreamingPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
+		    String content = sequenceNum+"_"+MessageCodeConfiguration.ACK_REQUEST_FILE+"_"+clientAddress+"_"+clientStreamingPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
 		    doStream.writeUTF(content);
 		    doStream.flush();
 		    byte[] data = boStream.toByteArray();
@@ -97,12 +98,13 @@ public class ServerMessageFactory {
 		    
 		  }
 	  
-	  static protected DatagramPacket buildForwardConfirmRequest(int sequenceNum, InetAddress addr, int port, String relayAddress, int relayControlPort, int relayStreamPort,String clientAddress, int clientControlPort, int clientStreamPort,int serverStreamingPort, int serverStreamingControlPort) throws IOException {
-		    
+//	  static protected DatagramPacket buildForwardConfirmRequest(int sequenceNum, InetAddress addr, int port, String relayAddress, int relayControlPort, int relayStreamPort,String clientAddress, int clientControlPort, int clientStreamPort,int serverStreamingPort, int serverStreamingControlPort) throws IOException {
+	  static protected DatagramPacket buildForwardConfirmRequest(int sequenceNum, InetAddress addr, int port, String relayAddress, int relayControlPort, int relayStreamPort,String clientAddress, int clientStreamPort,int serverStreamingPort, int serverStreamingControlPort) throws IOException {
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		    DataOutputStream doStream = new DataOutputStream(boStream);
-		    String content = sequenceNum+"_"+MessageCodeConfiguration.FORWARD_ACK_REQ+"_"+clientAddress+"_"+clientControlPort+"_"+clientStreamPort+"_"+relayAddress+"_"+relayControlPort+"_"+relayStreamPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
-		    doStream.writeUTF(content);
+//		    String content = sequenceNum+"_"+MessageCodeConfiguration.FORWARD_ACK_REQ+"_"+clientAddress+"_"+clientControlPort+"_"+clientStreamPort+"_"+relayAddress+"_"+relayControlPort+"_"+relayStreamPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
+		    String content = sequenceNum+"_"+MessageCodeConfiguration.FORWARD_ACK_REQ+"_"+clientAddress+"_"+clientStreamPort+"_"+relayAddress+"_"+relayControlPort+"_"+relayStreamPort+"_"+serverStreamingControlPort+"_"+serverStreamingPort;
+			doStream.writeUTF(content);
 		    doStream.flush();
 		    byte[] data = boStream.toByteArray();
 		    return new DatagramPacket(data, data.length, addr, port);
