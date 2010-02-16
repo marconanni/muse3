@@ -27,23 +27,23 @@ public class RelayController {
 			setState(true);
 		}
 
-		sessionManager = RelaySessionManager.getInstance();
+		//sessionManager = RelaySessionManager.getInstance();
 		electionManager = RelayElectionManager.getInstance(type, state);//, sessionManager);
 		
 		//Valerio:qui dentro scrivo a mano i tre indirizzi che mi servono per un relay
-		electionManager.setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
-		electionManager.setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
+		//electionManager.setLocalClusterAddress(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+		//electionManager.setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 		/*
 		 * se il relay è il big boss l'indirizzo di chi gli è sopra è
 		 * quello del server, altrimenti è unrelay secondario e 
 		 * l'indirizzo di chi gli è sopra è quello del big boss.
 		 */
-		if (parameters.NetConfiguration.IMBIGBOSS)
-			electionManager.setConnectedClusterHeadAddress(parameters.NetConfiguration.SERVER_ADDRESS);
-		else	
-			electionManager.setConnectedClusterHeadAddress(parameters.NetConfiguration.BIGBOSS_AD_HOC_ADDRESS);
-		
-		sessionManager.setElectionManager(electionManager);
+//		if (parameters.NetConfiguration.IMBIGBOSS)
+//			electionManager.setConnectedClusterHeadAddress(parameters.NetConfiguration.SERVER_ADDRESS);
+//		else	
+//			electionManager.setConnectedClusterHeadAddress(parameters.NetConfiguration.BIGBOSS_AD_HOC_ADDRESS);
+//		
+//		sessionManager.setElectionManager(electionManager);
 		
 	}
 
