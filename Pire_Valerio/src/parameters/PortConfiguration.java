@@ -83,5 +83,19 @@ public class PortConfiguration {
 	 *  assegnabili ad un PROXY creato per gestire una sessione RTP */
 	public static final int PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL = 9000;
 	
+	
+	/**
+	 * Magheggi di marco:porta vsulla rete superiore verso la quale
+	 * un relay o big boss è in ascolto
+	 */
+	public static final int portInConnectedSession = 4012;
+	
+
+	/**
+	 * Magheggi di marco:porta vsulla rete superiore verso la quale
+	 * un relay o big boss inviano messaggi
+	 */
+	public static final int portOutConnectedSession = 4013;
+	
 
 }
