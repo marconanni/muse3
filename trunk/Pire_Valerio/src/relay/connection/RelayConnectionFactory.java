@@ -76,7 +76,7 @@ public class RelayConnectionFactory {
 	}
 	
 	public static RelayCM getClusterHeadSessionConnectionManager(Observer obser){
-		return new RelayCM("RelaySessionCM",rpm.getLocalClusterHeadAddress(),null,rpm.getPortInAdHocSession(),rpm.getPortOutAdHocSession(),obser,false);
+		return new RelayCM("RelaySessionCM",rpm.getLocalClusterHeadAddress(),null,rpm.getPortInConnectedSession(),rpm.getPortOutConnectedSession(),obser,false);
 	}
 	
 	

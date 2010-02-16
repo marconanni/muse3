@@ -343,6 +343,23 @@ public class RelayPortMapper {
 	public int getPortOutManagedSession() {
 		return portOutManagedSession;
 	}
+	
+	/**
+	 * Magheggi di marco:porta vsulla rete superiore verso la quale
+	 * un relay o big boss è in ascolto
+	 */
+	public int getPortInConnectedSession(){
+		return PortConfiguration.portInConnectedSession;
+	}
+	
+	/**
+	 * Magheggi di marco:porta vsulla rete superiore verso la quale
+	 * un relay o big boss inviano messaggi
+	 */
+	public int getPortOutConnectedSession(){
+		return PortConfiguration.portOutConnectedSession;
+	}
+	
 
 
 
