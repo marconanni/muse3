@@ -151,6 +151,7 @@ public class RelaySessionManager implements Observer{
 		this.sessionCMCluster.start();
 		this.sessionCMClusterHead.start();
 		this.consolle=new DebugConsole("RELAY SESSION MANAGER DEBUG CONSOLLE");
+		consolle.setTitle("SessionManager Debug Consolle");
 		
 		
 		
@@ -555,6 +556,8 @@ public class RelaySessionManager implements Observer{
 	if(arg instanceof String)
 	{
 		this.event = (String)arg;
+		
+		consolle.debugMessage(1, "Arrivato Evento Stringa : "+ event);
 		if(this.event.equals("End_Of_Media") && status.equals(RelaySessionStatus.ACTIVE_BIGBOSS))
 		{
 			/*
