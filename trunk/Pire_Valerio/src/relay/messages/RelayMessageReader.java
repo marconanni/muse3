@@ -110,6 +110,7 @@ public class RelayMessageReader {
 		}
 		
 		if(code==MessageCodeConfiguration.FORWARD_REQ_LIST){
+			relayAddress=st.nextToken();
 			clientAddress=st.nextToken();
 		}
 		

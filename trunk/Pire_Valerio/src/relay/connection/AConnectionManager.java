@@ -78,6 +78,7 @@ public class AConnectionManager {
 	 * @param dp DatagramPacket da inviare alla rete Ad-Hoc*/
 	public void sendTo(DatagramPacket dp){
 		try {
+			System.out.println("Socket:"+adHocOutputSocket.getLocalAddress()+":"+adHocOutputSocket.getLocalPort()+" mando a "+dp.getAddress()+":"+dp.getPort());
 			adHocOutputSocket.send(dp);
 		} catch (IOException e) {e.printStackTrace();}
 	}
