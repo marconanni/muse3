@@ -458,6 +458,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						
 
 			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes&&isBigBoss){
+				System.out.println("arrivato forward ack dal server");
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				this.serverStreamPort=msgReader.getServerStreamingPort();
@@ -1202,10 +1203,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			}
 			else{
 				rtpSender.addDestination(InetAddress.getByName(relayAddress), this.relayStreamingPort);
-				System.err.println("FATTA ADDDESTINATION SUL CLIENT: "+relayAddress+":"+relayStreamingPort);
+				System.err.println("FATTA ADDDESTINATION SUL RELAY: "+relayAddress+":"+relayStreamingPort);
 				
 			}
-			System.err.println("addDestination eseguita su "+clientAddress+":"+this.clientStreamPort);
 		} catch (UnknownHostException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
@@ -1524,9 +1524,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 
 	private void sendAckFileToRelay(String clientAddr,int clientControlPort, int clientStreamPort){//messaggio che il bigboss invia al relay
 		try{
+			System.out.println("Mando ACK FILE a :"+msgReader.getRelayAddress()+":"+msgReader.getRelayControlPort());
 			this.proxyStreamingCtrlPort=proxyCM.getLocalAdHocInputPort();
 //			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,msgReader.getRelayControlPort(),InetAddress.getByName(msgReader.getRelayAddress()),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientControlPort,clientStreamPort);
 			DatagramPacket ackRelayReq=RelayMessageFactory.buildForwardAckReq(0,msgReader.getRelayControlPort(),InetAddress.getByName(msgReader.getRelayAddress()),this.outStreamPort,this.proxyStreamingCtrlPort,clientAddr,clientStreamPort);
+			
 			proxyCM.sendTo(ackRelayReq);
 		}catch (Exception e) {
 			// TODO: handle exception
