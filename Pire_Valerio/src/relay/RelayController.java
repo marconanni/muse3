@@ -5,7 +5,7 @@ import parameters.NetConfiguration;
 public class RelayController {
 	
 	private RelayElectionManager electionManager  = null;
-	private RelaySessionManager sessionManager = null;
+	//private RelaySessionManager sessionManager = null;
 	private int type = 0;
 	private boolean state = false;
 	

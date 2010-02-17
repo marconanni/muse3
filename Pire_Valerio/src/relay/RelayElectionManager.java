@@ -227,10 +227,10 @@ public class RelayElectionManager extends Observable implements Observer{
 			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
 			getComClusterHeadManager().start();
 		}
-		if(isRELAY()){
-			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
-			getComClusterHeadManager().start();
-		}
+//		if(isRELAY()){
+//			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
+//			getComClusterHeadManager().start();
+//		}
 
 		//Se parto come Relay BIG BOSS
 		//WIFI Managed deve essere associata al AP e quindi connessa
