@@ -167,106 +167,106 @@ public class RelayElectionManager extends Observable implements Observer{
 	 * 
 	 */
 	private RelayElectionManager(int type, boolean state) throws Exception{
-		//setActualStatus(RelayStatus.OFF);
+		setActualStatus(RelayStatus.OFF);
 		setNodeType(type, state);
 		
-		//setConsoleElectionManager(new DebugConsole("RELAY ELECTION MANAGER"));
+		setConsoleElectionManager(new DebugConsole("RELAY ELECTION MANAGER"));
 			
 		//Controllo delle interfacce WIFI
-//		try {
-//			//CLUSTER HEAD
-//			//caso in cui sono nel cluster head (rete ad hoc principale)
-//			//devo avere il controllo della scheda di rete interfacciata alla rete Managed nei confronti del server
-//			//nodi bigboss o possibili nodi sostituti
-//			if((isBIGBOSS())||isPOSSIBLE_BIGBOSS()){
-//				
-//				setRelayClusterHeadWNICController(WNICFinder.getCurrentWNIC(
-//						NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE,
-//						NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK,
-//						0));
-//				
-//				setConsoleClusterHeadWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE));
-//				getRelayClusterHeadWNICController().setDebugConsole(getConsoleClusterHeadWifiInterface());
-//				getRelayClusterHeadWNICController().init();
-//			}
-//			
-//			//se invece in una delle reti cluster secondarie 
-//			//devo avere il controllo della scheda di rete interfacciata alla rete cluster head
-//			//per comunicare col BIGBOSS
-//			else{
-//				setRelayClusterHeadWNICController(WNICFinder.getCurrentWNIC(
-//					NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE,
-//					NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK,
-//					1));
-//				
-//				setConsoleClusterHeadWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE));
-//				getRelayClusterHeadWNICController().setDebugConsole(getConsoleClusterHeadWifiInterface());
-//				getRelayClusterHeadWNICController().init();
-//			}
-//			
-//			//CLUSTER (RETE LOCALE)
-//			setRelayClusterWNICController(WNICFinder.getCurrentWNIC(
-//					NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE,
-//					NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK,
-//					1));
-//			
-//			setConsoleClusterWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE));
-//			getRelayClusterWNICController().setDebugConsole(getConsoleClusterWifiInterface());
-//			getRelayClusterWNICController().init();
-//			
-//		} catch (WNICException e) {System.err.println("ERRORE:"+e.getMessage());System.exit(1);}
-//		
-//		//comunicazione all'interno del prorpio CLUSTER
-//		setComClusterManager(RelayConnectionFactory.getClusterElectionConnectionManager(this,true));
-//		getComClusterManager().start();
-//		
-//		//comunicazione col CLUSTER HEAD
-//		//Il big boss non comunica col server e quindi non serve un connection Manager col server
-//		//Ogni relay di ogni cluster comunica col big boss, ovvero il relay del cluster head
-//		if(isBIGBOSS() || isRELAY()){
-//			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
-//			getComClusterHeadManager().start();
-//		}
-//		if(isRELAY()){
-//			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
-//			getComClusterHeadManager().start();
-//		}
+		try {
+			//CLUSTER HEAD
+			//caso in cui sono nel cluster head (rete ad hoc principale)
+			//devo avere il controllo della scheda di rete interfacciata alla rete Managed nei confronti del server
+			//nodi bigboss o possibili nodi sostituti
+			if((isBIGBOSS())||isPOSSIBLE_BIGBOSS()){
+				
+				setRelayClusterHeadWNICController(WNICFinder.getCurrentWNIC(
+						NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE,
+						NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK,
+						0));
+				
+				setConsoleClusterHeadWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE));
+				getRelayClusterHeadWNICController().setDebugConsole(getConsoleClusterHeadWifiInterface());
+				getRelayClusterHeadWNICController().init();
+			}
+			
+			//se invece in una delle reti cluster secondarie 
+			//devo avere il controllo della scheda di rete interfacciata alla rete cluster head
+			//per comunicare col BIGBOSS
+			else{
+				setRelayClusterHeadWNICController(WNICFinder.getCurrentWNIC(
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE,
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_NETWORK,
+					1));
+				
+				setConsoleClusterHeadWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE));
+				getRelayClusterHeadWNICController().setDebugConsole(getConsoleClusterHeadWifiInterface());
+				getRelayClusterHeadWNICController().init();
+			}
+			
+			//CLUSTER (RETE LOCALE)
+			setRelayClusterWNICController(WNICFinder.getCurrentWNIC(
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE,
+					NetConfiguration.NAME_OF_RELAY_CLUSTER_NETWORK,
+					1));
+			
+			setConsoleClusterWifiInterface(new DebugConsole("WIFI INTERFACE: "+NetConfiguration.NAME_OF_RELAY_CLUSTER_WIFI_INTERFACE));
+			getRelayClusterWNICController().setDebugConsole(getConsoleClusterWifiInterface());
+			getRelayClusterWNICController().init();
+			
+		} catch (WNICException e) {System.err.println("ERRORE:"+e.getMessage());System.exit(1);}
+		
+		//comunicazione all'interno del prorpio CLUSTER
+		setComClusterManager(RelayConnectionFactory.getClusterElectionConnectionManager(this,true));
+		getComClusterManager().start();
+		
+		//comunicazione col CLUSTER HEAD
+		//Il big boss non comunica col server e quindi non serve un connection Manager col server
+		//Ogni relay di ogni cluster comunica col big boss, ovvero il relay del cluster head
+		if(isBIGBOSS() || isRELAY()){
+			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
+			getComClusterHeadManager().start();
+		}
+		if(isRELAY()){
+			setComClusterHeadManager(RelayConnectionFactory.getClusterHeadElectionConnectionManager(this,true));
+			getComClusterHeadManager().start();
+		}
 
 		//Se parto come Relay BIG BOSS
 		//WIFI Managed deve essere associata al AP e quindi connessa
 		//WIFI Ad-Hoc deve solo essere configurata correttamente ma non essere necessariamente associata in quanto potrebbe essere l unico nodo in quell istante
-//		if(isBIGBOSS()){ 
-//			try {
-//				if(getRelayClusterWNICController().isOn() && getRelayClusterHeadWNICController().isConnected()) 
-//					becomeBigBossRelay(0);
-//				else{
-//					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Questo nodo non può essere il BigBoss dato che o non vede l'AP o non è collegato alla rete Ad Hoc.");
-//					throw new Exception("RelayElectionManager ERRORE: Questo nodo non può essere il BigBoss dato che o non vede l'AP o non è collegato alla rete Ad Hoc.");
-//				}
-//			} catch (WNICException e) {
-//				debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR, "Problemi con il RelayWNICController: " + e.getStackTrace());
-//				throw new Exception("RelayElectionManager ERRORE: Problemi con il RelayWNICController: "+ e.getStackTrace());
-//			} 
-//		}
+		if(isBIGBOSS()){ 
+			try {
+				if(getRelayClusterWNICController().isOn() && getRelayClusterHeadWNICController().isConnected()) 
+					becomeBigBossRelay(0);
+				else{
+					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Questo nodo non può essere il BigBoss dato che o non vede l'AP o non è collegato alla rete Ad Hoc.");
+					throw new Exception("RelayElectionManager ERRORE: Questo nodo non può essere il BigBoss dato che o non vede l'AP o non è collegato alla rete Ad Hoc.");
+				}
+			} catch (WNICException e) {
+				debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR, "Problemi con il RelayWNICController: " + e.getStackTrace());
+				throw new Exception("RelayElectionManager ERRORE: Problemi con il RelayWNICController: "+ e.getStackTrace());
+			} 
+		}
 
 		//Parto da relay secondario o possibile relay secondario o possibile BigBoss
-//		else if(isRELAY()||isPOSSIBLE_RELAY()||isPOSSIBLE_BIGBOSS()){
-//			try{
-//				if(getRelayClusterWNICController().isOn() && getRelayClusterHeadWNICController().isConnected())
-//					if(isRELAY())
-//						searchingRelayClusterHead();
-//					else if(isPOSSIBLE_RELAY()||isPOSSIBLE_BIGBOSS())
-//						becomePossibleRelay();
-//				else{
-//					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Questo nodo non può essere il Relay o possibile sostituto dato che o non è interfacciato alla rete CLUSTER HEAD o alla rete CLUSTER.");
-//					throw new Exception("RelayElectionManager ERRORE: Questo nodo non può essere il Relay o possibile sostituto dato che o non è interfacciato alla rete CLUSTER HEAD o alla rete CLUSTER.");
-//				}
-//					
-//			} catch (WNICException e) {
-//				debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR, "Problemi con il RelayWNICController: " + e.getStackTrace());
-//				throw new Exception("RelayElectionManager ERRORE: Problemi con il RelayWNICController: "+ e.getStackTrace());
-//			} 
-//		}
+		else if(isRELAY()||isPOSSIBLE_RELAY()||isPOSSIBLE_BIGBOSS()){
+			try{
+				if(getRelayClusterWNICController().isOn() && getRelayClusterHeadWNICController().isConnected())
+					if(isRELAY())
+						searchingRelayClusterHead();
+					else if(isPOSSIBLE_RELAY()||isPOSSIBLE_BIGBOSS())
+						becomePossibleRelay();
+				else{
+					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Questo nodo non può essere il Relay o possibile sostituto dato che o non è interfacciato alla rete CLUSTER HEAD o alla rete CLUSTER.");
+					throw new Exception("RelayElectionManager ERRORE: Questo nodo non può essere il Relay o possibile sostituto dato che o non è interfacciato alla rete CLUSTER HEAD o alla rete CLUSTER.");
+				}
+					
+			} catch (WNICException e) {
+				debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR, "Problemi con il RelayWNICController: " + e.getStackTrace());
+				throw new Exception("RelayElectionManager ERRORE: Problemi con il RelayWNICController: "+ e.getStackTrace());
+			} 
+		}
 			
 		
 		//parto come cliente normale  (relay o bigboss passivo)
