@@ -19,7 +19,7 @@ import com.sun.media.ExtBuffer;
 * <p>Essenzialmente, il thread estrae i frame componenti le tracce dai rispettivi buffer e li passa al modulo che
 * si occupa dwl multiplexing. Di fatto, il thread agisce come consumatore in uno schema produttore/consumatore in
 * cui la risorsa condivisa e' il buffer specificato come parametro del costruttore.</p>
-* <p>In particolare il buffer utilizzato è un EventCircularBuffer.<p/>
+* <p>In particolare il buffer utilizzato ï¿½ un EventCircularBuffer.<p/>
 * 
  * @author Carlo Di Fulco
  *
@@ -88,7 +88,7 @@ public class MultiplexerThreadEV {
 		close=false;
 		closed=false;
 		pauseMultiplexing=false;
-		buffer=buffer;
+		this.buffer=buffer;
 		sleep_millis=67;
 		sleep_nanos=0;
 		plugin=multiplexer;
