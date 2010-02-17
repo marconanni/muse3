@@ -880,6 +880,7 @@ public class RelaySessionManager implements Observer{
 	 */
 	if(arg instanceof int[])
 	{
+		proxy = (Proxy) receiver; // non ti fare ingannare dal nome. il receiver è colui che ha lanciato l'evento
 		/*
 		 * Il proxy creato ex-novo, comunca al sessionManager le porte che
 		 * usa. Il session Manager inserisce le porte nella tabella session.
@@ -902,14 +903,14 @@ public class RelaySessionManager implements Observer{
 		while(keys.hasMoreElements()){
 			String chiave = keys.nextElement();
 			Session sessione = sessions.get(chiave);
-			//MARCO ROBA TUA CHE HO COMMENTATO
-//			if ( sessione.getProxy().equals(proxy)){
-//				sessione.setSessionInfo(sessionPorts);
-//				// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
-//				// per stare dalla parte dei bottoni lascio tutto cos�.
-//				// ps ho controllato effettivamente va bene, l'equals è true solo se si tratta della 
-//				// stessa istanza del proxy
-//			}
+		
+			if ( sessione.getProxy().equals(proxy)){
+				sessione.setSessionInfo(sessionPorts);
+				// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
+				// per stare dalla parte dei bottoni lascio tutto cos�.
+				// ps ho controllato effettivamente va bene, l'equals è true solo se si tratta della 
+				// stessa istanza del proxy
+			}
 		}
 		
 		
