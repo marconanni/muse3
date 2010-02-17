@@ -55,7 +55,7 @@ public class AConnectionManager {
 		receiverLocalAdHocThread = new Thread(receiverLocalAdHoc);
 		if(bcast)receiverBcastAdHocThread = new Thread(receiverBcastAdHoc);
 		setStarted(false);
-		setStoped(false);
+		//setStoped(false);
 	}
 
 	/**Metodo per far partire la ricezione dei messaggi dalla rete Ad-Hoc*/
@@ -63,7 +63,8 @@ public class AConnectionManager {
 		if(stoped)resumeReceiving();
 		else{
 			if(receiverLocalAdHocThread!=null){
-				receiverLocalAdHocThread.start();
+				if(!isStarted())
+					receiverLocalAdHocThread.start();
 			}
 			if(bcast){
 				if(receiverBcastAdHocThread!=null){
@@ -78,7 +79,8 @@ public class AConnectionManager {
 	 * @param dp DatagramPacket da inviare alla rete Ad-Hoc*/
 	public void sendTo(DatagramPacket dp){
 		try {
-			System.out.println("Socket:"+adHocOutputSocket.getLocalAddress()+":"+adHocOutputSocket.getLocalPort()+" mando a "+dp.getAddress()+":"+dp.getPort());
+			System.out.println("Socket "+ adHocOutputSocket.getLocalAddress()+ " : porta "+adHocOutputSocket.getLocalPort() + " mando a "+ dp.getAddress()+":"+dp.getPort());
+			
 			adHocOutputSocket.send(dp);
 		} catch (IOException e) {e.printStackTrace();}
 	}
