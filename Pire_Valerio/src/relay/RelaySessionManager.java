@@ -346,6 +346,7 @@ public class RelaySessionManager implements Observer{
 				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,files[i]);
 			}
 			try {
+				System.out.println("indirizzo client "+this.messageReader.getClientAddress());
 				this.message=RelayMessageFactory.buildForwardListResponse(seqNumSendRelay++, InetAddress.getByName(messageReader.getRelayAddress()),PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, messageReader.getRelayAddress(),this.messageReader.getClientAddress(), listaFile);
 				sessionCMCluster.sendTo(this.message);
 			}catch (UnknownHostException e) {
