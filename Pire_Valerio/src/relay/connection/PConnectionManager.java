@@ -51,6 +51,7 @@ public class PConnectionManager extends AConnectionManager  {
 
 		this.localManagedAddress = localManagedAddress.getHostAddress();
 		this.localManagedInputOutputPort = localManagedInputOutputPort;
+//		this.localManagedInputOutputPort = 7000;
 		
 		this.localAdHocInputPort = localAdHocInputPort;
 		this.localAdHocOutputPort = localAdHocOutputPort;
@@ -120,9 +121,9 @@ public class PConnectionManager extends AConnectionManager  {
 	/**Metodo per far partire la ricezione dei messaggi provenienti dalla rete Ad-Hoc da parte del PConnectionManager 
 	 */
 	public void start(){
-		if((ackFromServerReceived && ackToClientSent && !changingRelay) || changingRelay){
+//		if((ackFromServerReceived && ackToClientSent && !changingRelay) || changingRelay){
 			super.start();
-		}
+//		}
 	}
 
 	/**Metodo per chiudere tutte le Socket del PConnectionManager
