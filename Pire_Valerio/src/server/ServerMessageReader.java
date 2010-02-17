@@ -87,7 +87,7 @@ public class ServerMessageReader {
 		}
 		if(code==MessageCodeConfiguration.REQUEST_FILE){//messaggio mandato da bigboss con catena client->bigboss->server
 			fileName=st.nextToken();
-			bigbossPort=Integer.parseInt(st.nextToken());
+			bigbossControlPort=Integer.parseInt(st.nextToken());
 			bigbossStreamingPort=Integer.parseInt(st.nextToken());
 			clientAddress=st.nextToken();
 //			clientPort=Integer.parseInt(st.nextToken());
