@@ -26,7 +26,7 @@ public class WeightCalculator {
 				//invece se il valore è 70 --> 1/70 = 0,014 moltiplicato * 20 = 0,28 quindi 28% questo valore risulta essere il minimo (lontano)
 				double inverseOfRSSIAPvalue = (double)((double)1/(double)RSSIAPvalue)*20;
 				//range MAX 1 min 0
-				double batteryLevel = (double)(RelayBatteryMonitor.getBatteryLevel());
+				double batteryLevel = 100;//(double)(RelayBatteryMonitor.getBatteryLevel());
 				
 				res = (double)(	ElectionConfiguration.W_OF_NUMBER_OF_CLIENTS * numberOfClients +  
 						ElectionConfiguration.W_OF_INVERSE_RSSI_AP_VALUE * inverseOfRSSIAPvalue +
@@ -35,8 +35,7 @@ public class WeightCalculator {
 						ElectionConfiguration.W_OF_CARATTERISTIC_OF_MANAGED_WIFI_INTERFACE * ElectionConfiguration.CARATTERISTIC_OF_MANAGED_WIFI_INTERFACE		
 				);
 			}
-		} catch (WNICException e) {e.printStackTrace();return res;} 
-		catch (IOException e) {e.printStackTrace();	return res;}
+		} catch (WNICException e) {e.printStackTrace();return res;}
 		return res ;
 	}
 }

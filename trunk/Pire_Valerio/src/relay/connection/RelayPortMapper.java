@@ -144,6 +144,7 @@ public class RelayPortMapper {
 	 */
 	public void setRangePortInRTPProxy(int rangePortInRTPProxy) {
 		
+		System.out.println("viene fuori l'indice " +(rangePortInRTPProxy - PortConfiguration.PROXY_INITIAL_PORT_IN_RTP));
 		this.rangePortInRTPProxy[rangePortInRTPProxy - PortConfiguration.PROXY_INITIAL_PORT_IN_RTP] = false;
 	}
 

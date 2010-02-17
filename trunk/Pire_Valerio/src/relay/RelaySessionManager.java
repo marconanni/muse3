@@ -142,8 +142,6 @@ public class RelaySessionManager implements Observer{
 	public RelaySessionManager()
 	{
 		this.numberOfSession = 0;
-//		pReferences = new Hashtable();
-//		sessionInfo = new Hashtable();
 		this.sessions= new Hashtable<String, Session>();
 		this.sessionCMCluster = RelayConnectionFactory.getClusterSessionConnectionManager(this);
 		this.sessionCMClusterHead = RelayConnectionFactory.getClusterHeadSessionConnectionManager(this);
@@ -723,6 +721,11 @@ public class RelaySessionManager implements Observer{
 			
 			String indFornitoreFlussiVecchioRelay=st.nextToken();
 			
+			consolle.debugMessage(0, "indirizzo new Relay "+ newRelay+" Election local address:"+electionManager.getLocalClusterAddress());
+			
+			
+			
+			
 			
 			//io sono un relay seconario ed � stato rieletto il big boss, devo avvertire i Proxy.
 			//nota. è imposibile che un relay secondario con delle sessioni attive diventi big boss.
@@ -732,6 +735,8 @@ public class RelaySessionManager implements Observer{
 				// perchè so che ci pu� essere una sola rielezione in corso alla volta, si interagirebbe con il 
 				// big boss solo se nel caso di una rielezione di questo proxy secondario, che
 				// per� non pu� aver luogo prima che la rielezione del big boss sia finita.
+				
+				consolle.debugMessage(0, "sono un relay secondario ed è stato rieletto il big boss");
 				this.connectedClusterHeadAddress=newRelay;
 				
 				/*
@@ -745,7 +750,7 @@ public class RelaySessionManager implements Observer{
 				
 				while (chiavi.hasMoreElements()){
 					Session sessione = sessions.get(chiavi.nextElement());
-//					sessione.getProxy().setFutureStreamingAddress(newRelay);
+					sessione.getProxy().setFutureStreamingAddress(newRelay);
 				}
 				
 				
@@ -753,9 +758,11 @@ public class RelaySessionManager implements Observer{
 			}
 				
 			else{
-				// il nodo � il vecchio relay
 				
+			
 				if (electionManager.getLocalClusterAddress().equals(oldRelayLocalClusterAddress)){
+					// il nodo � il vecchio relay
+					consolle.debugMessage(0, "sono il vecchio relay");
 					this.maxWnextRelay = newRelay;
 					this.status= RelaySessionStatus.AttendingRequestSession;
 					//TIMEOUT DISABILITATI
@@ -765,8 +772,19 @@ public class RelaySessionManager implements Observer{
 				else{
 					// il nodo � il vincitore!
 					if(electionManager.getLocalClusterAddress().equals(newRelay)){
+						consolle.debugMessage(0,"Sono il sul nodo " + electionManager.getLocalClusterAddress()+ " ho vinto le elezioni mando REQUEST_SESSION a "+vecchioRelay);
 						//MARCO: ROBA TUA CHE HO DOVUTO COMMENTARE
-//						this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+						try {
+							this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(vecchioRelay), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+							
+						} catch (UnknownHostException e1) {System.out.println("ERROR:"+e1.getMessage());
+						e1.printStackTrace();
+						} catch (IOException e2) { System.out.println("ERROR:"+e2.getMessage());
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+						}
+						
+						System.out.println("MANDO IL MESSAGGGIOOOOOOOOOOOOOOOOOO");
 						this.sessionCMCluster.sendTo(message);
 						//TIMEOUT DISABILITATI
 //						this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO);
@@ -778,6 +796,7 @@ public class RelaySessionManager implements Observer{
 					else{
 						// in questo caso ci finisco se sono un relay che non ha vinto e se non sono un relay secondario con dei flussi
 						// attivi provenienti dal vecchio big boss, mi limito a registrare i dati della rielezione, ma non li user� neanche
+						consolle.debugMessage(0, "non ho vinto le elezioni");
 						this.relayAddress= newRelay;
 						this.oldRelayClusterHeadAddress= vecchioRelay;
 						this.oldRelayClusterHeadAddress= indsupVecchioRelay;
@@ -908,7 +927,7 @@ public class RelaySessionManager implements Observer{
 			String chiave = keys.nextElement();
 			Session sessione = sessions.get(chiave);
 		
-			if ( sessione.getProxy().equals(proxy)){
+			if ( sessione.getProxy().equals(proxy.getClientAddress())){
 				sessione.setSessionInfo(sessionPorts);
 				// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
 				// per stare dalla parte dei bottoni lascio tutto cos�.

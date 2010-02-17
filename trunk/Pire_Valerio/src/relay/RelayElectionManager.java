@@ -76,6 +76,11 @@ public class RelayElectionManager extends Observable implements Observer{
 	
 	private RelaySessionManager relaySessionManager = null;
 	
+	private String newRelayLocalClusterAddress;
+	private String oldRelayLocalClusterAddress;
+	private String oldRelayLocalClusterHeadAddress;
+	private String headNodeAddress;
+	
 
 
 	private int activeRelay = 0;			//relay secondari collegati al bigboss (solo big boss)
@@ -333,7 +338,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			getWhoIsRelayServer().start();
 			
 			if(getRelaySessionManager()==null)
-				setRelaySessionManager(RelaySessionManager.getInstance() );
+				setRelaySessionManager(RelaySessionManager.getInstance());
 			
 			getRelaySessionManager().setElectionManager(this);
 			this.addObserver((Observer) getRelaySessionManager());
@@ -400,11 +405,12 @@ public class RelayElectionManager extends Observable implements Observer{
 				setWhoIsRelayServer(new WhoIsRelayServer(getConsoleClusterWifiInterface(),getConnectedClusterHeadAddress()));
 			getWhoIsRelayServer().start();
 			
-			if(getRelaySessionManager()==null)
-				setRelaySessionManager(RelaySessionManager.getInstance() );
+			if(getRelaySessionManager()==null){
+					setRelaySessionManager(RelaySessionManager.getInstance() );
 			
-			getRelaySessionManager().setElectionManager(this);
-			this.addObserver((Observer) getRelaySessionManager());
+					getRelaySessionManager().setElectionManager(this);
+					this.addObserver((Observer) getRelaySessionManager());
+			}
 				
 			if(state==0)setActualStatus(RelayStatus.IDLE);
 			
@@ -443,6 +449,14 @@ public class RelayElectionManager extends Observable implements Observer{
 		memorizeLocalClusterAddress();
 		setLocalClusterHeadAddress(NetConfiguration.RELAY_CLUSTER_HEAD_ADDRESS);
 		memorizeLocalClusterAddress();
+		if(isPOSSIBLE_BIGBOSS()){
+			if(getRelaySessionManager()==null){
+				setRelaySessionManager(RelaySessionManager.getInstance() );
+		
+				getRelaySessionManager().setElectionManager(this);
+				this.addObserver((Observer) getRelaySessionManager());
+		}
+		}
 		
 		//memorizeConnectedClusterHeadAddress();
 
@@ -659,6 +673,11 @@ public class RelayElectionManager extends Observable implements Observer{
 					(!sameAddress(getRelayMessageReader().getPacketAddess())) &&
 					(!getFirstELECTION_DONE())){
 				
+				setNewRelayLocalClusterAddress(getRelayMessageReader().getNewRelayLocalClusterAddress());
+				setOldRelayLocalClusterAddress(getRelayMessageReader().getOldRelayLocalClusterAddress());
+				setOldRelayLocalClusterHeadAddress(getRelayMessageReader().getOldRelayLocalClusterHeadAddress());
+				setHeadNodeAddress(getRelayMessageReader().getHeadNodeAddress());
+				
 				setFirstELECTION_DONE(true);
 				setFirstELECTION_REQUEST(false);
 				
@@ -693,6 +712,7 @@ public class RelayElectionManager extends Observable implements Observer{
 								becomRelay(1);
 							}
 							else if(isPOSSIBLE_BIGBOSS()){
+								
 								debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "Stato."+getActualStatus()+": ... DIVENTO BIGBOSS..");
 								becomeBigBossRelay(1);
 							}
@@ -714,7 +734,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				}
 				
 				setChanged();
-				notifyObservers("NEW_RELAY:"+getRelayMessageReader().getNewRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+":"+getRelayMessageReader().getHeadNodeAddress());
+				notifyObservers("NEW_RELAY:"+getNewRelayLocalClusterAddress()+":"+getOldRelayLocalClusterAddress()+":"+getOldRelayLocalClusterHeadAddress()+":"+getHeadNodeAddress());
 					
 				//propagazione del messaggio ELECTION_DONE
 				getComClusterManager().sendTo(prepareRepropagationCluster(dpIn));
@@ -908,11 +928,11 @@ public class RelayElectionManager extends Observable implements Observer{
 			//relayBatteryMonitor.start();
 			setActualStatus(RelayStatus.MONITORING);
 		}
-		if(getRelayPositionMonitor().isStopped()){
-			getRelayPositionMonitor().start();
-		}
-		if(!getRelayPositionMonitor().isStarted())
-			getRelayPositionMonitor().start();
+//		if(getRelayPositionMonitor().isStopped()){
+//			getRelayPositionMonitor().start();
+//		}
+//		if(!getRelayPositionMonitor().isStarted())
+//			getRelayPositionMonitor().start();
 			
 	}
 	public void stopMonitoringRSSI(){
@@ -1177,4 +1197,14 @@ public class RelayElectionManager extends Observable implements Observer{
 				System.err.println(message);
 		}
 	}
+	
+	public String getNewRelayLocalClusterAddress(){return newRelayLocalClusterAddress;}
+	public void setNewRelayLocalClusterAddress(String newRelayLocalClusterAddress){this.newRelayLocalClusterAddress = newRelayLocalClusterAddress;}
+	public String getHeadNodeAddress(){ return headNodeAddress;}
+	public void setHeadNodeAddress(String headNodeAddress){this.headNodeAddress = headNodeAddress;}
+	public String getOldRelayLocalClusterAddress(){return oldRelayLocalClusterAddress;}
+	public void setOldRelayLocalClusterAddress(String oldRelayLocalClusterAddress){this.oldRelayLocalClusterAddress = oldRelayLocalClusterAddress;}
+	public String getOldRelayLocalClusterHeadAddress(){return oldRelayLocalClusterHeadAddress;}
+	public void setOldRelayLocalClusterHeadAddress(String oldRelayLocalClusterHeadAddress){this.oldRelayLocalClusterHeadAddress = oldRelayLocalClusterHeadAddress;}
+	
 }

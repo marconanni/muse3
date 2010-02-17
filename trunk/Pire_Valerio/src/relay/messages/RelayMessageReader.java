@@ -90,6 +90,8 @@ public class RelayMessageReader {
 		StringTokenizer st = new StringTokenizer(message, "_");
 		index = Integer.valueOf(st.nextToken());
 		code = Integer.valueOf(st.nextToken());
+		
+
 
 		//if(code==MessageCodeConfiguration.REQUEST_RSSI) actualConnectedRelayAddress = packetAddress.toString();
 		if(code == MessageCodeConfiguration.NOTIFY_RSSI){
@@ -156,7 +158,7 @@ public class RelayMessageReader {
 			serverStreamingPort=Integer.parseInt(st.nextToken());
 		}
 		
-		if(code == MessageCodeConfiguration.ELECTION_DONE) newRelayAddress = st.nextToken();
+		
 		if(code == MessageCodeConfiguration.EM_ELECTION) W = Float.parseFloat(st.nextToken());
 		if(code == MessageCodeConfiguration.SESSION_INFO) getHashTable(st);
 		if(code == MessageCodeConfiguration.ACK_SESSION) getHashTable(st);
