@@ -214,8 +214,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		System.err.println(this.state.name());
 		System.out.println("fatto (1).");
 		
-		//mi sospendo in attesa della risposta del Server
-		proxyCM.waitStreamingServerResponse();
+
 	}
 	
 	
