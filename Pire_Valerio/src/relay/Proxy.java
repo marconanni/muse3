@@ -1108,6 +1108,38 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 	
 	/**
+	 * Metodo che ingrandisce il buffer normale del proxy, usato quando il proxy su un 
+	 * relay secondario deve ingrandire i propri bufffer a causa della rielezione del big boss
+	 * Visto che finita tutta la fase di rielezione e di handoff dovrò ricevere un leave dal vecchio big boss
+	 * creo un threaduccio che resta in attesa del messaggio e che esegueesegue l'update del proxy quando arriva il leave
+	 * se mi limitassi a usare wait server response bloccherei il thread che esegue questo metodo che è quello che 
+	 * fa l'update del sessionmanager e che richiama il matodo enlarge normalbuffer per ogniproxy, questo è il rtpreceiver
+	 * del connecionmanagere del proxy, inoltre deve aspettare il leave per ogni proxy, la soluzione sarebbe troppo lenta.
+	 */
+	
+	
+	public void enlargeNormalBuffer (){
+		/*
+		 * Agisce chiamndo l'omonimo metodo del bufferManager
+		 */
+		
+		this.buffer.enlargeNormalBuffer();
+		
+		/*
+		 * In pratica creo un thread specificando direttamente il codice che
+		 * del metodo run di questo proxy e poi l'avvio
+		 */
+		
+		Thread runner2 = new Thread(){public void run(){
+			
+			proxyCM.waitStreamingServerResponse();
+			
+			
+		}};
+		runner2.start();
+	}
+	
+	/**
 	 * metodo richiamato all'arrivo ddi un LEAVE dal vecchio proxy che serviva questo
 	 * qualora il proxy sia su un relay secondario e ci sia la rielezione del big boss.
 	 * rihciama il metodo omonimo del bufferManager per reimpostare le soglie a quelle di
@@ -1354,7 +1386,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, Parameters.RELAY_SESSION_AD_HOC_PORT_IN, this.inStreamPort, this.clientAddress, Parameters.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(Parameters.SERVER_ADDRESS), Parameters.SERVER_SESSION_PORT_IN);
 //			(0, clientAddress, filename, proxyCM.getLocalManagedInputOutputPort(),this.inStreamPort, InetAddress.getByName(Parameters.SERVER_ADDRESS),Parameters.SERVER_SESSION_PORT_IN);
 //			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, PortConfiguration.CLIENT_PORT_SESSION_IN, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
-			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
+			DatagramPacket reqFile =  RelayMessageFactory.(0, filename, proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
 			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+PortConfiguration.CLIENT_PORT_SESSION_IN+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
 			//this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, Parameters.TIMEOUT_ACK_FORWARD);
