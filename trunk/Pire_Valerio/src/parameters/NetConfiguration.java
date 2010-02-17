@@ -24,7 +24,7 @@ public class NetConfiguration {
 	public static final String SERVER_ADDRESS = "192.168.70.210";					//indirizzo IP del SERVE
 //	public static final String SERVER_ADDRESS = "127.0.0.1";					//indirizzo IP del SERVE
 	//public static final String SERVER_ADDRESS = "192.168.30.3";					//indirizzo IP del SERVE
-	public static final String NAME_OF_SERVER_INTERFACE = "ath1";					//Nome dell'interfaccia con cui il Server si affaccia sulla rete Managed (cablato all'AP) 
+	public static final String NAME_OF_SERVER_INTERFACE = "wlan0";					//Nome dell'interfaccia con cui il Server si affaccia sulla rete Managed (cablato all'AP) 
 	
 	//nel caso di big boss questi parametri sono uguali ai parametri del cluster head
 //	public static final String NAME_OF_RELAY_MANAGED_NETWORK = "muselab";				//Nome della rete Managed
@@ -37,7 +37,7 @@ public class NetConfiguration {
 	
 	/** CLUSTER HEAD*/
 	public static final String NAME_OF_RELAY_CLUSTER_HEAD_NETWORK = "muselab";		//Nome della rete Ad-Hoc (cluster head)
-	public static final String NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE = "ath1";//Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc (cluster head)
+	public static final String NAME_OF_RELAY_CLUSTER_HEAD_WIFI_INTERFACE = "wlan0";//Nome dell'interfaccia con cui il Relay si affaccia sulla rete Ad-Hoc (cluster head)
 	public static final String RELAY_CLUSTER_HEAD_ADDRESS = "192.168.70.209";	//indirizzo IP del RELAY nella rete Ad-Hoc di competenza del BigBoss (cluster head)
 //	public static final String RELAY_CLUSTER_HEAD_ADDRESS = "127.0.0.1";	//indirizzo IP del RELAY nella rete Ad-Hoc di competenza del BigBoss (cluster head)
 	//public static final String RELAY_CLUSTER_HEAD_ADDRESS = "192.168.30.3";	//indirizzo IP del RELAY nella rete Ad-Hoc di competenza del BigBoss (cluster head)
