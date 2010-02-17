@@ -864,7 +864,7 @@ public class RelaySessionManager implements Observer{
 			 * 
 			 * Comunico ai proxy di ingrandire i propri buffers.
 			 */
-			Enumeration <String> chiavi;
+			Enumeration <String> chiavi=sessions.keys();
 			while(chiavi.hasMoreElements()){
 				(sessions.get(chiavi.nextElement()).getProxy()).enlargeNormalBuffer();
 			}
