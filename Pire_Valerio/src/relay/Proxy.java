@@ -1568,6 +1568,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			e.printStackTrace();
 		}		
 	}
+
+	public void setFutureStreamingAddress(String newRelay) {
+		this.futureStreamingAddress = newRelay;
+		
+	}
 	
 	
 	/**
