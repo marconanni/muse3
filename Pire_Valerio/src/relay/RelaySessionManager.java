@@ -396,8 +396,9 @@ public class RelaySessionManager implements Observer{
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
 			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getClientStreamingPort(),imBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
-			Session sessione=new Session(this.clientAddress, proxy);
+			Session sessione=new Session(this.clientAddress, proxy);			
 			this.sessions.put(this.clientAddress, sessione);
+			System.out.println("Debug Marco: inserita sessione, il riferimento al proxy è: " + sessione.getProxy());
 //			pReferences.put(this.clientAddress, proxy);
 			this.numberOfSession++;
 			}
@@ -923,12 +924,15 @@ public class RelaySessionManager implements Observer{
 		System.err.println("RelaySessionManager- Porta di Stream del Server control: " +sessionPorts[4]);
 		System.err.println("RelaySessionManager- Porta di Stream del Proxy control: " +sessionPorts[5]);
 		Enumeration<String> keys = sessions.keys();
+		
+		boolean debugTrovataSessione = false;
 		while(keys.hasMoreElements()){
 			String chiave = keys.nextElement();
 			Session sessione = sessions.get(chiave);
-		
-			if ( sessione.getProxy().equals(proxy.getClientAddress())){
+				System.out.println("Debug Marco proxy di questa sessione "+ sessione.getProxy() +" proxy che ha sollevato l'evento "+proxy+" uguali?" + sessione.getProxy().equals(proxy));
+			if ( sessione.getProxy().equals(proxy)){
 				sessione.setSessionInfo(sessionPorts);
+				debugTrovataSessione= true;
 				// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
 				// per stare dalla parte dei bottoni lascio tutto cos�.
 				// ps ho controllato effettivamente va bene, l'equals è true solo se si tratta della 
@@ -937,7 +941,8 @@ public class RelaySessionManager implements Observer{
 		}
 		
 		
-		System.out.println("AGGIUNTO IL RIFERIMENTO IN SESSION_INFO");
+		
+		System.out.println("Modificate le porte  IN SESSION_INFO? "+debugTrovataSessione);
 	}
 }
 
