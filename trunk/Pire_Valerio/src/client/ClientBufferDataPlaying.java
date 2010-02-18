@@ -18,6 +18,7 @@ import javax.media.rtp.ReceiveStreamListener;
 import javax.media.rtp.event.ByeEvent;
 import javax.media.rtp.event.ReceiveStreamEvent;
 
+import parameters.BufferConfiguration;
 import parameters.NetConfiguration;
 import parameters.SessionConfiguration;
 
@@ -151,7 +152,7 @@ proxyIP---->l'indirizzo IP del mittente
 	public boolean startPlaying() //limito la sincronizzazione al solo accesso alla variabile flag playing che determina se l'avvio e' avvenuto o no, in questo modo allegerisco l'elaborazione
 	{
 	System.out.println("startPlaying()");
-	while(this.buffer.getStatusFrame()< SessionConfiguration.BUFFER_THS_START_POINT)
+	while(this.buffer.getStatusFrame()< BufferConfiguration.BUFFER_THS_START_POINT)
 		{
 		System.err.println("				sleep di 250 ms");
 			try {
@@ -184,10 +185,6 @@ proxyIP---->l'indirizzo IP del mittente
 
 			player.addControllerListener(this);  //registro il listener per EOM event
 
-			System.out.println("subito prima dell'eccezione");
-			
-			view.debugMessage("subito prima dell'eccezione");//perchè non compare nella gui????????
-															//forse per lo stesso motivo per cui si ha eccezione con l'istruzione dopo?			
 			view.setPlayer(player);
 			player.start();
 
@@ -231,7 +228,7 @@ proxyIP---->l'indirizzo IP del mittente
 			// ***** PARSER *****
 			rtpParser=new RTPParser(dsInput);
 			//parserThread=new ParserThreadPS(rtpParser,clientBufferSize,timeToWait);
-			parserThread=new ParserThreadEV(rtpParser,clientBufferSize,view, SessionConfiguration.BUFFER_THS_START_TX, SessionConfiguration.BUFFER_THS_STOP_TX);
+			parserThread=new ParserThreadEV(rtpParser,clientBufferSize,view, BufferConfiguration.BUFFER_THS_START_TX, BufferConfiguration.BUFFER_THS_STOP_TX);
 			EventCircularBuffer[] b=parserThread.getOutputBufferSet();
 			buffer=b[0];
 			//il ClientChainBuffer viene settato come listener degli eventi generati dal buffer
@@ -414,11 +411,11 @@ proxyIP---->l'indirizzo IP del mittente
 		this.buffer.setNormalMode(normalMode);
 		if(!normalMode)
 		{
-			this.buffer.setSogliaSuperiore(SessionConfiguration.CLIENT_BUFFER);
+			this.buffer.setSogliaSuperiore(BufferConfiguration.CLIENT_BUFFER);
 		}
 		if(normalMode)
 		{
-			this.buffer.setSogliaSuperiore(SessionConfiguration.BUFFER_THS_STOP_TX);
+			this.buffer.setSogliaSuperiore(BufferConfiguration.BUFFER_THS_STOP_TX);
 		}
 	}
 	
