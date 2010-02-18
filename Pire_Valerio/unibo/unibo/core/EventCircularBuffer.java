@@ -140,7 +140,8 @@ public class EventCircularBuffer extends CircularBuffer{
 	 * @param ev
 	 */
 	private void fireBufferEmptyEvent(BufferEmptyEvent ev)
-	{
+	{	
+		System.err.println("---------------------------------BUFFER VUOTO");
 		Object[] list= listeners.getListenerList();
 		for(int i=0;i<list.length;i+=2)
 		{
