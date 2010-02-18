@@ -36,7 +36,7 @@ import unibo.core.*;
 
 import sv60122.dbgUtil.*;
 
-public class ClientBufferDataPlaying extends Observable  implements ControllerListener, ReceiveStreamListener //, BufferFullListener , BufferEmptyListener
+public class ClientBufferDataPlaying extends Observable  implements ControllerListener, ReceiveStreamListener , BufferFullListener , BufferEmptyListener
 {
 	//MODIFICA AMBRA: booleano che indica se � stato inviato un messaggio di buffer full al proxy
 	private boolean bfSent = true; //inizialmente non � possibile inviare messaggi di buffer full
@@ -117,6 +117,7 @@ proxyIP---->l'indirizzo IP del mittente
 		this.view = view;
 		this.view.debugMessage("ClientBufferDataPlaying creato");
 
+
 		System.out.println("ClientChainBufferDataPlaying creato con:\nproxyPortRTP: "+proxyPortRTP+"\nclientPortRTP: "+clientPortRTP+"\nproxyIP: "+proxyIP);
 	}
 
@@ -130,6 +131,7 @@ proxyIP---->l'indirizzo IP del mittente
 		timeToWait=multiplexerInterCycleWait;
 		controller = cont;
 		this.view = view;
+
 
 		System.out.println("ClientChainBufferDataPlaying creato con:\nproxyPortRTP: "+proxyPortRTP+"\nclientPortRTP: "+clientPortRTP+"\nproxyIP: "+proxyIP);
 	}
@@ -230,10 +232,10 @@ proxyIP---->l'indirizzo IP del mittente
 			//parserThread=new ParserThreadPS(rtpParser,clientBufferSize,timeToWait);
 			parserThread=new ParserThreadEV(rtpParser,clientBufferSize,view, BufferConfiguration.BUFFER_THS_START_TX, BufferConfiguration.BUFFER_THS_STOP_TX);
 			EventCircularBuffer[] b=parserThread.getOutputBufferSet();
-			buffer=b[0];
+			this.buffer=b[0];
 			//il ClientChainBuffer viene settato come listener degli eventi generati dal buffer
-			buffer.addBufferFullEventListener(this.controller);
-			buffer.addBufferEmptyEventListener(this.controller);
+			this.buffer.addBufferFullEventListener(this);
+			this.buffer.addBufferEmptyEventListener(this);
 			// ***** MULTIPLEXER *****
 			mux=new PlayerMultiplexer(rtpParser.getTracksFormat());
 			//muxThread=new MultiplexerThread(mux,b,5);
@@ -243,6 +245,8 @@ proxyIP---->l'indirizzo IP del mittente
 			parserThread.start();
 			System.out.println("ClientChainBufferDataPlaying: parser started");
 			this.startPlaying();
+			setChanged();
+			notifyObservers("PLAYER_STARTED");
 		}
 		catch(IOException e)
 		{
@@ -352,21 +356,27 @@ proxyIP---->l'indirizzo IP del mittente
 	}
 
 	//MODIFICA AMBRA
-//	public void bufferFullEventOccurred(BufferFullEvent e) {
-//		if (bfSent) {
+	public void bufferFullEventOccurred(BufferFullEvent e) {
+		if (bfSent) {
 //		//se non � stato gi� inviato, viene inviato al proxy un messaggio di buffer full
 //		controller.bufferControl();
-//		setChanged();
-//		this.controller.update(this, "BUFFER_FULL");
-//		this.notifyObservers("BUFFER_FULL");
-//		bfSent = false;
-//		}		
-//	}
+		setChanged();
+		notifyObservers("BUFFER_FULL");
+		bfSent = false;
+		}		
+	}
 	
 	
-//	public void bufferEmptyEventOccurred(BufferEmptyEvent e) {
+	public void bufferEmptyEventOccurred(BufferEmptyEvent e) {
 	//LUCA: tolto il ! qui
-//	if (bfSent) {
+		System.err.println("GENERO BUFFER EMPTY:"+bfSent);
+	//if (bfSent) {
+		setChanged();
+		notifyObservers("BUFFER_EMPTY");
+		
+		bfSent = false;
+	//}
+	}
 		//se non � stato gi� inviato, viene inviato al proxy un messaggio di buffer full
 //		controller.update(this, "BUFFER_EMPTY");
 		//LUCA: messo false qui
@@ -475,6 +485,6 @@ proxyIP---->l'indirizzo IP del mittente
 //		muxThread.restart();
 //		System.out.println("12 - b. CHANGE RELAY: ripartito il MultiplexerThreadPS");
 	}
-	
+
 
 }//End of ClientChainBufferDataPlaying
