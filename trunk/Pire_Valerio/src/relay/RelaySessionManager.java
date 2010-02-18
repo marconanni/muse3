@@ -325,11 +325,8 @@ public class RelaySessionManager implements Observer{
 			//Valerio: non so ne nel proxy va cambiato qualcosa o se va bene anche se ad inviare al client invio ad un relay
 			//ovviamente gli passo l'indirizzo del relay e non quello del client
 			proxy = new Proxy(this, true, messageReader.getFilename(), this.relayAddress, messageReader.getRelayControlPort(),messageReader.getRelayStreamingInPort(), messageReader.getClientAddress(), messageReader.getClientStreamingPort() ,electionManager.isBIGBOSS(),false,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
+			// l'inserimento della sessione relativa a questo proxy viene fatto all'atto della ricezione dell'evento lanciato dal proxy stesso.
 			
-			Session sessione=new Session(messageReader.getClientAddress(), proxy, this.relayAddress);
-			this.sessions.put(messageReader.getClientAddress(), sessione);
-//			pReferences.put(this.relayAddress, proxy);
-			this.numberOfSession++;
 		}
 		if(this.messageReader.getCode()==MessageCodeConfiguration.FORWARD_LIST_RESPONSE&&imBigBoss){
 			//sono bigboss devo quindi mandare il messaggio di forward list response al relay
@@ -390,22 +387,23 @@ public class RelaySessionManager implements Observer{
 		
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_FILE && imBigBoss){
 			//se il request file arriva al bigboss ho questo comportamento
+			
 			System.out.println("arrivata richiesta file e sono bigboss, vado a creare il proxy");
+			this.relayAddress = null;
 			this.status = RelaySessionStatus.ACTIVE_BIGBOSS;
 			this.clientAddress = message.getAddress().getHostAddress();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+messageReader.getFilename()+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
 			proxy = new Proxy(this, true, messageReader.getFilename(), null,-1,-1 ,this.clientAddress, messageReader.getClientStreamingPort(),imBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
-			Session sessione=new Session(this.clientAddress, proxy);			
-			this.sessions.put(this.clientAddress, sessione);
-			System.out.println("Debug Marco: inserita sessione, il riferimento al proxy è: " + sessione.getProxy());
-//			pReferences.put(this.clientAddress, proxy);
-			this.numberOfSession++;
+			// quando il proxy vienecreato lancia un evento intercettato da sessionManager, è nell'update
+			// relativo a quell'evento che il proxy viene inserito nella truttura dati session
 			}
 		
 		if(this.messageReader.getCode() == MessageCodeConfiguration.REQUEST_FILE && imRelay){
 			//allora essendo relay devo inoltrare un forwardrequestfile al bigboss
+			
 			System.out.println("arrivata richiesta file e NON sono bigboss, vado a creare il proxy");
+			this.relayAddress = null;
 			this.status = RelaySessionStatus.ACTIVE_NORMAL;
 //			this.clientAddress = message.getAddress().getHostAddress();
 			this.clientAddress=message.getAddress().getHostAddress();
@@ -414,10 +412,10 @@ public class RelaySessionManager implements Observer{
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Arrivata la richiesta di "+this.fileName+" da "+ this.clientAddress);
 			System.out.println("E' arrivato un REQUEST_FILE, ora creo il proxy");
 			proxy = new Proxy(this, true, this.fileName,null,-1,-1, this.clientAddress, this.clientStreamingPort,imBigBoss,true,electionManager.getLocalClusterHeadAddress(),electionManager.getConnectedClusterHeadAddress());
-//			pReferences.put(this.relayAddress, proxy);
-			Session sessione=new Session(this.clientAddress, proxy);
-			this.sessions.put(this.clientAddress, sessione);
-			this.numberOfSession++;
+			
+			// quando il proxy vienecreato lancia un evento intercettato da sessionManager, è nell'update
+			// relativo a quell'evento che il proxy viene inserito nella truttura dati session
+
 			}
 
 		/**
@@ -899,7 +897,9 @@ public class RelaySessionManager implements Observer{
 		}
 	}
 	/**
-	 * il proxy dopo aver creato la sessione ha il compito di avvertire il sessionmanager
+	 * il proxy, una volta creato avverte il sessionManger che crea una sessione
+	 * contenente il proxy, imposta i valori delle porte della sessione e mette
+	 * tutto nella struttura dati sessions
 	 * ++++++++++++++++++++++++++EVENTO SOLLEVATO DAI PROXY++++++++++++++++++++++++++++++
 	 */
 	if(arg instanceof int[])
@@ -923,26 +923,44 @@ public class RelaySessionManager implements Observer{
 		System.err.println("RelaySessionManager- Porta di Stream del Client IN: " +sessionPorts[3]);
 		System.err.println("RelaySessionManager- Porta di Stream del Server control: " +sessionPorts[4]);
 		System.err.println("RelaySessionManager- Porta di Stream del Proxy control: " +sessionPorts[5]);
-		Enumeration<String> keys = sessions.keys();
+	
 		
-		boolean debugTrovataSessione = false;
-		while(keys.hasMoreElements()){
-			String chiave = keys.nextElement();
-			Session sessione = sessions.get(chiave);
-				System.out.println("Debug Marco proxy di questa sessione "+ sessione.getProxy() +" proxy che ha sollevato l'evento "+proxy+" uguali?" + sessione.getProxy().equals(proxy));
-			if ( sessione.getProxy().equals(proxy)){
-				sessione.setSessionInfo(sessionPorts);
-				debugTrovataSessione= true;
-				// in teoria qui ci andrebbe un break, non ha senso ciclare per tutti gli altri elementi
-				// per stare dalla parte dei bottoni lascio tutto cos�.
-				// ps ho controllato effettivamente va bene, l'equals è true solo se si tratta della 
-				// stessa istanza del proxy
-			}
-		}
+		
+		/*Controlla con valerio per l'inserimento di un riferimento con un relay secondario:
+		 * salvo il campo del relay secondario da qualche parte?
+		 */
+		
+		/*
+		 * ci può essere solo una richiesta pendente alla volta, quindi il campo
+		 * clientAddress è inizializzato dalla ricezione del request file al valore 
+		 * corretto inserito dalla ricezione del request file, analogamente dal campo relayAddress
+		 * che ha un valore diverso dal null solo se il proxy è stato creto dalla ricezione di un
+		 * forward request file, ossia la richiesta inviata al big boss da un relay secondario
+		 */
 		
 		
 		
-		System.out.println("Modificate le porte  IN SESSION_INFO? "+debugTrovataSessione);
+		
+		Session sessione = null;
+		
+		consolle.debugMessage(1, "creata sessione");
+		
+		if (relayAddress != null)
+			sessione = new Session(clientAddress, proxy, relayAddress);
+			
+		else 
+			sessione =  new Session(clientAddress, proxy);
+	
+			
+	sessione.setSessionInfo(sessionPorts);
+			
+	consolle.debugMessage(1, "inserite le porte nella sessione: "+ sessione.getSessionInfo());
+		
+	sessions.put(clientAddress, sessione);
+		
+		this.numberOfSession++;
+		
+		System.out.println("sessionInfo della sessione in tabella "+sessions.get(clientAddress).getSessionInfo());
 	}
 }
 
