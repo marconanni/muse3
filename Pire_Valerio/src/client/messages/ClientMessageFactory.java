@@ -185,6 +185,7 @@ public class ClientMessageFactory {
 	 * @throws IOException
 	 */
 	public static DatagramPacket buildStartTX(int sequenceNumber, InetAddress addr, int port) throws IOException{
+		System.err.println("Inviato START_TX");
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
 		String content = sequenceNumber+"_"+MessageCodeConfiguration.START_TX;
