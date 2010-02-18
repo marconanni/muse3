@@ -86,7 +86,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String streamingServerAddress; //è l'indirizzo di chi manda il flusso al proxy
 	private String futureStreamingAddress; // è l'indirizzo del nuovo big boss che manderà il flusso al proxy quando questo riceverà il messaggio
 											// di LEAVE dal proxy sul vecchio relay
-	int initialSupThreshold = (SessionConfiguration.PROXY_BUFFER*70)/100;
+	int initialSupThreshold = (BufferConfiguration.PROXY_BUFFER*70)/100;
 	
 	private boolean servingClient; // se true indice che si eroga il flusso al client, se è false
 	
@@ -1308,7 +1308,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				CircularBuffer[] b = this.rtpReceptionMan.getNormalParserThread().getOutputBufferSet();
 				try {
 					muxTh = new MuseMultiplexerThread(mux, b,null,5);
-					muxTh.setTimeToWait(SessionConfiguration.TTW-48);
+					muxTh.setTimeToWait(BufferConfiguration.TTW-48);
 				} catch (Exception e) {
 					// Auto-generated catch block
 					e.printStackTrace();
@@ -1342,7 +1342,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				CircularBuffer[] b = this.rtpReceptionMan.getRecoveryParserThread().getOutputBufferSet();
 				try {
 					muxThR = new MuseMultiplexerThread(mux, b,null,5);
-					muxThR.setTimeToWait(SessionConfiguration.TTW-48);
+					muxThR.setTimeToWait(BufferConfiguration.TTW-48);
 				} catch (Exception e) {
 					// Auto-generated catch block
 					e.printStackTrace();
