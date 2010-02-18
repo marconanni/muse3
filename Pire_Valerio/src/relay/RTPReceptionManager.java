@@ -125,20 +125,34 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		}
 	}
 
-	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer, int oldProxyStreamInPort, Proxy proxy) throws IOException, IncompatibleSourceException{
+	
+	/**
+	 * Crea un receptionManager per un proxy Sostitutivo che riceve sia il flusso dall'erogatore 
+	 * che mandava il flusso al vecchio proxy, sia il flusso di handoff proveniente dal vecchio relay.
+	 * @param newProxy
+	 * @param buffer bufferManager che contiene i due buffer nei quali andranno a finire i flussi
+	 * @param oldRelayAddress l'indirizzo inferiore del vecchio relay
+	 * @param oldProxyStreamInPort la porta dalla quale il vecchio relay riceveva i flussi
+	 * @param indirizzoRicezione l'indirizzo del relay sul quale si riceve il fusso
+	 * @param indirizzoTrasmissione l'indirizzo di chi manda il flusso
+	 * @param proxy 
+	 * @throws IOException
+	 * @throws IncompatibleSourceException
+	 */
+	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer,String oldRelayAddress, int oldProxyStreamInPort,  String indirizzoRicezione, String indirizzoTrasmissione, Proxy proxy) throws IOException, IncompatibleSourceException{
 		this.buffer = buffer;
 
 		this.proxy = proxy;
-		//imposto la porta di ricezione del proxy di recovery con la vecchia porta di ricezione del proxy
+		//imposto la porta di ricezione del proxy di recovery con la vecchia porta di ricezione del  vecchio proxy
 		normalReceivingPort = oldProxyStreamInPort;	
-		normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(this.localClusterHeadAddr),InetAddress.getByName(this.connectedClusterHeadAddr));
+		normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(indirizzoRicezione),InetAddress.getByName(indirizzoTrasmissione));
 		RelayPortMapper.getInstance().setRangePortInRTPProxy(normalReceivingPort);
 		//ottengo dal port mapper la porta di ricezione dello stream proveniente dal vecchio proxy
 		this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();
 		/*
 		 * Non abbiamo capito come funziona il costruttore di recoveryreceiver 
 		 */
-		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(this.localClusterHeadAddr), InetAddress.getByName(this.connectedClusterHeadAddr));
+		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(indirizzoRicezione), InetAddress.getByName(oldRelayAddress));
 		}
 
 

@@ -9,8 +9,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.media.rtp.event.NewParticipantEvent;
@@ -50,6 +52,7 @@ public class RelaySessionManager implements Observer{
 	//private Hashtable<String, Proxy> pReferences; // Marco: tabella che contiene per ogni sessione ( identificata dall'indirizzo del client) il proxy che la serve
 	//private Hashtable<String, int[]> sessionInfo;
 	private Hashtable<String, Session> sessions; // tablella che contiene le info sulle sessioni: la chiave � l'Ip del cliente finale che ascolta la musica ( anche se mediato da un relay secondario) - per maggiori info guardare la classe Session
+	private Set<String> enumSession = null;
 	/*
 	 * nota: nei commenti si parla di indirizzo inferiore per indicare l'indirizzo che un relay ha sul suo cluster (LocalClusterAddress)
 	 * 		e di indirizzo superiore per indicare l'indirizzo che un relay ha nel cluster di chi gli eroga il flusso ( big boss se relay, server se big boss)-> ClusterHeadAddress
@@ -111,6 +114,9 @@ public class RelaySessionManager implements Observer{
 	private String connectedClusterHeadAddress = null;
 	private String oldRelayLocalClusterAddress;
 	private String oldRelayClusterHeadAddress;
+	
+	private long startTime=0;
+	private long endTime=0;
 	
 	//stati in cui si può trovare il RelayElectionManager
 	public enum RelaySessionStatus {  
@@ -228,8 +234,8 @@ public class RelaySessionManager implements Observer{
 			consolle.debugMessage(DebugConfiguration.DEBUG_ERROR,"RELAY_SESSION_MANAGER: Errore nella lettura del Datagramma");
 			e.printStackTrace();
 		}
-		
-		System.err.println("E' arrivato un messaggio con codice: "+messageReader.getCode()+", imRelay: "+imRelay+", imBigBoss: "+imBigBoss);
+		this.isBigBoss = electionManager.isBIGBOSS();
+		System.err.println("E' arrivato un messaggio con codice: "+messageReader.getCode()+", imRelay: "+imRelay+", imBigBoss: "+this.isBigBoss);
 
 		/**
 		 * arrivato messaggio di richiesta da parte del client
@@ -528,6 +534,26 @@ public class RelaySessionManager implements Observer{
 			 // creo le sessioni ggio dal messa attualmente per� non ci sono i proxy, li metto con il 
 			//metodo
 			this.sessions = messageReader.getSessions();//X MARCO!!! QUESTO L'HO COMMENTATO PER FARE LE PROVE, PERCHÈ MI DAVA ERRORE!!
+			
+			//print hastable
+			
+			Set keys = this.sessions.keySet();
+			Iterator iterator = keys.iterator();
+			while (iterator.hasNext()) {
+			   String entry = (String)iterator.next();
+             Session value = (Session) this.sessions.get(entry);
+	            consolle.debugMessage(2,"SESSIONINFO:"+entry+"\n"+
+	            						"InStreamPort:"+value.getInStreamPort()+"\n"+
+	            						"OutStreamPort:"+value.getOutStreamPort()+"\n"+
+	            						"Proxy:"+value.getProxy()+"\n"+
+	            						"ProxyStreamingCtrlPort:"+value.getProxyStreamingCtrlPort()+"\n"+
+	            						"ReceiverStreamPort"+value.getReceiverStreamPort()+"\n"+
+	            						"SenderStreamPort"+value.getSenderStreamPort()+"\n"+
+	            						"SessionInfo:"+value.getSessionInfo()+"\n"+
+	            						"StreamingServerCtrlPort:"+value.getStreamingServerCtrlPort());
+	        } 
+			
+			
 			String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte di recovery dei relay sostituivi sulle quali ridirigere le varie sessioni
 			try {
 				this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
@@ -708,6 +734,10 @@ public class RelaySessionManager implements Observer{
 			 * 
 			 */
 		{
+			// serve per i test di protocollo
+			
+			this.startTime=System.currentTimeMillis();
+			
 			StringTokenizer st = new StringTokenizer(this.event, ":");
 			st.nextToken();
 			String newRelay = st.nextToken(); // Marco: estraggo l'indirizzo del nuovo relay
@@ -1075,12 +1105,17 @@ private String createProxyFromSession(Hashtable sessionInfo)
 					servingClient=false;
 				else
 					servingClient=true;
+				
+				this.endTime = System.currentTimeMillis();
+				long executionTime= endTime-startTime;
+				
+				consolle.debugMessage(2, "il protocollo fino alla creazione del nuovo proxy ha impiegato " + executionTime + "   millisecondi" );
 								
 				//proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut,this.connectedClusterHeadAddress ,InetAddress.getByName(this.oldRelayLocalClusterAddress), serverCtrlPort, proxyCtrlPort, servingClient);
-				proxy= new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut, InetAddress.getByName(this.oldRelayLocalClusterAddress), serverCtrlPort, proxyCtrlPort, electionManager.getLocalClusterHeadAddress(), electionManager.getConnectedClusterHeadAddress(), servingClient);
+				proxy= new Proxy(this, false, this.clientAddress, this.relayAddress, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut, proxyPortStreamIn, this.oldRelayLocalClusterAddress, serverCtrlPort, proxyCtrlPort, electionManager.getLocalClusterHeadAddress(), electionManager.getConnectedClusterHeadAddress(), servingClient);				
 				session.setProxy(proxy);
 				recStreamInports = recStreamInports+"_"+chiave+"_"+proxy.getRecoveryStreamInPort();
-			} catch (UnknownHostException e) {
+			} catch (Exception e) {
 				
 				e.printStackTrace();
 			}
@@ -1088,6 +1123,9 @@ private String createProxyFromSession(Hashtable sessionInfo)
 	}
 //	recStreamInports.replaceFirst("_", "");
 //	recStreamInports = recStreamInports.substring(arg0, arg1)
+	
+	
+	
 	return recStreamInports;
 }
 
