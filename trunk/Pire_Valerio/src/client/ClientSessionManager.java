@@ -133,7 +133,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 		this.messageReader = new ClientMessageReader();
 		
 		if(event instanceof String) {
-			System.out.println("ClientSessionManager: metodo update, è arrivato una STRINGA");
+			System.out.println("ClientSessionManager: metodo update, è arrivato una STRINGA"+((String)event)+" stato:"+status);
 			this.eventType = (String)event;
 						
 			if(eventType.equals("TIMEOUTSEARCH")){
@@ -428,23 +428,23 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 		if (bfSent) {
 			// se non � stato gi� inviato, viene inviato al proxy un messaggio
 			// di buffer full
-			//controller.bufferControl();
+			//this.bufferControl();
 			//setChanged();
-			//this.controller.update(this, "BUFFER_FULL");
-			//this.update(null, "BUFFER_FULL");
-			//bfSent = false;
+			//this.update(this, "BUFFER_FULL");
+			this.update(null, "BUFFER_FULL");
+			bfSent = false;
 		}
 	}
 
 	public void bufferEmptyEventOccurred(BufferEmptyEvent e) {
 		// LUCA: tolto il ! qui
-		if (!bfSent) {
+	//	if (!bfSent) {
 			// se non � stato gi� inviato, viene inviato al proxy un messaggio
 			// di buffer full
 			this.update(null, "BUFFER_EMPTY");
 			// LUCA: messo false qui
 			bfSent = true;
-		}
+		//}
 	}
 
 	public String getListaFile() {
