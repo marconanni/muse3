@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import parameters.BufferConfiguration;
 import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
@@ -120,7 +121,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 		
 		
 		try {
-			this.clientPlaying=new ClientBufferDataPlaying(PortConfiguration.CLIENT_PORT_SESSION_OUT, this.myStreamingPort, InetAddress.getByName(this.relayAddress), SessionConfiguration.CLIENT_BUFFER, 0, this.frameController);
+			this.clientPlaying=new ClientBufferDataPlaying(PortConfiguration.CLIENT_PORT_SESSION_OUT, this.myStreamingPort, InetAddress.getByName(this.relayAddress), BufferConfiguration.CLIENT_BUFFER, 0, this.frameController);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -206,7 +207,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 			if(eventType.equals("RECIEVED_ELECTION_REQUEST") && this.status.equals("Playing")) {
 				System.out.println("ricevuta richiesta di elezione quando lo status era playing");
 				this.frameController.debugMessage("ricevuta richiesta di elezione quando lo status era playing");
-				this.clientPlaying.setThdOnBuffer(SessionConfiguration.BUFFER_THS_START_TX + ((SessionConfiguration.CLIENT_BUFFER/2)%2 == 0 ? SessionConfiguration.CLIENT_BUFFER/2:SessionConfiguration.CLIENT_BUFFER/2+1), false);
+				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
 				}
 		 
 			if(eventType.equals("EMERGENCY_ELECTION")) {
@@ -258,7 +259,6 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 		
 		
 		if (event instanceof DatagramPacket) {
-			System.out.println("ClientSessionManager: metodo update, è arrivato un DATAGRAMMA");
 			this.msg = (DatagramPacket) event;
 			try {
 				messageReader.readContent(this.msg);
@@ -269,7 +269,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				e.printStackTrace();
 			}
 			
-			System.out.println("ClientSessionManager: codice del messaggio ricevuto "+messageReader.getCode());
+			System.err.println("ClientSessionManager: codice del messaggio ricevuto "+messageReader.getCode()+", ricevuto da "+messageReader.getPacketAddress());
 			if (messageReader.getCode() == MessageCodeConfiguration.LIST_RESPONSE) {
 				listaFile = messageReader.getListaFile();
 				files = listaFile.split(",");
@@ -291,6 +291,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				
 				//ora mando al server il messaggio per far partire lo streaming
 				try {
+					System.err.println("E' arrivato ACK_REQUEST_FILE da "+relayAddress+":"+messageReader.getRelayControlPort());
 					this.msg=ClientMessageFactory.buildStartTX(msgIdx++, InetAddress.getByName(this.relayAddress),messageReader.getRelayControlPort());//da rinominare
 					sessionCM.sendTo(this.msg);
 				} catch (UnknownHostException e) {
@@ -323,7 +324,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				this.proxyStreamingPort = messageReader.getRelaySendingPort();
 				this.proxyCtrlPort = messageReader.getRelayControlPort();
 				try { 
-					this.clientPlaying = new ClientBufferDataPlaying(this.proxyStreamingPort, this.myStreamingPort, InetAddress.getByName(relayAddress),SessionConfiguration.CLIENT_BUFFER, SessionConfiguration.TTW, this, this.frameController);
+					this.clientPlaying = new ClientBufferDataPlaying(this.proxyStreamingPort, this.myStreamingPort, InetAddress.getByName(relayAddress),BufferConfiguration.CLIENT_BUFFER, BufferConfiguration.TTW, this, this.frameController);
 					String[] data = new String[7];
 					data[0] = InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS).getHostAddress();
 					data[1] = String.valueOf(PortConfiguration.CLIENT_PORT_SESSION_IN);
@@ -364,7 +365,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				// mi da errore runtime
 				this.relayAddress =this.newrelay;
 				this.frameController.setNewRelayIP(this.relayAddress);
-				this.clientPlaying.setThdOnBuffer(SessionConfiguration.BUFFER_THS_START_TX, true);
+				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
 				this.clientPlaying.redirectSource(this.relayAddress);
 				}
 
