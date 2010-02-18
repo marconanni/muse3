@@ -128,6 +128,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	private String streamingClientAddress; //indirizzo dell'entità che riceve il flusso in uscita dal proxy
 	
+	private long startTime =0;
+	
 	
 	/**
 	 * @return the ending
@@ -268,11 +270,31 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	
 
-	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String connectedClusterHeadAddr, boolean servingClient){
+	/**
+	 * 
+	 * @param sessionManager il sessionManger 
+	 * @param newProxy false, questo è un proxy sostitutivo
+	 * @param clientAddress l'indirizzo del client finale
+	 * @param secondaryRelayAddress l'indirizzo superiore dell'evenutale relay secondario
+	 * @param clientStreamPort la porta dalla quale il ricevente riceve il flusso
+	 * @param proxyStreamPortOut la porta dalla quale il proxy eroga il flusso
+	 * @param proxyStreamPortIn la porta dalla quale il proxy riceve il flusso
+	 * @param serverStreamPort la porta dalla quale chi manda il fusso al proxy invia tale flussso
+	 * @param recoverySenderOutPort la porta dalla quale il vecchio proxy manda il flusso
+	 * @param recoverySenderInPort la porta dalla quale il vecchio proxy riceveva il flusso: devo aprire in ricezione la stessa porta
+	 * @param recoverySenderlocalClusterAddress l'indirizzo inferiore dall quale il vecchio proxy invia il flusso
+	 * @param serverCtrlPort la porta di controllo di chi invia il flusoo
+	 * @param proxyCtrlPort la porta di controllo di questo proxy
+	 * @param localClusterHeadAddr l'indirizzo inferiore di questo proxy
+	 * @param connectedClusterHeadAddr l'indirizzo superiore di questo proxy
+	 * @param servingClient true il proxy invia direttamente il flusso ad un client, false se invia ad un relay secondario
+	 */
+	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, String secondaryRelayAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderOutPort,int recoverySenderInPort, String recoverySenderlocalClusterAddress,  int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String connectedClusterHeadAddr, boolean servingClient){
 //	TODO: controllare che le porte siano tutte ben mappate
 		
 		this.localClusterHeadAddr=localClusterHeadAddr;
 		this.connectedClusterHeadAddr=connectedClusterHeadAddr;
+		this.relayAddress= secondaryRelayAddress;
 		
 		this.sessionManager = sessionManager;
 		this.addObserver(this.sessionManager);
@@ -287,7 +309,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.streamingServerCtrlPort = serverCtrlPort;
 		this.proxyStreamingCtrlPort = proxyCtrlPort;
 		System.out.println("Inizializzazione del proxy in corso...");
-		final InetAddress oldProxyAddress = recoverySenderAddress;
+		final String oldProxyAddress = recoverySenderlocalClusterAddress;
 		this.msgReader = new RelayMessageReader();
 		
 		this.fProxy = new ProxyFrame();
@@ -299,12 +321,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			buffer = new RelayBufferManager(BufferConfiguration.PROXY_BUFFER, this.fProxy.getController(), BufferConfiguration.PROXY_SOGLIA_INFERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_INFERIORE_ELECTION,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_ELECTION,this);
 			//creo un rtpreceptionamanger
-			this.rtpReceptionMan = new RTPReceptionManager(newProxy, buffer, this.inStreamPort, this);
+			this.rtpReceptionMan = new RTPReceptionManager(false, buffer, oldProxyAddress, recoverySenderInPort, this.localClusterHeadAddr, this.connectedClusterHeadAddr, this);
 			
 			//imposto la porta da cui il server invia lo stream 
 			this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
 			
-			//imposto la porta di ricezione normale
+			//imposto la porta di ricezione di recovey
 			//this.rtpReceptionMan.setNormalReceivingPort(proxyStreamPortIn);// Marco: perchè è commentato?
 		} catch (IncompatibleSourceException e) {
 			// Auto-generated catch block
@@ -343,7 +365,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		 */
 	
 		Thread runner2 = new Thread(){public void run(){try {
-			rtpReceptionMan.initRecoveryConnection(outStreamPort, oldProxyAddress);
+			final InetAddress address = InetAddress.getByName(oldProxyAddress);
+			rtpReceptionMan.initRecoveryConnection(outStreamPort, address);
 			System.err.print("Apertura ricezione recovery in corso...");
 			rtpReceptionMan.startRecoveryConnection();
 		} catch (UnknownHostException e) {
@@ -866,6 +889,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 */
 	@Override
 	public synchronized void bufferFullEventOccurred(BufferFullEvent ev) {
+		
+		
+		
 		/*
 		 * il buffer è pieno: al solito a causa degli stati si capice poco, ma proviamo comunque a fare chiarezza
 		 * in tutti c'è l'invio del messaggio STOPTX al server ( come era logico)
@@ -878,6 +904,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		 * prima di mandare il flusso al client.
 		 *
 		 */
+		
+		
+		// per vedere quanto ci metto a svuotare il buffer guardo il tempo adesso ed il tempo quando arriverà l'evento di buffer empty
+		// e faccio la differenza
+		this.startTime = System.currentTimeMillis();
+		
 		if (debug)
 			System.out.println("Proxy: evento:" + ev);
 		
@@ -960,6 +992,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		 * se invece ero in chiusura non mi resta che invocare il metodo dispose del'interfaccia grafica a me collegata
 		 * 
 		 */
+		
+		// per vedere quanto ci metto a svuotare il buffer guardo il tempo adesso ed il tempo quando arriverà l'evento di buffer empty
+		// e faccio la differenza
+		
+		long executionTime = System.currentTimeMillis()-this.startTime;
+		fProxy.messageArea.append("Tempo per svuotare il buffer: " + executionTime);
 		
 		if (debug)
 			System.out.println("Proxy: evento:" + e);
@@ -1464,6 +1502,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0,InetAddress.getByName(this.streamingServerAddress), this.streamingServerSessionPort);
 			proxyCM.sendToServer(redirect);
+			this.fProxy.messageArea.append("Mandato il redirect a "+ this.streamingServerAddress+": "+ this.streamingServerSessionPort);
 			//this.serverStopped = false;
 		} catch (UnknownHostException e) {
 			

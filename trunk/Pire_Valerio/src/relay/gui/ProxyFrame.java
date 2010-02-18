@@ -40,7 +40,7 @@ public class ProxyFrame extends JFrame implements ActionListener{
 	private BufferView buffer = null;
 	private BufferView bufferRec = null;
 	private JTextPane dataText = null;
-	private JTextArea messageArea = null;
+	public JTextArea messageArea = null;
 	private JLabel jLabelProxy = null;
 	private JLabel jLabelClient = null;
 	private JPanel jPanelData = null;

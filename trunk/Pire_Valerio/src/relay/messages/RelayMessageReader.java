@@ -160,7 +160,10 @@ public class RelayMessageReader {
 		
 		
 		if(code == MessageCodeConfiguration.EM_ELECTION) W = Float.parseFloat(st.nextToken());
-		if(code == MessageCodeConfiguration.SESSION_INFO) getHashTable(st);
+		if(code == MessageCodeConfiguration.SESSION_INFO){
+			System.err.println("##############SESSIONINFO:" + message);
+			getHashTable(st);
+		}
 		if(code == MessageCodeConfiguration.ACK_SESSION) getHashTable(st);
 		
 	}
