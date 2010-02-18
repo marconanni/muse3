@@ -18,7 +18,7 @@ import parameters.MessageCodeConfiguration;
  * @version 1.1
  */
 public class ClientMessageReader {
-	private boolean debug = true;
+	private boolean debug = false;
 
 	
 	private  String message = ""; 				//Stringa contenente il messaggio
