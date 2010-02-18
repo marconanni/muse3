@@ -761,7 +761,7 @@ public class RelaySessionManager implements Observer{
 			else{
 				
 			
-				if (electionManager.getLocalClusterAddress().equals(oldRelayLocalClusterAddress)){
+				if (electionManager.getLocalClusterAddress().equals(vecchioRelay)){
 					// il nodo � il vecchio relay
 					consolle.debugMessage(0, "sono il vecchio relay");
 					this.maxWnextRelay = newRelay;
