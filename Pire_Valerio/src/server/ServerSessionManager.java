@@ -186,6 +186,8 @@ public class ServerSessionManager implements Observer{
 				try {
 					System.out.println("Indirizzo da cui ho ricevuto la richiesta e su cui rispondo: "+this.bigbossAddress+":"+PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 					consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"Indirizzo da cui ho ricevuto la richiesta e su cui rispondo: "+this.bigbossAddress+":"+PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+					System.out.println("mando a "+this.bigbossAddress+":"+PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+					System.out.println("indirizzo client "+ServerMessageReader.getClientAddress());
 					message=ServerMessageFactory.buildForwardFilesListMessage(msgIdx++, this.bigbossAddress,PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN, ServerMessageReader.getRelayAddress(),ServerMessageReader.getClientAddress(), list);
 					manager.sendPacket(message);
 					System.out.println("Inviata lista files al bigboss");
@@ -204,8 +206,8 @@ public class ServerSessionManager implements Observer{
 				int portaRTPSuCuiInviare=ServerMessageReader.getBigbossStreamingPort();
 				DatagramPacket confirm;
 			
-				System.out.println("porta su cui manderò il flusso rtp "+ServerMessageReader.getRTPClientPort());
-				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"porta su cui manderò il flusso rtp "+ServerMessageReader.getRTPClientPort());
+				System.out.println("porta su cui manderò il flusso rtp "+portaRTPSuCuiInviare);
+				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"porta su cui manderò il flusso rtp "+portaRTPSuCuiInviare);
 				StreamingServer sender = null;
 				try {
 					System.err.println("INDIRIZZO su cui sparo flusso : "+ServerMessageReader.getPacketAddress().getHostAddress());
@@ -226,6 +228,7 @@ public class ServerSessionManager implements Observer{
 					//da sistemare, non capisco perchè la risposta la devo mandare sulla porta 9000 e non su quella di bigboss
 					//forse perchè il proxy crea una porpia porta, ma non è quella che passo al server col messaggio request file?
 //					confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), PortConfiguration.PROXY_INITIAL_MANAGED_PORT_IN_OUT_CONTROL, ServerMessageReader.getClientAddress(), ServerMessageReader.getClientPort(), ServerMessageReader.getClientRTPPort(), sender.getTransmissionPort(), sender.getTransmissionControlPort());
+					System.err.println("mando la conferma a bigboss "+this.message.getAddress()+":"+ServerMessageReader.getBigbossControlPort());
 					confirm = ServerMessageFactory.buildConfirmRequest(msgIdx++,this.message.getAddress(), ServerMessageReader.getBigbossControlPort(),ServerMessageReader.getClientAddress(), ServerMessageReader.getClientRTPPort(), sender.getTransmissionPort(), sender.getTransmissionControlPort());
 					manager.sendPacket(confirm);
 				} catch (IOException e) {
@@ -270,10 +273,10 @@ public class ServerSessionManager implements Observer{
 			}
 			 	
 			
-/*			
-			if(ServerMessageReader.getCode() == Parameters.REDIRECT)
+	
+			if(ServerMessageReader.getCode() == MessageCodeConfiguration.REDIRECT)
 			{
-				consolle.debugMessage("SERVER_SESSION_MANAGER: Arrivata una richiesta di REDIRECT");
+				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"SERVER_SESSION_MANAGER: Arrivata una richiesta di REDIRECT");
 				this.newRelayAddress = this.message.getAddress().getHostAddress();
 				if(!ssReferences.isEmpty())
 				{
@@ -285,14 +288,14 @@ public class ServerSessionManager implements Observer{
 						if(!ssReferences.get(chiave).redirect(this.newRelayAddress))
 						{
 							System.err.println("Errore nella REDIRECT di uno StreamingServer...");
-							Logger.write("Errore nella REDIRECT di uno StreamingServer...");
-							consolle.debugMessage("Errore nella REDIRECT di uno StreamingServer...");
+							//Logger.write("Errore nella REDIRECT di uno StreamingServer...");
+							consolle.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nella REDIRECT di uno StreamingServer...");
 						}
 						
 					}
 				}
 			}
-*/
+
 		}
 	}
 
