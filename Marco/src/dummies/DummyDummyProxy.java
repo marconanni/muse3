@@ -19,7 +19,7 @@ import relay.RTPReceptionManager;
 import relay.RelayBufferManager;
 import relay.RelayMessageFactory;
 import relay.RelayMessageReader;
-import relay.RelayPortMapper;
+import relay.connection.RelayPortMapper;
 import relay.RelaySessionManager;
 
 import relay.connection.ProxyCM;
@@ -46,59 +46,59 @@ import debug.*;
 public class DummyDummyProxy extends Observable implements Observer{
 
 	//flags
-	protected boolean debug = true;
+	public boolean debug = true;
 	
 	
 	//variabili di stato, eventi, messaggi:
-	protected ProxyState state;
-	protected boolean newProxy;
-	protected String event;
-	protected DatagramPacket msg;
+	public ProxyState state;
+	public boolean newProxy;
+	public String event;
+	public DatagramPacket msg;
 	
 
 //	//timeout:
-//	protected TimeOutAckForward timeoutAckForward;
-//	protected TimeOutAckClientReq timeoutAckClientReq;
-//	protected TimeOutSessionInterrupted timeoutSessionInterrupted;
+//	public TimeOutAckForward timeoutAckForward;
+//	public TimeOutAckClientReq timeoutAckClientReq;
+//	public TimeOutSessionInterrupted timeoutSessionInterrupted;
 	
 	//parametri:
-	protected String proxyID = "-1";
-	protected String filename;
-	protected String clientAddress;
-	protected String streamingServerAddress; //è l'indirizzo di chi manda il flusso al proxy
-	protected String futureStreamingAddress; // è l'indirizzo del nuovo big boss che manderà il flusso al proxy quando questo riceverà il messaggio
+	public String proxyID = "-1";
+	public String filename;
+	public String clientAddress;
+	public String streamingServerAddress; //è l'indirizzo di chi manda il flusso al proxy
+	public String futureStreamingAddress; // è l'indirizzo del nuovo big boss che manderà il flusso al proxy quando questo riceverà il messaggio
 											// di LEAVE dal proxy sul vecchio relay
 	
 			
-	protected boolean servingClient; // se true indice che si eroga il flusso al client, se è false
+	public boolean servingClient; // se true indice che si eroga il flusso al client, se è false
 	
 	//porte(le porte di ricezione del proxy si trovano dentro l'RTPReceptionManager): 
-	protected int clientStreamPort = 0; 	//porta su cui il client riceve lo stream rtp 
-	protected int serverStreamPort = 0; 	//porta da cui lo streamingserver invia lo stream rtp
-	protected int outStreamPort = 0;		//porta da cui il proxy invia lo stream rtp
-	protected int inStreamPort = 0;       //porta da cui il proxy riceve lo str 
-	protected int streamingServerCtrlPort = 0; //porta su cui lo streamingserver riceve i messaggi di controllo
-//	protected int sessionControlPort;  //porta su cui il proxy riceve i messaggi di controllo dal client durante la trasmissione:
-	protected int proxyStreamingCtrlPort = 0;
-	protected int clientStreamControlPort=0; // la porta di controllo del client (� valida e diversa da -1
+	public int clientStreamPort = 0; 	//porta su cui il client riceve lo stream rtp 
+	public int serverStreamPort = 0; 	//porta da cui lo streamingserver invia lo stream rtp
+	public int outStreamPort = 0;		//porta da cui il proxy invia lo stream rtp
+	public int inStreamPort = 0;       //porta da cui il proxy riceve lo str 
+	public int streamingServerCtrlPort = 0; //porta su cui lo streamingserver riceve i messaggi di controllo
+//	public int sessionControlPort;  //porta su cui il proxy riceve i messaggi di controllo dal client durante la trasmissione:
+	public int proxyStreamingCtrlPort = 0;// la porte di controllo in ricezione aperta verso il client.
+	public int clientStreamControlPort=0; // la porta di controllo del client (� valida e diversa da -1
 	// solo se il client � un altro proxy
 	
 	
 	
 	// porte di sessione di sender e receiver
-	protected int streamingServerSessionPort;
-	protected int clientSessionPort;
+	public int streamingServerSessionPort;
+	public int clientSessionPort;
 	
 	//componenti:
-	protected ProxyCM proxyCM;
+	public ProxyCM proxyCM;
 	
 	//classi di utilita':
-	protected RelayMessageReader msgReader;
-	protected DebugConsole consolle;
+	public RelayMessageReader msgReader;
+	public DebugConsole consolle;
 	
 	
 
-	protected Observer sessionManager;
+	public Observer sessionManager;
 	private int recoveryStreamInPort;
 	
 	
@@ -113,21 +113,64 @@ public class DummyDummyProxy extends Observable implements Observer{
 	 */
 	
 	
-	
-	
-	
-	
-	
 	/**
-	 * Nell'attuale versione del dummy questo costruttore si occupa di 
-	 * creare un finto proxy da rielezione, è utilizzabile anche per 
-	 * creare un proxy nuovo, specificandogli le porte tramite i parametri del costruttore,
-	 * visto chein reatà non c'è nessun flusso e nessun buffer sotto.
+	 * Costruisce un nuovo dummy proxy, determina le porte locali sfruttando RelayportMappper e prende gli indirizzi locali dal file di configurazione
 	 */
-	
+	public DummyDummyProxy (Observer sessionManager, String clientAddress, int clientStreamPort,  int serverStreamPort, String streamingServerAddress,   boolean servingClient){
 
-	public DummyDummyProxy (Observer sessionManager, boolean newProxy, String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort,String streamingServerAddress, InetAddress recoverySenderAddress, int serverCtrlPort, int proxyCtrlPort, boolean servingClient){
-//	TODO: controllare che le porte siano tutte ben mappate
+		
+		RelayPortMapper portMapper = RelayPortMapper.getInstance();
+		
+		this.sessionManager = sessionManager;
+		this.addObserver(this.sessionManager);
+		
+		
+		
+		this.clientAddress = clientAddress; 
+		this.clientStreamPort = clientStreamPort;
+		this.serverStreamPort = serverStreamPort;
+		this.outStreamPort = portMapper.getFirstFreeStreamOutPort();
+		this.inStreamPort = portMapper.getFirstFreeStreamInPort();
+		this.streamingServerAddress= streamingServerAddress;
+		this.servingClient=servingClient;
+		this.determinaPorteSessione(this.servingClient, this.streamingServerAddress); // determino le porte su cui mandare i messaggi di sessione ( v doc metodo)
+		consolle.debugMessage("Inizializzazione del proxy in corso...");
+		this.msgReader = new RelayMessageReader();
+		this.consolle= new DebugConsole();
+		
+		try {
+			
+			// creo le porte di controllo
+			int localClusterControlPortIn = portMapper.getFirstFreeControlAdHocInPort();
+			this.proxyStreamingCtrlPort = localClusterControlPortIn;
+			int	localClusterControlPortOut = portMapper.getFirstFreeControlAdHocOutPort();
+			int localClusterHeadControlPortIn = portMapper.getFirstFreeControlManagedInPort();
+			int localClusterHeadControlPortOut = portMapper.getFirstFreeControlManagedOutPort();
+			
+			
+		InetAddress localClusterAddress= InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+		
+		InetAddress localClusterHeadAddress= InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+		this.proxyCM = new ProxyCM(localClusterAddress, localClusterControlPortIn, localClusterControlPortOut, localClusterHeadAddress, localClusterHeadControlPortIn, localClusterHeadControlPortOut, this);
+		this.proxyCM.start();
+		}
+		
+		catch (Exception e){
+			e.printStackTrace();
+		}
+		//proxy connection manager, e' osservato da this
+
+	
+	
+	}
+	
+		
+	
+		/**
+		 * Costruttore per un dummy dummy proxy sostitutivo, occorre specificare anche le porte locali di controllo e di streaming  che devono essere uguali a quelle del server
+		 */
+	public DummyDummyProxy (Observer sessionManager,  String clientAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderPort,String streamingServerAddress, String recoverySenderAddress, int localClusterControlPortIn , int localClusterControlPortOut, int localClusterHeadControlPortIn, int localClusterHeadControlPortOut, boolean servingClient){
+			//	TODO: controllare che le porte siano tutte ben mappate
 		this.sessionManager = sessionManager;
 		this.addObserver(this.sessionManager);
 		
@@ -138,23 +181,25 @@ public class DummyDummyProxy extends Observable implements Observer{
 		this.serverStreamPort = serverStreamPort;
 		this.outStreamPort = proxyStreamPortOut;
 		this.inStreamPort = proxyStreamPortIn;
-		this.streamingServerCtrlPort = serverCtrlPort;
-		this.proxyStreamingCtrlPort = proxyCtrlPort;
 		this.streamingServerAddress= streamingServerAddress;
 		this.servingClient=servingClient;
 		this.determinaPorteSessione(this.servingClient, this.streamingServerAddress); // determino le porte su cui mandare i messaggi di sessione ( v doc metodo)
 		consolle.debugMessage("Inizializzazione del proxy in corso...");
-		final InetAddress oldProxyAddress = recoverySenderAddress;
+		String oldProxyAddress = recoverySenderAddress;
 		this.msgReader = new RelayMessageReader();
 		this.consolle= new DebugConsole();
 		
-		//proxy connection manager, e' osservato da this
-		// TODO sistema la parte di connectionManager.
-		this.proxyCM = RelayConnectionFactory.getProxyConnectionManager(this);
+		try {
+		InetAddress localClusterAddress= InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+		
+		InetAddress localClusterHeadAddress= InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+		this.proxyCM = new ProxyCM(localClusterAddress, localClusterControlPortIn, localClusterControlPortOut, localClusterHeadAddress, localClusterHeadControlPortIn, localClusterHeadControlPortOut, this);
 		this.proxyCM.start();
+		}
 		
-		
-		
+		catch (Exception e){
+			e.printStackTrace();
+		}
 		
 		
 		
@@ -171,10 +216,79 @@ public class DummyDummyProxy extends Observable implements Observer{
 		 * ho copiato il modo in cui si ottiene la porta dal costruttore di RTPReceptionManager
 		 */
 		this.recoveryStreamInPort =RelayPortMapper.getInstance().getFirstFreeStreamInPort();
-			
-		this.state = ProxyState.receivingRetransmission;
+		
 		
 	
+	}
+	
+	public DummyDummyProxy(Observer sessionManager, boolean newProxy,String clientAddress, int clientStreamPort,int proxyStreamPortOut, int proxyStreamPortIn,
+			int serverStreamPort, int recoverySenderPort,
+			String streamingServerAddress,
+			String recoverySenderAddress, int serverCtrlPort,
+			int proxyCtrlPort, boolean servingClient) {
+		
+		
+		//	TODO: controllare che le porte siano tutte ben mappate
+		this.sessionManager = sessionManager;
+		this.addObserver(this.sessionManager);
+		
+		RelayPortMapper portMapper=RelayPortMapper.getInstance();
+		
+		this.clientAddress = clientAddress; 
+		this.clientStreamPort = clientStreamPort;
+		this.serverStreamPort = serverStreamPort;
+		this.outStreamPort = proxyStreamPortOut;
+		this.inStreamPort = proxyStreamPortIn;
+		this.streamingServerAddress= streamingServerAddress;
+		this.servingClient=servingClient;
+		this.proxyStreamingCtrlPort = proxyCtrlPort;
+		this.determinaPorteSessione(this.servingClient, this.streamingServerAddress); // determino le porte su cui mandare i messaggi di sessione ( v doc metodo)
+		consolle.debugMessage("Inizializzazione del proxy in corso...");
+		String oldProxyAddress = recoverySenderAddress;
+		this.msgReader = new RelayMessageReader();
+		this.consolle= new DebugConsole();
+		
+		try {
+			
+			int localClusterControlPortOut= portMapper.getFirstFreeControlAdHocOutPort();
+			int localClusterHeadControlPortIn = portMapper.getFirstFreeControlManagedInPort();
+			int localClusterHeadControlPortOut = portMapper.getFirstFreeControlManagedOutPort();
+			
+			
+		InetAddress localClusterAddress= InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+		
+		InetAddress localClusterHeadAddress= InetAddress.getByName(NetConfiguration.RELAY_CLUSTER_ADDRESS);
+		this.proxyCM = new ProxyCM(localClusterAddress, proxyCtrlPort, localClusterControlPortOut, localClusterHeadAddress, localClusterHeadControlPortIn, localClusterHeadControlPortOut, this);
+		this.proxyCM.start();
+		}
+		
+		catch (Exception e){
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		this.sendRedirectToServer();
+
+		
+		
+		
+		
+		
+		/*
+		 * chiedo al port mapper una porta in ricezione dalla quale ricevere lo stream dal vecchio relay
+		 * ho copiato il modo in cui si ottiene la porta dal costruttore di RTPReceptionManager
+		 */
+		this.recoveryStreamInPort =RelayPortMapper.getInstance().getFirstFreeStreamInPort();
+		
+		
+		
+		
+		
+		
+		
+		// TODO Auto-generated constructor stub
 	}
 
 	
@@ -184,6 +298,10 @@ public class DummyDummyProxy extends Observable implements Observer{
 	 * ***************************************************************
 	 */
 	
+	
+
+
+
 	/**
 	 * @return la porta sulla quale il client riceve lo stream;
 	 */
@@ -397,7 +515,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 	 * @return true se l'oerazione � andata a buon fine; false altrimenti
 	 * 
 	 */
-	protected boolean startHandoff(String oldClientAddress, int portStremInNewClient, String newClientAddress, boolean alsoSendRedirectToclient){
+	public boolean startHandoff(String oldClientAddress, int portStremInNewClient, String newClientAddress, boolean alsoSendRedirectToclient){
 		
 			
 			if (alsoSendRedirectToclient == true){
@@ -471,7 +589,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 
 	
 	// TODO send redirectToServer.
-	protected void sendRedirectToServer(){
+	public void sendRedirectToServer(){
 		/*
 		 *  il server potrebbe anche essere un proxy sul big boss; ma il metodo non d� problemi
 		 *  a riguardo, visto che  l'indirizzo viene fornito dal costruttore e la porta
@@ -501,7 +619,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 	
 	
 	// TODO	sendleaveMessage to client!
-	protected void sendLeaveMsgToClient() {
+	public void sendLeaveMsgToClient() {
 		try {
 			//invio LEAVE al client:
 			DatagramPacket leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), this.clientSessionPort);
@@ -531,7 +649,7 @@ public class DummyDummyProxy extends Observable implements Observer{
 	 * @param streamingServerAddress l'indirizzo del nodo che sta erogando il flusso a questo proxy.
 	 */
 	
-	protected void determinaPorteSessione(boolean servingClient, String streamingServerAddress){
+	public void determinaPorteSessione(boolean servingClient, String streamingServerAddress){
 		/*
 		 * Se sto servendo un cliente la sua porta di sessione � quella dei client,
 		 * infatti i messaggi di LEAVE arrivano  al ClientSessionManager, mentre
