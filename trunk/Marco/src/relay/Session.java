@@ -11,7 +11,10 @@ package relay;
  *
  */
 
-public class Session {
+
+
+
+public class Session  {
 	
 	private String id;						//( l�indirizzo Ip del client che si serve, magari anche grazie alla mediazione di un relay secondario)
 	private Proxy proxy;					//riferimento al Proxy che gestisce lo streaming

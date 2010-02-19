@@ -1,4 +1,4 @@
-package relay;
+package dummies;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -12,7 +12,18 @@ import java.util.StringTokenizer;
 
 import parameters.Parameters;
 
-public class RelayMessageReader {
+
+/**
+ * Classe dummy di message reader praticamente identica all'originale, la sola cosa che cambia è
+ * che il metodo getSessions che viene chiamato all'arrivo del session info dal session manager del nuovo relay
+ * questo ritorna una tabella di di DummySession anziche una di session. (anche nella versione originale non
+ * veniva creato il proxy, c'era solo il passaggio di sessionni vuote, con solo l'indicazione delle porte ed 
+ * il proxy viene in ogni caso creato dal sessionmanager)
+ * @author marco
+ *
+ */
+
+public class DummyMessageReader {
 
 
 	//Stringa contenente il messaggio
@@ -40,7 +51,7 @@ public class RelayMessageReader {
 	private  String actualRelayAddress = null;
 	
 	
-	private  Hashtable<String, Session> sessions;
+	private  Hashtable<String, DummySession> dummySessions;
 	private  Hashtable<String, int[]> proxyInfo;
 	private  String filename;
 	private  int portStreamingClient;
@@ -49,7 +60,7 @@ public class RelayMessageReader {
 	private int portStreamingCtrlServer;
 	
 	
-	public RelayMessageReader(){}
+	public DummyMessageReader(){}
 	/**
 	 * Metodo che consente di leggere il contenuto di un pacchetto
 	 * @param dp - datagramma di cui si vuole leggere il contenuto
@@ -207,7 +218,7 @@ public class RelayMessageReader {
 
 		if(code == Parameters.SESSION_INFO)
 		{
-			sessions = new Hashtable<String,Session>();
+			dummySessions = new Hashtable<String,DummySession>();
 			while(elements.hasMoreElements())
 			{
 				// estraggo l'indirizzo del cliente
@@ -226,10 +237,10 @@ public class RelayMessageReader {
 				if (relaySecondario.equals("null"))
 					relaySecondario=null;
 				// Creo la sessione senza tuttavia indicare il proxy; andr� settato dopo dal SessionManager
-				Session session = new Session(clientAddress,null,relaySecondario,sessionPorts);
-				sessions.put(clientAddress, session);
+				DummySession session = new DummySession(clientAddress,null,relaySecondario,sessionPorts);
+				dummySessions.put(clientAddress, session);
 			}
-			return sessions;
+			return dummySessions;
 		}
 		if(code == Parameters.ACK_SESSION)
 		{
@@ -268,7 +279,7 @@ public class RelayMessageReader {
 
 	public  void main(String[] args)
 	{
-		RelayMessageReader r = new RelayMessageReader();
+		DummyMessageReader r = new DummyMessageReader();
 		r.stamp();
 	}
 
@@ -300,8 +311,8 @@ public class RelayMessageReader {
 		return RSSI;
 	}
 
-	public  Hashtable<String, Session> getSessions() {
-		return sessions;
+	public  Hashtable<String, DummySession> getDummySessions() {
+		return dummySessions;
 	}
 
 	public  double getW() {
