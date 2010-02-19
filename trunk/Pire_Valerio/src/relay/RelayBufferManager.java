@@ -51,7 +51,7 @@ public class RelayBufferManager {
 	 *    
 	 * @return CircularBuffer 
 	 */
-	public EventCircularBuffer getNormalBuffer(){
+	public ExtensibleEvenCircularBuffer getNormalBuffer(){
 		return normalBuffer;
 	}
 
