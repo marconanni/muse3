@@ -631,7 +631,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			}
 
-			if(msgReader.getCode() == MessageCodeConfiguration.START_TX)
+			if(msgReader.getCode() == MessageCodeConfiguration.START_TX){
 				System.err.println("E' arrivato START_TX");
 				/*
 				 * MArco:è arrivato un messaggio START_TX da parte del client
@@ -642,6 +642,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //				{
 //					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
 //				}
+			
+			
 				if (state == ProxyState.waitingClientAck){	
 					System.err.println("IL MIO STATO È WAITINGCLIENTACK");
 					/*
@@ -718,7 +720,6 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					 */
 					if(!this.buffer.getNormalBuffer().isEmpty())
 					{
-						System.err.print("CAZZO È QUI CHE DEVI SPEDIRE");
 						this.startNormalStreamToClient();
 					}
 					else{this.request_pending = true;}
@@ -740,7 +741,6 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						state = ProxyState.transmittingToClient;
 						
 					}else{
-						System.err.println("BOH!");
 						/*
 						 * MArco: qui dovrebbe essere più chiaro: ricevo uno start TX dal client ed ho il recovery buffer 
 						 * riempito con quanto rimasto dal buffer dell vecchio relay. faccio quindi partire un recovery stream
@@ -768,9 +768,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					System.err.println(this.state.name());
 					//avvio lo stream di recovery verso il client
 					
-					//startRecoveryStreamToClient();
+					startRecoveryStreamToClient();
 					
-					startNormalStreamToClient();
+					//startNormalStreamToClient();
 					
 					//transito nel nuovo stato
 					state = ProxyState.TransmittingTempBuffer;
@@ -781,17 +781,24 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					System.err.println(this.state.name());
 					//avvio lo stream di recovery verso il client
 					
-					startRecoveryStreamToClient();
+					//startRecoveryStreamToClient();
 					
-					//startNormalStreamToClient();
+					startNormalStreamToClient();
 					
 					//transito nel nuovo stato
 					state = ProxyState.TransmittingTempBuffer;
 					this.newProxy = false;
 				}
 //				this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
+				//VALERIO:CONTROLLARE!!!!!!!!!!!!!!!!!!!!!!
+				//////////////////////////////////////////////////
+				else if(state==ProxyState.transmittingToClient){
+					muxTh.restart();
+					System.out.println("ho fatto muxth.start()");
+				}
+				///////////////////////////////////////
 			}
-			
+		}
 			
 			else
 				if(msgReader.getCode() == MessageCodeConfiguration.STOP_TX){
