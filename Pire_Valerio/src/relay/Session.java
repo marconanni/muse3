@@ -237,7 +237,7 @@ public class Session {
 	 */
 	
 	public boolean isMediata(){
-		return (this.relaySecondario==null);
+		return (this.relaySecondario!=null);
 	}
 	
 	/**
@@ -300,8 +300,7 @@ public class Session {
 				"\n OutStreamPort : \t" +this.getOutStreamPort()+
 				"\n ReceiverStreamPort : \t" +this.getReceiverStreamPort()+
 				"\n ProxyStreamingCtrlPort : \t" +this.getProxyStreamingCtrlPort()+
-				"\n streamingServerControlPort \t " + this.getStreamingServerCtrlPort()+
-				
+				"\n streamingServerControlPort \t " + this.getStreamingServerCtrlPort()+				
 				"\n sessione Mediata? \t" +this.isMediata());
 		
 	}
