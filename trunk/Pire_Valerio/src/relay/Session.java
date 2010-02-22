@@ -294,10 +294,14 @@ public class Session {
 	{		
 			
 		return ("id : \t" + this.getId()+
+				"\n senderStreamPort \t"+ this.getSenderStreamPort()+
+				
 				"\n InStreamPort : \t" +this.getInStreamPort()+
 				"\n OutStreamPort : \t" +this.getOutStreamPort()+
-				"\n ProxyStreamingCtrlPort : \t" +this.getProxyStreamingCtrlPort()+
 				"\n ReceiverStreamPort : \t" +this.getReceiverStreamPort()+
+				"\n ProxyStreamingCtrlPort : \t" +this.getProxyStreamingCtrlPort()+
+				"\n streamingServerControlPort \t " + this.getStreamingServerCtrlPort()+
+				
 				"\n sessione Mediata? \t" +this.isMediata());
 		
 	}
