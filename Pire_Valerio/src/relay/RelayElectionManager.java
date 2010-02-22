@@ -507,6 +507,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			/** IM_RELAY
 			 *  WAITING_WHO_IS_RELAY
 			 *  Risposta da parte del nodo relay attivo del CLUSTER di riferimento*/
+			debug(getConsoleElectionManager(),3,"Arrivato messaggio :"+getRelayMessageReader().getCode());
 			if((getRelayMessageReader().getCode() == MessageCodeConfiguration.IM_RELAY) && 
 			   (getActualStatus() == RelayStatus.WAITING_WHO_IS_RELAY)){
 				
