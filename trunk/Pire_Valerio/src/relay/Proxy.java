@@ -1621,6 +1621,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		try {
 			//invio LEAVE al client:
 			DatagramPacket leave=null;
+			System.out.println("--------------sendLeaveMsgToClient() clientaddress "+clientAddress+", cliensessionport "+this.clientSessionPort);
 			if(servingClient)
 				leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), this.clientSessionPort);
 			else

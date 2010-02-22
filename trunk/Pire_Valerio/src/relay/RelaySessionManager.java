@@ -1178,14 +1178,19 @@ private void changeProxySession(Hashtable sessionEndpoint)
 	 * 
 	 */
 	String chiave;
+	consolle.debugMessage(2, "SessionEndpoint è vuoto?" + sessionEndpoint.isEmpty());
 	if(!sessionEndpoint.isEmpty())
-	{
+		{
+		consolle.debugMessage(0, "sessionEndopoint non è vuota");
 		if(!sessions.isEmpty())
 		{
+			consolle.debugMessage(0, "sessionEndopoint non è vuota");
 			Enumeration keys = sessionEndpoint.keys();
 			while(keys.hasMoreElements())
 			{
 				chiave = keys.nextElement().toString();
+				consolle.debugMessage(0, "sessionEndopoint attuale "+ chiave);
+				consolle.debugMessage(0, "la chiave c'è anche nella tabella sessions locale ?"+sessions.containsKey(chiave) );
 				int[] values =(int[]) sessionEndpoint.get(chiave);
 				try {
 					Proxy proxy = sessions.get(chiave).getProxy();
