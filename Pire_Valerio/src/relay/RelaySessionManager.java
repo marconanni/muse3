@@ -222,6 +222,8 @@ public class RelaySessionManager implements Observer{
 	System.out.println("Tipo di Classe dell'arg: "+ arg.getClass());
 	if(arg instanceof DatagramPacket)
 	{
+		
+		consolle.debugMessage(DebugConfiguration.DEBUG_INFO, "arrivato messaggio: contenuto messaggio " + messageReader.getMessage());
 		/**
 		 * un messaggio è appena arrivato e richiamo il reader per la lettura dello stesso
 		 */
@@ -499,6 +501,7 @@ public class RelaySessionManager implements Observer{
 			// il metodo getProxyInfo restituisce una tabella che ha per ogni chiave ( l'ip del client) la porta sulla
 			//quale ridirigere il flusso.
 			
+			
 			this.changeProxySession(messageReader.getProxyInfo()); 
 		}
 		
@@ -556,8 +559,9 @@ public class RelaySessionManager implements Observer{
 			
 			String proxyInfo = this.createProxyFromSession(sessions); // Nota: proxyInfo contiene le porte di recovery dei relay sostituivi sulle quali ridirigere le varie sessioni
 			try {
-				this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+				this.message = RelayMessageFactory.buildAckSession(0, proxyInfo, InetAddress.getByName(this.oldRelayLocalClusterAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
 				this.sessionCMCluster.sendTo(this.message);
+				consolle.debugMessage(1, "mandato il messaggio di ack session");
 				if(electionManager.isBIGBOSS())
 					this.status = RelaySessionStatus.ACTIVE_BIGBOSS;
 				else
@@ -998,29 +1002,29 @@ public class RelaySessionManager implements Observer{
 	 * impacchettamentodei dati delle sessioni nel messaggio SESSION_INFO, e l'estrazione da
 	 * dei medesimi dal messaggio.
 	 */
-		{
-			try {
-				DatagramPacket pacchetto =RelayMessageFactory.buildSessionInfo(0, sessions, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), 30);
-				messageReader.readContent(pacchetto);
-				consolle.debugMessage(0, "imacchettati ed estratti i dati sessione. il messaggio del pacchetto è:"+ messageReader.getMessage());
-				consolle.debugMessage(2, "stampa della prima sessione estratta dal messaggio:");
-				Hashtable<String, Session> sessioniTemporanee = messageReader.getSessions();
-				String primaChiave = sessioniTemporanee.keys().nextElement();
-				Session primaSessione = sessioniTemporanee.get(primaChiave);
-				consolle.debugMessage(2, primaSessione.toString());
-				
-				
-				
-				
-			} catch (UnknownHostException e) {
-				//  Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				//  Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		}
+//		{
+//			try {
+//				DatagramPacket pacchetto =RelayMessageFactory.buildSessionInfo(0, sessions, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), 30);
+//				messageReader.readContent(pacchetto);
+//				consolle.debugMessage(0, "imacchettati ed estratti i dati sessione. il messaggio del pacchetto è:"+ messageReader.getMessage());
+//				consolle.debugMessage(2, "stampa della prima sessione estratta dal messaggio:");
+//				Hashtable<String, Session> sessioniTemporanee = messageReader.getSessions();
+//				String primaChiave = sessioniTemporanee.keys().nextElement();
+//				Session primaSessione = sessioniTemporanee.get(primaChiave);
+//				consolle.debugMessage(2, primaSessione.toString());
+//				
+//				
+//				
+//				
+//			} catch (UnknownHostException e) {
+//				//  Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				//  Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			
+//		}
 	
 	
 	}
@@ -1106,6 +1110,7 @@ private String createProxyFromSession(Hashtable sessionInfo)
 		{
 			chiave = keys.nextElement().toString();
 			Session session = (Session)sessions.get(chiave);
+			consolle.debugMessage(2, "creo il proxy per la sessione: "+session.toString());
 			int[] values =session.getSessionInfo();
 			if(values.length == 6)
 			{
