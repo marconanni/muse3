@@ -196,6 +196,14 @@ public class RelayMessageReader {
 	 * @return indirizzo Ip in forma di stringa del nodo (relay o big boss attivo) a cui si è collegati*/
 	//public String getActualConnectedRelayAddress(){return actualConnectedRelayAddress;}
 	
+	/**
+	 * Tutti i messaggi mandati,sono in realtà delle stringhe, questo metodo ritorna la stringa
+	 * inviata come messaggio. 
+	 */
+	public String getMessage() {
+		return message;
+	}
+
 	/**Metogo getter
 	 * @return valore RSSI attuale*/
 	public  double getRSSI() {return RSSI;}
