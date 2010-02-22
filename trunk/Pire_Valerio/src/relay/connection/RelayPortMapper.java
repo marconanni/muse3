@@ -144,8 +144,9 @@ public class RelayPortMapper {
 	 */
 	public void setRangePortInRTPProxy(int rangePortInRTPProxy) {
 		
-		System.out.println("viene fuori l'indice " +(rangePortInRTPProxy - PortConfiguration.PROXY_INITIAL_PORT_IN_RTP));
+		//System.out.println("viene fuori l'indice " +(rangePortInRTPProxy - PortConfiguration.PROXY_INITIAL_PORT_IN_RTP));
 		this.rangePortInRTPProxy[rangePortInRTPProxy - PortConfiguration.PROXY_INITIAL_PORT_IN_RTP] = false;
+		this.rangePortInRTPProxy[(rangePortInRTPProxy+1) - PortConfiguration.PROXY_INITIAL_PORT_IN_RTP] = false;
 	}
 
 	/**
@@ -153,6 +154,7 @@ public class RelayPortMapper {
 	 */
 	public void setRangePortOutRTPProxy(int rangePortOutRTPProxy) {
 		this.rangePortOutRTPProxy[rangePortOutRTPProxy - PortConfiguration.PROXY_INITIAL_PORT_OUT_RTP] = false;
+		this.rangePortOutRTPProxy[(rangePortOutRTPProxy+1) - PortConfiguration.PROXY_INITIAL_PORT_OUT_RTP] = false;
 	}
 
 	/**
@@ -243,6 +245,7 @@ public class RelayPortMapper {
 
 		return -1;
 	}
+	
 
 	/**Metodo per ottenere una porta libera da assegnare al PROXY per 
 	 * ricevere i messaggi di START_TX e STOP_TX dal CLIENT

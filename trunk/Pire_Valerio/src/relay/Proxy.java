@@ -126,6 +126,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String connectedClusterHeadAddr;
 	private String localClusterHeadAddr;
 	
+	private String oldProxyAddress;
+	
 		
 	private long startTime =0;
 	
@@ -308,7 +310,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.streamingServerCtrlPort = serverCtrlPort;
 		this.proxyStreamingCtrlPort = proxyCtrlPort;
 		System.out.println("Inizializzazione del proxy in corso...");
-		final String oldProxyAddress = recoverySenderlocalClusterAddress;
+		this.oldProxyAddress = recoverySenderlocalClusterAddress;
 		this.msgReader = new RelayMessageReader();
 		
 		this.fProxy = new ProxyFrame();
@@ -364,8 +366,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		 */
 	
 		Thread runner2 = new Thread(){public void run(){try {
-			final InetAddress address = InetAddress.getByName(oldProxyAddress);
-			rtpReceptionMan.initRecoveryConnection(outStreamPort, address);
+			final InetAddress address = InetAddress.getByName(getOldProxyAddress());
+			System.out.println("+++++++ Ricezione recovery da "+address.toString()+":"+getOutStreamPort());
+			rtpReceptionMan.initRecoveryConnection(getOutStreamPort(), address);
 			System.err.print("Apertura ricezione recovery in corso...");
 			rtpReceptionMan.startRecoveryConnection();
 		} catch (UnknownHostException e) {
@@ -425,6 +428,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 */
 	public int getOutStreamPort() {
 		return outStreamPort;
+	}
+	
+	public String getOldProxyAddress(){
+		return oldProxyAddress;
 	}
 
 	/* (non-Javadoc)

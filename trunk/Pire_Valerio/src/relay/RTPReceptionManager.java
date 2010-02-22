@@ -119,10 +119,11 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 			recoveryReceiver = null;
 			recoveryRTPParser = null;
 			recoveryParserThread = null;
-		}else{
-			this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();
-			recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(this.localClusterHeadAddr),InetAddress.getByName(this.connectedClusterHeadAddr));
 		}
+//		}else{
+//			this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();
+//			recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(this.localClusterHeadAddr),InetAddress.getByName(this.connectedClusterHeadAddr));
+//		}
 	}
 
 	
@@ -141,14 +142,19 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	 */
 	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer,String oldRelayAddress, int oldProxyStreamInPort,  String indirizzoRicezione, String indirizzoTrasmissione, Proxy proxy) throws IOException, IncompatibleSourceException{
 		this.buffer = buffer;
+		this.localClusterHeadAddr=indirizzoRicezione;
+		this.connectedClusterHeadAddr=indirizzoTrasmissione;
 
 		this.proxy = proxy;
 		//imposto la porta di ricezione del proxy di recovery con la vecchia porta di ricezione del  vecchio proxy
 		normalReceivingPort = oldProxyStreamInPort;	
+		
 		normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(indirizzoRicezione),InetAddress.getByName(indirizzoTrasmissione));
+		System.out.println("*******OldPortProxy:"+oldProxyStreamInPort);
 		RelayPortMapper.getInstance().setRangePortInRTPProxy(normalReceivingPort);
 		//ottengo dal port mapper la porta di ricezione dello stream proveniente dal vecchio proxy
 		this.recoveryReceivingPort = RelayPortMapper.getInstance().getFirstFreeStreamInPort();
+		System.out.println("******Recovery PORT:"+this.recoveryReceivingPort);
 		/*
 		 * Non abbiamo capito come funziona il costruttore di recoveryreceiver 
 		 */
@@ -169,8 +175,10 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	 * @throws IncompatibleSourceException 
 	 */
 	public void initNormalConnection() throws UnknownHostException, IOException, IncompatibleSourceException{
+		System.out.println("############à INITNORMALCONNECTION ");
 		normalReceiver.setSender(InetAddress.getByName(this.connectedClusterHeadAddr), streamingServerSendingPort);//da dove prende streamingServerPort
 		//	normalReceiver.setBufferLength(this.buffer.getBufSize());
+		System.out.println("############à INITNORMALCONNECTION 3");
 		normalReceiver.addReceiveStreamEventListener(this);
 
 		System.err.println("Indirizzo da cui ricevo "+this.connectedClusterHeadAddr+":"+streamingServerSendingPort);
