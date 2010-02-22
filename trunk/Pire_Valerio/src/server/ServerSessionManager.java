@@ -274,27 +274,7 @@ public class ServerSessionManager implements Observer{
 			 	
 			
 	
-			if(ServerMessageReader.getCode() == MessageCodeConfiguration.REDIRECT)
-			{
-				consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"SERVER_SESSION_MANAGER: Arrivata una richiesta di REDIRECT");
-				this.newRelayAddress = this.message.getAddress().getHostAddress();
-				if(!ssReferences.isEmpty())
-				{
-					Enumeration keys = ssReferences.keys();
-					while(keys.hasMoreElements())
-					{
-						String chiave = keys.nextElement().toString();
-						System.out.println(chiave);
-						if(!ssReferences.get(chiave).redirect(this.newRelayAddress))
-						{
-							System.err.println("Errore nella REDIRECT di uno StreamingServer...");
-							//Logger.write("Errore nella REDIRECT di uno StreamingServer...");
-							consolle.debugMessage(DebugConfiguration.DEBUG_ERROR,"Errore nella REDIRECT di uno StreamingServer...");
-						}
-						
-					}
-				}
-			}
+
 
 		}
 	}

@@ -928,9 +928,9 @@ public class RelayElectionManager extends Observable implements Observer{
 			//relayBatteryMonitor.start();
 			setActualStatus(RelayStatus.MONITORING);
 		}
-		if(getRelayPositionMonitor().isStopped()){
-			getRelayPositionMonitor().start();
-		}
+//		if(getRelayPositionMonitor().isStopped()){
+//			getRelayPositionMonitor().start();
+//		}
 		if(!getRelayPositionMonitor().isStarted())
 			getRelayPositionMonitor().start();
 			

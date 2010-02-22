@@ -126,8 +126,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String connectedClusterHeadAddr;
 	private String localClusterHeadAddr;
 	
-	private String streamingClientAddress; //indirizzo dell'entità che riceve il flusso in uscita dal proxy
-	
+		
 	private long startTime =0;
 	
 	
@@ -358,7 +357,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}}};
 		runner1.start();
 		
-		this.sendRedirectToServer();
+		this.sendRedirect();
 		
 		/*
 		 * Ho un'altro thread in ricezione: quello che riceve il flusso dal vecchio relay
@@ -1051,6 +1050,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * 
 	 */
 	public boolean startHandoff(int portStremInNewProxy, InetAddress newRelayAddr){
+		this.fProxy.messageArea.append("start handoff, ridirigo il fusso verso "+ newRelayAddr.getHostAddress()+":" + portStremInNewProxy);
 		boolean result=false;
 		if(servingClient)
 			try {
@@ -1501,7 +1501,16 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	}
 	
 	
-	protected void sendRedirectToServer(){
+
+	
+	/**
+	 * Metodo che manda il messaggio di redirect a chi eroga il flusso, il quale
+	 * ridirigerà il flusso rtp verso questo nodo.
+	 * Non c'è la versione differenziata perchè deve arrivare a chi eroga il flusso 
+	 * (proxy del big boss o StreamingServer del server), la porta sulla quale 
+	 * stanno in ascolto è la porta di controllo.
+	 */
+	private void sendRedirect(){
 		/*
 		 *  il server potrebbe anche essere un proxy sul big boss; ma il metodo non d� problemi
 		 *  a riguardo, visto che  l'indirizzo viene fornito dal costruttore e la porta
@@ -1511,9 +1520,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		try {
 			//Creo un messaggio REDIRECT e lo invio al server
 			
-			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0,InetAddress.getByName(this.streamingServerAddress), this.streamingServerSessionPort);
+			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0,InetAddress.getByName(this.connectedClusterHeadAddr),this.streamingServerCtrlPort);
 			proxyCM.sendToServer(redirect);
-			this.fProxy.messageArea.append("Mandato il redirect a "+ this.streamingServerAddress+": "+ this.streamingServerSessionPort);
+			this.fProxy.messageArea.append("Mandato il redirect a "+ this.connectedClusterHeadAddr+": "+ this.streamingServerCtrlPort);
 			//this.serverStopped = false;
 		} catch (UnknownHostException e) {
 			
@@ -1545,7 +1554,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendStopTXToBigBoss(){
 		DatagramPacket stopTX;
 		try {
-			stopTX = RelayMessageFactory.buildStopTx(0, InetAddress.getByName(NetConfiguration.BIGBOSS_AD_HOC_ADDRESS), this.bigbossControlPort);
+			stopTX = RelayMessageFactory.buildStopTx(0, InetAddress.getByName(this.connectedClusterHeadAddr), this.bigbossControlPort);
 			proxyCM.sendToServer(stopTX);
 			this.serverStopped = true;
 		} catch (UnknownHostException e) {

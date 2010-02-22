@@ -155,6 +155,15 @@ public class StreamingServer implements ControllerListener, Observer{
 			if(this.started) this.stopProcessor();
 			this.status = "Stopped";
 		}
+		
+		if(ServerMessageReader.getCode() == MessageCodeConfiguration.REDIRECT )
+		{
+			String newRelayAddress= this.msg.getAddress().getHostAddress();
+						
+			consolle.debugMessage(2,"Arrivato redirect da"+ newRelayAddress);
+			this.redirect(newRelayAddress);
+			
+		}
 
 	}
 	
