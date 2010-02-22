@@ -289,6 +289,20 @@ public class Session {
 		this.proxyStreamingCtrlPort = sessionInfo[5];
 		
 	}
+	@Override
+	public String toString()
+	{		
+			
+		return ("id : \t" + this.getId()+
+				"\n InStreamPort : \t" +this.getInStreamPort()+
+				"\n OutStreamPort : \t" +this.getOutStreamPort()+
+				"\n ProxyStreamingCtrlPort : \t" +this.getProxyStreamingCtrlPort()+
+				"\n ReceiverStreamPort : \t" +this.getReceiverStreamPort()+
+				"\n sessione Mediata? \t" +this.isMediata());
+		
+	}
+	
+	
 	
 
 }

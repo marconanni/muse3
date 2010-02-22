@@ -991,6 +991,38 @@ public class RelaySessionManager implements Observer{
 		this.numberOfSession++;
 		
 		System.out.println("sessionInfo della sessione in tabella "+sessions.get(clientAddress).getSessionInfo());
+	
+	
+	/*
+	 * Il seguente blocco di codice è inserito solo per testare le funzionalità di
+	 * impacchettamentodei dati delle sessioni nel messaggio SESSION_INFO, e l'estrazione da
+	 * dei medesimi dal messaggio.
+	 */
+		{
+			try {
+				DatagramPacket pacchetto =RelayMessageFactory.buildSessionInfo(0, sessions, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), 30);
+				messageReader.readContent(pacchetto);
+				consolle.debugMessage(0, "imacchettati ed estratti i dati sessione. il messaggio del pacchetto è:"+ messageReader.getMessage());
+				consolle.debugMessage(2, "stampa della prima sessione estratta dal messaggio:");
+				Hashtable<String, Session> sessioniTemporanee = messageReader.getSessions();
+				String primaChiave = sessioniTemporanee.keys().nextElement();
+				Session primaSessione = sessioniTemporanee.get(primaChiave);
+				consolle.debugMessage(2, primaSessione.toString());
+				
+				
+				
+				
+			} catch (UnknownHostException e) {
+				//  Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				//  Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	
+	
 	}
 }
 
