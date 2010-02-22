@@ -530,6 +530,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			if(msgReader.getCode()==MessageCodeConfiguration.FORWARD_ACK_REQ&&state==ProxyState.waitingServerRes&&!isBigBoss){
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
+				
 				this.serverStreamPort=msgReader.getServerStreamingPort();
 				this.streamingServerCtrlPort=msgReader.getServerStreamingControlPort();
 				//imposto la porta da cui il server invia lo stream
@@ -1446,8 +1447,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.inStreamPort = rtpReceptionMan.getNormalReceivingPort();
 		DatagramPacket reqFile;
 		try {
-			reqFile = RelayMessageFactory.buildForwardReqFile(0, filename, 0, 0,"questo campo non mi serve, lo riempirà bigboss", proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress,  this.clientStreamPort, InetAddress.getByName(this.connectedClusterHeadAddr), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
-			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+this.clientStreamPort);
+//			reqFile = RelayMessageFactory.buildForwardReqFile(0, filename, 0, 0,"questo campo non mi serve, lo riempirà bigboss", proxyCM.getLocalAdHocInputPort(), this.inStreamPort, this.clientAddress,  this.clientStreamPort, InetAddress.getByName(this.connectedClusterHeadAddr), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+//			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+this.clientStreamPort);
+			reqFile = RelayMessageFactory.buildForwardReqFile(0, filename, 0, 0,"questo campo non mi serve, lo riempirà bigboss", proxyCM.getLocalManagedInputOutputPort(), this.inStreamPort, this.clientAddress,  this.clientStreamPort, InetAddress.getByName(this.connectedClusterHeadAddr), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalManagedInputOutputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
 		} catch (Exception e) {
 			// Auto-generated catch block
@@ -1483,9 +1486,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private void sendStartTXToBigBoss(){
 		try {
 			//Creo un messaggio START_TX e lo invio al server
-			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(connectedClusterHeadAddr), this.bigbossControlPort);
+			System.out.println("-------------------------------------------porta bigboss "+this.streamingServerCtrlPort);
+			DatagramPacket startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(connectedClusterHeadAddr), this.streamingServerCtrlPort);
 			proxyCM.sendToServer(startTX);
-			
+
 			this.serverStopped = false;
 		} catch (UnknownHostException e) {
 			// Auto-generated catch block
