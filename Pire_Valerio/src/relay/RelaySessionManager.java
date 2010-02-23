@@ -223,13 +223,14 @@ public class RelaySessionManager implements Observer{
 	if(arg instanceof DatagramPacket)
 	{
 		
-		consolle.debugMessage(DebugConfiguration.DEBUG_INFO, "arrivato messaggio: contenuto messaggio " + messageReader.getMessage());
+		
 		/**
 		 * un messaggio è appena arrivato e richiamo il reader per la lettura dello stesso
 		 */
 		this.message = (DatagramPacket) arg;
 		try {
 			messageReader.readContent(this.message);
+			consolle.debugMessage(DebugConfiguration.DEBUG_INFO, "arrivato messaggio: contenuto messaggio " + messageReader.getMessage());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.err.println("RELAY_SESSION_MANAGER: Errore nella lettura del Datagramma");
@@ -536,7 +537,7 @@ public class RelaySessionManager implements Observer{
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
 			 // creo le sessioni ggio dal messa attualmente per� non ci sono i proxy, li metto con il 
 			//metodo
-			this.sessions = messageReader.getSessions();//X MARCO!!! QUESTO L'HO COMMENTATO PER FARE LE PROVE, PERCHÈ MI DAVA ERRORE!!
+			this.sessions = messageReader.getSessions();
 			
 			//print hastable
 			
@@ -1177,6 +1178,9 @@ private void changeProxySession(Hashtable sessionEndpoint)
 	 * inoltre setta il flag ending per ongi proxy
 	 * 
 	 */
+	
+
+	
 	String chiave;
 	consolle.debugMessage(2, "SessionEndpoint è vuoto?" + sessionEndpoint.isEmpty());
 	if(!sessionEndpoint.isEmpty())
@@ -1184,7 +1188,7 @@ private void changeProxySession(Hashtable sessionEndpoint)
 		consolle.debugMessage(0, "sessionEndopoint non è vuota");
 		if(!sessions.isEmpty())
 		{
-			consolle.debugMessage(0, "sessionEndopoint non è vuota");
+			consolle.debugMessage(0, "sessions non è vuota");
 			Enumeration keys = sessionEndpoint.keys();
 			while(keys.hasMoreElements())
 			{
@@ -1192,9 +1196,11 @@ private void changeProxySession(Hashtable sessionEndpoint)
 				consolle.debugMessage(0, "sessionEndopoint attuale "+ chiave);
 				consolle.debugMessage(0, "la chiave c'è anche nella tabella sessions locale ?"+sessions.containsKey(chiave) );
 				int[] values =(int[]) sessionEndpoint.get(chiave);
+				consolle.debugMessage(0, "valore della porta dalla quale il nuovo proxy accetta il flusso di recovery "+ values[0] );
 				try {
 					Proxy proxy = sessions.get(chiave).getProxy();
 					proxy.startHandoff(values[0], InetAddress.getByName(this.maxWnextRelay));
+					consolle.debugMessage(0, "chiamato il metodo startHandoff: indirizzo  "+ this.maxWnextRelay+" porta: " + values[0] );
 					proxy.setEnding(true);
 				} catch (UnknownHostException e) {
 					
