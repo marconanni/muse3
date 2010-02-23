@@ -184,6 +184,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * @param clientAddress
 	 * @param clientStreamPort
 	 */
+	
 	public Proxy(Observer sessionManager,boolean newProxy, String filename,String relayAddress, int relayControlPort,int relayStreamPort, String clientAddress, int clientStreamPort, boolean isBigBoss, boolean servingClient, String localClusterHeadAddr, String connectedClusterHeadAddr) {
 		
 		this.connectedClusterHeadAddr=connectedClusterHeadAddr;
@@ -393,7 +394,15 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //		boolean flag = rtpReceptionMan.startNormalConnection();
 		
 		//avvio la ricezione di recovery
-//		boolean flag2 = rtpReceptionMan.startRecoveryConnection();
+		boolean flag2 = rtpReceptionMan.startRecoveryConnection();
+		System.err.println("+++++++ fatta startRecoveryConnection");
+		/*
+		 * Marco: prova: non so se va bene, ma mando lo start TX al vecchio relay
+		 */
+		
+		this.sendStartTXToOldProxy();
+		
+		System.err.println("+++++++ inviata startTX al vecchio proxy.");
 
 		//transito nel nuovo stato 
 		this.state = ProxyState.receivingRetransmission;
@@ -1129,6 +1138,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			if (alsoSendRedirectToclient == true){
 			//invio un messaggio di Leave al client
 					sendLeaveMsgToClient();		 //informo il client che mi sto staccando
+					fProxy.messageArea.append("mandato il Leave al client.");
+					System.err.println("++++++++++++ mandato il Leave al client.");
 			}
 			try {
 				//elimino il client dalla lista dei destinatari del sender
@@ -1557,6 +1568,22 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			e.printStackTrace();
 		}
 	}
+	
+	private void sendStartTXToOldProxy(){
+		DatagramPacket startTX;
+		try {
+			startTX = RelayMessageFactory.buildStartTx(0, InetAddress.getByName(this.oldProxyAddress), this.streamingServerCtrlPort);
+			proxyCM.sendToServer(startTX);
+			this.serverStopped = true;
+		} catch (UnknownHostException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	
 	private void sendStopTXToBigBoss(){
 		DatagramPacket stopTX;
