@@ -754,6 +754,7 @@ public class RelaySessionManager implements Observer{
 			String indsupVecchioRelay = st.nextToken();
 			
 			String indFornitoreFlussiVecchioRelay=st.nextToken();
+			this.connectedClusterHeadAddress = electionManager.getConnectedClusterHeadAddress();
 			
 			consolle.debugMessage(0, "indirizzo new Relay "+ newRelay+" Election local address:"+electionManager.getLocalClusterAddress());
 			
