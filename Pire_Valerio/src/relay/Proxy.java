@@ -400,7 +400,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		 * Marco: prova: non so se va bene, ma mando lo start TX al vecchio relay
 		 */
 		
-		this.sendStartTXToOldProxy();
+//		this.sendStartTXToOldProxy();
 		
 		System.err.println("+++++++ inviata startTX al vecchio proxy.");
 
@@ -1328,6 +1328,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		if (muxTh == null || state == ProxyState.receivingRetransmission || state == ProxyState.TransmittingTempBuffer){
 		
 			try {
+				System.out.println("trackformat "+this.rtpReceptionMan.getTrackFormats().toString());
 				RTPMultiplexer mux = new RTPMultiplexer(this.rtpReceptionMan.getTrackFormats());
 				//creo un MultiplexerThread
 				//muxTh = new MultiplexerThreadEV(rtpMux, buffer.getNormalBuffer(),null , this.clientAddress);
