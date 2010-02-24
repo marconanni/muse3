@@ -202,7 +202,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 
 		if((val<0) || (val>120))
 			throw new InvalidParameter("ERRORE: Potenza del segnale non valida "+val);
-		if(averageValues.size()<maxNumberOfAverageValues)
+		if(averageValues.size()<=maxNumberOfAverageValues)
 			averageValues.add(Double.valueOf(val));
 		else {
 			averageValues.removeElementAt(0);
