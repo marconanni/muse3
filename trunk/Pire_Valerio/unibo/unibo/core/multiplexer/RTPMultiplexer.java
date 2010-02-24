@@ -33,7 +33,7 @@ public class RTPMultiplexer implements Multiplex {
     public RTPMultiplexer(Format[] inputFormats) throws IOException {
         rtpMux=new RTPSyncBufferMux();
         rtpMux.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW_RTP));
-        rtpMux.setNumTracks(inputFormats.length);
+       rtpMux.setNumTracks(inputFormats.length);
         for (int i=0; i<inputFormats.length; i++) {
             if (rtpMux.setInputFormat(inputFormats[i],i)==null)
             	throw new IOException("Mux Input non compatible");
