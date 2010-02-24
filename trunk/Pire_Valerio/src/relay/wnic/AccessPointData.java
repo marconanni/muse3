@@ -64,7 +64,7 @@ public class AccessPointData
 		this.name=name;
 		this.mac=mac;
 		this.mode=mode;
-		signal.add(Double.valueOf(RSSI));
+		//signal.add(Double.valueOf(RSSI));
 	}
 	
 	/**
