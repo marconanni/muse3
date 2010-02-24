@@ -125,7 +125,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private boolean isBigBoss;
 	private String connectedClusterHeadAddr;
 	private String localClusterHeadAddr;
-	
+	private String localClusterAddress;
 	private String oldProxyAddress;
 	
 		
@@ -291,9 +291,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * @param connectedClusterHeadAddr l'indirizzo superiore di questo proxy
 	 * @param servingClient true il proxy invia direttamente il flusso ad un client, false se invia ad un relay secondario
 	 */
-	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, String secondaryRelayAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderOutPort,int recoverySenderInPort, String recoverySenderlocalClusterAddress,  int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String connectedClusterHeadAddr, boolean servingClient){
+	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, String secondaryRelayAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderOutPort,int recoverySenderInPort, String recoverySenderlocalClusterAddress,  int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String localClusterAddress,String connectedClusterHeadAddr, boolean servingClient){
 //	TODO: controllare che le porte siano tutte ben mappate
 		
+		this.localClusterAddress = localClusterAddress;
 		this.localClusterHeadAddr=localClusterHeadAddr;
 		this.connectedClusterHeadAddr=connectedClusterHeadAddr;
 		this.relayAddress= secondaryRelayAddress;
@@ -303,7 +304,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.serverStopped = false;
 		this.newProxy = newProxy;
 		this.filename = ""; 
-		this.clientAddress = clientAddress; 
+		this.clientAddress = clientAddress;
+		System.err.println("cllient----------------------------------------------------------------------------------------------"+this.clientAddress);
 		this.clientStreamPort = clientStreamPort;
 		this.serverStreamPort = serverStreamPort;
 		this.outStreamPort = proxyStreamPortOut;
@@ -313,6 +315,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		System.out.println("Inizializzazione del proxy in corso...");
 		this.oldProxyAddress = recoverySenderlocalClusterAddress;
 		this.msgReader = new RelayMessageReader();
+		this.servingClient = servingClient;
 		
 		this.fProxy = new ProxyFrame();
 		//proxy connection manager, e' osservato da this
@@ -323,17 +326,17 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			
 			buffer = new RelayBufferManager(BufferConfiguration.PROXY_BUFFER, this.fProxy.getController(), BufferConfiguration.PROXY_SOGLIA_INFERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_INFERIORE_ELECTION,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_ELECTION,this);
 			//creo un rtpreceptionamanger
-			this.rtpReceptionMan = new RTPReceptionManager(false, buffer, oldProxyAddress, recoverySenderInPort, this.localClusterHeadAddr, this.connectedClusterHeadAddr, this);
+			this.rtpReceptionMan = new RTPReceptionManager(false, buffer, oldProxyAddress, recoverySenderInPort, this.localClusterHeadAddr,this.localClusterAddress, this.connectedClusterHeadAddr, this);
 			
 			//imposto la porta da cui il server invia lo stream 
 			this.rtpReceptionMan.setStreamingServerSendingPort(serverStreamPort);
 			
 			//imposto la porta di ricezione di recovey
 			//this.rtpReceptionMan.setNormalReceivingPort(proxyStreamPortIn);// Marco: perchè è commentato?
-		} catch (IncompatibleSourceException e) {
+		} catch (IncompatibleSourceException e) {System.out.println(e.getMessage());
 			// Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (IOException e) {System.out.println(e.getMessage());
 			// Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -400,9 +403,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		 * Marco: prova: non so se va bene, ma mando lo start TX al vecchio relay
 		 */
 		
-//		this.sendStartTXToOldProxy();
-		
-		System.err.println("+++++++ inviata startTX al vecchio proxy.");
+
 
 		//transito nel nuovo stato 
 		this.state = ProxyState.receivingRetransmission;
@@ -649,6 +650,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 
 			if(msgReader.getCode() == MessageCodeConfiguration.START_TX){
 				System.err.println("E' arrivato START_TX");
+				
 				/*
 				 * MArco:è arrivato un messaggio START_TX da parte del client
 				  come si comporta il proxy dipende dallo stato in cui si trova il proxy, sono che sono molto criptici
@@ -1542,6 +1544,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			DatagramPacket redirect = RelayMessageFactory.buildRedirect(0,InetAddress.getByName(this.connectedClusterHeadAddr),this.streamingServerCtrlPort);
 			proxyCM.sendToServer(redirect);
 			this.fProxy.messageArea.append("Mandato il redirect a "+ this.connectedClusterHeadAddr+": "+ this.streamingServerCtrlPort);
+			System.err.println("Mandato il redirect a "+ this.connectedClusterHeadAddr+": "+ this.streamingServerCtrlPort);
 			//this.serverStopped = false;
 		} catch (UnknownHostException e) {
 			
