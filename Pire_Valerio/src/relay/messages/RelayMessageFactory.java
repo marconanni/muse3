@@ -121,10 +121,10 @@ public class RelayMessageFactory {
 	 * @return DatagramPacket da inviare 
 	 * @throws IOException
 	 */
-	public static DatagramPacket buildElectioBeaconRelay(int sequenceNumber, InetAddress addr, int port, int client) throws IOException{
+	public static DatagramPacket buildElectioBeacon(int sequenceNumber, InetAddress addr, int port, int client) throws IOException{
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_BEACON_RELAY+"_"+client;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_BEACON+"_"+client;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
