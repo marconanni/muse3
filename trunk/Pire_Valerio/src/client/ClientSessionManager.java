@@ -207,7 +207,8 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 			if(eventType.equals("RECIEVED_ELECTION_REQUEST") && this.status.equals("Playing")) {
 				System.out.println("ricevuta richiesta di elezione quando lo status era playing");
 				this.frameController.debugMessage("ricevuta richiesta di elezione quando lo status era playing");
-				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
+				//  temporaneamente disabilitato ingrandimento buffer;
+//				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
 				}
 		 
 			if(eventType.equals("EMERGENCY_ELECTION")) {
@@ -365,8 +366,28 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				// mi da errore runtime
 				this.relayAddress =this.newrelay;
 				this.frameController.setNewRelayIP(this.relayAddress);
-				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
+				// disabilitato rimpicciolimento buffer
+//				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
 				this.clientPlaying.redirectSource(this.relayAddress);
+				
+				// aggiunto invio di startTX
+				try {
+					this.msg = ClientMessageFactory.buildStartTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
+				} catch (UnknownHostException e) {
+					//  Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					//  Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					System.out.println("costruito messaggio StartTX da inviare a "+InetAddress.getByName(relayAddress)+":"+this.proxyCtrlPort);
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				sessionCM.sendTo(msg);
+			
 				}
 
 			
