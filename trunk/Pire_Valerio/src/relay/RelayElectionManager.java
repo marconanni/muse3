@@ -108,6 +108,22 @@ public class RelayElectionManager extends Observable implements Observer{
 //	private TimeOutClientDetection timeoutClientDetection = null;
 //	private TimeOutEmElection timeoutEmElection = null;
 	
+	//per i test
+	private long startElectionNoTimeOut = -1;
+	private long stopElectionNoTimeOut = -1;
+	private long intermedio = -1;
+	private long startElection = -1;
+	private long stopElection = -1;
+	
+	private static int NODE = 2;
+	private static int NUMBERPOSSIBLERELAY = 1;
+	
+	private int numberOfNode = -1;
+	private int numberOfPossibleRelay = -1;
+
+	private boolean test = true;
+	
+
 	public enum RelayStatus {					//stati in cui si può trovare il RelayElectionManager
 		OFF,
 		WAITING_WHO_IS_RELAY,
@@ -557,11 +573,17 @@ public class RelayElectionManager extends Observable implements Observer{
 			/**	ELECTION_REQUEST
 			 *  Un nodo Relay attivo sta uscendo dal proprio cluster -> in cerca di un nuovo sostituto
 			 */
-			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_REQUEST) && 
+			else if(((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_REQUEST) ||
+					(getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_BEACON))&& 
 					(!sameAddress(getRelayMessageReader().getPacketAddess())) &&
 					(!getFirstELECTION_REQUEST())){
 					setFirstELECTION_REQUEST(true);
 					setFirstELECTION_DONE(false);
+					
+					setStartElection(System.currentTimeMillis());
+					//setStartElectionNoTimeOut(System.currentTimeMillis());
+					setNumberOfNode(0);
+					
 
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "Arrivato ELECTION_REQUEST");
 				//rielezione nuovo nodo relay BigBoss/Relay secondario e sono un nodo possibile sostituto
@@ -581,9 +603,10 @@ public class RelayElectionManager extends Observable implements Observer{
 						
 						//AP/BIGBOSS CLUSTER Visibility == true
 						if(getRelayClusterHeadWNICController().isConnected()){
-
-							setTimeoutElectionBeacon(RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_ELECTION_BEACON, TimeOutConfiguration.TIME_OUT_ELECTION_BEACON));
-							setTimeoutFailToElect(RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT, TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
+							if(!test){
+								setTimeoutElectionBeacon(RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_ELECTION_BEACON, TimeOutConfiguration.TIME_OUT_ELECTION_BEACON));
+								setTimeoutFailToElect(RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT, TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
+							}
 
 							setActualStatus(RelayStatus.WAITING_BEACON);
 							
@@ -604,6 +627,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					setFirstELECTION_DONE(false);
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": relay secondario IP:"+getRelayMessageReader().getPacketAddess()+" è in cerca di un suo sostituto. removeRelay()");
 					setRelayToElect(getRelayMessageReader().getPacketAddess().getHostAddress());					
+					if(!test)
 					setTimeoutFailToElect(RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT, TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
 					//QUI DEVO INFORMARE IL SESSION MANAGER
 				}
@@ -624,12 +648,13 @@ public class RelayElectionManager extends Observable implements Observer{
 
 					try {
 						//Messaggio destinato ai possibili sostituti
-						dpOut = RelayMessageFactory.buildElectioBeaconRelay(0, BCASTHEAD,PortConfiguration.PORT_ELECTION_IN, getActiveClient());
+						dpOut = RelayMessageFactory.buildElectioBeacon(0, BCASTHEAD,PortConfiguration.PORT_ELECTION_IN, getActiveClient());
 						getComClusterHeadManager().sendTo(dpOut);
 						
 					} catch (IOException e){e.printStackTrace();}
-
-					setTimeoutFailToElect(RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
+					
+					if(!test)
+						setTimeoutFailToElect(RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
 					setActualStatus(RelayStatus.WAITING_END_NORMAL_ELECTION);
 					
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+" ELECTION_BEACON_RELAY inviato e start TIMEOUT_FAIL_TO_ELECT");
@@ -640,11 +665,36 @@ public class RelayElectionManager extends Observable implements Observer{
 			 *  WAITING_BEACON
 			 *  solo nodo possibile sostituti
 			 */
-			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_BEACON_RELAY) &&
+			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_BEACON) &&
 						(isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY())&&
 						 getActualStatus() == RelayStatus.WAITING_BEACON){
+						
 						addClientVisibility(getRelayMessageReader().getActiveClient());
 						debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_BEACON_RELAY arrivato, client_visibility = "+getClientVisibility());
+						
+						if(test){
+							setNumberOfNode(getNumberOfNode()+1);
+						
+							if(getNumberOfNode()==NODE){
+								
+								//Stato instabile WeightCalculation
+								weightCalculation();
+
+								debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"W calcolato:"+getW());
+								
+								DatagramPacket dpOut = null;
+
+								try {
+									dpOut = RelayMessageFactory.buildElectionResponse(0, getW(), getConnectedClusterHeadInetAddress(), PortConfiguration.PORT_ELECTION_IN);
+									getComClusterManager().sendTo(dpOut);
+									debug(getConsoleClusterWifiInterface(),DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ECTION_RESPONSE inviato a "+getConnectedClusterHeadAddress());
+								} catch (IOException e) {e.printStackTrace();}
+
+								setActualStatus(RelayStatus.WAITING_END_NORMAL_ELECTION);
+								
+								debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": attesa che ricevo risposta (ELECTIONE_DONE) dal nodo da sosituire ");
+							}
+						}
 			}
 			
 			/** ELECTION_RESPONSE
@@ -661,6 +711,49 @@ public class RelayElectionManager extends Observable implements Observer{
 
 				setBestSubstituteRelayAddress(getPossibleRelay().get(0).getAddress());
 				memorizeBestSubstituteRelayAddress();
+				if(test){
+					if(getNumberOfPossibleRelay() ==NUMBERPOSSIBLERELAY){
+						setElecting(false);
+						
+						debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": elezione finita, scelgo un nodo sostituto se ce ne sono.");
+
+						//Ho trovato nodi possibili sostituti
+						if (!possibleRelay.isEmpty()) {
+
+							DatagramPacket dpOut = null;
+
+							try {
+								//invio ai Relay
+								dpOut = RelayMessageFactory.buildElectionDone(	0, getBestSubstituteRelayAddress(),getLocalClusterAddress(),getLocalClusterHeadAddress(),getConnectedClusterHeadAddress(),BCAST, PortConfiguration.PORT_ELECTION_IN);
+								getComClusterManager().sendTo(dpOut);
+							
+								dpOut = RelayMessageFactory.buildElectionDone(	0, getBestSubstituteRelayAddress(),getLocalClusterAddress(),getLocalClusterHeadAddress(),getConnectedClusterHeadAddress(),BCASTHEAD, PortConfiguration.PORT_ELECTION_IN);
+								getComClusterHeadManager().sendTo(dpOut);
+								//firstELECTION_DONEsent = true;
+							} catch (IOException e) {e.printStackTrace();}
+
+							//faccio sapere al SESSIONMANAGER chi ho appena eletto
+						
+							setStopElection(System.currentTimeMillis());
+							debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStartElection()-getStopElection())+" ms");
+							setChanged();
+							notifyObservers("NEW_RELAY:" + getBestSubstituteRelayAddress()+":"+getLocalClusterAddress()+":"+getLocalClusterHeadAddress()+":"+getConnectedClusterHeadAddress());
+						
+							debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "RelayElectionManager STATO:"+actualStatus+" ELECTION_DONE + "+bestSubstituteRelayAddress+" inviato e passo allo stato di IDLE");
+						
+						}
+						else{
+							debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_ERROR, "RelayElectionManager STATO:"+actualStatus+" non ci sono nodi sostituti --> FASE DI EMERGENZA, questo nodo nn ne fa parte");
+							//FASE DI EMERGENZA
+						}
+						getComClusterHeadManager().close();
+						setComClusterHeadManager(null);
+						setActualStatus(RelayStatus.IDLE);
+						if(isBIGBOSS())setNodeType(0,false);
+						if(isRELAY())setNodeType(1,false);
+						
+					}
+				}else
 				
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_RESPONSE arrivato -> miglior nodo giunto " + getBestSubstituteRelayAddress() + " con peso: " + getPossibleRelay().get(0).getWeight());
 			}
@@ -685,6 +778,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				cancelTimeoutFailToElect();
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ELECTION_DONE arrivato: nuovo Relay: "+getRelayMessageReader().getNewRelayLocalClusterAddress());
 			
+				
 				//caso in cui viene eletto un nuovo BIGBOSS devo ricollegare il relay attivo
 				if(isRELAY()){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un relay secondario attivo ed è stato appena eletto un nuovo BIGBOSS, lo memorizzo.");
@@ -734,6 +828,9 @@ public class RelayElectionManager extends Observable implements Observer{
 						
 				}
 				
+				
+				setStopElection(System.currentTimeMillis());
+				debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStartElection()-getStopElection())+" ms");
 				setChanged();
 				notifyObservers("NEW_RELAY:"+getNewRelayLocalClusterAddress()+":"+getOldRelayLocalClusterAddress()+":"+getOldRelayLocalClusterHeadAddress()+":"+getHeadNodeAddress());
 					
@@ -754,6 +851,9 @@ public class RelayElectionManager extends Observable implements Observer{
 				try {
 					if(!sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayLocalClusterAddress())))
 						setChanged();
+					
+					setStopElection(System.currentTimeMillis());
+					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStartElection()-getStopElection())+" ms");
 					notifyObservers("NEW_RELAY:"+getRelayMessageReader().getNewRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+":"+getRelayMessageReader().getHeadNodeAddress());
 					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+"\nnuovo relay manderà un messaggio di ACK_CONNECTION");
 					setFirstELECTION_DONE(true);
@@ -788,6 +888,8 @@ public class RelayElectionManager extends Observable implements Observer{
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": DISCONNECTION_WARNING sollevato, chiudo tutti i monitor e spedisco il messaggio di ELECTION_REQUEST");
 				setW(-1);
 
+				setStartElection(System.currentTimeMillis());
+				
 				if(getWhoIsRelayServer()!=null)getWhoIsRelayServer().close();
 				setWhoIsRelayServer(null);
 				if(getRelayPositionAPMonitor()!=null)getRelayPositionAPMonitor().close();
@@ -812,6 +914,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					
 				} catch (IOException e) {e.printStackTrace();}
 
+				if(!test)
 				setTimeoutToElect(RelayTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_TO_ELECT,TimeOutConfiguration.TIME_OUT_TO_ELECT));
 
 				setElecting(true);
@@ -932,8 +1035,8 @@ public class RelayElectionManager extends Observable implements Observer{
 //		if(getRelayPositionMonitor().isStopped()){
 //			getRelayPositionMonitor().start();
 //		}
-		if(!getRelayPositionMonitor().isStarted())
-			getRelayPositionMonitor().start();
+//		if(!getRelayPositionMonitor().isStarted())
+//			getRelayPositionMonitor().start();
 			
 	}
 	public void stopMonitoringRSSI(){
@@ -1207,5 +1310,21 @@ public class RelayElectionManager extends Observable implements Observer{
 	public void setOldRelayLocalClusterAddress(String oldRelayLocalClusterAddress){this.oldRelayLocalClusterAddress = oldRelayLocalClusterAddress;}
 	public String getOldRelayLocalClusterHeadAddress(){return oldRelayLocalClusterHeadAddress;}
 	public void setOldRelayLocalClusterHeadAddress(String oldRelayLocalClusterHeadAddress){this.oldRelayLocalClusterHeadAddress = oldRelayLocalClusterHeadAddress;}
+	
+	//per i test
+	public long getStartElectionNoTimeOut() {return startElectionNoTimeOut;}
+	public void setStartElectionNoTimeOut(long startElectionNoTimeOut) {this.startElectionNoTimeOut = startElectionNoTimeOut;}
+	public long getStopElectionNoTimeOut() {return stopElectionNoTimeOut;}
+	public void setStopElectionNoTimeOut(long stopElectionNoTimeOut) {this.stopElectionNoTimeOut = stopElectionNoTimeOut;}
+	public long getIntermedio() {return intermedio;}
+	public void setIntermedio(long intermedio) {this.intermedio = intermedio;}
+	public long getStartElection() {return startElection;}
+	public void setStartElection(long startElection) {this.startElection = startElection;}
+	public long getStopElection() {return stopElection;}
+	public void setStopElection(long stopElection) {this.stopElection = stopElection;}	
+	public int getNumberOfNode() {return numberOfNode;}
+	public void setNumberOfNode(int numberOfNode) {this.numberOfNode = numberOfNode;}
+	public int getNumberOfPossibleRelay() {return numberOfPossibleRelay;}
+	public void setNumberOfPossibleRelay(int numberOfPossibleRelay) {this.numberOfPossibleRelay = numberOfPossibleRelay;}
 	
 }
