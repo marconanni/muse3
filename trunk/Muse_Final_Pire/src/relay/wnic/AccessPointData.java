@@ -64,7 +64,7 @@ public class AccessPointData
 		this.name=name;
 		this.mac=mac;
 		this.mode=mode;
-		signal.add(Double.valueOf(RSSI));
+		//signal.add(Double.valueOf(RSSI));
 	}
 	
 	/**
@@ -130,4 +130,18 @@ public class AccessPointData
 			signal.add(Double.valueOf(val));
 		}
 	}
+	
+	 
+		public void addSignalStrenghtValue(double val) throws InvalidParameter
+		{
+			if((val<0) || (val>120))
+				throw new InvalidParameter("ERRORE: Potenza del segnale dell'AP non valida "+val);
+			if(signal.size()<maxSignalSize)
+				signal.add(Double.valueOf(val));
+			else
+			{
+				signal.removeElementAt(0);
+				signal.add(Double.valueOf(val));
+			}
+		}
 }
