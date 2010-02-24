@@ -389,7 +389,7 @@ public class RelayMessageFactory {
 		 * @throws IOException
 		 */
 		static public DatagramPacket buildStartTx(int sequenceNumber, InetAddress addr, int port) throws IOException {
-
+			System.err.println("MANDO START_TX");
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 			DataOutputStream doStream = new DataOutputStream(boStream);
 			String content = sequenceNumber+"_"+MessageCodeConfiguration.START_TX;
@@ -410,7 +410,7 @@ public class RelayMessageFactory {
 		 * @throws IOException
 		 */
 		static public DatagramPacket buildStopTx(int sequenceNumber, InetAddress addr, int port) throws IOException {
-
+			System.err.println("MANDO STOP_TX");
 			ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 			DataOutputStream doStream = new DataOutputStream(boStream);
 			String content = sequenceNumber+"_"+MessageCodeConfiguration.STOP_TX;
