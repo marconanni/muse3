@@ -1040,7 +1040,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 		fProxy.getController().debugMessage(this.state.name());
 		System.err.println(this.state.name());
-		sendStartTXToServer();
+		if(isBigBoss)sendStartTXToServer();
+		else sendStartTXToBigBoss();
 		this.muxTh.suspend();
 		if(this.state == ProxyState.transmittingToClient)
 		{
