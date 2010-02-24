@@ -1025,7 +1025,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		// e faccio la differenza
 		
 		long executionTime = System.currentTimeMillis()-this.startTime;
-		fProxy.messageArea.append("Tempo per svuotare il buffer: " + executionTime);
+		System.err.println("@@@@@@@@@@@@@Tempo per svuotare il buffer: " + executionTime);
 		
 		if (debug)
 			System.out.println("Proxy: evento:" + e);
