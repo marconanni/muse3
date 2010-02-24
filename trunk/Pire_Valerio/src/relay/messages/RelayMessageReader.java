@@ -21,7 +21,7 @@ public class RelayMessageReader {
 	
 	private  String message = ""; 				//Stringa contenente il messaggio
 	private  int index = 0;						//indice messaggio
-	private  int code = 0;						//Codice messaggio
+	private  int code = -1;						//Codice messaggio
 	
 	//Ulteriodi parametri che dipendono dai vari messaggi
 	private  double W;
