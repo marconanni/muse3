@@ -120,6 +120,8 @@ public class EventCircularBuffer extends CircularBuffer{
 	
 	private void fireBufferFullEvent(BufferFullEvent ev)
 	{
+		
+	
 		Object[] list= listeners.getListenerList();
 		for(int i=0;i<list.length;i+=2)
 		{
@@ -140,8 +142,7 @@ public class EventCircularBuffer extends CircularBuffer{
 	 * @param ev
 	 */
 	private void fireBufferEmptyEvent(BufferEmptyEvent ev)
-	{	
-		System.err.println("---------------------------------BUFFER VUOTO");
+	{
 		Object[] list= listeners.getListenerList();
 		for(int i=0;i<list.length;i+=2)
 		{
@@ -156,8 +157,10 @@ public class EventCircularBuffer extends CircularBuffer{
 	public synchronized void setFrame(ExtBuffer frame) 
 	{
 		super.setFrame(frame);
-		if(super.isFull() || (super.getContatore() == this.sogliaSuperiore && this.normalMode))
+		if(super.isFull() || (super.getContatore() == this.sogliaSuperiore && this.normalMode)){
+			System.err.println("#### evento buffer full!" + this.getContatore()+"= "+ this.sogliaSuperiore);
 			fireBufferFullEvent(new BufferFullEvent(this));
+		}
 		if(this.view!=null)
 		setBufferPercentage();
 	}
@@ -166,9 +169,12 @@ public class EventCircularBuffer extends CircularBuffer{
 	public synchronized ExtBuffer getFrame() {		
 		ExtBuffer frame = super.getFrame();
 		setBufferPercentage();
-		if(super.getContatore() == this.sogliaInferiore || super.isEmpty())
+		if(super.getContatore() == this.sogliaInferiore || super.isEmpty()){
+			System.err.println("#### evento buffer empty!" + this.getContatore()+"= "+ this.sogliaInferiore);	
+		
 			fireBufferEmptyEvent(new BufferEmptyEvent(this));
-		return frame;
+		}
+			return frame;
 	}
 	
 	private void setBufferPercentage()
