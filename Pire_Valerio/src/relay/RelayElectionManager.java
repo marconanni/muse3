@@ -115,7 +115,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	private long startElection = -1;
 	private long stopElection = -1;
 	
-	private static int NODE = 2;
+	private static int NODE = 1;
 	private static int NUMBERPOSSIBLERELAY = 1;
 	
 	private int numberOfNode = -1;
@@ -711,6 +711,7 @@ public class RelayElectionManager extends Observable implements Observer{
 
 				setBestSubstituteRelayAddress(getPossibleRelay().get(0).getAddress());
 				memorizeBestSubstituteRelayAddress();
+				setNumberOfPossibleRelay(getNumberOfPossibleRelay()+1);
 				if(test){
 					if(getNumberOfPossibleRelay() ==NUMBERPOSSIBLERELAY){
 						setElecting(false);
@@ -735,7 +736,7 @@ public class RelayElectionManager extends Observable implements Observer{
 							//faccio sapere al SESSIONMANAGER chi ho appena eletto
 						
 							setStopElection(System.currentTimeMillis());
-							debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStartElection()-getStopElection())+" ms");
+							debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStopElection()-getStartElection())+" ms");
 							setChanged();
 							notifyObservers("NEW_RELAY:" + getBestSubstituteRelayAddress()+":"+getLocalClusterAddress()+":"+getLocalClusterHeadAddress()+":"+getConnectedClusterHeadAddress());
 						
@@ -830,7 +831,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				
 				
 				setStopElection(System.currentTimeMillis());
-				debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStartElection()-getStopElection())+" ms");
+				debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStopElection()-getStartElection())+" ms");
 				setChanged();
 				notifyObservers("NEW_RELAY:"+getNewRelayLocalClusterAddress()+":"+getOldRelayLocalClusterAddress()+":"+getOldRelayLocalClusterHeadAddress()+":"+getHeadNodeAddress());
 					
@@ -853,7 +854,7 @@ public class RelayElectionManager extends Observable implements Observer{
 						setChanged();
 					
 					setStopElection(System.currentTimeMillis());
-					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStartElection()-getStopElection())+" ms");
+					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_ERROR,"Durata elezione fino alla notifica al Session Manager : "+ (getStopElection()-getStartElection())+" ms");
 					notifyObservers("NEW_RELAY:"+getRelayMessageReader().getNewRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterAddress()+":"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+":"+getRelayMessageReader().getHeadNodeAddress());
 					debug(getConsoleElectionManager(),DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": è stato eletto un nuovo relay secondario:\nvecchio relay:"+getRelayMessageReader().getOldRelayLocalClusterHeadAddress()+"\nnuovo relay manderà un messaggio di ACK_CONNECTION");
 					setFirstELECTION_DONE(true);
@@ -887,6 +888,7 @@ public class RelayElectionManager extends Observable implements Observer{
 
 				debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": DISCONNECTION_WARNING sollevato, chiudo tutti i monitor e spedisco il messaggio di ELECTION_REQUEST");
 				setW(-1);
+				setNumberOfPossibleRelay(0);
 
 				setStartElection(System.currentTimeMillis());
 				
