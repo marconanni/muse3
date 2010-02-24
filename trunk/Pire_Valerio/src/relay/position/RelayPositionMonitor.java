@@ -103,6 +103,7 @@ public class RelayPositionMonitor extends Observable implements Observer {
 	 */
 	public void close(){
 		rrcm.close();
+		if(timer!=null)
 		timer.cancel();
 		if(tnRSSI!=null)tnRSSI.cancelTimeOutSingleWithMessage();
 		setStarted(false);
