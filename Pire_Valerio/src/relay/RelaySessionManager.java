@@ -1151,7 +1151,7 @@ private String createProxyFromSession(Hashtable sessionInfo)
 				consolle.debugMessage(2, "il protocollo fino alla creazione del nuovo proxy ha impiegato " + executionTime + "   millisecondi" );
 								
 				//proxy = new Proxy(this, false, chiave, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut,this.connectedClusterHeadAddress ,InetAddress.getByName(this.oldRelayLocalClusterAddress), serverCtrlPort, proxyCtrlPort, servingClient);
-				proxy= new Proxy(this, false, this.clientAddress, this.relayAddress, clientPortStreamIn, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut, proxyPortStreamIn, this.oldRelayLocalClusterAddress, serverCtrlPort, proxyCtrlPort, electionManager.getLocalClusterHeadAddress(), electionManager.getConnectedClusterHeadAddress(), servingClient);				
+				proxy= new Proxy(this, false, chiave, this.relayAddress, clientPortStreamIn+10, proxyPortStreamOut, proxyPortStreamIn, serverPortStreamOut, proxyPortStreamOut, proxyPortStreamIn, this.oldRelayLocalClusterAddress, serverCtrlPort, proxyCtrlPort, electionManager.getLocalClusterHeadAddress(),electionManager.getLocalClusterAddress(), electionManager.getConnectedClusterHeadAddress(), servingClient);				
 				session.setProxy(proxy);
 				recStreamInports = recStreamInports+"_"+chiave+"_"+proxy.getRecoveryStreamInPort();
 			} catch (Exception e) {
