@@ -5,7 +5,14 @@ import relay.wnic.RelayWNICController;
 import relay.wnic.exception.InvalidParameter;
 import relay.wnic.exception.WNICException;
 
+import jxl.Workbook;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.Number;
 
+
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
@@ -36,6 +43,11 @@ public class RelayPositionAPMonitor extends Observable {
 	private String tmp;
 	private DebugConsole console = null;
 	private boolean debug= false;
+	
+	//per i test
+	private WritableWorkbook workbook = null;
+	private WritableSheet sheet = null;
+	private int count = 0;
 
 
 	/**Metodo per ottenere un RelayPositionAPMonitor
@@ -58,6 +70,15 @@ public class RelayPositionAPMonitor extends Observable {
 		started = false;
 		setDebugConsole(rwc.getDebugConsole());
 		debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: CICLO DI CONTROLLO CONNESSIONE AP ogni " + period + " ms");
+		
+		//per i test
+		try {
+			workbook = Workbook.createWorkbook(new File("output.xls"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		sheet = workbook.createSheet("First Sheett",0);
 	}
 
 
@@ -109,6 +130,18 @@ public class RelayPositionAPMonitor extends Observable {
 					debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: "+tmp);
 				}
 				debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RSSI nei confronti del AP:"+ actualRSSI+"  -  Previsione: "+prevision);
+				if(count<=50){
+					Number n1 = new Number(0,count,actualRSSI);
+					Number n2 = new Number(1,count,prevision);
+					sheet.addCell(n1);
+					sheet.addCell(n2);
+					
+				}
+				if(count ==50){
+					workbook.write();
+					workbook.close();
+				}
+				count++;
 				if(prevision >= ElectionConfiguration.AP_DISCONNECTION_THRS){
 					positiveDisconnectionPrediction++;
 					debug(getDebugConsole(), DebugConfiguration.DEBUG_WARNING,"RelayPositionAPMonitor: RSSI PREVISTO SUPERA SOGLIA DI DISCONNESSIONE ("+positiveDisconnectionPrediction+" su"+ElectionConfiguration.NUMBER_OF_AP_DISCONNECTION_DETECTION+")");
