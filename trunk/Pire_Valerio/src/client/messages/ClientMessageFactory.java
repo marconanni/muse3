@@ -65,17 +65,17 @@ public class ClientMessageFactory {
 	 * @return DatagramPacket da inviare 
 	 * @throws IOException
 	 */
-	public static DatagramPacket buildElectioBeaconRelay(int sequenceNumber, InetAddress addr, int port, int client) throws IOException{
-		
-		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_BEACON_RELAY+"_"+client;
-		doStream.writeUTF(content);
-		doStream.flush();
-		byte[] data = boStream.toByteArray();
-
-		return new DatagramPacket(data, data.length, addr, port);
-	}
+//	public static DatagramPacket buildElectioBeaconRelay(int sequenceNumber, InetAddress addr, int port, int client) throws IOException{
+//		
+//		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+//		DataOutputStream doStream = new DataOutputStream(boStream);
+//		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_BEACON_RELAY+"_"+client;
+//		doStream.writeUTF(content);
+//		doStream.flush();
+//		byte[] data = boStream.toByteArray();
+//
+//		return new DatagramPacket(data, data.length, addr, port);
+//	}
 	
 	/**
 	 * Messaggio di Election_Beacon in caso di elezione di un nuovo nodo (big boss o relay attivo)
@@ -86,11 +86,11 @@ public class ClientMessageFactory {
 	 * @return DatagramPacket da inviare 
 	 * @throws IOException
 	 */
-	public static DatagramPacket buildElectioBeacon(int sequenceNumber, InetAddress addr, int port) throws IOException{
+	public static DatagramPacket buildElectioBeacon(int sequenceNumber, InetAddress addr, int port,int client) throws IOException{
 		
 		ByteArrayOutputStream boStream = new ByteArrayOutputStream();
 		DataOutputStream doStream = new DataOutputStream(boStream);
-		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_BEACON;
+		String content = sequenceNumber+"_"+MessageCodeConfiguration.ELECTION_BEACON+"_"+client;
 		doStream.writeUTF(content);
 		doStream.flush();
 		byte[] data = boStream.toByteArray();
