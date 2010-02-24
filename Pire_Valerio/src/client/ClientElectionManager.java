@@ -290,6 +290,7 @@ public class ClientElectionManager extends Observable implements Observer{
 			else if((getClientMessageReader().getCode()==MessageCodeConfiguration.ELECTION_DONE)&&
 					(getActualStatus()==ClientStatus.WAITING_END_ELECTION || getActualStatus()==ClientStatus.IDLE) &&
 					(!isFirstELECTION_DONE())){
+				setFirstELECTION_DONE(true);
 				
 				setConnectedRelayAddress(getClientMessageReader().getNewRelayLocalClusterAddress());
 				memorizeConnectedRelayAddress();
@@ -308,7 +309,7 @@ public class ClientElectionManager extends Observable implements Observer{
 					debug(getConsoleWifiInterface(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": client connesso al nuovo Relay IP:"+getConnectedRelayAddress()+" e ACK_CONNECTION spedito");
 				}
 				getComManager().sendTo(prepareRepropagation(dpIn));
-				setFirstELECTION_DONE(true);
+				
 			}
 			
 			//FASE DI EMERGENZA
