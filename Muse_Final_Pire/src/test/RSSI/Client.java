@@ -103,7 +103,7 @@ public class Client {
 						if(countbytes%(BUFFER_SIZE*BUFFER_SIZE)==0){
 							//rate = (numbytes*8)/((endTime-startTime)/1000);
 							MB++;
-							System.out.println("Receive "+countblocks+" blocks = "+MB+" Mb");
+							System.out.println("Receive "+countblocks+" blocks = "+MB+" Mbit/s");
 						}
 						if(packet.getData().length!=BUFFER_SIZE)stop = true;
 					}
