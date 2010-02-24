@@ -128,8 +128,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	private String localClusterAddress;
 	private String oldProxyAddress;
 	
-		
+	// variabili usate pre fare i test	
 	private long startTime =0;
+	
 	
 	
 	/**
@@ -1047,6 +1048,11 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 		if(this.rtpReceptionMan.isEOM() || this.isEnding()) 
 		{
+			
+			System.out.println("Proxy: termino e cominico la mia fine al sessionmanager");
+			this.setChanged();
+			this.notifyObservers("PROXY_ENDED");
+			
 			this.fProxy.dispose();
 		}
 	}
@@ -1087,7 +1093,6 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				// Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		return result;
 	}
 	
@@ -1676,6 +1681,15 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	public void setFutureStreamingAddress(String newRelay) {
 		this.futureStreamingAddress = newRelay;
 		
+	}
+
+	/**
+	 * metodo creato per finalità di test ritorna il numero di frames prensenti nel nomalBuffer
+	 * @return
+	 */
+	public int tGetNormalBufferSize() {
+		// TODO Auto-generated method stub
+		return this.buffer.getNormalBuffer().getContatore();
 	}
 	
 	

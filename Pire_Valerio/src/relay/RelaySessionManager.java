@@ -114,9 +114,10 @@ public class RelaySessionManager implements Observer{
 	private String connectedClusterHeadAddress = null;
 	private String oldRelayLocalClusterAddress;
 	private String oldRelayClusterHeadAddress;
-	
+	// campi introdotti per finalità di test
 	private long startTime=0;
 	private long endTime=0;
+	private int framesNelBuffer =0;
 	
 	//stati in cui si può trovare il RelayElectionManager
 	public enum RelaySessionStatus {  
@@ -925,9 +926,33 @@ public class RelaySessionManager implements Observer{
 			Enumeration <String> chiavi=sessions.keys();
 			while(chiavi.hasMoreElements()){
 				(sessions.get(chiavi.nextElement()).getProxy()).enlargeNormalBuffer();
+			}			
+		}
+		
+		/**
+		 * Evento sollevato da un proxy quando termina l'esecuzione,o perchè è finita la canzone,
+		 * o perchè ha mandato tutto il suo buffer al proxy sul nuovo relay in caso di rielezione.
+		 *  rumuovo la sessione alla quale apparteneva
+		 */
+		if (this.event.equals("PROXY_ENDED")){
+			
+			Proxy sender = (Proxy) receiver; // non ti fare ingannare dal nome il receiver è chi ha sollevato l'evento
+			
+			Enumeration <String> chiavi = sessions.keys();
+			
+			while(chiavi.hasMoreElements()){
+				String chiave= chiavi.nextElement();
+				Session sessione = sessions.get(chiave);
+				if (sessione.getProxy().equals(sender)){
+					sessions.remove(chiave);
+				}
+				
 			}
-			
-			
+			// blocco inserito per test prestazionali
+			{
+			long tempoEsecuzioneTotale= System.currentTimeMillis()-this.startTime;
+			consolle.debugMessage(2, "Tempo inntercorso per fare l'handoff sul nuovo relay: " + tempoEsecuzioneTotale+ "per svuotare un buffer di " +this.framesNelBuffer);
+		}
 			
 			
 		}
@@ -1199,7 +1224,12 @@ private void changeProxySession(Hashtable sessionEndpoint)
 				int[] values =(int[]) sessionEndpoint.get(chiave);
 				consolle.debugMessage(0, "valore della porta dalla quale il nuovo proxy accetta il flusso di recovery "+ values[0] );
 				try {
+					// blocco introdotto per finalità di test
+					
 					Proxy proxy = sessions.get(chiave).getProxy();
+					{
+						this.framesNelBuffer= proxy.tGetNormalBufferSize();
+					}
 					proxy.startHandoff(values[0], InetAddress.getByName(this.maxWnextRelay));
 					consolle.debugMessage(0, "chiamato il metodo startHandoff: indirizzo  "+ this.maxWnextRelay+" porta: " + values[0] );
 					proxy.setEnding(true);
