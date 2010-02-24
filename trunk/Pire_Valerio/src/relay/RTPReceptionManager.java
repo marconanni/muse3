@@ -86,6 +86,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	
 	private String localClusterHeadAddr;
 	private String connectedClusterHeadAddr;
+	private String localClusterAddress;
 	/*
 	 * *********************************************************
 	 * ***********************COSTRUTTORI***********************
@@ -134,22 +135,23 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 	 * @param buffer bufferManager che contiene i due buffer nei quali andranno a finire i flussi
 	 * @param oldRelayAddress l'indirizzo inferiore del vecchio relay
 	 * @param oldProxyStreamInPort la porta dalla quale il vecchio relay riceveva i flussi
-	 * @param indirizzoRicezione l'indirizzo del relay sul quale si riceve il fusso
+	 * @param indirizzoRicezioneServer l'indirizzo del relay sul quale si riceve il fusso
 	 * @param indirizzoTrasmissione l'indirizzo di chi manda il flusso
 	 * @param proxy 
 	 * @throws IOException
 	 * @throws IncompatibleSourceException
 	 */
-	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer,String oldRelayAddress, int oldProxyStreamInPort,  String indirizzoRicezione, String indirizzoTrasmissione, Proxy proxy) throws IOException, IncompatibleSourceException{
+	public RTPReceptionManager(boolean newProxy, RelayBufferManager buffer,String oldRelayAddress, int oldProxyStreamInPort,  String indirizzoRicezioneServer, String indirizzoRicezioneVecchioRelay, String indirizzoTrasmissione, Proxy proxy) throws IOException, IncompatibleSourceException{
 		this.buffer = buffer;
-		this.localClusterHeadAddr=indirizzoRicezione;
+		this.localClusterHeadAddr=indirizzoRicezioneServer;
 		this.connectedClusterHeadAddr=indirizzoTrasmissione;
+		this.localClusterAddress = indirizzoRicezioneVecchioRelay;
 
 		this.proxy = proxy;
 		//imposto la porta di ricezione del proxy di recovery con la vecchia porta di ricezione del  vecchio proxy
 		normalReceivingPort = oldProxyStreamInPort;	
 		
-		normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(indirizzoRicezione),InetAddress.getByName(indirizzoTrasmissione));
+		normalReceiver = new RTPReceiverPS(normalReceivingPort,InetAddress.getByName(indirizzoRicezioneServer),InetAddress.getByName(indirizzoTrasmissione));
 		System.out.println("*******OldPortProxy:"+oldProxyStreamInPort);
 		RelayPortMapper.getInstance().setRangePortInRTPProxy(normalReceivingPort);
 		//ottengo dal port mapper la porta di ricezione dello stream proveniente dal vecchio proxy
@@ -158,8 +160,9 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 		/*
 		 * Non abbiamo capito come funziona il costruttore di recoveryreceiver 
 		 */
-		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(indirizzoRicezione), InetAddress.getByName(oldRelayAddress));
-		}
+		recoveryReceiver = new RTPReceiverPS(recoveryReceivingPort,InetAddress.getByName(indirizzoRicezioneVecchioRelay), InetAddress.getByName(oldRelayAddress));
+	// TODO sistema indirizzo ricezione	
+	}
 
 
 	/*
