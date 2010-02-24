@@ -915,8 +915,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	@Override
 	public synchronized void bufferFullEventOccurred(BufferFullEvent ev) {
 		
-		
-		
+		System.out.println(".................BUFFERFULLEVENT, MANDO UNO STOP_TX AL SERVER");
+		sendStopTXToServer();
+		System.out.println("stato "+state);
 		/*
 		 * il buffer è pieno: al solito a causa degli stati si capice poco, ma proviamo comunque a fare chiarezza
 		 * in tutti c'è l'invio del messaggio STOPTX al server ( come era logico)
@@ -1027,12 +1028,13 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		if (debug)
 			System.out.println("Proxy: evento:" + e);
 		//TODO: da rivedere
+		
 		if (e.getSource() == buffer.getRecoveryBuffer()){
 			
 						
 			startNormalStreamToClient();
 			state = ProxyState.transmittingToClient;
-			
+						
 		}
 		fProxy.getController().debugMessage(this.state.name());
 		System.err.println(this.state.name());
@@ -1084,6 +1086,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				// Auto-generated catch block
 				e.printStackTrace();
 			}
+
 		return result;
 	}
 	
@@ -1151,7 +1154,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				this.clientStreamPort = portStremInNewClient;  // port stremInNewProxy è la porta sulla quale il nuovo proxy riceve il flusso dal vecchio proxy
 				
 				//aggiungo il nuovo relay cm destinatario inserendo la porta e l'indirizzo del proxy sul nuovo relay
-				rtpSender.addDestination(newClientAddress, clientStreamPort);
+				
+				// marco provo a modificarlo 
+				rtpSender.addDestination(newClientAddress,portStremInNewClient);
 				
 			} catch (UnknownHostException e) {
 				// Auto-generated catch block
@@ -1652,9 +1657,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		try {
 			//invio LEAVE al client:
 			DatagramPacket leave=null;
-			System.out.println("--------------sendLeaveMsgToClient() clientaddress "+clientAddress+", cliensessionport "+this.clientSessionPort);
+			System.out.println("--------------sendLeaveMsgToClient() clientaddress "+clientAddress+", cliensessionport "+ PortConfiguration.CLIENT_PORT_SESSION_IN+" ServingClient"+servingClient);
 			if(servingClient)
-				leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), this.clientSessionPort);
+				leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(clientAddress), PortConfiguration.CLIENT_PORT_SESSION_IN);
 			else
 				leave = RelayMessageFactory.buildLeave(0, InetAddress.getByName(relayAddress), this.relayControlPort);
 			proxyCM.sendTo(leave);
