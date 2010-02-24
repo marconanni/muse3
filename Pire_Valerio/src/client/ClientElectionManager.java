@@ -226,10 +226,10 @@ public class ClientElectionManager extends Observable implements Observer{
 					DatagramPacket dpOut = null;
 					try {
 						//Messaggio destinato ai possibili sostituti
-						dpOut = ClientMessageFactory.buildElectioBeaconRelay(getIndexELECTION_BEACON(), BCAST,PortConfiguration.PORT_ELECTION_IN,1);
-						getComManager().sendTo(dpOut);
+//						dpOut = ClientMessageFactory.buildElectioBeaconRelay(getIndexELECTION_BEACON(), BCAST,PortConfiguration.PORT_ELECTION_IN,1);
+//						getComManager().sendTo(dpOut);
 						//Messaggio destinati ai client coinvolti nella elezione
-						dpOut = ClientMessageFactory.buildElectioBeacon(getIndexELECTION_BEACON(), BCAST, PortConfiguration.PORT_ELECTION_IN);
+						dpOut = ClientMessageFactory.buildElectioBeacon(getIndexELECTION_BEACON(), BCAST, PortConfiguration.PORT_ELECTION_IN,1);
 						getComManager().sendTo(dpOut);
 							
 						addIndexELECTION_BEACON(1);
@@ -264,10 +264,10 @@ public class ClientElectionManager extends Observable implements Observer{
 
 					try {
 						//Messaggio destinato ai possibili sostituti
-						dpOut = ClientMessageFactory.buildElectioBeaconRelay(getIndexELECTION_BEACON(), BCAST,PortConfiguration.PORT_ELECTION_IN, 1);
-						getComManager().sendTo(dpOut);
+//						dpOut = ClientMessageFactory.buildElectioBeaconRelay(getIndexELECTION_BEACON(), BCAST,PortConfiguration.PORT_ELECTION_IN, 1);
+//						getComManager().sendTo(dpOut);
 						//Messaggio destinati ai client coinvolti nella elezione
-						dpOut = ClientMessageFactory.buildElectioBeacon(getIndexELECTION_BEACON(), BCAST, PortConfiguration.PORT_ELECTION_IN);
+						dpOut = ClientMessageFactory.buildElectioBeacon(getIndexELECTION_BEACON(), BCAST, PortConfiguration.PORT_ELECTION_IN,1);
 						getComManager().sendTo(dpOut);
 						
 						addIndexELECTION_BEACON(1);
