@@ -915,8 +915,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	@Override
 	public synchronized void bufferFullEventOccurred(BufferFullEvent ev) {
 		
-		System.out.println(".................BUFFERFULLEVENT, MANDO UNO STOP_TX AL SERVER");
-		sendStopTXToServer();
+		System.out.println(".................BUFFERFULLEVENT, MANDO UNO STOP_TX A monte");
+		if(isBigBoss)sendStopTXToServer();
+		else sendStopTXToBigBoss();
 		System.out.println("stato "+state);
 		/*
 		 * il buffer è pieno: al solito a causa degli stati si capice poco, ma proviamo comunque a fare chiarezza
