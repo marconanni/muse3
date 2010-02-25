@@ -70,6 +70,8 @@ public class ClientElectionManager extends Observable implements Observer{
 	public void setClientSessionManager(ClientSessionManager clientSessionManager) {this.clientSessionManager = clientSessionManager;}
 	private String event = null;
 	
+	private boolean test = true;
+	
 	public enum ClientStatus {//stati in cui si può trovare il ClientElectionManager
 		OFF,
 		WAITING_WHO_IS_RELAY, 
@@ -95,6 +97,7 @@ public class ClientElectionManager extends Observable implements Observer{
 	 * Fa partire il Connection Manager ed in seguito si mette alla ricerca di un Relay.
 	 */
 	public void init(){
+		setConsoleElectionManager(new DebugConsole("CLIENT ELECTION MANAGER"));
 		
 		setActualStatus(ClientStatus.OFF);
 		setLocalAddress(NetConfiguration.CLIENT_ADDRESS);
@@ -235,6 +238,7 @@ public class ClientElectionManager extends Observable implements Observer{
 						addIndexELECTION_BEACON(1);
 					} catch (IOException e){e.printStackTrace();}
 
+					if(!test)
 					setTimeoutFailToElect(ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
 						
 					setActualStatus(ClientStatus.WAITING_END_ELECTION);
@@ -274,6 +278,7 @@ public class ClientElectionManager extends Observable implements Observer{
 						
 					} catch (IOException e){e.printStackTrace();}
 
+					if(!test)
 					setTimeoutFailToElect(ClientTimeoutFactory.getSingeTimeOutWithMessage(this,TimeOutConfiguration.TIMEOUT_FAIL_TO_ELECT,TimeOutConfiguration.TIME_OUT_FAIL_TO_ELECT));
 					setActualStatus(ClientStatus.WAITING_END_ELECTION);
 					
@@ -310,6 +315,8 @@ public class ClientElectionManager extends Observable implements Observer{
 				}
 				getComManager().sendTo(prepareRepropagation(dpIn));
 				
+				setChanged();
+				notifyObservers("NEW_RELAY:"+getConnectedRelayAddress());
 			}
 			
 			//FASE DI EMERGENZA

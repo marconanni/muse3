@@ -207,8 +207,13 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 			if(eventType.equals("RECIEVED_ELECTION_REQUEST") && this.status.equals("Playing")) {
 				System.out.println("ricevuta richiesta di elezione quando lo status era playing");
 				this.frameController.debugMessage("ricevuta richiesta di elezione quando lo status era playing");
+<<<<<<< .mine
+				// disabilitato ingrandimento del buffer
+//				getClientBufferDataPlaying().setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
+=======
 				//  temporaneamente disabilitato ingrandimento buffer;
 //				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
+>>>>>>> .r454
 				}
 		 
 			if(eventType.equals("EMERGENCY_ELECTION")) {
@@ -286,30 +291,33 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				requestFile(fileScelto);//metodo che fa partire la richiesta del file al server
 			}
 
-			if(messageReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE){//con questo ack il server ci dice che gli è arrivata la richiesta del file
-				System.out.println("è arrivato l'ack della richiesta stream");
-				frameController.debugMessage("è arrivato l'ack della richiesta stream");
-				
-				//ora mando al server il messaggio per far partire lo streaming
-				try {
-					System.err.println("E' arrivato ACK_REQUEST_FILE da "+relayAddress+":"+messageReader.getRelayControlPort());
-					this.msg=ClientMessageFactory.buildStartTX(msgIdx++, InetAddress.getByName(this.relayAddress),messageReader.getRelayControlPort());//da rinominare
-					sessionCM.sendTo(this.msg);
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("mandato all'indirizzo "+this.relayAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
-				frameController.debugMessage("mandato all'indirizzo "+this.relayAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
-				
-				System.out.println("dovrebbe iniziare a suonare qui");
-				clientPlaying.start();
-				
-				
-			}
+//			if(messageReader.getCode()==MessageCodeConfiguration.ACK_REQUEST_FILE){//con questo ack il server ci dice che gli è arrivata la richiesta del file
+//				System.out.println("è arrivato l'ack della richiesta stream");
+//				frameController.debugMessage("è arrivato l'ack della richiesta stream");
+//				
+//				//ora mando al server il messaggio per far partire lo streaming
+//				try {
+//					System.err.println("E' arrivato ACK_REQUEST_FILE da "+relayAddress+":"+messageReader.getRelayControlPort());
+//					this.msg=ClientMessageFactory.buildStartTX(msgIdx++, InetAddress.getByName(this.relayAddress),messageReader.getRelayControlPort());//da rinominare
+//					sessionCM.sendTo(this.msg);
+//					
+//					long inizio = System.currentTimeMillis();
+//					System.out.println("INIZIO (OVVERO ISTANTE IN CUI MANDO START_TX): "+inizio);
+//				} catch (UnknownHostException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				System.out.println("mandato all'indirizzo "+this.relayAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
+//				frameController.debugMessage("mandato all'indirizzo "+this.relayAddress+", sulla porta "+21001+" il messaggio di invio trasmissione");
+//				
+//				System.out.println("dovrebbe iniziare a suonare qui");
+//				clientPlaying.start();
+//				
+//				
+//			}
 			
 			if (messageReader.getCode() == MessageCodeConfiguration.SERVER_UNREACHEABLE
 					&& status.equals("WaitingForResponse")) {
@@ -349,6 +357,8 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 						this.msg = ClientMessageFactory.buildStartTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
 						System.out.println("costruito messaggio StartTX da inviare a "+InetAddress.getByName(relayAddress)+":"+this.proxyCtrlPort);
 						sessionCM.sendTo(msg);
+						long inizio = System.currentTimeMillis();
+						System.out.println("INIZIO (OVVERO ISTANTE IN CUI MANDO START_TX): "+inizio);
 						status = "WaitingForPlaying";
 						if(this.electionManager!=null)
 							this.electionManager.setServed(true);
@@ -362,13 +372,25 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 			 	}  
 			}
 			if (messageReader.getCode() == MessageCodeConfiguration.LEAVE) {
-				// Valerio: per il momento questa parte la commento perchè
-				// mi da errore runtime
+				System.err.println("LEAVE");
+				
 				this.relayAddress =this.newrelay;
 				this.frameController.setNewRelayIP(this.relayAddress);
+<<<<<<< .mine
+
+				
+				// disabilitato rimpicciolimento del buffer
+//				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
+=======
 				// disabilitato rimpicciolimento buffer
 //				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
+>>>>>>> .r454
 				this.clientPlaying.redirectSource(this.relayAddress);
+<<<<<<< .mine
+				
+				
+				
+=======
 				
 				// aggiunto invio di startTX
 				try {
@@ -388,6 +410,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				}
 				sessionCM.sendTo(msg);
 			
+>>>>>>> .r454
 				}
 
 			
@@ -478,4 +501,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 	
 	public void setRelayAddress(String relayAddress){this.relayAddress = relayAddress;}
 
+	public void setClientBufferDataPlaying(ClientBufferDataPlaying player){this.clientPlaying = player;}
+	
+	public ClientBufferDataPlaying getClientBufferDataPlaying(){return this.clientPlaying;}
 }
