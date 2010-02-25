@@ -246,14 +246,14 @@ proxyIP---->l'indirizzo IP del mittente
 	{
 		try
 		{
-<<<<<<< .mine
+
 			System.err.println("@@@@@@@@@@@@@@ il thread è passato per playgStreamRTp di ClientBufferDataPlaying");
 			
 			
-=======
+
 			System.err.println("@@@@@@@@@@@@@@@@@@@@@@@@ ClientBufferDataPlaying, il thread è entrato in playing streamrtp");
 			
->>>>>>> .r454
+
 			Manager.setHint(Manager.PLUGIN_PLAYER,new Boolean(true));
 			rtpRx=new RTPReceiverPS(clientPortRTP,InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS), proxyIP);
 			rtpRx.setSender(proxyIP,proxyPortRTP);
