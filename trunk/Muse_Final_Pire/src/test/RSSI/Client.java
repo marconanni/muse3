@@ -24,7 +24,7 @@ public class Client {
 	private static int TIMEOUT_RECEIVE = 1000;
 	private static int PORT_IN_OUT = 12345;
 	
-	private static boolean RSSI_CONTROLLER = true;
+	private static boolean RSSI_CONTROLLER = false;
 	private static int PORT_RSSI_IN = 3000;
 	private static int PORT_RSSI_OUT = 3001;
 		
@@ -43,8 +43,8 @@ public class Client {
 
 					ClientWNICLinuxController cwnic = new ClientWNICLinuxController(WIFI_INTERFACE,NETWORK_ESSID);
 					cwnic.init();
-					ClientPositionController position = new ClientPositionController(cwnic,null);
-					position.start();
+					//ClientPositionController position = new ClientPositionController(cwnic,null);
+					//position.start();
 				} catch (WNICException e1) {e1.printStackTrace();}
 			}
 
