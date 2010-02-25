@@ -9,11 +9,16 @@ import java.util.Vector;
 
 import javax.media.ControllerEvent;
 import javax.media.ControllerListener;
+import javax.media.DataSink;
 import javax.media.EndOfMediaEvent;
 import javax.media.IncompatibleSourceException;
 import javax.media.Manager;
+import javax.media.MediaLocator;
 import javax.media.Player;
+import javax.media.Processor;
 import javax.media.protocol.DataSource;
+import javax.media.protocol.FileTypeDescriptor;
+import javax.media.protocol.SourceCloneable;
 import javax.media.rtp.ReceiveStreamListener;
 import javax.media.rtp.event.ByeEvent;
 import javax.media.rtp.event.ReceiveStreamEvent;
@@ -24,6 +29,7 @@ import parameters.SessionConfiguration;
 
 
 import client.gui.IClientView;
+import client.messages.ClientMessageFactory;
 
 import unibo.core.multiplexer.PlayerMultiplexer;
 import unibo.core.parser.Parser;
@@ -42,7 +48,8 @@ public class ClientBufferDataPlaying extends Observable  implements ControllerLi
 	private boolean bfSent = true; //inizialmente non � possibile inviare messaggi di buffer full
 
 	//variabili gestione thread di controllo flusso RTP
-	private Thread runner;
+	private Thread runner1;
+	private Thread runner2;
 
 	//variabili di informazione sul proxy
 	private int proxyPortRTP;
@@ -52,7 +59,7 @@ public class ClientBufferDataPlaying extends Observable  implements ControllerLi
 	private int clientPortRTP;
 
 	//variabile ricezione stream RTP
-	private RTPReceiverPS rtpRx;
+	public RTPReceiverPS rtpRx;
 
 	//variabili gestione parsing
 	//MODIFICA: si utilizza un ParserThreadEV per ottenere un EventCircularBuffer
@@ -115,7 +122,7 @@ proxyIP---->l'indirizzo IP del mittente
 		clientBufferSize=bufferSize;
 		timeToWait=multiplexerInterCycleWait;
 		this.view = view;
-		this.view.debugMessage("ClientBufferDataPlaying creato");
+		//this.view.debugMessage("ClientBufferDataPlaying creato");
 
 
 		System.out.println("ClientChainBufferDataPlaying creato con:\nproxyPortRTP: "+proxyPortRTP+"\nclientPortRTP: "+clientPortRTP+"\nproxyIP: "+proxyIP);
@@ -139,8 +146,8 @@ proxyIP---->l'indirizzo IP del mittente
 //	avvia un nuovo thread per gestire lo stream in arrivo dal proxy, trasformarlo in flusso RAW e passarlo al player
 	public void start()
 	{
-		runner=new Thread(){ public void run(){ playingStreamRTP(); } };
-		runner.start();
+		runner1=new Thread(){ public void run(){ playingStreamRTP(); } };
+		runner1.start();
 	}
 
 //	metodo che gestisce l'accesso in lettura sincrono (mutuamente esclusivo) alla variabile flag playing
@@ -164,6 +171,8 @@ proxyIP---->l'indirizzo IP del mittente
 				e.printStackTrace();
 			}
 		}
+	long fine = System.currentTimeMillis();
+	System.out.println("FINE (OVVERO ISTANTE IN CUI INIZIO A SUONARE): "+fine);
 		//if(!playing)
 		if(!getPlayingFlag())
 		{	
@@ -179,7 +188,24 @@ proxyIP---->l'indirizzo IP del mittente
 
 			try{
 				Manager.setHint(Manager.PLUGIN_PLAYER, new Boolean(true));
-				player = Manager.createRealizedPlayer(mux.getDataOutput()); }
+				player = Manager.createRealizedPlayer(mux.getDataOutput());
+				//Valerio: codice aggiunto per salvare su file lo stream
+//				MediaLocator ml = new MediaLocator("vfw://0");
+//				 
+//				DataSource source = Manager.createDataSource(ml);
+//				source = Manager.createCloneableDataSource(source);
+//				 
+//				DataSource clone = ((SourceCloneable) source).createClone();
+//				 
+//				Player player = Manager.createRealizedPlayer(mux.getDataOutput());
+//				Processor processor = Manager.createProcessor(clone);
+//				processor.setContentDescriptor(new FileTypeDescriptor(FileTypeDescriptor.WAVE));
+//				MediaLocator outMl = new MediaLocator("file://home/valerio/capture.wav");
+//				DataSink datasink = Manager.createDataSink(processor.getDataOutput(), outMl);
+//				datasink.open();
+//				datasink.start();
+				//------------------------------------------------------				
+				}
 			catch(Exception e){
 				System.err.println("ClientChainBufferDataPlaying: impossibile abilitare il player\n");
 				e.printStackTrace(); }
@@ -220,8 +246,14 @@ proxyIP---->l'indirizzo IP del mittente
 	{
 		try
 		{
+<<<<<<< .mine
+			System.err.println("@@@@@@@@@@@@@@ il thread è passato per playgStreamRTp di ClientBufferDataPlaying");
+			
+			
+=======
 			System.err.println("@@@@@@@@@@@@@@@@@@@@@@@@ ClientBufferDataPlaying, il thread è entrato in playing streamrtp");
 			
+>>>>>>> .r454
 			Manager.setHint(Manager.PLUGIN_PLAYER,new Boolean(true));
 			rtpRx=new RTPReceiverPS(clientPortRTP,InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS), proxyIP);
 			rtpRx.setSender(proxyIP,proxyPortRTP);
@@ -234,10 +266,10 @@ proxyIP---->l'indirizzo IP del mittente
 			//parserThread=new ParserThreadPS(rtpParser,clientBufferSize,timeToWait);
 			parserThread=new ParserThreadEV(rtpParser,clientBufferSize,view, BufferConfiguration.BUFFER_THS_START_TX, BufferConfiguration.BUFFER_THS_STOP_TX);
 			EventCircularBuffer[] b=parserThread.getOutputBufferSet();
-			this.buffer=b[0];
+			setEventBuffer(b[0]);
 			//il ClientChainBuffer viene settato come listener degli eventi generati dal buffer
-			this.buffer.addBufferFullEventListener(this);
-			this.buffer.addBufferEmptyEventListener(this);
+			getEventBuffer().addBufferFullEventListener(this);
+			getEventBuffer().addBufferEmptyEventListener(this);
 			// ***** MULTIPLEXER *****
 			mux=new PlayerMultiplexer(rtpParser.getTracksFormat());
 			//muxThread=new MultiplexerThread(mux,b,5);
@@ -249,6 +281,7 @@ proxyIP---->l'indirizzo IP del mittente
 			this.startPlaying();
 			setChanged();
 			notifyObservers("PLAYER_STARTED");
+			System.err.println("@@@@@@@@@@@@@@ il thread èn in fondo a playgStreamRTp di ClientBufferDataPlaying");
 		}
 		catch(IOException e)
 		{
@@ -420,7 +453,8 @@ proxyIP---->l'indirizzo IP del mittente
 	//METODO DA RICHIAMARE ALL'ATTO DELL'ARRIVO DI UN ELECTION_REQUEST DA PARTE DEL SESSIONMANAGER
 	public void setThdOnBuffer(int sogliaInferiore, boolean normalMode){
 	//	this.buffer.setSogliaInferiore(sogliaInferiore);
-		this.buffer.setNormalMode(normalMode);
+		System.err.println("normalMode "+normalMode);
+		getEventBuffer().setNormalMode(normalMode);
 		if(!normalMode)
 		{
 			this.buffer.setSogliaSuperiore(BufferConfiguration.CLIENT_BUFFER);
@@ -434,15 +468,59 @@ proxyIP---->l'indirizzo IP del mittente
 	
 	public void redirectSource(final String newRelayAddress)
 	{
-		Thread runner;
-		
-		
-		
-		runner = new Thread(){public void run(){
+	
+	System.out.println("redirectSource");
+		try {
+			System.err.println("@@@@@@@@@@@@@@@@@@@@@@@@@@New relay address " + newRelayAddress);
+			rtpRx=new RTPReceiverPS(clientPortRTP+10,InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS), InetAddress.getByName(newRelayAddress));
+			System.err.println("il client si aspetta lo stream sulla porta "+(clientPortRTP+10));
+			System.out.println("dopo creazione rtpRx");
+			rtpRx.setSender(InetAddress.getByName(newRelayAddress),proxyPortRTP);
+			System.err.println("il nuovo proxy manda da "+newRelayAddress+":"+proxyPortRTP);
+			System.out.println("dopo setSender rtpRx");
 			
+			rtpRx.addReceiveStreamEventListener(this);
+			System.out.println("dopo creazione addReceiveStreamListener");
+					
+			
+			} catch (UnknownHostException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+	
+		System.out.println("prima della creazione del thread");
+		//Runnable RTPReceiverPS;
+		runner2 = new Thread(){			
+			ParserThreadEV parserThread1=null;
+			public void run(){
+				dsInput=rtpRx.receiveData();
+				System.out.println("dopo creazione receiveData");
+				
+				
+				//clReport.startPSTransmission();
+								
+				try {
+					rtpParser=new RTPParser(dsInput);
+				} catch (IncompatibleSourceException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				} catch (IOException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				System.out.println("dopo new RTPPareser");
+				
+				
+				
+			// ***** PARSER *****			
+			parserThread1=new ParserThreadEV(rtpParser,clientBufferSize,view, BufferConfiguration.BUFFER_THS_START_TX, BufferConfiguration.BUFFER_THS_STOP_TX);
+			System.err.println("+++++++++++++++++++++"+rtpRx);
 			rtpRx.removeTargets();
 			System.out.println("01b. CHANGE RELAY: rimossi i Targets dall'RTPReceiverPS");
-			
 			try {
 				rtpRx.addSource(InetAddress.getByName(newRelayAddress), proxyPortRTP);
 			} catch (UnknownHostException e1) {
@@ -453,11 +531,11 @@ proxyIP---->l'indirizzo IP del mittente
 				e1.printStackTrace();
 			}
 			System.out.println("02b. CHANGE RELAY: rimossi i Targets dall'RTPReceiverPS");
-						
+			
 			DataSource ds =rtpRx.receiveData();
 			System.out.println("03b. CHANGE RELAY: ottenuto nuovo Datasource");
 			
-			parserThread.suspend();
+//			parserThread.suspend();
 			System.out.println("04b CHANGE RELAY: sospeso il vecchio ParserThreadEV");	
 			
 			try {
@@ -472,12 +550,13 @@ proxyIP---->l'indirizzo IP del mittente
 			System.out.println("05b. CHANGE RELAY: cambiato il Datasource del RTPParser");
 			System.out.println("05.1b CHANGE RELAY: RTPParser: " + ((RTPParser)rtpParser).toString());
 			
-			parserThread.setRTPParser((RTPParser)rtpParser);
+			parserThread1.setRTPParser((RTPParser)rtpParser);
 			System.out.println("06b CHANGE RELAY: settato il nuovo RTPParser dentro il vecchio ParserThreadEV");
 			parserThread.restart();
 			System.out.println("09b. CHANGE RELAY: ripartito il vecchio ParserThreadEV");
 		};};
-		runner.start();
+		System.err.println("++++++++++rtpreceiver da fuori il thread +" +rtpRx);
+		runner2.start();
 					
 //		muxThread.suspend();
 //		System.out.println("08b. CHANGE RELAY: sospeso il MultiplexerThreadPS");
@@ -486,7 +565,16 @@ proxyIP---->l'indirizzo IP del mittente
 //					
 //		muxThread.restart();
 //		System.out.println("12 - b. CHANGE RELAY: ripartito il MultiplexerThreadPS");
+	
+
+		
 	}
+	
+	public void setEventBuffer(EventCircularBuffer b){this.buffer = b;}
+	public EventCircularBuffer getEventBuffer(){return this.buffer;}
+//	
+//	public RTPReceiverPS getRtpRx(){return this.rtpRx;}
+//	public void setRtpRx(RTPReceiverPS rt){this.rtpRx = rt;}
 
 
 }//End of ClientChainBufferDataPlaying

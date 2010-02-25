@@ -96,7 +96,7 @@ public class ClientPositionController implements Observer{
 				cmr.readContent((DatagramPacket)arg1);
 				if(debug)debug(getDebugConsole(),DebugConfiguration.DEBUG_INFO, "ClientPositionController: ricevuto nuovo DatagramPacket da " + ((DatagramPacket)arg1).getAddress()+":"+((DatagramPacket)arg1).getPort());
 				if(cmr.getCode() == MessageCodeConfiguration.REQUEST_RSSI){
-					RSSIvalue = cwnic.getSignalStrenghtValue();
+					RSSIvalue = 40;//cwnic.getSignalStrenghtValue();
 					notifyRSSI = ClientMessageFactory.buildNotifyRSSI(sequenceNumber, RSSIvalue, cmr.getPacketAddress(), PortConfiguration.RSSI_PORT_IN, MessageCodeConfiguration.TYPECLIENT,1);
 					sequenceNumber++;
 					crscm.sendTo(notifyRSSI);

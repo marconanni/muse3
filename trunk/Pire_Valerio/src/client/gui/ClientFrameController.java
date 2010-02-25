@@ -78,6 +78,7 @@ public class ClientFrameController implements IClientView {
 	
 	public void setNewRelayIP(String newrelay)
 	{
+		System.out.println("ClientFrameController metodo setNewRelayIP "+newrelay);
 		if(dataText!=null && newrelay!=null && this.data!=null)
 		{
 			String txt = "IP: "+data[0]+", Control Port: "+data[1]+",  Stream Port: "+data[2]+"\n\n";
