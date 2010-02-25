@@ -207,13 +207,13 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 			if(eventType.equals("RECIEVED_ELECTION_REQUEST") && this.status.equals("Playing")) {
 				System.out.println("ricevuta richiesta di elezione quando lo status era playing");
 				this.frameController.debugMessage("ricevuta richiesta di elezione quando lo status era playing");
-<<<<<<< .mine
+
 				// disabilitato ingrandimento del buffer
 //				getClientBufferDataPlaying().setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
-=======
+
 				//  temporaneamente disabilitato ingrandimento buffer;
 //				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX + ((BufferConfiguration.CLIENT_BUFFER/2)%2 == 0 ? BufferConfiguration.CLIENT_BUFFER/2:BufferConfiguration.CLIENT_BUFFER/2+1), false);
->>>>>>> .r454
+
 				}
 		 
 			if(eventType.equals("EMERGENCY_ELECTION")) {
@@ -376,21 +376,21 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				
 				this.relayAddress =this.newrelay;
 				this.frameController.setNewRelayIP(this.relayAddress);
-<<<<<<< .mine
+
 
 				
 				// disabilitato rimpicciolimento del buffer
 //				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
-=======
+
 				// disabilitato rimpicciolimento buffer
 //				this.clientPlaying.setThdOnBuffer(BufferConfiguration.BUFFER_THS_START_TX, true);
->>>>>>> .r454
+
 				this.clientPlaying.redirectSource(this.relayAddress);
-<<<<<<< .mine
+
 				
 				
 				
-=======
+
 				
 				// aggiunto invio di startTX
 				try {
@@ -410,7 +410,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 				}
 				sessionCM.sendTo(msg);
 			
->>>>>>> .r454
+
 				}
 
 			
