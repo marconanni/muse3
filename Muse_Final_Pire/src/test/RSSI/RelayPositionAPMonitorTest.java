@@ -60,6 +60,8 @@ public class RelayPositionAPMonitorTest{
 	private WritableSheet sheet = null;
 	private BufferedWriter bw = null;
 	private int count = 0;
+	private int count1 = 0;
+	private int startAt = 2;
 
 
 	/**Metodo per ottenere un RelayPositionAPMonitor
@@ -142,35 +144,38 @@ public class RelayPositionAPMonitorTest{
 				if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: AP: "  +currAP.getAccessPointName() + " - RSSI: " + actualRSSI);
 
 				if(actualRSSI!=lastRSSI){
+					count1++;
 					lastRSSI=actualRSSI;
-					currAP.addSignalStrenghtValue(actualRSSI);
-					double [] a = currAP.getLastSignalStrenghtValues();
-					filter =new GreyModel(a, min, thr);
-					prevision = filter.predictRSSI();
-					if(debug){
-						tmp="[";
-						for(int i = 0; i<a.length;i++)
-							tmp+=a[i]+",";
-						tmp+="]";
-						tmp +=" PREVISIONE:"+prevision;
-						debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: "+tmp);
-					}
-					double tt = (System.currentTimeMillis()-time);
-					Number n = new Number(0,count,tt);
-					Number n1 = new Number(1,count,actualRSSI);
-					Number n2 = new Number(2,count,prevision);
-					sheet.addCell(n);
-					sheet.addCell(n1);
-					sheet.addCell(n2);
+					if(count1>startAt){
+						currAP.addSignalStrenghtValue(actualRSSI);
+						double [] a = currAP.getLastSignalStrenghtValues();
+						filter =new GreyModel(a, min, thr);
+						prevision = filter.predictRSSI();
+						if(debug){
+							tmp="[";
+							for(int i = 0; i<a.length;i++)
+								tmp+=a[i]+",";
+							tmp+="]";
+							tmp +=" PREVISIONE:"+prevision;
+							debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: "+tmp);
+						}
+						double tt = (System.currentTimeMillis()-time);
+						Number n = new Number(0,count,tt);
+						Number n1 = new Number(1,count,actualRSSI);
+							Number n2 = new Number(2,count,prevision);
+						sheet.addCell(n);
+						sheet.addCell(n1);
+						sheet.addCell(n2);
+						
+						System.out.println(count);
 					
-					System.out.println(count);
-					
-					if(count ==50){
-						workbook.write();
-						workbook.close();
-						System.exit(1);					}
-					count++;
+						if(count ==50){
+							workbook.write();
+							workbook.close();
+							System.exit(1);					}
+						count++;
 					//debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,tt+"\t"+actualRSSI+"\t"+prevision);
+					}
 				}
 			}
 			else{

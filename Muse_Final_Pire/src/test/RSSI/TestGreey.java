@@ -8,10 +8,10 @@ import relay.wnic.exception.WNICException;
 public class TestGreey {
 	private static String wifiInterface = "wlan1";
 	private static String wifiNetwork = "muselab";
-	private static int numberOfPreviousRSSI = 15;
+	private static int numberOfPreviousRSSI = 10;
 	private static int minNumberOfRSSI = 5;
 	private static double previsionTHRS = 20;
-	private static long interval = 10;
+	private static long interval = 1;
 
 	
 	private RelayAPWNICLinuxController wnic = null;
