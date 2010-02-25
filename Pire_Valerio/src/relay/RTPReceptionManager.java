@@ -227,6 +227,7 @@ public class RTPReceptionManager implements ReceiveStreamListener {
 			System.out.println("Proxy receiver: attesa ricezione stream...");
 			recoveryRTPParser = new RTPParser(recoveryDataIn);
 			this.trackFormats2 = recoveryRTPParser.getTracksFormat();
+			System.err.println("lllllllllllllllllllllllllllllllllllllllllll "+this.trackFormats2);
 			recoveryParserThread = new ParserThreadPS(recoveryRTPParser, buffer.getBufSize(), buffer.getRecoveryBuffer());
 		}
 	}

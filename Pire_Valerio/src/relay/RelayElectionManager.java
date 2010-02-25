@@ -51,8 +51,10 @@ public class RelayElectionManager extends Observable implements Observer{
 	private InetAddress localClusterInetAddress = null;		//indirizzo del Relay in forma InetAddress
 	private InetAddress localClusterHeadInetAddress = null;			//indirizzo del Server in forma InetAddress
 	private InetAddress connectedClusterHeadInetAddress = null;	//indirizzo del Relay in forma InetAddress
+	
 
 	
+
 	private static RelayElectionManager INSTANCE = null;	//istanza singleton del RelayElectionManager
 	private static boolean BIGBOSS = true;					//boolean che indica che si è il BIGBOSS (connesso al server)
 	private static boolean RELAY = false;					//boolean che indica che si è un RELAY attivo (connesso al BIGBOSS)
@@ -550,6 +552,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			 * 	Conferma da parte di un nodo della connessione al nodo corrente
 			 */
 			if((getRelayMessageReader().getCode()==MessageCodeConfiguration.ACK_CONNECTION) &&
+					(getActualStatus()!=RelayStatus.WAITING_END_NORMAL_ELECTION) &&
 					(!sameAddress(getRelayMessageReader().getPacketAddess()))){
 				if(getRelayMessageReader().getTypeNode()==MessageCodeConfiguration.TYPERELAY){
 					addRelay();
@@ -676,7 +679,7 @@ public class RelayElectionManager extends Observable implements Observer{
 							setNumberOfNode(getNumberOfNode()+1);
 						
 							if(getNumberOfNode()==NODE){
-								
+								setActualStatus(RelayStatus.WAITING_END_NORMAL_ELECTION);
 								//Stato instabile WeightCalculation
 								weightCalculation();
 
@@ -690,7 +693,7 @@ public class RelayElectionManager extends Observable implements Observer{
 									debug(getConsoleClusterWifiInterface(),DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ECTION_RESPONSE inviato a "+getConnectedClusterHeadAddress());
 								} catch (IOException e) {e.printStackTrace();}
 
-								setActualStatus(RelayStatus.WAITING_END_NORMAL_ELECTION);
+								
 								
 								debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": attesa che ricevo risposta (ELECTIONE_DONE) dal nodo da sosituire ");
 							}
@@ -784,7 +787,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				if(isRELAY()){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un relay secondario attivo ed è stato appena eletto un nuovo BIGBOSS, lo memorizzo.");
 										
-					setConnectedClusterHeadAddress(getRelayMessageReader().getNewRelayLocalClusterAddress());
+					setConnectedClusterHeadAddress(getNewRelayLocalClusterAddress());
 					memorizeConnectedClusterHeadAddress();
 					
 					setElectingHead(false);
@@ -801,8 +804,8 @@ public class RelayElectionManager extends Observable implements Observer{
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un possibile sostituto BIGBOSS/RELAY ATTIVO, controllo se è questo nodo eletto");
 					setElecting(false);
 					try {
-						if(sameAddress(InetAddress.getByName(getRelayMessageReader().getNewRelayLocalClusterAddress()))){
-							setConnectedClusterHeadAddress(getRelayMessageReader().getHeadNodeAddress());
+						if(sameAddress(InetAddress.getByName(getNewRelayLocalClusterAddress()))){
+							setConnectedClusterHeadAddress(getHeadNodeAddress());
 							if(isPOSSIBLE_RELAY()){
 								debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING, "Stato."+getActualStatus()+": ... DIVENTO RELAY ATTIVO..");
 								becomRelay(1);
@@ -1214,7 +1217,7 @@ public class RelayElectionManager extends Observable implements Observer{
 	public static void setCLIENT(boolean client) {CLIENT=client;}
 	public static boolean isCLIENT() {return CLIENT;}
 	
-
+	
 	public static void setINSTANCE(RelayElectionManager iNSTANCE) {INSTANCE = iNSTANCE;}
 	public static RelayElectionManager getINSTANCE() {return INSTANCE;}
 	
