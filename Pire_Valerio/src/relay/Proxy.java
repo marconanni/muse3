@@ -292,7 +292,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * @param connectedClusterHeadAddr l'indirizzo superiore di questo proxy
 	 * @param servingClient true il proxy invia direttamente il flusso ad un client, false se invia ad un relay secondario
 	 */
-	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, String secondaryRelayAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderOutPort,int recoverySenderInPort, String recoverySenderlocalClusterAddress,  int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String localClusterAddress,String connectedClusterHeadAddr, boolean servingClient){
+	public Proxy(Observer sessionManager, boolean newProxy, String clientAddress, String secondaryRelayAddress, int clientStreamPort, int proxyStreamPortOut, int proxyStreamPortIn, int serverStreamPort, int recoverySenderOutPort,int recoverySenderInPort, String recoverySenderlocalClusterAddress,  int serverCtrlPort, int proxyCtrlPort, String localClusterHeadAddr,String localClusterAddress,String connectedClusterHeadAddr, boolean servingClient, boolean isBigBoss){
 //	TODO: controllare che le porte siano tutte ben mappate
 		
 		this.localClusterAddress = localClusterAddress;
@@ -318,6 +318,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.msgReader = new RelayMessageReader();
 		this.servingClient = servingClient;
 		
+		this.isBigBoss=isBigBoss;
 		this.fProxy = new ProxyFrame();
 		//proxy connection manager, e' osservato da this
 		this.proxyCM = RelayConnectionFactory.getProxyConnectionManager(this, this.proxyStreamingCtrlPort);
@@ -400,8 +401,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		//avvio la ricezione di recovery
 		boolean flag2 = rtpReceptionMan.startRecoveryConnection();
 		System.err.println("+++++++ fatta startRecoveryConnection");
+		System.err.println("+++++++++ track formats 2" + rtpReceptionMan.getTrackFormats2());
 		/*
-		 * Marco: prova: non so se va bene, ma mando lo start TX al vecchio relay
+		 * Marco: prova: non so se va bene, ma mando lo start TX al vecchio relayoldProxyAddress
 		 */
 		
 
@@ -650,7 +652,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			}
 
 			if(msgReader.getCode() == MessageCodeConfiguration.START_TX){
-				System.err.println("E' arrivato START_TX");
+				System.err.println("E' arrivato START_TX da "+msgReader.getPacketAddess()+" il mio stato è "+state);
 				
 				/*
 				 * MArco:è arrivato un messaggio START_TX da parte del client
@@ -751,15 +753,16 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					System.err.println("IL MIO STATO È RECEIVINGRETRANSMISSION");
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
-					if(buffer.getRecoveryBuffer().isEmpty()){
-						
-						//avvio lo stream normale verso il client
-						startNormalStreamToClient();
-						
-						//transito nel nuovo stato
-						state = ProxyState.transmittingToClient;
-						
-					}else{
+//					if(buffer.getRecoveryBuffer().isEmpty()){
+//						
+//						//avvio lo stream normale verso il client
+//						startNormalStreamToClient();
+//						
+//						//transito nel nuovo stato
+//						state = ProxyState.transmittingToClient;
+//						
+//					}
+//					else{
 						/*
 						 * MArco: qui dovrebbe essere più chiaro: ricevo uno start TX dal client ed ho il recovery buffer 
 						 * riempito con quanto rimasto dal buffer dell vecchio relay. faccio quindi partire un recovery stream
@@ -774,7 +777,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						//transito nel nuovo stato
 						state = ProxyState.TransmittingTempBuffer;
 						
-					}
+//					}
 					
 				} else if (state == ProxyState.attemptingToStart && !this.newProxy){
 					System.err.println("IL MIO STATO È ATTEMPTINGTOSTART E NON SONO UN NUOVO PROXY");
@@ -1025,7 +1028,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		// e faccio la differenza
 		
 		long executionTime = System.currentTimeMillis()-this.startTime;
-		System.err.println("@@@@@@@@@@@@@Tempo per svuotare il buffer: " + executionTime);
+		fProxy.messageArea.append("Tempo per svuotare il buffer: " + executionTime);
 		
 		if (debug)
 			System.out.println("Proxy: evento:" + e);
@@ -1372,24 +1375,43 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		/*
 		 * Marco: questa dovrebbe far partire lo stream usando i frames presenti nel recovery buffer
 		 */
-		
+		System.err.println("@@@@@@@@@@@@@@@@@@@@@ appena dentro startRecoveryStreamToClient");
 		//si occupa anche di attaccare il mux al buffer normale
 		if (muxThR == null || state == ProxyState.receivingRetransmission || state == ProxyState.TransmittingTempBuffer){
-		
+			System.err.println("@@@@@@@@@@@@@@@@@@@@@ appena dentro il primo if");
 			try {
-				RTPMultiplexer mux = new RTPMultiplexer(this.rtpReceptionMan.getTrackFormats2());
+//				if(rtpReceptionMan.getTrackFormats2()==null){
+//					System.err.println("@@@@@@@@@@@@@@@@@@@@@ appena dentro il secondo if");
+//					try {
+//						rtpReceptionMan.initRecoveryConnection(getOutStreamPort(), InetAddress.getByName(oldProxyAddress));
+//						System.err.println("@@@@@@@@@@@@@@@@@@@@@ appena fatta la initRecoveryConnection");
+//						rtpReceptionMan.startRecoveryConnection();
+//						System.err.println("@@@@@@@@@@@@@@@@@@@@@ appena fatta la StartRecoveryConnection");
+//					} catch (IncompatibleSourceException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//				}
+				RTPMultiplexer mux = new RTPMultiplexer(rtpReceptionMan.getTrackFormats2());
+				System.err.println("@@@@@@@@@@@@  dopocreazione muxRTP");
 				//creo un MultiplexerThread
 				//muxTh = new MultiplexerThreadEV(rtpMux, buffer.getNormalBuffer(),null , this.clientAddress);
-				CircularBuffer[] b = this.rtpReceptionMan.getRecoveryParserThread().getOutputBufferSet();
+				System.err.println("@@@@@@@@@@@@  +" +rtpReceptionMan+ "  - " +rtpReceptionMan.getRecoveryParserThread()+" - "+rtpReceptionMan.getRecoveryParserThread().getOutputBufferSet());
+
+				CircularBuffer[] b = rtpReceptionMan.getRecoveryParserThread().getOutputBufferSet();
+				System.err.println("@@@@@@@@@@@@  estrazione circular buffer");
 				try {
 					muxThR = new MuseMultiplexerThread(mux, b,null,5);
+					System.err.println("@@@@@@@@@@@@  dopo creazione muxTHR");
 					muxThR.setTimeToWait(BufferConfiguration.TTW-48);
+					System.err.println("@@@@@@@@@@@@  dopo set TTW muxTHR");
 				} catch (Exception e) {
 					// Auto-generated catch block
 					e.printStackTrace();
 				}
 				//imposto il datasource
 				rtpSender.sendData(mux.getDataOutput());
+				System.err.println("@@@@@@@@@@@@  dopo send data");
 			} catch (IOException e) {
 				// Auto-generated catch block
 				e.printStackTrace();
