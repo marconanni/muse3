@@ -469,58 +469,15 @@ proxyIP---->l'indirizzo IP del mittente
 	public void redirectSource(final String newRelayAddress)
 	{
 	
-	System.out.println("redirectSource");
-		try {
-			System.err.println("@@@@@@@@@@@@@@@@@@@@@@@@@@New relay address " + newRelayAddress);
-			rtpRx=new RTPReceiverPS(clientPortRTP+10,InetAddress.getByName(NetConfiguration.CLIENT_ADDRESS), InetAddress.getByName(newRelayAddress));
-			System.err.println("il client si aspetta lo stream sulla porta "+(clientPortRTP+10));
-			System.out.println("dopo creazione rtpRx");
-			rtpRx.setSender(InetAddress.getByName(newRelayAddress),proxyPortRTP);
-			System.err.println("il nuovo proxy manda da "+newRelayAddress+":"+proxyPortRTP);
-			System.out.println("dopo setSender rtpRx");
-			
-			rtpRx.addReceiveStreamEventListener(this);
-			System.out.println("dopo creazione addReceiveStreamListener");
-					
-			
-			} catch (UnknownHostException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+		Thread runner;
 		
-	
-		System.out.println("prima della creazione del thread");
-		//Runnable RTPReceiverPS;
-		runner2 = new Thread(){			
-			ParserThreadEV parserThread1=null;
-			public void run(){
-				dsInput=rtpRx.receiveData();
-				System.out.println("dopo creazione receiveData");
-				
-				
-				//clReport.startPSTransmission();
-								
-				try {
-					rtpParser=new RTPParser(dsInput);
-				} catch (IncompatibleSourceException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
-				} catch (IOException e2) {
-					// TODO Auto-generated catch block
-					e2.printStackTrace();
-				}
-				System.out.println("dopo new RTPPareser");
-				
-				
-				
-			// ***** PARSER *****			
-			parserThread1=new ParserThreadEV(rtpParser,clientBufferSize,view, BufferConfiguration.BUFFER_THS_START_TX, BufferConfiguration.BUFFER_THS_STOP_TX);
-			System.err.println("+++++++++++++++++++++"+rtpRx);
+		
+		
+		runner = new Thread(){public void run(){
+			
 			rtpRx.removeTargets();
 			System.out.println("01b. CHANGE RELAY: rimossi i Targets dall'RTPReceiverPS");
+			
 			try {
 				rtpRx.addSource(InetAddress.getByName(newRelayAddress), proxyPortRTP);
 			} catch (UnknownHostException e1) {
@@ -531,11 +488,12 @@ proxyIP---->l'indirizzo IP del mittente
 				e1.printStackTrace();
 			}
 			System.out.println("02b. CHANGE RELAY: rimossi i Targets dall'RTPReceiverPS");
+						
 			
 			DataSource ds =rtpRx.receiveData();
 			System.out.println("03b. CHANGE RELAY: ottenuto nuovo Datasource");
 			
-//			parserThread.suspend();
+			parserThread.suspend();
 			System.out.println("04b CHANGE RELAY: sospeso il vecchio ParserThreadEV");	
 			
 			try {
@@ -550,21 +508,12 @@ proxyIP---->l'indirizzo IP del mittente
 			System.out.println("05b. CHANGE RELAY: cambiato il Datasource del RTPParser");
 			System.out.println("05.1b CHANGE RELAY: RTPParser: " + ((RTPParser)rtpParser).toString());
 			
-			parserThread1.setRTPParser((RTPParser)rtpParser);
+			parserThread.setRTPParser((RTPParser)rtpParser);
 			System.out.println("06b CHANGE RELAY: settato il nuovo RTPParser dentro il vecchio ParserThreadEV");
 			parserThread.restart();
 			System.out.println("09b. CHANGE RELAY: ripartito il vecchio ParserThreadEV");
 		};};
-		System.err.println("++++++++++rtpreceiver da fuori il thread +" +rtpRx);
-		runner2.start();
-					
-//		muxThread.suspend();
-//		System.out.println("08b. CHANGE RELAY: sospeso il MultiplexerThreadPS");
-//		
-//		
-//					
-//		muxThread.restart();
-//		System.out.println("12 - b. CHANGE RELAY: ripartito il MultiplexerThreadPS");
+		runner.start();
 	
 
 		
