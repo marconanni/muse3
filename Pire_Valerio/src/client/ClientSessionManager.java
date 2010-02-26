@@ -120,13 +120,13 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 		// TODO Auto-generated method stub
 		
 		
-		try {
-			this.clientPlaying=new ClientBufferDataPlaying(PortConfiguration.CLIENT_PORT_SESSION_OUT, this.myStreamingPort, InetAddress.getByName(this.relayAddress), BufferConfiguration.CLIENT_BUFFER, 0, this.frameController);
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.err.println("ERRORE NELLA CREAZIONE DI CLIENTPLAYING");
-		}
+//		try {
+//			this.clientPlaying=new ClientBufferDataPlaying(PortConfiguration.CLIENT_PORT_SESSION_OUT, this.myStreamingPort, InetAddress.getByName(this.relayAddress), BufferConfiguration.CLIENT_BUFFER, 0, this.frameController);
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			System.err.println("ERRORE NELLA CREAZIONE DI CLIENTPLAYING");
+//		}
 		
 		
 		
@@ -393,24 +393,24 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 
 				
 				// aggiunto invio di startTX
-				try {
-					this.msg = ClientMessageFactory.buildStartTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
-				} catch (UnknownHostException e) {
-					//  Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					//  Auto-generated catch block
-					e.printStackTrace();
-				}
-				try {
-					System.out.println("costruito messaggio StartTX da inviare a "+InetAddress.getByName(relayAddress)+":"+this.proxyCtrlPort);
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				sessionCM.sendTo(msg);
-			
-
+//				try {
+//					this.msg = ClientMessageFactory.buildStartTX(0, InetAddress.getByName(relayAddress), this.proxyCtrlPort);
+//				} catch (UnknownHostException e) {
+//					//  Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (IOException e) {
+//					//  Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				try {
+//					System.out.println("costruito messaggio StartTX da inviare a "+InetAddress.getByName(relayAddress)+":"+this.proxyCtrlPort);
+//				} catch (UnknownHostException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				sessionCM.sendTo(msg);
+//			
+//
 				}
 
 			
