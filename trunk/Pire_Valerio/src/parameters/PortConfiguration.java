@@ -5,10 +5,10 @@ public class PortConfiguration {
 	//Pire
 	//Porte per gli ELECTION MANAGER
 	/** porta per la gestione della elezione sui CLIENT/RELAY in ingresso */
-	public static final int PORT_ELECTION_IN = 3002;
+	public static final int PORT_ELECTION_IN = 30151;
 	/** porta per la gestione della elezione sui CLIENTRELAY in uscita.
 	 * Attraverso questa porta vengono spediti anche i messaggi WHO_IS_RELAY */
-	public static final int PORT_ELECTION_OUT = 3003;
+	public static final int PORT_ELECTION_OUT = 30152;
 	
 	//Porte per i WHO_IS_RELAY
 	/** porta su cui il Thread periodico del Relay Attuale ascolta i messaggi WHO_IS_RELAY
