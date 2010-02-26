@@ -821,10 +821,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				}
 				///////////////////////////////////////
 			}
-		}
+		
 			
-			else
-				if(msgReader.getCode() == MessageCodeConfiguration.STOP_TX){
+			else if(msgReader.getCode() == MessageCodeConfiguration.STOP_TX){
 				System.err.println("IL MIO STATO È ARRIVATO STOP_TX");
 				/*
 				 * Marco: qui finalemte le cose sono più chiare: arriva uno stop TX dal client,
@@ -874,6 +873,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				}
 			// TODO Arrivo Redirect
 				else if (msgReader.getCode() == MessageCodeConfiguration.REDIRECT){
+					
+					System.out.println("Entrato nel redirect");
 					/*
 					 * C'� stata la rielezione di un nuovo relay secondario, il proxy sostitutivo
 					 * sul nuovo relay secondario mi manda il redirect, affich� io mandi i flussi
@@ -909,10 +910,14 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 						} catch (UnknownHostException e) {
 							//  Auto-generated catch block
 							e.printStackTrace();
+							
 						}
-						this.clientAddress = newClientAddress;
+						this.relayAddress = newClientAddress;
+						System.out.println("ricevuto redirect, ridirigo il flusso verso "+newClientAddress);
 						
 					}
+					
+
 					
 					
 					
@@ -920,6 +925,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					
 								
 				}
+		}
 			
 		}
 		
@@ -1349,7 +1355,15 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			System.out.println("Init Recovery Sessione controllare costruttore RTPSENDERPS");
 			// TODO Init Recovery Sessione controllare costruttore RTPSENDERPS
 			this.rtpSender = new RTPSenderPS(outStreamPort);
-			rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
+			if(servingClient){
+				rtpSender.addDestination(InetAddress.getByName(clientAddress), this.clientStreamPort);
+				System.err.println("FATTA ADDDESTINATION SUL CLIENT: "+clientAddress+":"+clientStreamPort);
+			}
+			else{
+				rtpSender.addDestination(InetAddress.getByName(relayAddress), this.relayStreamingPort);
+				System.err.println("FATTA ADDDESTINATION SUL RELAY: "+relayAddress+":"+relayStreamingPort);
+				
+			}
 			
 		} catch (UnknownHostException e) {
 			// Auto-generated catch block
