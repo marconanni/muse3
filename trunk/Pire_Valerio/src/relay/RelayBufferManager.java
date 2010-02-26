@@ -61,7 +61,7 @@ public class RelayBufferManager {
 	 * @return CircularBuffer 
 	 */
 	public EventCircularBuffer getRecoveryBuffer(){
-		System.err.println("############## RECOVERY BUFFER TRUE");
+
 		if (recoveryBuffer == null)
 			recoveryBuffer = new EventCircularBuffer(true ,bufSize, this.controller);
 			recoveryBuffer.addBufferEmptyEventListener(proxy);

@@ -310,12 +310,15 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		this.serverStreamPort = serverStreamPort;
 		this.outStreamPort = proxyStreamPortOut;
 		this.inStreamPort = proxyStreamPortIn;
-		this.streamingServerCtrlPort = serverCtrlPort;
+		
+			this.streamingServerCtrlPort = serverCtrlPort;
+	
 		this.proxyStreamingCtrlPort = proxyCtrlPort;
 		System.out.println("Inizializzazione del proxy in corso...");
 		this.oldProxyAddress = recoverySenderlocalClusterAddress;
 		this.msgReader = new RelayMessageReader();
-		this.servingClient = servingClient;
+		this.servingClient = servingClient;		
+
 		
 		this.isBigBoss=isBigBoss;
 		this.fProxy = new ProxyFrame();
@@ -1393,7 +1396,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			 */
 			try {
 				while (rtpReceptionMan.getTrackFormats()==null){
-					System.err.println("track formats normal stram vuoto");
+//					System.err.println("track formats normal stream vuoto");
 					try {
 						Thread.sleep(10);
 					} catch (InterruptedException e) {
@@ -1633,15 +1636,12 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	 * ridirigerà il flusso rtp verso questo nodo.
 	 * Non c'è la versione differenziata perchè deve arrivare a chi eroga il flusso 
 	 * (proxy del big boss o StreamingServer del server), la porta sulla quale 
-	 * stanno in ascolto è la porta di controllo.
+	 * stanno in ascolto è la porta di controllo, tale porta viene determinata
+	 * all'interno del metodo.
 	 */
 	private void sendRedirect(){
-		/*
-		 *  il server potrebbe anche essere un proxy sul big boss; ma il metodo non d� problemi
-		 *  a riguardo, visto che  l'indirizzo viene fornito dal costruttore e la porta
-		 *  di sessione viene stabilita in base al tipo di nodo che eroga il fusso dal
-		 *  metodo determinaPorteSessione
-		 */
+	
+		
 		try {
 			//Creo un messaggio REDIRECT e lo invio al server
 			
