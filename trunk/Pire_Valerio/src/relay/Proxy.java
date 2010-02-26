@@ -216,7 +216,6 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		
 		System.err.println("isBibBoss="+this.isBigBoss+", servingClient="+this.servingClient);
 		
-		
 		try {
 			//relay buffer manager, this e' un listener per gli eventi sollevati dal buffer nominale
 			buffer = new RelayBufferManager(BufferConfiguration.PROXY_BUFFER, this.fProxy.getController(), BufferConfiguration.PROXY_SOGLIA_INFERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_INFERIORE_ELECTION,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_NORMAL,BufferConfiguration.PROXY_SOGLIA_SUPERIORE_ELECTION,this);
@@ -537,6 +536,8 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					for(int i=0;i<sessionports.length;i++)				
 						System.out.println(sessionports[i]);
 					
+					
+					System.err.println("$$$$ outStreamPort"+ outStreamPort);
 					this.setChanged();
 					this.notifyObservers(sessionports);
 				}
@@ -883,14 +884,40 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					String newClientAddress = ((DatagramPacket)arg).getAddress().getHostAddress();					
 					// non ho bisogno di controllare le porte sulle quali opera il  proxy sostitutivo perch�  sono
 					// le stesse di quelle del proxy sul vecchio relay secondario.
-					//MARCO ROBA TUA CHE HO COMMENTATO
-					try {
-						this.redirectOutputStream(InetAddress.getByName(clientAddress),this.clientStreamPort, InetAddress.getByName(newClientAddress));
-					} catch (UnknownHostException e) {
-						//  Auto-generated catch block
-						e.printStackTrace();
+					
+					
+					/*
+					 * se servo un client sovrascrivo e mando il clientAddress
+					 * se servo un relay  sovrascrivo e mando relayAddress
+					 */
+					if (servingClient== true){
+						try {
+							this.redirectOutputStream(InetAddress.getByName(clientAddress),this.clientStreamPort, InetAddress.getByName(newClientAddress));
+						} catch (UnknownHostException e) {
+							//  Auto-generated catch block
+							e.printStackTrace();
+						}
+						this.clientAddress = newClientAddress;
+						
+						System.out.println("ricevuto redirect, ridirigo il flusso verso "+newClientAddress);
+						
 					}
-					this.clientAddress = newClientAddress;
+					
+					else {
+						try {
+							this.redirectOutputStream(InetAddress.getByName(relayAddress),this.relayStreamingPort, InetAddress.getByName(newClientAddress));
+						} catch (UnknownHostException e) {
+							//  Auto-generated catch block
+							e.printStackTrace();
+						}
+						this.clientAddress = newClientAddress;
+						
+					}
+					
+					
+					
+					
+					
 								
 				}
 			
