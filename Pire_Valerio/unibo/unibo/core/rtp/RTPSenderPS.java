@@ -91,6 +91,8 @@ public class RTPSenderPS implements SendStreamListener
 			}
 		catch(IOException e){ throw new IOException("RTP initializing failed:\n"+e); }
 		catch(InvalidSessionAddressException e){ throw new IOException("Invalid Local Address:\n"+e); }
+		
+		System.err.println("$$$$$$$ Dentro il costruttore di RtpSender, localAddress "+ localAddress.getHostAddress() + "localport" + localPort);
 	}
 	
 /**
