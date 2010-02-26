@@ -733,6 +733,30 @@ public class RelayElectionManager extends Observable implements Observer{
 							setActualStatus(RelayStatus.WAITING_BEACON);
 							addClientVisibility(getRelayMessageReader().getActiveClient());
 							debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": Ap/BigBoss Visibility == true, TIMEOUT_ELECTION_BEACON, TIMEOUT_FAIL_TO_ELECT partiti");
+							
+							if(test){
+								setNumberOfNode(getNumberOfNode()+1);
+								
+								if(getNumberOfNode()==NODE){
+										
+									//Stato instabile WeightCalculation
+									weightCalculation();
+
+									debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"W calcolato:"+getW());
+										
+									DatagramPacket dpOut = null;
+
+									try {
+										dpOut = RelayMessageFactory.buildElectionResponse(0, getW(), getConnectedClusterHeadInetAddress(), PortConfiguration.PORT_ELECTION_IN);
+										getComClusterManager().sendTo(dpOut);
+										debug(getConsoleClusterWifiInterface(),DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": ECTION_RESPONSE inviato a "+getConnectedClusterHeadAddress());
+									} catch (IOException e) {e.printStackTrace();}
+
+									setActualStatus(RelayStatus.WAITING_END_NORMAL_ELECTION);
+										
+									debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Stato."+getActualStatus()+": attesa che ricevo risposta (ELECTIONE_DONE) dal nodo da sosituire ");
+								}
+							}
 						} 			
 
 					} catch (WNICException e) {e.printStackTrace();}
