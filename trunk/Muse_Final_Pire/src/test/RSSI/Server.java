@@ -26,10 +26,10 @@ class Server{
 	//private static boolean RSSI_CONTROLLER = fasle;
 	private static int PORT_RSSI_IN = 3000;
 	private static int PORT_RSSI_OUT = 3001;
-	private static int PORT_IN_OUT = 12346;
+	private static int PORT_IN_OUT = 12345;
 	
-	private static String LOCAL_ADDRESS = "192.168.70.211";
-	private static String DESTINATION_ADDRESS = "192.168.70.210";
+	private static String LOCAL_ADDRESS = "192.168.2.4";
+	private static String DESTINATION_ADDRESS = "192.168.2.7";
 	
 	
 	public static void main(String args[]){
