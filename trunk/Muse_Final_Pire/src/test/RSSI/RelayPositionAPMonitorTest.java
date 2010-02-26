@@ -43,10 +43,19 @@ import parameters.ElectionConfiguration;
 public class RelayPositionAPMonitorTest{
 
 	private long period = -1;
-	private RelayWNICController rwc = null;
-	private RSSIFilter filter = null;
+	private RelayWNICController rwc1 = null;
+	private RelayWNICController rwc2 = null;
+	private RelayWNICController rwc3 = null;
+	private RelayWNICController rwc4 = null;
+	private RSSIFilter filter1 = null;
+	private RSSIFilter filter2 = null;
+	private RSSIFilter filter3 = null;
+	private RSSIFilter filter4 = null;
 	private int positiveDisconnectionPrediction = 0;
-	private AccessPointData currAP = null;
+	private AccessPointData currAP1 = null;
+	private AccessPointData currAP2 = null;
+	private AccessPointData currAP3 = null;
+	private AccessPointData currAP4 = null;
 	private Timer timer = null;
 	private boolean started;
 	private String tmp;
@@ -61,7 +70,7 @@ public class RelayPositionAPMonitorTest{
 	private BufferedWriter bw = null;
 	private int count = 0;
 	private int count1 = 0;
-	private int startAt = 2;
+	private int startAt = 0;
 
 
 	/**Metodo per ottenere un RelayPositionAPMonitor
@@ -72,14 +81,20 @@ public class RelayPositionAPMonitorTest{
 	 * @param electionManager l'Observer che deve essere avvertito in caso di prevista disconnessione dall'AP
 	 * @throws InvalidParameter
 	 */
-	public RelayPositionAPMonitorTest(RelayAPWNICLinuxController wc, long p,int min, double thr) throws WNICException{
+	public RelayPositionAPMonitorTest(RelayAPWNICLinuxController wc1,RelayAPWNICLinuxController wc2,RelayAPWNICLinuxController wc3,RelayAPWNICLinuxController wc4, long p,int min, double thr) throws WNICException{
 
-		if(wc==null)
+		if(wc1==null)
 			throw new WNICException("ERRORE: WNICController non valido");
-		rwc=wc;
+		rwc1=wc1;
+		rwc2=wc2;
+		rwc3=wc3;
+		rwc4=wc4;
 		period = p;
 		positiveDisconnectionPrediction=0;
-		currAP=null;
+		currAP1=null;
+		currAP2=null;
+		currAP3=null;
+		currAP4=null;
 		started = false;
 		this.min = min;
 		this.thr = thr;
@@ -102,7 +117,7 @@ public class RelayPositionAPMonitorTest{
 //		}
 
 
-		setDebugConsole(rwc.getDebugConsole());
+		setDebugConsole(rwc1.getDebugConsole());
 		debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: CICLO DI CONTROLLO CONNESSIONE AP ogni " + period + " ms");
 	}
 
@@ -135,41 +150,75 @@ public class RelayPositionAPMonitorTest{
 	private void mainTask(){
 		try{
 
-			currAP = rwc.getAssociatedAccessPoint();
+			currAP1 = rwc1.getAssociatedAccessPoint();
+			currAP2 = rwc2.getAssociatedAccessPoint();
+			currAP3 = rwc3.getAssociatedAccessPoint();
+			currAP4 = rwc4.getAssociatedAccessPoint();
 			tmp = null;
-			double prevision = -1;
+			double prevision1 = -1;
+			double prevision2 = -1;
+			double prevision3 = -1;
+			double prevision4 = -1;
 
-			if(currAP!=null){
-				double actualRSSI = (double)rwc.updateSignalStrenghtValue();
-				if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: AP: "  +currAP.getAccessPointName() + " - RSSI: " + actualRSSI);
+			if(currAP1!=null){
+				double actualRSSI = (double)rwc1.updateSignalStrenghtValue();
+				if(debug)debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: AP: "  +currAP1.getAccessPointName() + " - RSSI: " + actualRSSI);
 
 				if(actualRSSI!=lastRSSI){
 					count1++;
 					lastRSSI=actualRSSI;
-					if(count1>startAt){
-						currAP.addSignalStrenghtValue(actualRSSI);
-						double [] a = currAP.getLastSignalStrenghtValues();
-						filter =new GreyModel(a, min, thr);
-						prevision = filter.predictRSSI();
+					if(count1>=startAt){
+						currAP1.addSignalStrenghtValue(actualRSSI);
+						currAP2.addSignalStrenghtValue(actualRSSI);
+						currAP3.addSignalStrenghtValue(actualRSSI);
+						currAP4.addSignalStrenghtValue(actualRSSI);
+						double [] a1 = currAP1.getLastSignalStrenghtValues();
+						double [] a2 = currAP2.getLastSignalStrenghtValues();
+						double [] a3 = currAP3.getLastSignalStrenghtValues();
+						double [] a4 = currAP4.getLastSignalStrenghtValues();
+						filter1 =new GreyModel(a1, min, thr);
+						filter2 =new GreyModel(a2, min, thr);
+						filter3 =new GreyModel(a3, min, thr);
+						filter4 =new GreyModel(a4, min, thr);
+						prevision1 = filter1.predictRSSI();
+						prevision2 = filter2.predictRSSI();
+						prevision3 = filter3.predictRSSI();
+						prevision4 = filter4.predictRSSI();
 						if(debug){
 							tmp="[";
-							for(int i = 0; i<a.length;i++)
-								tmp+=a[i]+",";
+							for(int i = 0; i<a1.length;i++)
+								tmp+=a1[i]+",";
 							tmp+="]";
-							tmp +=" PREVISIONE:"+prevision;
+							tmp +=" PREVISIONE:"+prevision1;
 							debug(getDebugConsole(), DebugConfiguration.DEBUG_INFO,"RelayPositionAPMonitor: "+tmp);
 						}
 						double tt = (System.currentTimeMillis()-time);
 						Number n = new Number(0,count,tt);
-						Number n1 = new Number(1,count,actualRSSI);
-							Number n2 = new Number(2,count,prevision);
+							
+							Number n1 = new Number(1,count,actualRSSI);
+							Number n2 = new Number(2,count,prevision1);
+							
+							Number n3 = new Number(4,count,actualRSSI);
+							Number n4 = new Number(5,count,prevision2);
+							
+							Number n5 = new Number(7,count,actualRSSI);
+							Number n6 = new Number(8,count,prevision3);
+							
+							Number n7 = new Number(10,count,actualRSSI);
+							Number n8 = new Number(11,count,prevision4);
 						sheet.addCell(n);
 						sheet.addCell(n1);
 						sheet.addCell(n2);
+						sheet.addCell(n3);
+						sheet.addCell(n4);
+						sheet.addCell(n5);
+						sheet.addCell(n6);
+						sheet.addCell(n7);
+						sheet.addCell(n8);
 						
 						System.out.println(count);
 					
-						if(count ==50){
+						if(count ==300){
 							workbook.write();
 							workbook.close();
 							System.exit(1);					}
