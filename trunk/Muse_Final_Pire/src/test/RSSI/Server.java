@@ -51,10 +51,10 @@ class Server{
 			} catch (UnknownHostException e) {e.printStackTrace();}
 		} catch (SocketException e) {e.printStackTrace();}
 
-		BufferedInputStream inbinary=null;
-		try {
-			inbinary = new BufferedInputStream(new FileInputStream("Up.avi"));
-		} catch (FileNotFoundException e) {e.printStackTrace();}
+//		BufferedInputStream inbinary=null;
+//		try {
+//			inbinary = new BufferedInputStream(new FileInputStream("Up.avi"));
+//		} catch (FileNotFoundException e) {e.printStackTrace();}
 	
 		long startTime = 0;
 		long endTime = 0;
@@ -64,10 +64,11 @@ class Server{
 	    int MB = 0;
 	    double rate = 0;
 	    byte[] buf = new byte[BUFFER_SIZE];
+	    for(int i = 0; i<BUFFER_SIZE; i++) buf[i]=(byte)i;
 	    DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
 	    try {
-	    	while ((numbytes = inbinary.read(buf,0,BUFFER_SIZE)) >= 0)
+	    	while (true)
 	    	{
 	    	//	startTime = System.currentTimeMillis();
 	    		if(BIDIREZIONE)server.receive(packet);
@@ -77,7 +78,7 @@ class Server{
 				server.send(packet);
 			//	endTime = System.currentTimeMillis()+1000;
 				
-				countbytes+= numbytes;
+				countbytes+= packet.getLength();
 				countblocks++;         
 				//rate = (numbytes*8)/((endTime-startTime)/1000);
 				if(countbytes%(BUFFER_SIZE*BUFFER_SIZE)==0){
