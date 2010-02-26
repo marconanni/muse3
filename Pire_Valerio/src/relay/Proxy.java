@@ -1344,7 +1344,23 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		//si occupa anche di attaccare il mux al buffer normale
 		if (muxTh == null || state == ProxyState.receivingRetransmission || state == ProxyState.TransmittingTempBuffer){
 		
+			/*
+			 * Spesso, dopo una rielezione
+			 *  arriva la richiesta del flusso da parte del client prima che
+			 * il Thread 1 finisca di inizializzare la ricezione del flusso di recovery.
+			 * con questo ciclo faccio aspettare il thread finchè tutto non è inizializzato a dovere
+			 */
 			try {
+				while (rtpReceptionMan.getTrackFormats()==null){
+					System.err.println("track formats normal stram vuoto");
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				
+				}
 				System.out.println("trackformat "+this.rtpReceptionMan.getTrackFormats().toString());
 				RTPMultiplexer mux = new RTPMultiplexer(this.rtpReceptionMan.getTrackFormats());
 				//creo un MultiplexerThread
@@ -1380,6 +1396,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		if (muxThR == null || state == ProxyState.receivingRetransmission || state == ProxyState.TransmittingTempBuffer){
 			System.err.println("@@@@@@@@@@@@@@@@@@@@@ appena dentro il primo if");
 			try {
+				// commentato perchè funziona male, usare il codice scritto dopo
 //				if(rtpReceptionMan.getTrackFormats2()==null){
 //					System.err.println("@@@@@@@@@@@@@@@@@@@@@ appena dentro il secondo if");
 //					try {
@@ -1392,6 +1409,18 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 //						e1.printStackTrace();
 //					}
 //				}
+				/*
+				 * Spesso arriva la richiesta del flusso da parte del client prima che
+				 * il Thread 2 finisca di inizializzare la ricezione del flusso di recovery.
+				 * con questo ciclio faccio aspettare il thread finchè tutto non è inizializzato a dover
+				 */
+				while(rtpReceptionMan.getTrackFormats2()==null)
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				RTPMultiplexer mux = new RTPMultiplexer(rtpReceptionMan.getTrackFormats2());
 				System.err.println("@@@@@@@@@@@@  dopocreazione muxRTP");
 				//creo un MultiplexerThread
