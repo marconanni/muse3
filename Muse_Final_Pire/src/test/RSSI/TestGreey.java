@@ -6,15 +6,18 @@ import relay.wnic.RelayAPWNICLinuxController;
 import relay.wnic.exception.WNICException;
 
 public class TestGreey {
-	private static String wifiInterface = "wlan1";
-	private static String wifiNetwork = "muselab";
-	private static int numberOfPreviousRSSI = 10;
+	private static String wifiInterface = "wlan0";
+	private static String wifiNetwork = "lord";
+	private static int numberOfPreviousRSSI = 5;
 	private static int minNumberOfRSSI = 5;
 	private static double previsionTHRS = 20;
-	private static long interval = 1;
+	private static long interval = 1500;
 
 	
-	private RelayAPWNICLinuxController wnic = null;
+	private RelayAPWNICLinuxController wnic1 = null;
+	private RelayAPWNICLinuxController wnic2 = null;
+	private RelayAPWNICLinuxController wnic3 = null;
+	private RelayAPWNICLinuxController wnic4 = null;
 	private RelayPositionAPMonitorTest ap = null;
 	
 	private DebugConsole console = null;
@@ -25,9 +28,12 @@ public class TestGreey {
 	public TestGreey(){
 		
 		try {
-			console = new DebugConsole("TEST RSSI");
-			wnic = new RelayAPWNICLinuxController(numberOfPreviousRSSI,wifiInterface,wifiNetwork);
-			ap = new RelayPositionAPMonitorTest(wnic,interval,minNumberOfRSSI,previsionTHRS);
+			//console = new DebugConsole("TEST RSSI");
+			wnic1 = new RelayAPWNICLinuxController(5,wifiInterface,wifiNetwork);
+			wnic2 = new RelayAPWNICLinuxController(10,wifiInterface,wifiNetwork);
+			wnic3 = new RelayAPWNICLinuxController(15,wifiInterface,wifiNetwork);
+			wnic4 = new RelayAPWNICLinuxController(20,wifiInterface,wifiNetwork);
+			ap = new RelayPositionAPMonitorTest(wnic1,wnic2,wnic3,wnic4,interval,minNumberOfRSSI,previsionTHRS);
 			ap.setDebugConsole(console);
 			ap.start();
 		} catch (WNICException e) {e.printStackTrace();}
