@@ -446,6 +446,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		try {
 			dpOut = RelayMessageFactory.buildAckConnection(getConnectedClusterHeadInetAddress(), PortConfiguration.PORT_ELECTION_IN, MessageCodeConfiguration.TYPERELAY);
 			getComClusterHeadManager().sendTo(dpOut);
+			debug(getConsoleClusterHeadWifiInterface(),DebugConfiguration.DEBUG_INFO,"RelayElectionManger: Stato."+getActualStatus()+" sono diventato il NEW RELAY e ACK sepdito a "+getConnectedClusterHeadAddress()+":"+PortConfiguration.PORT_ELECTION_IN);
 		} catch (IOException e) {debug(getConsoleClusterHeadWifiInterface(), DebugConfiguration.DEBUG_ERROR,"Errore nel spedire il messaggio di ACK_CONNECTION");e.getStackTrace();}
 	
 		if(state==0){
@@ -527,7 +528,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			/** IM_RELAY
 			 *  WAITING_WHO_IS_RELAY
 			 *  Risposta da parte del nodo relay attivo del CLUSTER di riferimento*/
-			debug(getConsoleElectionManager(),3,"Arrivato messaggio :"+getRelayMessageReader().getCode());
+			debug(getConsoleElectionManager(),3,"Arrivato messaggio :"+getRelayMessageReader().getCode()+" e stato:"+getActualStatus());
 			if((getRelayMessageReader().getCode() == MessageCodeConfiguration.IM_RELAY) && 
 			   (getActualStatus() == RelayStatus.WAITING_WHO_IS_RELAY)){
 				
@@ -573,6 +574,8 @@ public class RelayElectionManager extends Observable implements Observer{
 //				}
 				
 			}
+			
+		
 
 			/**	ELECTION_REQUEST
 			 *  Un nodo Relay attivo sta uscendo dal proprio cluster -> in cerca di un nuovo sostituto
@@ -664,12 +667,22 @@ public class RelayElectionManager extends Observable implements Observer{
 				}
 			}
 			
+			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_REQUEST) && 
+					(!sameAddress(getRelayMessageReader().getPacketAddess())) &&
+					(getFirstELECTION_REQUEST())){
+				setConnectedClusterHeadAddress(getRelayMessageReader().getPacketAddess().getHostAddress());
+				memorizeConnectedClusterHeadAddress();
+			}
+			
 			/** ELECTION_BEACON_RELAY
 			 *  WAITING_BEACON
 			 *  solo nodo possibile sostituti
 			 */
 			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_BEACON) &&
 					(!sameAddress(getRelayMessageReader().getPacketAddess()))){
+				
+				setFirstELECTION_REQUEST(true);
+				setFirstELECTION_DONE(false);
 				
 				//Significa che ho ricevuto l'election request
 				if((isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY())&&
@@ -705,8 +718,7 @@ public class RelayElectionManager extends Observable implements Observer{
 				//non ho ricevuto l election request ancora
 				else if((isPOSSIBLE_BIGBOSS()||isPOSSIBLE_RELAY())&&
 						 getActualStatus() == RelayStatus.IDLE){		
-					setFirstELECTION_REQUEST(true);
-					setFirstELECTION_DONE(false);
+
 						
 					setStartElection(System.currentTimeMillis());
 					setNumberOfNode(0);
@@ -770,8 +782,7 @@ public class RelayElectionManager extends Observable implements Observer{
 					setElectingHead(true);
 					setConnectedClusterHeadAddress(null);
 					setConnectedClusterHeadInetAddress(null);
-					setFirstELECTION_REQUEST(true);
-					setFirstELECTION_DONE(false);
+
 				
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_WARNING,"Stato."+getActualStatus()+": ELECTION_REQUEST arrivato da (BIGBOSS) IP:"+getRelayMessageReader().getPacketAddess());
 					
@@ -861,7 +872,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			 *  risposta da parte del nodo che è stato sostituito con allegato l indirizzo del nuovo relay eletto
 			 */
 			else if((getRelayMessageReader().getCode() == MessageCodeConfiguration.ELECTION_DONE) && 
-					(getActualStatus() == RelayStatus.WAITING_END_NORMAL_ELECTION) &&
+					//(getActualStatus() == RelayStatus.WAITING_END_NORMAL_ELECTION) &&
 					(!sameAddress(getRelayMessageReader().getPacketAddess())) &&
 					(!getFirstELECTION_DONE())){
 				
@@ -878,7 +889,7 @@ public class RelayElectionManager extends Observable implements Observer{
 			
 				
 				//caso in cui viene eletto un nuovo BIGBOSS devo ricollegare il relay attivo
-				if(isRELAY()){
+				if(isRELAY() && (getActualStatus() == RelayStatus.WAITING_END_NORMAL_ELECTION) ){
 					debug(getConsoleElectionManager(), DebugConfiguration.DEBUG_INFO,"Nodo corrente è un relay secondario attivo ed è stato appena eletto un nuovo BIGBOSS, lo memorizzo.");
 										
 					setConnectedClusterHeadAddress(getRelayMessageReader().getNewRelayLocalClusterAddress());
@@ -1134,8 +1145,8 @@ public class RelayElectionManager extends Observable implements Observer{
 //		if(getRelayPositionMonitor().isStopped()){
 //			getRelayPositionMonitor().start();
 //		}
-//		if(!getRelayPositionMonitor().isStarted())
-//			getRelayPositionMonitor().start();
+		if(!getRelayPositionMonitor().isStarted())
+			getRelayPositionMonitor().start();
 			
 	}
 	public void stopMonitoringRSSI(){
