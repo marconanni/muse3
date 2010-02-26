@@ -95,7 +95,7 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 		this.status = "Idle";
 		this.myStreamingPort = PortConfiguration.CLIENT_PORT_RTP_IN;
 		
-		this.relayAddress=NetConfiguration.RELAY_CLUSTER_ADDRESS;//Valerio: simulo che il client sia collegato ad un relay
+	//	this.relayAddress=NetConfiguration.RELAY_CLUSTER_ADDRESS;//Valerio: simulo che il client sia collegato ad un relay
 														//e non a bigboss, questa parte va modificata, non posso sapere a priori
 														//a chi mi collego
 		System.out.println("finito costruttore clientsessionmanager");
