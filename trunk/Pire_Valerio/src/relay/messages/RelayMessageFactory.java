@@ -709,27 +709,27 @@ static public DatagramPacket buildLeave(int sequenceNumber, InetAddress addr, in
 //}
 //
 //
-///**
-//* Messaggio di SessionUnreacheable
-//* 
-//* @param sequenceNumber
-//* @param clientAddr
-//* @param port
-//* @return
-//* @throws IOException 
-//*/
-//static public DatagramPacket buildSessionInvalidation(int sequenceNumber, InetAddress clientAddr, int port) throws IOException{
-//	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
-//	DataOutputStream doStream = new DataOutputStream(boStream);
-//	String content = sequenceNumber+"_"+MessageCodeConfiguration.SESSION_INVALIDATION;
-//	doStream.writeUTF(content);
-//	doStream.flush();
-//	byte[] data = boStream.toByteArray();
-//
-//	return new DatagramPacket(data, data.length, clientAddr, port);
-//}
-//
-//
+/**
+* Messaggio di SessionUnreacheable
+* 
+* @param sequenceNumber
+* @param clientAddr
+* @param port
+* @return
+* @throws IOException 
+*/
+static public DatagramPacket buildSessionInvalidation(int sequenceNumber, InetAddress clientAddr, int port) throws IOException{
+	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+	DataOutputStream doStream = new DataOutputStream(boStream);
+	String content = sequenceNumber+"_"+MessageCodeConfiguration.SESSION_INVALIDATION;
+	doStream.writeUTF(content);
+	doStream.flush();
+	byte[] data = boStream.toByteArray();
+
+	return new DatagramPacket(data, data.length, clientAddr, port);
+}
+
+
 
 /**
  * 

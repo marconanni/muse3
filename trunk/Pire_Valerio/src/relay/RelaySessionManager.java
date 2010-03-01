@@ -49,8 +49,6 @@ import debug.*;
 public class RelaySessionManager implements Observer{
 	private RelaySessionStatus status;
 	private int numberOfSession;
-	//private Hashtable<String, Proxy> pReferences; // Marco: tabella che contiene per ogni sessione ( identificata dall'indirizzo del client) il proxy che la serve
-	//private Hashtable<String, int[]> sessionInfo;
 	private Hashtable<String, Session> sessions; // tablella che contiene le info sulle sessioni: la chiave � l'Ip del cliente finale che ascolta la musica ( anche se mediato da un relay secondario) - per maggiori info guardare la classe Session
 	private Set<String> enumSession = null;
 	/*
@@ -82,9 +80,9 @@ public class RelaySessionManager implements Observer{
 	private RelayElectionManager electionManager;
 
 //X Pire: non so come hai chiamato i timeout
-//	private TimeOutSingleWithMessage toSessionRequest;
-//	private TimeOutSingleWithMessage toAckSessionInfo;
-//	private TimeOutSingleWithMessage toSessionInfo;
+	private TimeOutSingleWithMessage toSessionRequest;
+	private TimeOutSingleWithMessage toAckSessionInfo;
+	private TimeOutSingleWithMessage toSessionInfo;
 	
 	
 	private RelayCM sessionCMClusterHead; // Marco: è chi si occupa di spedire i messaggi.
@@ -457,9 +455,9 @@ public class RelaySessionManager implements Observer{
 		
 		if(messageReader.getCode() == MessageCodeConfiguration.REQUEST_SESSION && this.status==RelaySessionStatus.AttendingRequestSession )
 		{
-			//TIMEOUT COMMENTATI
-//			if(toSessionRequest!=null) // Marco: viene disattivato il timeout request session: il messaggio è arrivato
-//				toSessionRequest.cancelTimeOutSessionRequest();
+			//TIMEOUT
+			if(toSessionRequest!=null) // Marco: viene disattivato il timeout request session: il messaggio è arrivato
+				toSessionRequest.cancelTimeOutSingleWithMessage();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: ricevuto SESSION_REQUEST dal nuovo RELAY");
 			try {
 				if(this.sessions != null || !this.sessions.isEmpty())
@@ -472,8 +470,8 @@ public class RelaySessionManager implements Observer{
 
 				this.sessionCMCluster.sendTo(this.message); //Marco: invio il messaggio preparato
 				this.status = RelaySessionStatus.ATTENDIGACKSESSION;
-				//TIMEOUT COMMENTATI
-//				this.toAckSessionInfo = RelayTimeoutFactory.getTimeOutAckSessionInfo(this, TimeOutConfiguration.TIMEOUT_ACK_SESSION_INFO);
+				// TIMEOUT
+				this.toAckSessionInfo = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_ACK_SESSION_INFO, "ACKSESSIONINFO");
 			} catch (UnknownHostException e) {
 				
 				e.printStackTrace();
@@ -494,9 +492,9 @@ public class RelaySessionManager implements Observer{
 			 *  Una volta svuotati tutti i buffer di tutti i proxy questi  mandano il messaggio di LEAVE a tutti i client serviti
 			 */
 		{
-			//TIMEOUT COMMENTATI
-//			if(this.toAckSessionInfo!=null)
-//				toAckSessionInfo.cancelTimeOutAckSessionInfo();
+			//TIMEOUT 
+			if(this.toAckSessionInfo!=null)
+				toAckSessionInfo.cancelTimeOutSingleWithMessage();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Ricevuto ACK_SESSION dal nuovo RELAY");
 			// Marco: il metyodo change proxy Session invoca il metodo Start handoff di ogni proxy che, in sostanza dovrebbe gestisce
 			// la redirezione del flusso verso il nuovo relay ( per i dettagli guarda i commenti ai metodi).
@@ -533,10 +531,10 @@ public class RelaySessionManager implements Observer{
 			 * sembra che a mandare il messaggio di REDIRECT al server perchè questi dirotti il flusso sul nuovo relay sia 
 			 * ogni nuovo proxy relativamente alla stessa sessione
 			 */
-			//TIMEOUT COMMENTATI
-//			this.toSessionInfo.cancelTimeOutSessionInfo();
+			//TIMEOUT 
+			this.toSessionInfo.cancelTimeOutSingleWithMessage();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Ricevuto SESSION_INFO dal vecchio RELAY");
-			 // creo le sessioni ggio dal messa attualmente per� non ci sono i proxy, li metto con il 
+			 // creo le sessioni  dal messaggio attualmente per� non ci sono i proxy, li metto con il 
 			//metodo
 			this.sessions = messageReader.getSessions();
 			
@@ -667,24 +665,24 @@ public class RelaySessionManager implements Observer{
 			this.relayAddress = st.nextToken();
 			consolle.debugMessage(DebugConfiguration.DEBUG_INFO,"RELAY_SESSION_MANAGER: Evento di RELAY_FOUND, il RELAY attuale è: "+this.relayAddress);
 		}
-		
+
 		if(this.event.equals("TIMEOUTSESSIONREQUEST") || this.event.equals("TIMEOUTACKSESSIONINFO")) //VECCHIO RELAY: il nuovo relay non ha risposto
 		{
-//TIMEOUT COMMENTATI CONROLLARE
-//			if(this.event.equals("TIMEOUTSESSIONREQUEST") && status.equals("Active"))
-//				consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_REQUEST");
-//			if(this.event.equals("TIMEOUTACKSESSIONINFO") && status.equals("AttendingAckSession"))
-//				consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_ACK_SESSION_INFO");
-//			//TODO DEVO AVVISARE IL RELAYELECTIONMANAGER
-//			/*
-//			 * Marco: in sostanza, se il nuovo relay non risponde, cerco di nominare il secondo
-//			 * classificato alle elezioni
-//			 * 
-//			 */
-//			if(this.electionManager!=null)
-//			{
-//				electionManager.chooseAnotherRelay();
-//			}
+//			TIMEOUT  CONROLLARE
+			if(this.event.equals("TIMEOUTSESSIONREQUEST") && status.equals("Active"))
+				consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_REQUEST");
+			if(this.event.equals("TIMEOUTACKSESSIONINFO") && status.equals("AttendingAckSession"))
+				consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_ACK_SESSION_INFO");
+			//TODO DEVO AVVISARE IL RELAYELECTIONMANAGER
+			/*
+			 * Marco: in sostanza, se il nuovo relay non risponde, cerco di nominare il secondo
+			 * classificato alle elezioni
+			 * 
+			 */
+			if(this.electionManager!=null)
+			{
+				consolle.debugMessage(DebugConfiguration.DEBUG_ERROR, "Scatato il timeout, il nuovo relay non ha risposto");
+			}
 
 		}
 		
@@ -801,8 +799,8 @@ public class RelaySessionManager implements Observer{
 					consolle.debugMessage(0, "sono il vecchio relay");
 					this.maxWnextRelay = newRelay;
 					this.status= RelaySessionStatus.AttendingRequestSession;
-					//TIMEOUT DISABILITATI
-//					this.toSessionRequest = RelayTimeoutFactory.getTimeOutSessionRequest(this, TimeOutConfiguration.TIMEOUT_SESSION_REQUEST);
+					//TIMEOUT 
+					this.toSessionRequest = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_SESSION_REQUEST,"TIMEOUTSESSIONREQUEST");
 
 				}
 				else{
@@ -822,8 +820,8 @@ public class RelaySessionManager implements Observer{
 						
 						System.out.println("MANDO IL MESSAGGGIOOOOOOOOOOOOOOOOOO");
 						this.sessionCMCluster.sendTo(message);
-						//TIMEOUT DISABILITATI
-//						this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO);
+						//TIMEOUT 
+						this.toSessionInfo = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO,"TIMEOUTSESSIONINFO");
 						this.status = RelaySessionStatus.RequestingSession;
 						this.oldRelayLocalClusterAddress=vecchioRelay;
 						this.oldRelayClusterHeadAddress=indsupVecchioRelay;
@@ -875,40 +873,51 @@ public class RelaySessionManager implements Observer{
 			 * il parametro numberOf ritrasmissions idica quante volte posso chiedere la ritrasmissione del messaggio Sessioninfo
 			 * fortunatamente qui posso ritrasmetterlo diminuendo il numero di ritrasmissioni rimaste
 			 */
-//			consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO");
-//			try {
-//				this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
-//				this.sessionCM.sendTo(message);
-//				this.toSessionInfo = RelayTimeoutFactory.getTimeOutSessionInfo(this, Parameters.TIMEOUT_SESSION_INFO);
-//				this.numberOfRetrasmissions--;
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO");
+			try {
+				this.message = RelayMessageFactory.buildRequestSession(0, InetAddress.getByName(this.relayAddress), PortConfiguration.RELAY_SESSION_AD_HOC_PORT_IN);
+				this.sessionCMCluster.sendTo(message);
+				this.toSessionInfo = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_SESSION_INFO,"TIMEOUTSESSIONINFO");
+				this.numberOfRetrasmissions--;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		}
 		if(this.event.equals("TIMEOUTSESSIONINFO") && this.numberOfRetrasmissions == 0)
 		{
-//			/*
-//			 * Marco: sono il nuovo relay: è scattato il timeout sulla ricezione del messaggio SessionInfo.
-//			 * il parametro numberOf ritrasmissions idica quante volte posso chiedere la ritrasmissione del messaggio Sessioninfo
-//			 * sfortunatamente non posso ritrasmetterlo: non mi resta che mandare IN BROADCAST
-//			 *  ai client il messaggio di invalidare le sessioni attive, ipotizzo quindi che il vecchio relay non ci sia più
-//			 */
-//			consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO e numero di ritrasmissioni a 0");
-//			this.status = "Waiting";
-//			//Invio il messaggio di invalidazione della sessione ai client che conoscono l'identità del nuovo relay ma non si ha modo di recuperare la sessione
-//			try {
-//				this.message = RelayMessageFactory.buildSessionInvalidation(0, InetAddress.getByName(Parameters.BROADCAST_ADDRESS), Parameters.CLIENT_PORT_SESSION_IN);
-//				this.sessionCM.sendTo(this.message);
-//				this.status = "Active";
-//			} catch (UnknownHostException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			/*
+			 * Marco: sono il nuovo relay: è scattato il timeout sulla ricezione del messaggio SessionInfo.
+			 * il parametro numberOf ritrasmissions idica quante volte posso chiedere la ritrasmissione del messaggio Sessioninfo
+			 * sfortunatamente non posso ritrasmetterlo: non mi resta che mandare IN BROADCAST
+			 *  ai client il messaggio di invalidare le sessioni attive, ipotizzo quindi che il vecchio relay non ci sia più
+			 */
+			consolle.debugMessage(DebugConfiguration.DEBUG_WARNING,"RELAY_SESSION_MANAGER: Scattato il TIMEOUT_SESSION_INFO e numero di ritrasmissioni a 0");
+			this.status = RelaySessionStatus.WAITING;
+			//Invio il messaggio di invalidazione della sessione ai client che conoscono l'identità del nuovo relay ma non si ha modo di recuperare la sessione
+			try {
+				
+				Enumeration<String> keys = sessions.keys();
+				
+				while (keys.hasMoreElements()){
+					String indirizzo = keys.nextElement();
+					this.message = RelayMessageFactory.buildSessionInvalidation(0, InetAddress.getByName(indirizzo), PortConfiguration.CLIENT_PORT_SESSION_IN);
+					this.sessionCMCluster.sendTo(this.message);
+				
+				}
+				
+				if (electionManager.isBIGBOSS())
+					this.status = RelaySessionStatus.ACTIVE_BIGBOSS;
+				else
+					this.status = RelaySessionStatus.ACTIVE_NORMAL;
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		// TODO ELECTION_REQUEST_RECEIVED si inizia la fase di rielezione
