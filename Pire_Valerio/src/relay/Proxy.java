@@ -75,9 +75,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 	
 	private boolean request_pending;
 	//timeout:
-//	private TimeOutAckForward timeoutAckForward;
-//	private TimeOutAckClientReq timeoutAckClientReq;
-//	private TimeOutSessionInterrupted timeoutSessionInterrupted;
+	private TimeOutSingleWithMessage timeoutAckForward;
+	private TimeOutSingleWithMessage timeoutAckClientReq;
+	private TimeOutSingleWithMessage timeoutSessionInterrupted;
+
 	
 	//parametri:
 	private String proxyID = "-1";
@@ -252,7 +253,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		}
 		
 		//imposto il timeout
-//		this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, TimeOutConfiguration.TIMEOUT_ACK_FORWARD);
+		this.timeoutAckForward = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_ACK_FORWARD,"TIMEOUTACKFORWARD");
 		//transito nello stato di WaitingServerRes 
 		this.state = ProxyState.waitingServerRes;
 		fProxy.getController().debugMessage(this.state.name());
@@ -545,7 +546,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					this.notifyObservers(sessionports);
 				}
 				//imposto il timeout ack client req:
-//				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
+				this.timeoutAckClientReq = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ,"TIMEOUTACKCLIENTREQ");
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
 				
@@ -592,7 +593,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					this.notifyObservers(sessionports);
 				}
 				//imposto il timeout ack client req:
-//				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ);
+				this.timeoutAckClientReq = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ,"TIMEOUTACKCLIENTREQ");
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
 				
@@ -603,7 +604,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				fProxy.getController().debugMessage(this.state.name());
 				System.err.println(this.state.name());
 				//reset timeout TimeOutAckForward
-//				this.timeoutAckForward.cancelTimeOutAckForward();
+				this.timeoutAckForward.cancelTimeOutSingleWithMessage();
 				//leggo le informazioni contenute nel messaggio
 				this.serverStreamPort = msgReader.getServerStreamingPort();
 				this.streamingServerCtrlPort = msgReader.getServerStreamingControlPort();
@@ -647,7 +648,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					
 				}
 				//imposto il timeout ack client req:
-//				this.timeoutAckClientReq = RelayTimeoutFactory.getTimeOutTimeOutAckClientReq(this, Parameters.TIMEOUT_ACK_CLIENT_REQ);
+				this.timeoutAckClientReq = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_ACK_CLIENT_REQ,"TIMEOUTACKCLIENTREQ");
 				
 				//transito nel nuovo stato
 				this.state = ProxyState.waitingClientAck;
@@ -663,10 +664,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				  come si comporta il proxy dipende dallo stato in cui si trova il proxy, sono che sono molto criptici
 				  * non si capisce che cosa significano e quando si verificano...
 				*/
-//				if(this.timeoutSessionInterrupted!=null)
-//				{
-//					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();
-//				}
+				if(this.timeoutSessionInterrupted!=null)
+				{
+					this.timeoutSessionInterrupted.cancelTimeOutSingleWithMessage();
+				}
 			
 			
 				if (state == ProxyState.waitingClientAck){	
@@ -686,7 +687,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//resetto TimeOutAckClientReq
-//					this.timeoutAckClientReq.cancelTimeOutAckClientReq();
+					this.timeoutAckClientReq.cancelTimeOutSingleWithMessage();
 					
 					// Marco: in pratica dichiaro qui il thread, ed il codice contenuto nell suo metodo run anzichè farlo in un file separato
 					Thread runner = new Thread(){public void run(){try {
@@ -731,7 +732,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());
 					//resetto il TimeOutSessionInterrupted
-//					this.timeoutSessionInterrupted.cancelTimeOutSessionInterrupted();					
+					this.timeoutSessionInterrupted.cancelTimeOutSingleWithMessage();
 					//invio il msg di startTX al server
 					if(serverStopped){
 						if(isBigBoss)sendStartTXToServer();
@@ -814,8 +815,9 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 					//transito nel nuovo stato
 					state = ProxyState.TransmittingTempBuffer;
 					this.newProxy = false;
+					this.timeoutSessionInterrupted = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_SESSION_INTERRUPTED,"TIMEOUTSESSIONINTERRUPTED");
+
 				}
-//				this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
 				//VALERIO:CONTROLLARE!!!!!!!!!!!!!!!!!!!!!!
 				//////////////////////////////////////////////////
 				else if(state==ProxyState.transmittingToClient){
@@ -836,14 +838,14 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 				
 				if (state == ProxyState.transmittingToClient){
 					System.err.println("IL MIO STATO È TRANSMITTINGTOCLIENT");
-//					if(this.timeoutSessionInterrupted!=null)
-//					{
-//						this.timeoutSessionInterrupted.cancel();
-//					}
+					if(this.timeoutSessionInterrupted!=null)
+					{
+						this.timeoutSessionInterrupted.cancelTimeOutSingleWithMessage();
+					}
 					fProxy.getController().debugMessage(this.state.name());
 					System.err.println(this.state.name());				
 					//imposto il timeoutSessionInterrupted
-//					this.timeoutSessionInterrupted = RelayTimeoutFactory.getTimeOutSessionInterrupted(this, Parameters.TIMEOUT_SESSION_INTERRUPTED);
+					this.timeoutSessionInterrupted = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_SESSION_INTERRUPTED,"TIMEOUTSESSIONINTERRUPTED");
 
 					//interrompo lo strem versoil client
 					pauseNormalStreamToClient();
@@ -1563,7 +1565,7 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 			DatagramPacket reqFile =  RelayMessageFactory.buildReqFile(0, filename, proxyCM.getLocalManagedInputOutputPort(), this.inStreamPort, this.clientAddress, this.clientStreamPort, InetAddress.getByName(NetConfiguration.SERVER_ADDRESS), PortConfiguration.SERVER_SESSION_PORT_IN);
 			System.out.println("il messaggio di request file che il relay manda al server è:\n0, "+filename+", "+proxyCM.getLocalAdHocInputPort()+", "+this.inStreamPort+", "+this.clientAddress+", "+PortConfiguration.CLIENT_PORT_SESSION_IN+", "+this.clientStreamPort);
 			proxyCM.sendToServer(reqFile);	
-			//this.timeoutAckForward = RelayTimeoutFactory.getTimeOutAckForward(this, Parameters.TIMEOUT_ACK_FORWARD);
+			this.timeoutAckForward = RelayTimeoutFactory.getSingeTimeOutWithMessage(this, TimeOutConfiguration.TIMEOUT_ACK_FORWARD,"TIMEOUTACKFORWARD");
 		} catch (Exception e) {
 			// Auto-generated catch block
 			e.printStackTrace();
