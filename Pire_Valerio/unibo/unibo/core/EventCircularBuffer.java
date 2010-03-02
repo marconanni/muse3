@@ -190,4 +190,8 @@ public class EventCircularBuffer extends CircularBuffer{
 			view.setBufferRecValue((int)(100/f));
 		}
 	}
+	public float getBufferPercentage(){
+		float f = (float)super.getBufferSize() / super.getStatusFrame();
+		return (100/f);
+	}
 }
