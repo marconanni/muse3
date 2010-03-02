@@ -27,6 +27,7 @@ import unibo.core.BufferEmptyEvent;
 import unibo.core.BufferEmptyListener;
 import unibo.core.BufferFullEvent;
 import unibo.core.BufferFullListener;
+import unibo.core.EventCircularBuffer;
 import client.connection.ClientConnectionFactory;
 import client.connection.ClientCM;
 import client.connection.ClientPortMapper;
@@ -68,7 +69,8 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 	private Timer runner;
 	private String newrelay;
 	
-
+	private Valerio valerio;
+	
 	/**
 	 * @param electionManager
 	 *            the electionManager to set
@@ -360,6 +362,10 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 						long inizio = System.currentTimeMillis();
 						System.out.println("INIZIO (OVVERO ISTANTE IN CUI MANDO START_TX): "+inizio);
 						status = "WaitingForPlaying";
+						
+						valerio=new Valerio("/home/valerio/statisticabufferclient.txt",clientPlaying.getEventBuffer());
+						valerio.start();
+						
 						if(this.electionManager!=null)
 							this.electionManager.setServed(true);
 						}
