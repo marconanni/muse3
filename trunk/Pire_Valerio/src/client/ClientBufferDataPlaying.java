@@ -86,6 +86,8 @@ public class ClientBufferDataPlaying extends Observable  implements ControllerLi
 	private ClientSessionManager controller;
 
 	private IClientView view;
+	
+	
 
 //	metodo costruttore che prende come parametri l'indirizzo (IP + Port) del proxy per il flusso RTP e la porta di ricezione del client per tale flusso, la capacita' del buffer e l'intervallo tra l'elaborazione dei frame da parte del multiplexer, un'interfaccia per il piano di controllo
 	public ClientBufferDataPlaying(int sendingPortRTP, int inPortRTP, InetAddress proxyAddress, int bufferSize, int timeToWait, IClientView view)
@@ -161,6 +163,7 @@ proxyIP---->l'indirizzo IP del mittente
 	public boolean startPlaying() //limito la sincronizzazione al solo accesso alla variabile flag playing che determina se l'avvio e' avvenuto o no, in questo modo allegerisco l'elaborazione
 	{
 	System.out.println("startPlaying()");
+	
 	while(this.buffer.getStatusFrame()< BufferConfiguration.BUFFER_THS_START_POINT)
 		{
 		System.err.println("				sleep di 250 ms");
@@ -475,8 +478,8 @@ proxyIP---->l'indirizzo IP del mittente
 		
 		runner = new Thread(){public void run(){
 			
-			rtpRx.removeTargets();
-			System.out.println("01b. CHANGE RELAY: rimossi i Targets dall'RTPReceiverPS");
+//			rtpRx.removeTargets();
+//			System.out.println("01b. CHANGE RELAY: rimossi i Targets dall'RTPReceiverPS");
 			
 			try {
 				rtpRx.addSource(InetAddress.getByName(newRelayAddress), proxyPortRTP);
@@ -491,6 +494,7 @@ proxyIP---->l'indirizzo IP del mittente
 						
 			
 			DataSource ds =rtpRx.receiveData();
+			addAsRTPListener();
 			System.out.println("03b. CHANGE RELAY: ottenuto nuovo Datasource");
 			
 			parserThread.suspend();
@@ -521,6 +525,10 @@ proxyIP---->l'indirizzo IP del mittente
 	
 	public void setEventBuffer(EventCircularBuffer b){this.buffer = b;}
 	public EventCircularBuffer getEventBuffer(){return this.buffer;}
+	
+	public void addAsRTPListener(){
+		rtpRx.addReceiveStreamEventListener(this);
+	}
 //	
 //	public RTPReceiverPS getRtpRx(){return this.rtpRx;}
 //	public void setRtpRx(RTPReceiverPS rt){this.rtpRx = rt;}
