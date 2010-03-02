@@ -54,13 +54,13 @@ public class NetConfiguration {
 	public static final String RELAY_CLUSTER_BROADCAST_ADDRESS = "192.168.30.255"; 		//indirizzo IP di BROADCAST sulla rete Ad-Hoc (cluster)
 	
 	/** CLIENT */
-	public static final String NAME_OF_CLIENT_NETWORK = "lord";
+	public static final String NAME_OF_CLIENT_NETWORK = "RELAY1";
 	public static final String NAME_OF_CLIENT_WIFI_INTERFACE = "wlan0";				//Nome dell'interfaccia con cui il Client si affaccia sulla rete Ad-Hoc
-//	public static final String CLIENT_ADDRESS = "192.168.2.4";						//indirizzo IP del CLIENT
-	public static final String CLIENT_ADDRESS = "127.0.0.1";						//indirizzo IP del CLIENT
-	public static final String CLIENT_BROADCAST_ADDRESS = "192.168.2.255";
+	public static final String CLIENT_ADDRESS = "192.168.5.10";						//indirizzo IP del CLIENT
+	//public static final String CLIENT_ADDRESS = "127.0.0.1";						//indirizzo IP del CLIENT
+	public static final String CLIENT_BROADCAST_ADDRESS = "192.168.5.255";
 	
-	public static final String BIGBOSS_AD_HOC_ADDRESS="127.0.0.1";
+	//public static final String BIGBOSS_AD_HOC_ADDRESS="127.0.0.1";
 
 
 	
