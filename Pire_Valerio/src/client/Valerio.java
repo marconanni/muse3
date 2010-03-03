@@ -26,6 +26,7 @@ public class Valerio extends Thread{
 			e.printStackTrace();
 		}
 		pw.println("tempo,percentuale");
+		pw.flush();
 	}
 	@Override
 	public void run() {
@@ -33,6 +34,7 @@ public class Valerio extends Thread{
 		// TODO Auto-generated method stub
 		while(k<90000){//monitoro buffer per un minuto e mezzo
 			pw.println(k+","+ev.getBufferPercentage());
+			pw.flush();
 			try {
 				sleep(100);
 			} catch (InterruptedException e) {
