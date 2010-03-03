@@ -1786,6 +1786,10 @@ public class Proxy extends Observable implements Observer, BufferFullListener, B
 		// TODO Auto-generated method stub
 		return this.buffer.getNormalBuffer().getContatore();
 	}
+
+	public RelayBufferManager getBuffer() {
+		return buffer;
+	}
 	
 	
 	/**

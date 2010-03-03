@@ -17,6 +17,8 @@ import java.util.StringTokenizer;
 
 import javax.media.rtp.event.NewParticipantEvent;
 
+import client.Valerio;
+
 import parameters.DebugConfiguration;
 import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
@@ -116,6 +118,8 @@ public class RelaySessionManager implements Observer{
 	private long startTime=0;
 	private long endTime=0;
 	private int framesNelBuffer =0;
+	
+	public Valerio valerio;
 	
 	//stati in cui si può trovare il RelayElectionManager
 	public enum RelaySessionStatus {  
@@ -994,7 +998,8 @@ public class RelaySessionManager implements Observer{
 		System.err.println("RelaySessionManager- Porta di Stream del Server control: " +sessionPorts[4]);
 		System.err.println("RelaySessionManager- Porta di Stream del Proxy control: " +sessionPorts[5]);
 	
-		
+		valerio=new Valerio("/home/vsandri/workspace/statistichebufferbigboss.cvs", proxy.getBuffer().getNormalBuffer());
+		valerio.start();
 		
 		/*Controlla con valerio per l'inserimento di un riferimento con un relay secondario:
 		 * salvo il campo del relay secondario da qualche parte?
