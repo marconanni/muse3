@@ -278,7 +278,7 @@ proxyIP---->l'indirizzo IP del mittente
 			setEventBuffer(b[0]);
 			
 			System.err.println("CONTROLLO SE il buffer é NULL "+getEventBuffer());
-			valerio=new Valerio("/home/valerio/statisticabufferclient.txt",getEventBuffer());
+			valerio=new Valerio("/home/valerio/statisticabufferclient.cvs",getEventBuffer());
 			valerio.start();
 			
 			//il ClientChainBuffer viene settato come listener degli eventi generati dal buffer
