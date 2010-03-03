@@ -10,6 +10,6 @@
 	<classpathentry kind="lib" path="lib/mediaplayer.jar"/>
 	<classpathentry kind="lib" path="lib/mp3plugin.jar"/>
 	<classpathentry kind="lib" path="lib/multiplayer.jar"/>
-	<classpathentry kind="lib" path="/home/valerio/workspace/Pire_Valerio/lib/jxl.jar"/>
+	<classpathentry kind="lib" path="lib/jxl.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
