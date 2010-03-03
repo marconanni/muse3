@@ -1,5 +1,9 @@
 package parameters;
 
+/**Classe che definisce i messaggi di comunicazioni
+ * @author Pire Dejaco, Valerio Sandri, Marco Nanni
+ * @version 1.1
+ */
 public class MessageCodeConfiguration {
 	
 	public static final int TYPERELAY = 0;
@@ -16,7 +20,7 @@ public class MessageCodeConfiguration {
 	
 	public static final int ELECTION_REQUEST = 8;			//Messaggio inviato da un relay attualmente attivo che deve essere sostituito
 	public static final int ELECTION_BEACON = 9;			//Messaggio inviato dai client con sessione RTP in corso destinato ai possibili relay sostituti
-	public static final int ELECTION_BEACON_RELAY = 10;
+	//public static final int ELECTION_BEACON_RELAY = 10;
 	public static final int ELECTION_RESPONSE = 11;
 	public static final int ELECTION_DONE = 12;				//Messagio inviato dal nuovo relay appena eletto
 	

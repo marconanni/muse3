@@ -1,5 +1,9 @@
 package parameters;
 
+/**Classe che permette di impostare i vari timeout
+ * @author Pire Dejaco, Valerio Sandri, Marco Nanni
+ * @version 1.1
+ */
 public class TimeOutConfiguration {
 
 	/** Periodo con cui il RelayPositionClientsMonitor richiede ai Clients serviti il valore di RSSI rilevato nei suoi confronti */
@@ -16,7 +20,7 @@ public class TimeOutConfiguration {
 	public static final String TIME_OUT_SEARCH = "TIMEOUTSEARCH";
 		
 	/** timeout relativo all'intera fase di elezione */
-	public static final int TIMEOUT_FAIL_TO_ELECT = 4000;
+	public static final int TIMEOUT_FAIL_TO_ELECT = 5000;
 	public static final String TIME_OUT_FAIL_TO_ELECT = "TIMEOUTFAILTOELECT";
 	
 	/** timeout relativo al messaggio FILE_REQ */
@@ -24,11 +28,11 @@ public class TimeOutConfiguration {
 	public static final String TIME_OUT_FILE_REQUEST = "TIMEOUTFILEREQUEST";
 		
 	/** timeout relativo all'intera fase di elezione */
-	public static final int TIMEOUT_TO_ELECT = 3000;
+	public static final int TIMEOUT_TO_ELECT = 4000;
 	public static final String TIME_OUT_TO_ELECT = "TIMEOUTTOELECT";
 	
 	/** timeout relativo al messaggio di risposta dei client al messagigo ELECTION_REQUEST */
-	public static final int TIMEOUT_ELECTION_BEACON = 1000;
+	public static final int TIMEOUT_ELECTION_BEACON = 1500;
 	public static final String TIME_OUT_ELECTION_BEACON = "TIMEOUTELECTIONBEACON";
 	
 	/** timeout relativo alla prima fase del protocollo di emergenza */
