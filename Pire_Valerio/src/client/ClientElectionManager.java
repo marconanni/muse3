@@ -7,14 +7,13 @@ import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import parameters.DebugConfiguration;
 import parameters.MessageCodeConfiguration;
 import parameters.NetConfiguration;
 import parameters.PortConfiguration;
 import parameters.TimeOutConfiguration;
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
+
 
 import client.connection.ClientCM;
 import client.connection.ClientConnectionFactory;
