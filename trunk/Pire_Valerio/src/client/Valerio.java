@@ -51,7 +51,7 @@ public class Valerio extends Thread{
 		// TODO Auto-generated method stub
 		String stringa="";
 		int dato=0;
-		for(long k=0;k<70000;k=k+100){//monitoro buffer per 70 secondi
+		for(long k=0;k<80000;k=k+100){//monitoro buffer per 80 secondi
 			if(this.ev==null) dato=0;
 			else dato=(int)ev.getBufferPercentage();
 			
