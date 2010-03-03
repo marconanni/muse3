@@ -5,6 +5,7 @@ import relay.wnic.exception.WNICException;
 
 /**Classe che permette di verificare l'interfaccia della scheda di rete WIFI
  * @author Pire Dejaco
+ * @version 1.1
  */
 
 public class WNICFinder 

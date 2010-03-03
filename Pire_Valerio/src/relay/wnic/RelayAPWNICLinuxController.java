@@ -13,6 +13,10 @@ import parameters.DebugConfiguration;
 import parameters.ElectionConfiguration;
 import parameters.NetConfiguration;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
 public class RelayAPWNICLinuxController implements RelayWNICController{
 
 	private AccessPointData currentAP;

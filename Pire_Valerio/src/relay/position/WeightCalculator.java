@@ -8,6 +8,10 @@ import relay.battery.RelayBatteryMonitor;
 import relay.wnic.RelayWNICController;
 import relay.wnic.exception.WNICException;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
 
 public class WeightCalculator {
 
@@ -26,7 +30,10 @@ public class WeightCalculator {
 				//invece se il valore è 70 --> 1/70 = 0,014 moltiplicato * 20 = 0,28 quindi 28% questo valore risulta essere il minimo (lontano)
 				double inverseOfRSSIAPvalue = (double)((double)1/(double)RSSIAPvalue)*20;
 				//range MAX 1 min 0
-				double batteryLevel = 100;//(double)(RelayBatteryMonitor.getBatteryLevel());
+				double batteryLevel = 0;
+				try {
+					batteryLevel = (double)(RelayBatteryMonitor.getBatteryLevel());
+				} catch (IOException e) {e.printStackTrace();}
 				
 				res = (double)(	ElectionConfiguration.W_OF_NUMBER_OF_CLIENTS * numberOfClients +  
 						ElectionConfiguration.W_OF_INVERSE_RSSI_AP_VALUE * inverseOfRSSIAPvalue +

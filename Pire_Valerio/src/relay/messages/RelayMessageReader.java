@@ -14,7 +14,6 @@ import java.net.InetAddress;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import parameters.MessageCodeConfiguration;
-import parameters.SessionConfiguration;
 import relay.Session;
 
 public class RelayMessageReader {

@@ -1,7 +1,5 @@
 package relay;
 
-import parameters.NetConfiguration;
-
 
 public class RelayMain {
 

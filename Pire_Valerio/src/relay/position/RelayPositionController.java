@@ -19,6 +19,11 @@ import relay.wnic.exception.WNICException;
 
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */ 
+
 public class RelayPositionController implements Observer {
 	private DatagramPacket notifyRSSI = null;
 	private boolean enableToMonitor;
@@ -84,7 +89,6 @@ public class RelayPositionController implements Observer {
 
 		if(arg1 instanceof DatagramPacket){
 			int RSSIvalue =-1;
-			int temp = -1;
 			cmr = new RelayMessageReader();
 			try {
 				cmr.readContent((DatagramPacket)arg1);

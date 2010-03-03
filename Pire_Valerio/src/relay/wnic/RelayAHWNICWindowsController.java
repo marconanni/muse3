@@ -4,6 +4,10 @@ import parameters.DebugConfiguration;
 import relay.wnic.exception.WNICException;
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
 public class RelayAHWNICWindowsController implements RelayWNICController {
 
 	private boolean isOn = false;

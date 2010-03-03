@@ -6,8 +6,8 @@ package relay.timeout;
 import java.util.Observer;
 
 /**
- * @author Leo Di Carlo
- *
+ * @author Leo Di Carlo, Pire Dejaco
+ * @version 1.1
  */
 public class RelayTimeoutFactory {
 

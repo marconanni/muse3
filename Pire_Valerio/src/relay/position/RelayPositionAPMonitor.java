@@ -29,7 +29,8 @@ import parameters.ElectionConfiguration;
 
 /**Classe che rappresenta un oggetto in grado di prevedere una  possibile 
  * disconnessione dall'AP da parte del nodo Relay 
- * @author Luca Campeti
+ * @author Luca Campeti, Pire Dejaco
+ * @version 1.1
  */
 public class RelayPositionAPMonitor extends Observable {
 
