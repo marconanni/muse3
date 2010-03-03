@@ -87,6 +87,7 @@ public class ClientBufferDataPlaying extends Observable  implements ControllerLi
 
 	private IClientView view;
 	
+	public Valerio valerio;
 	
 
 //	metodo costruttore che prende come parametri l'indirizzo (IP + Port) del proxy per il flusso RTP e la porta di ricezione del client per tale flusso, la capacita' del buffer e l'intervallo tra l'elaborazione dei frame da parte del multiplexer, un'interfaccia per il piano di controllo
@@ -249,10 +250,14 @@ proxyIP---->l'indirizzo IP del mittente
 	{
 		try
 		{
+			
+			
+			
+			
+			
 
 			System.err.println("@@@@@@@@@@@@@@ il thread è passato per playgStreamRTp di ClientBufferDataPlaying");
-			
-			
+					
 
 			System.err.println("@@@@@@@@@@@@@@@@@@@@@@@@ ClientBufferDataPlaying, il thread è entrato in playing streamrtp");
 			
@@ -264,12 +269,18 @@ proxyIP---->l'indirizzo IP del mittente
 			dsInput=rtpRx.receiveData();
 			//clReport.startPSTransmission();
 			rtpRx.addReceiveStreamEventListener(this);
+						
 			// ***** PARSER *****
 			rtpParser=new RTPParser(dsInput);
 			//parserThread=new ParserThreadPS(rtpParser,clientBufferSize,timeToWait);
 			parserThread=new ParserThreadEV(rtpParser,clientBufferSize,view, BufferConfiguration.BUFFER_THS_START_TX, BufferConfiguration.BUFFER_THS_STOP_TX);
 			EventCircularBuffer[] b=parserThread.getOutputBufferSet();
 			setEventBuffer(b[0]);
+			
+			System.err.println("CONTROLLO SE il buffer é NULL "+getEventBuffer());
+			valerio=new Valerio("/home/valerio/statisticabufferclient.txt",getEventBuffer());
+			valerio.start();
+			
 			//il ClientChainBuffer viene settato come listener degli eventi generati dal buffer
 			getEventBuffer().addBufferFullEventListener(this);
 			getEventBuffer().addBufferEmptyEventListener(this);
@@ -285,6 +296,7 @@ proxyIP---->l'indirizzo IP del mittente
 			setChanged();
 			notifyObservers("PLAYER_STARTED");
 			System.err.println("@@@@@@@@@@@@@@ il thread èn in fondo a playgStreamRTp di ClientBufferDataPlaying");
+						
 		}
 		catch(IOException e)
 		{
