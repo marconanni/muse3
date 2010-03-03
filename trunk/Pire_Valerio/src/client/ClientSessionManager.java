@@ -363,8 +363,10 @@ public class ClientSessionManager implements Observer, BufferFullListener,
 						System.out.println("INIZIO (OVVERO ISTANTE IN CUI MANDO START_TX): "+inizio);
 						status = "WaitingForPlaying";
 						
-						valerio=new Valerio("/home/valerio/statisticabufferclient.txt",clientPlaying.getEventBuffer());
-						valerio.start();
+//						System.err.println("CONTROLLO SE il buffer é NULL "+clientPlaying.getEventBuffer());
+//						
+//						valerio=new Valerio("/home/valerio/statisticabufferclient.txt",clientPlaying.getEventBuffer());
+//						valerio.start();
 						
 						if(this.electionManager!=null)
 							this.electionManager.setServed(true);
