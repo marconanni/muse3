@@ -14,15 +14,15 @@ public class ElectionConfiguration {
 	 */
 	
 	/**Soglia superata la quale si considera molto probabile il presentarsi di una disconnessione dall'AP */
-	public static final double AP_DISCONNECTION_THRS = 70;
+	public static final double AP_DISCONNECTION_THRS =69;
 	
 	/** Numero massimo di riscontri positivi per la disconnessione dall'AP raggiunto 
 	 *  il quale la disconnessione è considerata come certa */
-	public static final int NUMBER_OF_AP_DISCONNECTION_DETECTION = 2;
+	public static final int NUMBER_OF_AP_DISCONNECTION_DETECTION =2;
 	
 	/** Soglia al di sopra della quale un valore RSSI non viene considerato nel calcolo della media
 	 *  degli RSSI rilevati dai Clients serviti nei confronti del Relay attuale */
-	public static final double VALID_RSSI_THRS = 70;
+	public static final double VALID_RSSI_THRS = 75;
 	
 	/** Soglia al di sotto della quale si considera la batteria come esaurita */
 	public static final double BATTERY_LOW_THRS = 0.10;
@@ -33,7 +33,7 @@ public class ElectionConfiguration {
 	
 	/** Numero massimo di riscontri positivi per la disconnessione dai Clients serviti raggiunto 
 	 *  il quale tale disconnessione è considerata come certa */
-	public static final double NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION =3;
+	public static final double NUMBER_OF_CLIENTS_DISCONNECTION_DETECTION =2;
 	
 	/*
 	 *************** PARAMETRI PER IL CALCOLO DEL PESO W **********************
@@ -49,10 +49,10 @@ public class ElectionConfiguration {
 	public static final double W_OF_BATTERY_LEVEL = 3;
 	
 	/** Numero di campioni da memorizzare nella classe RelayPositionClientsMonitor affinchè il Grey Model possa effettuare la previsione*/
-	public static final int NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL = 5;
+	public static final int NUMBER_OF_SAMPLE_FOR_CLIENTS_GREY_MODEL = 13;
 		
 	/** Numero di campioni da memorizzare nella classe AccessPointData affinchè il Grey Model possa effettuare la previsione */
-	public static final int NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL = 15;
+	public static final int NUMBER_OF_SAMPLE_FOR_AP_GREY_MODEL = 13;
 	
 	/**Caratterizzazione numerica della capacità in bpms dell'interfaccia WIFI connessa alla rete Ad-Hoc
 	 */
