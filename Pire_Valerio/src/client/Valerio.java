@@ -30,22 +30,6 @@ public class Valerio extends Thread{
 		pw.flush();
 	}
 	@Override
-//	public void run() {
-//		long k=0;
-//		// TODO Auto-generated method stub
-//		while(k<90000){//monitoro buffer per un minuto e mezzo
-//			pw.println(k+","+ev.getBufferPercentage());
-//			pw.flush();
-//			try {
-//				sleep(100);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			k=k+100;
-//		}
-//		pw.close();
-//	}
 	public void run() {
 		
 		// TODO Auto-generated method stub
@@ -54,16 +38,13 @@ public class Valerio extends Thread{
 		for(long k=0;k<80000;k=k+100){//monitoro buffer per 80 secondi
 			if(this.ev==null) dato=0;
 			else dato=(int)ev.getBufferPercentage();
-			
 			stringa=stringa+k+","+dato+"\n";
-			System.out.println(stringa);
 			try {
 				sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//			k=k+100;
 		}
 		System.out.println(stringa);
 		pw.print(stringa);
