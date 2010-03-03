@@ -1,5 +1,10 @@
 package parameters;
 
+
+/**Classe che permette di configurare le impostazioni per la predizione e disconnessione da parte di un relay
+ * @author Dejaco Pire
+ * @version 1.1
+ */
 public class ElectionConfiguration {
 	/*
 	 * ************** PER IL GREYMODEL **************************

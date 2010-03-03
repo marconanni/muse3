@@ -1,5 +1,9 @@
 package parameters;
 
+/**Classe che permette di impostare un ip statico al nodo
+ * @author Pire Dejaco, Valerio Sandri, Marco Nanni
+ * @version 1.1
+ */
 public class NetConfiguration {
 	
 	/*

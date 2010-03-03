@@ -1,5 +1,9 @@
 package parameters;
 
+/**Classe che definisce le porte usate dal sistema
+ * @author Pire Dejaco, Valerio Sandri, Marco Nanni
+ * @version 1.1
+ */
 public class PortConfiguration {
 	
 	//Pire
