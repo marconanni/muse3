@@ -8,8 +8,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * @author Leo Di Carlo
- *
+ * @author Leo Di Carlo, Pire Dejaco
+ * @version 1.1
  */
 
 public class TimeOutSingleWithMessage extends Timer {

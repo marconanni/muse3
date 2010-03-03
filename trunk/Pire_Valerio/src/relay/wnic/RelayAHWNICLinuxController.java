@@ -12,6 +12,11 @@ import relay.wnic.exception.WNICException;
 
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
+
 public class RelayAHWNICLinuxController implements RelayWNICController {
 
 	private boolean debug = false;

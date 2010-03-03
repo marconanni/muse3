@@ -1,5 +1,10 @@
 package relay;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
+
 class Couple implements Comparable<Couple> {
 
 	private double weight = -1;

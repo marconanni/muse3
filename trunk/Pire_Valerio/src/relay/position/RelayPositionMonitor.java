@@ -30,7 +30,6 @@ import relay.wnic.exception.InvalidParameter;
  * nei confronti dei nodi Clients all'interno del proprio cluster
  * @author  Pire Dejaco, Luca Campeti
  * @version 1.1
- *
  */
 public class RelayPositionMonitor extends Observable implements Observer {
 

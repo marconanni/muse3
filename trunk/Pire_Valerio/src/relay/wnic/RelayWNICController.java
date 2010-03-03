@@ -3,6 +3,11 @@ package relay.wnic;
 import debug.DebugConsole;
 import relay.wnic.exception.WNICException;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
+
 public interface RelayWNICController 
 {
 	/**Metodo per initializzare l'interfaccia

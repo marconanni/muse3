@@ -34,6 +34,10 @@ import relay.wnic.WNICFinder;
 import relay.wnic.exception.WNICException;
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
 
 public class RelayElectionManager extends Observable implements Observer{
 	
@@ -80,6 +84,8 @@ public class RelayElectionManager extends Observable implements Observer{
 	private String oldRelayLocalClusterAddress;
 	private String oldRelayLocalClusterHeadAddress;
 	private String headNodeAddress;
+	
+	private boolean lock = false;
 	
 
 
@@ -518,6 +524,7 @@ public class RelayElectionManager extends Observable implements Observer{
 		//PARTE PER LA GESTIONE DEI MESSAGGI PROVENIENTI DALLA RETE
 		if(arg1 instanceof DatagramPacket){
 			DatagramPacket dpIn = (DatagramPacket)arg1;
+
 			setRelayMessageReader(new RelayMessageReader());
 
 			try {
@@ -970,6 +977,9 @@ public class RelayElectionManager extends Observable implements Observer{
 				} catch (UnknownHostException e) {e.printStackTrace();}
 			
 			}
+			
+			lock = false;
+			getRelayMessageReader().notify();
 					
 		}
 		
@@ -1302,7 +1312,16 @@ public class RelayElectionManager extends Observable implements Observer{
 	private void setBestSubstituteRelayInetAddress(InetAddress bestSubstituteRelayInetAddress) {this.bestSubstituteRelayInetAddress = bestSubstituteRelayInetAddress;}
 	public InetAddress getBestSubstituteRelayInetAddress() {return bestSubstituteRelayInetAddress;}
 	
-	public void setRelayMessageReader(RelayMessageReader relayMessageReader){this.relayMessageReader = relayMessageReader;}
+	public synchronized void setRelayMessageReader(RelayMessageReader relayMessageReader){
+		if(lock)
+			try {
+				wait();
+			} catch (InterruptedException e) {e.printStackTrace();}
+		this.relayMessageReader = relayMessageReader;
+		lock = true;
+	}
+	
+	
 	public RelayMessageReader getRelayMessageReader(){return relayMessageReader;}
 	
 	public void setRelayBatteryMonitor(RelayBatteryMonitor relayBatteryMonitor){this.relayBatteryMonitor = relayBatteryMonitor;}

@@ -5,6 +5,10 @@ import relay.wnic.exception.InvalidAccessPoint;
 import relay.wnic.exception.WNICException;
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
 public class RelayAPWNICMacController implements RelayWNICController {
 	private AccessPointData currentAP;
 	private boolean isOn = false;
