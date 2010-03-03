@@ -24,6 +24,10 @@ public class GreyModel implements RSSIFilter
 	private boolean computed=false;
 	private double[] X1;
 	private double a, u;
+	
+	//per i test
+	private double PREVISION_THRS;
+	private double GREY_MIN_NUMBER_OF_RSSI;
 
 	/**
 	 * Costruttore del Grey Model
@@ -33,6 +37,15 @@ public class GreyModel implements RSSIFilter
 	public GreyModel(double [] realValues)throws InvalidParameter
 	{
 		setOriginalValues(realValues);
+		setGREY_MIN_NUMBER_OF_RSSI(ElectionConfiguration.GREY_MIN_NUMBER_OF_RSSI);
+		setPREVISION_THRS(ElectionConfiguration.PREVISION_THRS);
+	}
+	
+	public GreyModel(double [] realValues, int min, double prev)throws InvalidParameter
+	{
+		setOriginalValues(realValues);
+		setGREY_MIN_NUMBER_OF_RSSI(min);
+		setPREVISION_THRS(prev);
 	}
 
 //+++++++++++++++++++++++++++++++++++++++++++++ROBA NUOVA+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -45,7 +58,7 @@ public class GreyModel implements RSSIFilter
 		predictedTime=realValues.length;
 	
 		//se non vi sono abbastanza valori per fare la previsione restituisce il valore di RSSI attuale reale
-		if(realValues.length<ElectionConfiguration.GREY_MIN_NUMBER_OF_RSSI){
+		if(realValues.length<GREY_MIN_NUMBER_OF_RSSI){
 			return realValues[realValues.length-1];
 		}
 		
@@ -222,4 +235,7 @@ public class GreyModel implements RSSIFilter
 		}
 		this.realValues=RSSIRealValues;
 	}
+	
+	public void setPREVISION_THRS(double p){this.PREVISION_THRS = p;}
+	public void setGREY_MIN_NUMBER_OF_RSSI(int p){this.GREY_MIN_NUMBER_OF_RSSI = p;}
 }
