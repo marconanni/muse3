@@ -25,7 +25,8 @@ import debug.DebugConsole;
 /**Classe che rappresenta un oggetto che è in grado di rispondere alle richieste del Relay 
  * che sta servendo questo nodo Client in merito alla potenza di segnale rilevata dal Client 
  * stesso nei confronti del nodo Relay
- * @author Luca Campeti	
+ * @author Luca Campeti, Pire Dejaco
+ * @version 1.1 
  */
 public class ClientPositionController implements Observer{
 	

@@ -4,6 +4,10 @@ import parameters.DebugConfiguration;
 import client.wnic.exception.WNICException;
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
 
 public class ClientWNICWindowsController implements ClientWNICController{
 

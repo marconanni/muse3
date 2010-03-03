@@ -3,6 +3,11 @@ package client.wnic;
 import client.wnic.exception.WNICException;
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
+
 public interface ClientWNICController 
 {
 	/**Metodo per initializzare l'interfaccia

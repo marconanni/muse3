@@ -11,6 +11,10 @@ import parameters.NetConfiguration;
 import client.wnic.exception.WNICException;
 import debug.DebugConsole;
 
+/**
+ * @author Pire Dejaco
+ * @version 1.1
+ */
 
 public class ClientWNICLinuxController implements ClientWNICController{
 	

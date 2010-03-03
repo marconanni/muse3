@@ -7,7 +7,7 @@ import java.util.Observer;
 
 
 /**
- * @author Leo Di Carlo
+ * @author Leo Di Carlo, Pire Dejaco
  *
  */
 public class ClientTimeoutFactory {
