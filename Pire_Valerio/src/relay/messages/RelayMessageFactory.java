@@ -796,4 +796,16 @@ private static String getSession(Hashtable sessions)
 	return session;
 }
 
+//PER TEST
+
+static public DatagramPacket buildNum(int sequenceNumber, String message,InetAddress addr, int port) throws IOException {
+	ByteArrayOutputStream boStream = new ByteArrayOutputStream();
+	DataOutputStream doStream = new DataOutputStream(boStream);
+	String content = sequenceNumber+"_"+100+"_"+message;
+	doStream.writeUTF(content);
+	doStream.flush();
+	byte[] data = boStream.toByteArray();
+	return new DatagramPacket(data, data.length, addr, port);
+}
+
 }
