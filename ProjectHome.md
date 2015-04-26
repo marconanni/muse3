@@ -1,0 +1,1 @@
+Coodinazione tra server, relay e clinet in ambito WIFI.
